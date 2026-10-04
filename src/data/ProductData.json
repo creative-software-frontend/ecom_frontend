@@ -1,0 +1,286 @@
+{
+  "store": {
+    "name": "Power Zenox",
+    "url": "https://powerzenox.com/",
+    "tagline": "Explore our premium products",
+    "currency": "BDT",
+    "currency_symbol": "৳",
+    "language": "bn",
+    "contact": {
+      "phone": "01780212230",
+      "whatsapp": "01780212230"
+    },
+    "delivery": {
+      "method": "Cash on Delivery",
+      "note": "সারা বাংলাদেশ ক্যাশ অন ডেলিভারি",
+      "free_delivery": true,
+      "delivery_charge": 0
+    }
+  },
+  "products": [
+    {
+      "id": "ultrahot",
+      "slug": "ultrahot",
+      "name": "Ultra Hot Capsules",
+      "brand_name": "ULTRAHOT",
+      "page_title": "ULTRAHOT — Premium Malaysian Herbal Supplement | ৳1,500",
+      "url": "https://powerzenox.com/p/ultrahot",
+      "category": "Herbal Supplement",
+      "form": "Capsules",
+      "origin": "Malaysia",
+      "price": {
+        "currency": "BDT",
+        "current": 1600,
+        "regular": 2990,
+        "discount_percent": 47,
+        "display": "৳ ১,৬০০"
+      },
+      "badge": "সীমিত সময়ের অফার",
+      "tagline": "আপনার ভেতরের হারিয়ে যাওয়া যৌবন ও শক্তি ফিরিয়ে আনুন—অফুরন্ত স্ট্যামিনায় সঙ্গীকে দিন শতভাগ তৃপ্তি!",
+      "short_description": "প্রতি রাতে নিজেকে নতুন করে আবিষ্কার করুন—প্রাকৃতিকভাবে ফিরিয়ে আনুন দীর্ঘস্থায়ী এনার্জি ও অফুরন্ত স্ট্যামিনা!",
+      "highlights": [
+        "১০০% অরিজিনাল",
+        "সারা দেশে হোম ডেলিভারি"
+      ],
+      "specs": [
+        { "label": "প্রিমিয়াম ভেষজ ফর্মুলা" },
+        { "label": "মালয়েশিয়ান প্রোডাক্ট" },
+        { "label": "৬০ ক্যাপসুল" },
+        { "label": "ফ্রি ডেলিভারি" }
+      ],
+      "quantity": 60,
+      "quantity_unit": "capsules",
+      "images": [
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/dkijjvxex89-1786397783745.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9ka2lqanZ4ZXg4OS0xNzg2Mzk3NzgzNzQ1LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.LstVhFhobsXWddcdpjdh9b8OvDLhxfNZjSrYkxhEKlw",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/0q6g8j2c2wtg-1786397803201.jpg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS8wcTZnOGoyYzJ3dGctMTc4NjM5NzgwMzIwMS5qcGciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.RYvmGcVmPJGJUpgJBZ3QUfB9o_MSwPx6_boUaa5-oLs",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/8l4s9vf1ycr-1786397810669.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS84bDRzOXZmMXljci0xNzg2Mzk3ODEwNjY5LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.iBnKfY8BIcceSl18pgfm7sx-vG9dmepWnEW0St8Qy2c",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/up89zylwhrd-1786397817584.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS91cDg5enlsd2hyZC0xNzg2Mzk3ODE3NTg0LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.x5lobdxUom5bMGe6xqG9VL1YJnJieKq6Ca-c_Hk0fbY",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/l25p8xe713k-1786397825864.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9sMjVwOHhlNzEzay0xNzg2Mzk3ODI1ODY0LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.PhhaFLczkKnSgmS0ARxydOR4ijaBbC8XAGBj45j4QKM",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/zvzygbkkom-1786397835682.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS96dnp5Z2Jra29tLTE3ODYzOTc4MzU2ODIuanBlZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTExMTkwMzQsImV4cCI6MTgyMjY1NTAzNH0.HJFbL54MB6YOj--Db9-CYby9tfw4bT34Fr6XuAlkrg8"
+      ],
+      "problems": [
+        {
+          "title": "ক্লান্ত বোধ করা",
+          "description": "সারাদিনের ব্যস্ততা ও মানসিক চাপে শরীর অতিরিক্ত ক্লান্ত হয়ে পড়া?"
+        },
+        {
+          "title": "সঙ্গীকে সময় দিতে না পারা",
+          "description": "দাম্পত্য জীবনে সঙ্গীকে কাঙ্ক্ষিত সময় ও সন্তুষ্টি দিতে না পারা?"
+        },
+        {
+          "title": "স্ট্যামিনা কমে যাওয়া",
+          "description": "বয়সের প্রভাব কিংবা পুষ্টির অভাবে শারীরিক ড্রাইভ ও স্ট্যামিনা কমে যাওয়া?"
+        },
+        {
+          "title": "আত্মবিশ্বাস হারানো",
+          "description": "ভেতরের আত্মবিশ্বাস হারিয়ে ফেলে মানসিকভাবে বিষণ্ণ বোধ করা?"
+        }
+      ],
+      "benefits": [
+        {
+          "icon": "⚡",
+          "title": "প্রাকৃতিক এনার্জি বুস্টার",
+          "description": "শরীরে প্রাকৃতিকভাবে টেস্টোস্টেরন ও ব্লাড সার্কুলেশন বাড়াতে সাহায্য করে, যা আপনাকে দেয় দীর্ঘস্থায়ী কর্মক্ষমতা।"
+        },
+        {
+          "icon": "🔥",
+          "title": "দাম্পত্য জীবনের তৃপ্তি",
+          "description": "শারীরিক দুর্বলতা দূর করে সঙ্গীর সাথে আপনার সম্পর্ককে করে তোলে আরও প্রগাঢ় ও আনন্দময়।"
+        },
+        {
+          "icon": "🌿",
+          "title": "শতভাগ ভেষজ ও নিরাপদ",
+          "description": "Tongkat Ali সহ প্রিমিয়াম প্ল্যান্ট-বেসড এক্সট্র্যাক্ট থেকে তৈরি, যার কোনো ক্ষতিকর কেমিক্যাল নেই।"
+        },
+        {
+          "icon": "🛡️",
+          "title": "পার্শ্বপ্রতিক্রিয়ামুক্ত",
+          "description": "আন্তর্জাতিক মাননিয়ন্ত্রণ বজায় রেখে মালয়েশিয়ায় হাইজেনিক ল্যাব পরিবেশে প্রস্তুত।"
+        }
+      ],
+      "ingredients": ["Tongkat Ali", "Premium Plant-Based Extract"],
+      "trust": [
+        {
+          "icon": "🔒",
+          "title": "১০০% অরিজিনাল",
+          "description": "১০০% অরিজিনাল মালয়েশিয়ান প্রোডাক্টের গ্যারান্টি।"
+        },
+        {
+          "icon": "📦",
+          "title": "গোপনীয় পার্সেল",
+          "description": "প্যাকেজের বাইরে কোনো সংবেদনশীল নাম বা লেখা থাকবে না।"
+        }
+      ],
+      "in_stock": true,
+      "stock_note": "স্টক দ্রুত ফুরিয়ে যাচ্ছে!",
+      "order_form": {
+        "enabled": true,
+        "heading": "আজই আপনার ULTRAHOT অর্ডার করুন",
+        "description": "নিচের ফর্মটি সঠিক তথ্য দিয়ে পূরণ করুন, আমরা দ্রুত আপনার সাথে যোগাযোগ করব।",
+        "payment_method": "ক্যাশ অন ডেলিভারি",
+        "payment_note": "পণ্য হাতে পেয়ে টাকা পরিশোধ করুন",
+        "fields": [
+          { "name": "name", "label": "আপনার নাম *", "type": "text", "required": true, "placeholder": "আপনার পূর্ণ নাম" },
+          { "name": "phone", "label": "মোবাইল নম্বর *", "type": "tel", "required": true, "placeholder": "01XXXXXXXXX" },
+          { "name": "address", "label": "সম্পূর্ণ ঠিকানা *", "type": "textarea", "required": true, "placeholder": "বাসা/হোল্ডিং, রোড, থানা, জেলা" },
+          {
+            "name": "delivery_area",
+            "label": "ডেলিভারি এলাকা *",
+            "type": "select",
+            "required": true,
+            "options": [
+              { "id": "134fbefb-d8cb-4896-9dd5-7b3183d18193", "label": "Free Delivery", "delivery_charge": 0 }
+            ]
+          },
+          { "name": "quantity", "label": "পরিমাণ", "type": "number", "required": true, "min": 1, "default": 1 },
+          { "name": "notes", "label": "অতিরিক্ত তথ্য (ঐচ্ছিক)", "type": "textarea", "required": false }
+        ],
+        "submit_label": "অর্ডার নিশ্চিত করুন"
+      },
+      "badges_footer": ["SECURED", "ORIGINAL", "CASH ON DELIVERY", "24/7 SUPPORT"],
+      "cta": {
+        "order_label": "অর্ডার করুন",
+        "call_label": "কল করুন",
+        "call_url": "tel:01780212230",
+        "whatsapp_url": "https://wa.me/01780212230"
+      }
+    },
+    {
+      "id": "jingseng-plus",
+      "slug": "jingseng-plus",
+      "name": "JINGSENG PLUS",
+      "brand_name": "JINGSENG PLUS",
+      "page_title": "JINGSENG PLUS — প্রিমিয়াম হারবাল গোল্ডেন ক্যাপসুল | Power Zenox",
+      "url": "https://powerzenox.com/p/jingseng-plus",
+      "category": "Herbal Supplement",
+      "form": "Golden Capsules",
+      "price": {
+        "currency": "BDT",
+        "current": 1700,
+        "regular": 2900,
+        "discount_percent": 41,
+        "display": "৳ ১,৭০০"
+      },
+      "badge": "আজকের বিশেষ অফার",
+      "tagline": "সারাদিনের ক্লান্তি ভুলে ফিরে পান তরুণের মতো প্রাণবন্ত শক্তি ও আত্মবিশ্বাস! 💥",
+      "short_description": "ক্লান্তি নয়—প্রতিটি মুহূর্তে নিজেকে প্রমাণ করুন JINGSENG PLUS-এর সাথে একটানা ৪০-৫০ মিনিট।",
+      "highlights": [
+        "১০০% অরিজিনাল",
+        "সারা দেশে হোম ডেলিভারি"
+      ],
+      "specs": [
+        { "label": "প্রিমিয়াম হারবাল ফর্মুলা" },
+        { "label": "গোল্ডেন ক্যাপসুল" },
+        { "label": "গোপন ডেলিভারি" },
+        { "label": "ক্যাশ অন ডেলিভারি" }
+      ],
+      "duration_minutes": "40-50",
+      "images": [
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/jko89sk7bxn-1787508825236.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9qa284OXNrN2J4bi0xNzg3NTA4ODI1MjM2LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.JEKvRyewKDUOyzoZA0vHO3B350_DsaIe8o14BNS7Yqg",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/2s6f8adxvjt-1787508840932.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS8yczZmOGFkeHZqdC0xNzg3NTA4ODQwOTMyLmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.-d2UoXycQb9t_8JOYryck_k8vfEI41QVEBXwEncOz9s",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/mm6wlp7bnyf-1787508852660.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9tbTZ3bHA3Ym55Zi0xNzg3NTA4ODUyNjYwLmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.PoWLw0BJJnMhNHfPb6QrnVtKzUdiMAYHYH_hhYb3_AU",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/tmjivbnxw8-1787508861162.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS90bWppdmJueHc4LTE3ODc1MDg4NjExNjIuanBlZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTExMTkwNzYsImV4cCI6MTgyMjY1NTA3Nn0.FdGPeSOO4rPetX-mhRcVL14cHtFdA12v_seHCpidWgE",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/kmoqbspusi-1787508870822.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9rbW9xYnNwdXNpLTE3ODc1MDg4NzA4MjIuanBlZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTExMTkwNzYsImV4cCI6MTgyMjY1NTA3Nn0.-IJs-CVbHSjzD4DwT5rJI6XmoymMGNgJpnbZCmlkcJU",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/mioqk576y2r-1787508879169.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9taW9xazU3Nnkyci0xNzg3NTA4ODc5MTY5LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.EIwbtxJET_sqTnptLObDageBtoTcSnsjMmYC_p3AY78",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/g339sgsgc1r-1787508906606.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9nMzM5c2dzZ2Mxci0xNzg3NTA4OTA2NjA2LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.k7-Daw1fdpOY1drVLavMkDFrefbcQP2vX91mPIOdfhU"
+      ],
+      "benefits": [
+        {
+          "title": "ঝড়ের মতো এনার্জি",
+          "description": "সারাদিনের ক্লান্তি ভুলে থাকুন সবসময় চাঙ্গা ও অপ্রতিরোধ্য।"
+        },
+        {
+          "title": "অটুট আত্মবিশ্বাস",
+          "description": "দুর্বলতা দূর করে শক্তি ধরে রাখুন দীর্ঘক্ষণ।"
+        },
+        {
+          "title": "১০০% অর্গানিক গোল্ডেন ক্যাপসুল",
+          "description": "কোনো ক্যামিক্যাল বা সাইড ইফেক্ট নেই।"
+        },
+        {
+          "icon": "🔒",
+          "title": "সম্পূর্ণ গোপন ডেলিভারি",
+          "description": "আপনার পরিচয় ও তথ্য থাকবে শতভাগ সুরক্ষিত।"
+        }
+      ],
+      "promo": {
+        "heading": "আজকের জন্য বিশেষ ছাড়!",
+        "regular_price_label": "রেগুলার প্রাইস",
+        "offer_price_label": "অফার প্রাইস",
+        "offer_price": 1700,
+        "urgency": "⏳ স্টক দ্রুত ফুরিয়ে যাচ্ছে!"
+      },
+      "in_stock": true,
+      "order_form": { "enabled": false },
+      "cta": {
+        "order_label": "এখনই অর্ডার করুন",
+        "call_label": "কল",
+        "whatsapp_label": "WhatsApp",
+        "whatsapp_url": "https://wa.me/01780212230"
+      }
+    },
+    {
+      "id": "ling-long",
+      "slug": "ling-long",
+      "name": "Ling Long Capsules",
+      "brand_name": "লিং লং ক্যাপসুল",
+      "page_title": "লিং লং ক্যাপসুল - এখনই অর্ডার করুন",
+      "url": "https://powerzenox.com/p/ling-long",
+      "category": "Herbal Supplement",
+      "form": "Capsules",
+      "price": {
+        "currency": "BDT",
+        "current": 1500,
+        "regular": 2950,
+        "discount_percent": 49,
+        "display": "৳ ১,৫০০"
+      },
+      "badge": "সীমিত সময়ের অফার",
+      "tagline": "প্রিমিয়াম কোয়ালিটি লিং লং ক্যাপসুল",
+      "short_description": "সুস্থ ও সতেজ জীবনের জন্য আপনার বিশ্বস্ত সঙ্গী।",
+      "highlights": [
+        "১০০% অরিজিনাল",
+        "সারা দেশে হোম ডেলিভারি"
+      ],
+      "specs": [
+        { "label": "১০০% অরিজিনাল প্রোডাক্ট" },
+        { "label": "সারা দেশে ক্যাশ অন ডেলিভারি" },
+        { "label": "দ্রুত ডেলিভারি সুবিধা" },
+        { "label": "প্রিমিয়াম প্যাকিং" }
+      ],
+      "images": [
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/q74cn2xbelp-1786101725975.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9xNzRjbjJ4YmVscC0xNzg2MTAxNzI1OTc1LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDgzLCJleHAiOjE4MjI2NTUwODN9.3w6z2ax8dlebD56BfrRviaOp9LqOY6ymfMVz4m4jmxQ",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/k6a3881l2hc-1786035852427.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9rNmEzODgxbDJoYy0xNzg2MDM1ODUyNDI3LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDgzLCJleHAiOjE4MjI2NTUwODN9.viZpmbZsR1wR69sDnogGrdE19gG-KFQuQsPxUjv673M",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/dl7az3ojjao-1786035861180.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9kbDdhejNvamphby0xNzg2MDM1ODYxMTgwLmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDgzLCJleHAiOjE4MjI2NTUwODN9.IXRPEFBd09OAbP0TrY8_6GlE5fuCVTBtWmDHsHGOpYc",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/spf535c5se-1786035865881.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9zcGY1MzVjNXNlLTE3ODYwMzU4NjU4ODEuanBlZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTExMTkwODMsImV4cCI6MTgyMjY1NTA4M30.W0NAes2u-8uCnfYkmRP2ML8161J_6DJp-Pni9-9iWts",
+        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/w1jdyj3abvl-1786035871062.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS93MWpkeWozYWJ2bC0xNzg2MDM1ODcxMDYyLmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDgzLCJleHAiOjE4MjI2NTUwODN9.rUZR_LycEuEQbfk4vPBRrZgnGwF21nPrPQaNPUU1ryg"
+      ],
+      "benefits": [
+        { "title": "প্রাকৃতিক উপাদান", "description": "সম্পূর্ণ প্রাকৃতিক এবং নিরাপদ উপাদান দিয়ে তৈরি।" },
+        { "title": "দ্রুত কার্যকারিতা", "description": "অল্প সময়ের মধ্যেই আপনি পরিবর্তন অনুভব করবেন।" },
+        { "title": "বিশ্বস্ত কোয়ালিটি", "description": "হাজারো গ্রাহকের আস্থার প্রতীক আমাদের এই পণ্য।" },
+        { "title": "অরিজিনাল গ্যারান্টি", "description": "আমরা সরাসরি আমদানিকারকের কাছ থেকে সংগ্রহ করি।" },
+        { "title": "নিরাপদ প্যাকেজিং", "description": "পণ্যটির গোপনীয়তা বজায় রেখে ডেলিভারি করা হয়।" },
+        { "title": "সহজ ব্যবহার", "description": "খুব সহজেই নিয়মিত সেবন করা যায়।" }
+      ],
+      "ingredients_section": {
+        "heading": "শক্তিশালী প্রাকৃতিক উপাদান",
+        "description": "বিশ্বস্ত হারবাল উপাদানের সমন্বয়ে তৈরি, যা পুরুষের শক্তি, স্ট্যামিনা ও আত্মবিশ্বাস বৃদ্ধিতে সহায়ক।",
+        "items": [
+          { "name_en": "Shilajit", "name_bn": "শিলাজিৎ", "description": "শারীরিক শক্তি ও স্ট্যামিনা বাড়াতে সাহায্য করে।" },
+          { "name_en": "Ashwagandha", "name_bn": "অশ্বগন্ধা", "description": "স্ট্রেস ও মানসিক চাপ কমিয়ে এনার্জি লেভেল উন্নত করতে সহায়তা করে।" },
+          { "name_en": "Gokhru", "name_bn": "গক্ষুর", "description": "শারীরিক সক্ষমতা ও স্ট্যামিনা বৃদ্ধিতে কার্যকর ভূমিকা রাখে।" },
+          { "name_en": "Safed Musli", "name_bn": "সফেদ মুসলি", "description": "দুর্বলতা দূর করে শরীরে নতুন উদ্দীপনা ও প্রাণশক্তি ফিরিয়ে আনতে সহায়তা করে।" }
+        ]
+      },
+      "in_stock": true,
+      "order_form": { "enabled": false },
+      "cta": {
+        "order_label": "অর্ডার করুন",
+        "call_label": "কল",
+        "whatsapp_label": "WhatsApp",
+        "whatsapp_url": "https://wa.me/01780212230"
+      }
+    }
+  ]
+}
