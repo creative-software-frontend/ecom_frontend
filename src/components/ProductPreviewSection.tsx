@@ -1,4 +1,11 @@
-import { ArrowRight, BadgeCheck, Phone, ShoppingCart, Zap } from "lucide-react"
+import {
+  ArrowRight,
+  BadgeCheck,
+  Phone,
+  ShoppingCart,
+  Truck,
+  Zap,
+} from "lucide-react"
 import type { ProductPreviewSectionProps } from "./shared/ProductDetails"
 import { Button } from "./ui/button"
 
@@ -6,87 +13,149 @@ const ProductPreviewSection = ({
   product,
   styles,
 }: ProductPreviewSectionProps) => {
+  const handleOrderClick = () => {
+    const orderSection = document.getElementById("order")
+    if (orderSection) {
+      orderSection.scrollIntoView({ behavior: "smooth" })
+      return
+    }
+
+    if (typeof product?.cta.whatsapp_url !== "string") return
+
+    const orderUrl = new URL(product.cta.whatsapp_url)
+    orderUrl.searchParams.set(
+      "text",
+      `আমি ${product.brand_name} অর্ডার করতে চাই। মূল্য: ৳ ${product.price.current.toLocaleString("bn-BD")}`
+    )
+    window.open(orderUrl.toString(), "_blank", "noopener,noreferrer")
+  }
+
   return (
-    <section className={`py-18 ${styles?.bg}`}>
-      <div className="mx-auto grid max-w-6xl items-center gap-6 lg:grid-cols-2 lg:gap-12">
-        {/* left side */}
-        <div className="flex flex-col justify-center">
-          <div className="p-2">
-            <img src={product?.images[0]} alt="product" />
+    <section
+      className={`relative overflow-hidden py-12 md:py-16 ${styles?.bg || "bg-[#1a0b15]"}`}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.10),transparent_25%)]" />
+
+      <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 lg:grid-cols-2 lg:gap-12">
+        <div className="flex min-w-0 flex-col justify-center">
+          <div className="shadow-[0_18px_50px_rgba(0,0,0,0.28)]">
+            <img
+              src={product?.images[0]}
+              alt={product?.name || "product"}
+              className="w-full object-cover"
+            />
           </div>
-          {/* preview product */}
-          <div className="-mx-1 mt-12 flex gap-4">
-            {product?.images.map((image) => (
-              <button className="size-20 shrink-0 overflow-hidden rounded-2xl outline">
-                <div className="relative aspect-square overflow-hidden">
-                  <img
-                    src={image}
-                    className="h-full w-full object-contain"
-                    alt="product image"
-                  />
-                </div>
+
+          <div className="mt-6 flex gap-3 pb-2">
+            {product?.images.map((image, index) => (
+              <button
+                key={`${image}-${index}`}
+                className="size-22 shrink-0 overflow-hidden rounded-2xl border border-white/15 bg-white/5 p-1 ring-1 ring-white/10 transition outline-none hover:ring-white/30"
+              >
+                <img
+                  src={image}
+                  className="h-full w-full rounded-xl object-cover"
+                  alt={`${product?.name || "product"} preview ${index + 1}`}
+                />
               </button>
             ))}
           </div>
-          <ul className="mt-8 flex gap-6">
+
+          <ul className="mt-8 flex gap-4">
             {product?.specs.map((spec, i) => (
-              <li>
-                <p>0{i + 1}</p>
-                {spec.label}
+              <li
+                key={`${spec.label}-${i}`}
+                className={`items-center gap-3 px-3 py-2 text-sm ${styles?.textColor || "text-white"}`}
+              >
+                <span
+                  className={`flex size-7 items-center justify-center text-base font-bold ${styles?.primaryTextColor || "text-yellow-400"}`}
+                >
+                  0{i + 1}
+                </span>
+                <span className="opacity-90">{spec.label}</span>
               </li>
             ))}
           </ul>
         </div>
-        {/* right side */}
-        <div className="">
-          <div className={`flex gap-2 px-4 py-2 text-lg ${""}`}>
-            <Zap fill="true" strokeWidth={0} />
+
+        <div className="relative min-w-0">
+          <div
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black tracking-[0.12em] uppercase ${styles?.primaryBgColor || "bg-yellow-500 text-slate-900"} `}
+          >
+            <Zap fill="currentColor" strokeWidth={0} className={`size-4`} />
             {product?.badge}
           </div>
+
           <h1
-            className={`text-2xl leading-tight font-black sm:text-3xl md:text-4xl lg:text-5xl ${styles?.textColor}`}
+            className={`mt-6 text-3xl leading-tight font-black sm:text-4xl lg:text-5xl ${styles?.textColor || "text-white"}`}
           >
             {product?.tagline}
           </h1>
-          <p className={`my-4 text-lg ${styles?.textColor} opacity-70`}>
+
+          <p
+            className={`mt-4 text-lg leading-relaxed opacity-80 ${styles?.textColor || "text-white"}`}
+          >
             {product?.short_description}
           </p>
-          <div className={`flex gap-4 ${styles?.textColor}`}>
-            <div className="flex gap-2 px-4 py-2 text-lg">
-              <BadgeCheck fill="true" strokeWidth={0} />
+
+          <div
+            className={`mt-6 flex flex-wrap gap-3 ${styles?.textColor || "text-white"}`}
+          >
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium">
+              <BadgeCheck className="size-6" color="green" />
               ১০০% অরিজিনাল
             </div>
-            <div className="flex gap-2 px-4 py-2 text-lg">
-              <Zap fill="true" strokeWidth={0} />
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium">
+              <Truck
+                className={`size-6 ${styles?.primaryTextColor || "text-yellow-400"} `}
+              />
               সারা দেশে হোম ডেলিভারি
             </div>
           </div>
-          <div className="mt-8 flex gap-4">
-            <div className="w-full">
-              {/* price */}
-              <div className="flex gap-4">
-                <span className="text-3xl font-bold text-yellow-600 sm:text-4xl">
+          <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:gap-6">
+            <div className="mt-8 min-w-0">
+              <div className="flex flex-wrap items-center gap-3">
+                <span
+                  className={`text-3xl font-black ${styles?.primaryTextColor || "text-yellow-400"}`}
+                >
                   ৳ {product?.price.current.toLocaleString("bn-BD")}
                 </span>
-                <span className="text-xl text-muted-foreground line-through">
+                <span className="text-lg text-white/60 line-through">
                   ৳ {product?.price.regular.toLocaleString("bn-BD")}
                 </span>
               </div>
-              <p className="mt-4 text-muted-foreground">
+              <p className="mt-3 text-sm text-white/70">
                 সারা বাংলাদেশ ক্যাশ অন ডেলিভারি
               </p>
             </div>
-            <div className="flex w-full flex-col gap-4">
-              <Button className="w-full py-6 text-lg" size="lg">
-                <ShoppingCart className="size-5" data-icon="inline-start" />
+
+            <div className="mt-8 flex w-full min-w-0 flex-col gap-4 sm:w-auto">
+              <Button
+                variant="link"
+                className={`w-full rounded-full px-8 py-6 text-lg font-black ${styles?.primaryBgColor || "bg-yellow-500"} text-slate-900 transition-none hover:no-underline`}
+                size="lg"
+                onClick={handleOrderClick}
+              >
+                <ShoppingCart className="size-5" />
                 অর্ডার করুন
-                <ArrowRight data-icon="inline-end" className="size-5" />
+                <ArrowRight className="size-5" />
               </Button>
 
-              <Button variant="outline" className="w-full py-6 text-lg">
-                <Phone data-icon="inline-start" className="size-5" />
-                কল করুন
-              </Button>
+              <a
+                href={
+                  typeof product?.cta.call_url === "string"
+                    ? product.cta.call_url
+                    : "tel:01780212230"
+                }
+              >
+                <Button
+                  variant="outline"
+                  className="w-full cursor-pointer rounded-full border-white/20 bg-white/5 px-8 py-6 text-lg font-black text-white hover:bg-white/10 hover:text-white"
+                >
+                  <Phone className="size-5" />
+                  কল করুন
+                </Button>
+              </a>
             </div>
           </div>
         </div>

@@ -9,6 +9,8 @@ export interface ProductPreviewSectionProps {
     bg?: string
     textColor?: string
     primaryColor?: string
+    primaryTextColor?: string
+    primaryBgColor?: string
   }
 }
 
@@ -16,6 +18,13 @@ export interface ProblemSectionData {
   title: string
   subtitle?: string
   problems: { title: string; description: string; icon?: string }[] | undefined
+  theme?: {
+    bg?: string
+    sectionBg?: string
+    textColor?: string
+    primaryBgColor?: string
+    primaryTextColor?: string
+  }
 }
 
 const problemSectionData: ProblemSectionData = {

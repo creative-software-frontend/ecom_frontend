@@ -17,7 +17,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </CardTitle>
         <Link
           className="mx-auto -mt-3 mb-2 flex w-fit items-center justify-center gap-1 text-lg font-bold text-red-600"
-          to={"/"}
+          to={`/p/${product.id}`}
         >
           <p className="hover:border-b-2 hover:border-b-red-600">বিস্তারিত</p>
           <ChevronRight />
