@@ -4,7 +4,6 @@ export type Product = {
   name: string
   brand_name: string
   page_title: string
-  url: string
   category: string
   form: string
   price: {
@@ -67,4 +66,8 @@ export type Store = {
 
 export interface ProductCardProps {
   product: Product
+}
+
+export interface ProductPreviewSectionProps {
+  product: Product | null
 }

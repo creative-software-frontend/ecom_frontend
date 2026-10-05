@@ -1,17 +1,14 @@
 import ProductCard from "@/components/shared/ProductCard"
 import productData from "../data/ProductData.json"
 import type { Product } from "@/types/product"
+import LogoImage from "@/assets/images/logo.jpg"
 
 const HomePage = () => {
   return (
     <>
       <main className="">
         <header className="flex flex-col items-center pt-12">
-          <img
-            className="size-46"
-            alt="Power Zenox Logo"
-            src="https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/favicon-1786030776191.jpg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9mYXZpY29uLTE3ODYwMzA3NzYxOTEuanBnIiwic2NvcGUiOiJkb3dubG9hZCIsImlhdCI6MTc5MTExNjMyMiwiZXhwIjoxODIyNjUyMzIyfQ.2ouMIYSwEz8NrwiDZiYK1QCQsAmOd_kxZp0B9S6-l74"
-          />
+          <img className="size-46" alt="Power Zenox Logo" src={LogoImage} />
           {/* header content */}
           <section className="py-2 text-center">
             <h1 className="text-2xl font-bold md:text-3xl">
