@@ -1,12 +1,13 @@
-import { Button } from "@/components/ui/button"
-import type { ProductPreviewSectionProps } from "@/types/product"
 import { ArrowRight, BadgeCheck, Phone, ShoppingCart, Zap } from "lucide-react"
+import type { ProductPreviewSectionProps } from "./shared/ProductDetails"
+import { Button } from "./ui/button"
 
-const ProductPreviewSection = ({ product }: ProductPreviewSectionProps) => {
+const ProductPreviewSection = ({
+  product,
+  styles,
+}: ProductPreviewSectionProps) => {
   return (
-    <section
-      className={`bg-linear-to-br from-[#1a0b15] via-[#2d0a1b] to-[#1a0b15] py-18`}
-    >
+    <section className={`py-18 ${styles?.bg}`}>
       <div className="mx-auto grid max-w-6xl items-center gap-6 lg:grid-cols-2 lg:gap-12">
         {/* left side */}
         <div className="flex flex-col justify-center">
@@ -38,17 +39,19 @@ const ProductPreviewSection = ({ product }: ProductPreviewSectionProps) => {
         </div>
         {/* right side */}
         <div className="">
-          <div className="flex w-20 gap-2 bg-yellow-300/20 px-4 py-2 text-lg">
+          <div className={`flex gap-2 px-4 py-2 text-lg ${""}`}>
             <Zap fill="true" strokeWidth={0} />
             {product?.badge}
           </div>
           <h1
-            className={`text-2xl leading-tight font-black text-white/90 sm:text-3xl md:text-4xl lg:text-5xl`}
+            className={`text-2xl leading-tight font-black sm:text-3xl md:text-4xl lg:text-5xl ${styles?.textColor}`}
           >
             {product?.tagline}
           </h1>
-          <p className={`my-4 text-lg`}>{product?.short_description}</p>
-          <div className={`flex gap-4`}>
+          <p className={`my-4 text-lg ${styles?.textColor} opacity-70`}>
+            {product?.short_description}
+          </p>
+          <div className={`flex gap-4 ${styles?.textColor}`}>
             <div className="flex gap-2 px-4 py-2 text-lg">
               <BadgeCheck fill="true" strokeWidth={0} />
               ১০০% অরিজিনাল

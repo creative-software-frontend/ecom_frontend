@@ -1,7 +1,7 @@
 import ProblemSection from "@/pages/Products/ultrahot/ProblemSection"
 import getProductsById from "@/lib/getProductsById"
 import type { Product } from "@/types/product"
-import ProductPreviewSection from "./ProductPreviewSection"
+import ProductPreviewSection from "@/components/ProductPreviewSection"
 
 export interface ProductPreviewSectionProps {
   product: Product | null

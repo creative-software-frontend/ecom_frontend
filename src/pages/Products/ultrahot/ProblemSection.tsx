@@ -16,7 +16,7 @@ export default function ProblemSection({
         )}
         <Progress
           value={50}
-          className="mx-auto mb-4 w-24"
+          className="mx-auto my-6 w-24"
           indicatorClassName="!bg-yellow-600"
         />
 
@@ -27,14 +27,17 @@ export default function ProblemSection({
         )}
 
         <div className="grid grid-cols-1 gap-6 text-left md:grid-cols-2">
-          {problems.map((item, index) => (
-            <FeatureCard
-              id={`0${index + 1}`}
-              key={index}
-              title={item.title}
-              description={item.description}
-            />
-          ))}
+          {problems.map((item, index) => {
+            const icon = item?.icon || `0${index + 1}`
+            return (
+              <FeatureCard
+                id={icon}
+                key={index}
+                title={item.title}
+                description={item.description}
+              />
+            )
+          })}
         </div>
       </div>
     </section>
