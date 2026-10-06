@@ -90,4 +90,5 @@ export interface ProductTheme {
   badgeBgColor?: string
   badgeOutlineColor?: string
   descriptionTextColor?: string
+  productImageShadow?: string
 }

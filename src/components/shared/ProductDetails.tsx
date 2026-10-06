@@ -14,6 +14,7 @@ export interface ProductPreviewSectionProps {
     badgeBgColor?: string
     badgeOutlineColor?: string
     appearance?: "light" | "dark"
+    productImageShadow?: string
   }
 }
 

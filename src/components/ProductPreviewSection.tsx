@@ -52,7 +52,7 @@ const ProductPreviewSection = ({
             <img
               src={product?.images[0]}
               alt={product?.name || "product"}
-              className="w-full object-cover"
+              className={`w-full object-cover filter ${styles?.productImageShadow || "drop-shadow-[0_20px_25px_rgba(0,0,0,0.2)]"}`}
             />
           </div>
 

@@ -16,6 +16,7 @@ const styles: ProductTheme = {
   badgeBgColor: "bg-lx-gold/20",
   badgeOutlineColor: "ring-lx-gold/40",
   descriptionTextColor: "text-white/60",
+  productImageShadow: "drop-shadow-[0_35px_35px_rgba(212,175,55,0.3)]",
 }
 
 const problemSectionStyles = {

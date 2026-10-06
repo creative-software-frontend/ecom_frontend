@@ -21,6 +21,7 @@ const styles = {
   badgeBgColor: "bg-red-50",
   badgeOutlineColor: "ring-red-200",
   descriptionTextColor: "text-gray-500",
+  productImageShadow: "drop-shadow-[0_25px_28px_rgba(225,38,47,0.16)]",
 }
 
 const LingLong = () => {

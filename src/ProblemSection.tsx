@@ -17,7 +17,7 @@ export default function ProblemSection({
     <section
       className={`${sectionStyles?.sectionBg ?? theme?.sectionBg ?? ""} px-4 py-16 ${textClass} md:py-20`}
     >
-      <div className="mx-auto max-w-5xl text-center">
+      <div className="mx-auto max-w-4xl text-center">
         {title && (
           <h2 className="mb-4 text-3xl leading-tight font-extrabold md:text-5xl">
             {title}

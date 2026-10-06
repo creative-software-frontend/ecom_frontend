@@ -12,7 +12,9 @@ const ProductTrustSection = ({
   if (!product.trust?.length) return null
 
   return (
-    <section className="bg-[#2d0a1b] px-4 py-10 text-white sm:py-12">
+    <section
+      className={`${theme.badgeBgColor} px-4 py-10 text-white backdrop-brightness-2 sm:py-12`}
+    >
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
           <h2 className="text-3xl leading-tight font-black sm:text-4xl">
@@ -29,10 +31,10 @@ const ProductTrustSection = ({
           {product.trust.map((item, index) => (
             <article
               key={`${item.title}-${index}`}
-              className="flex min-h-32 items-start gap-4 rounded-[28px] border border-white/8 bg-white/5 p-5 sm:p-6"
+              className="flex min-h-32 cursor-default items-start gap-4 rounded-[28px] border border-white/8 bg-white/5 p-5 hover:bg-white/10 sm:p-6"
             >
               <span
-                className={`flex size-12 shrink-0 items-center justify-center rounded-full bg-[#512832] text-base font-black ${theme.primaryTextColor ?? "text-amber-400"}`}
+                className={`flex size-12 shrink-0 items-center justify-center rounded-full ${theme.badgeBgColor ?? "bg-amber-400"} text-base font-black ${theme.primaryTextColor ?? "text-amber-400"}`}
               >
                 {String(index + 1).padStart(2, "0")}
               </span>

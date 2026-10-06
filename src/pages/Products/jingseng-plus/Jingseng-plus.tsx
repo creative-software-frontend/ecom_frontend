@@ -16,6 +16,7 @@ const styles = {
   primaryTextColor: "text-[#d9b45f]",
   primaryBgColor: "bg-[#d9b45f]",
   badgeBgColor: "bg-[#d9b45f]/30",
+  productImageShadow: "drop-shadow-[0_1px_80px_rgba(217,180,95,0.3)]",
 }
 const whyChooseSectionStyles = {
   sectionBg: "bg-[#0a0908]",

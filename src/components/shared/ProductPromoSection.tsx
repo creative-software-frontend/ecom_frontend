@@ -1,3 +1,5 @@
+import { motion } from "motion/react"
+
 import { ArrowRight, ShoppingCart, Timer, Zap } from "lucide-react"
 import type { Product } from "@/types/product"
 import { Button } from "@/components/ui/button"
@@ -23,7 +25,7 @@ const ProductPromoSection = ({ product }: { product: Product }) => {
 
   return (
     <section className="bg-[#100b08] px-4 py-12 text-white sm:py-14">
-      <div className="mx-auto max-w-md rounded-3xl border border-[#d9b45f]/35 bg-[#17110c] p-6 text-center shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-8">
+      <div className="mx-auto max-w-2xl rounded-3xl border border-[#d9b45f]/35 bg-[#17110c] p-6 text-center shadow-[0_18px_50px_rgba(0,0,0,0.28)] sm:p-8">
         <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-[#d9b45f]/15 text-[#d9b45f]">
           <Zap className="size-5" fill="currentColor" />
         </span>
@@ -31,36 +33,47 @@ const ProductPromoSection = ({ product }: { product: Product }) => {
           🚨 {promo.heading}
         </h2>
 
-        <div className="mt-6 grid grid-cols-2 items-end gap-4">
+        <div className="mx-auto mt-6 flex justify-center gap-6 text-center">
           <div>
-            <p className="text-xs text-white/55">{promo.regular_price_label}</p>
-            <p className="mt-1 text-lg font-semibold text-white/45 line-through">
+            <p className="text-sm text-white/55">{promo.regular_price_label}</p>
+            <p className="mt-1 text-lg font-semibold text-white/45 line-through md:text-xl">
               ৳ {product.price.regular.toLocaleString("bn-BD")}
             </p>
           </div>
           <div>
-            <p className="text-xs text-white/65">{promo.offer_price_label}</p>
-            <p className="mt-1 text-2xl font-black text-[#d9b45f]">
+            <p className="text-sm text-white/65">{promo.offer_price_label}</p>
+            <p className="mt-1 text-2xl font-black text-[#d9b45f] sm:text-3xl md:text-4xl">
               ৳ {promo.offer_price.toLocaleString("bn-BD")}
             </p>
           </div>
         </div>
 
-        <p className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-xs text-white/70">
+        <p className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-base text-white/70">
           <Timer className="size-3.5 text-[#d9b45f]" />
           {promo.urgency.replace(/^⏳\s*/, "")}
         </p>
-
-        <Button
-          variant="link"
-          size="lg"
-          onClick={orderNow}
-          className="mt-5 h-12 w-full justify-center gap-2 rounded-xl bg-[#d9b45f] font-bold text-[#20170d] hover:no-underline"
+        <motion.div
+          animate={{ scale: 1.03 }}
+          transition={{
+            type: "spring",
+            repeat: Infinity,
+            repeatType: "reverse",
+            stiffness: 35,
+            damping: 15,
+          }}
+          className="mt-8 flex justify-center"
         >
-          <ShoppingCart className="size-4" />
-          {product.cta.order_label}
-          <ArrowRight className="size-4" />
-        </Button>
+          <Button
+            variant="link"
+            size="lg"
+            onClick={orderNow}
+            className="mt-5 h-12 justify-center gap-2 rounded-xl bg-[#d9b45f] px-6 font-bold text-[#20170d] hover:no-underline"
+          >
+            <ShoppingCart className="size-4" />
+            {product.cta.order_label}
+            <ArrowRight className="size-4" />
+          </Button>
+        </motion.div>
       </div>
     </section>
   )
