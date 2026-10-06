@@ -6,14 +6,16 @@ export default function ProblemSection({
   subtitle,
   problems = [],
   theme,
+  sectionStyles,
 }: ProblemSectionData) {
-  const sectionBgClass = theme?.sectionBg ?? "bg-[#2d0a1b]"
-  const textClass = theme?.textColor ?? "text-white"
+  const accentTextClass = theme?.textColor ?? "text-white"
   const accentClass = theme?.primaryBgColor ?? "bg-yellow-600"
-  const accentTextClass = theme?.primaryTextColor ?? "text-yellow-400"
+  const textClass = theme?.textColor
 
   return (
-    <section className={`${sectionBgClass} px-4 py-16 ${textClass} md:py-20`}>
+    <section
+      className={`${sectionStyles?.sectionBg || ""} px-4 py-16 ${textClass} md:py-20`}
+    >
       <div className="mx-auto max-w-5xl text-center">
         {title && (
           <h2 className="mb-4 text-3xl leading-tight font-extrabold md:text-6xl">
@@ -27,9 +29,7 @@ export default function ProblemSection({
         />
 
         {subtitle && (
-          <p className="mx-auto mb-12 max-w-2xl text-sm leading-relaxed opacity-75 md:text-base">
-            {subtitle}
-          </p>
+          <p className="mb-12 text-lg leading-relaxed opacity-75">{subtitle}</p>
         )}
 
         <div className="grid grid-cols-1 gap-6 text-left md:grid-cols-2">
@@ -37,13 +37,14 @@ export default function ProblemSection({
             const icon = item?.icon || `0${index + 1}`
             return (
               <FeatureCard
-                id={icon}
+                icon={icon}
                 key={index}
+                iconTextClass={theme?.primaryTextColor}
                 title={item.title}
                 description={item.description}
-                accentClass={accentClass}
+                accentClass={theme?.badgeBgColor}
                 accentTextClass={accentTextClass}
-                textClass={textClass}
+                textClass={theme?.descriptionTextColor}
               />
             )
           })}

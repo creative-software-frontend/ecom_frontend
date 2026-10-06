@@ -1,6 +1,7 @@
 import ProductCard from "@/components/shared/ProductCard"
 import productData from "../data/ProductData.json"
 import type { Product } from "@/types/product"
+import Footer from "@/components/shared/Footer"
 
 const HomePage = () => {
   return (
@@ -31,11 +32,7 @@ const HomePage = () => {
           </div>
         </section>
       </main>
-      <footer className="mt-18 border-t py-8">
-        <p className="text-center text-sm font-bold text-muted-foreground">
-          © Power Zenox — সকল অধিকার সংরক্ষিত
-        </p>
-      </footer>
+      <Footer />
     </>
   )
 }

@@ -26,7 +26,10 @@ export interface ProblemSectionData {
     textColor?: string
     primaryBgColor?: string
     primaryTextColor?: string
+    badgeBgColor?: string
+    descriptionTextColor?: string
   }
+  sectionStyles?: { sectionBg?: string }
 }
 
 const problemSectionData: ProblemSectionData = {

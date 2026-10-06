@@ -45,6 +45,14 @@ export type Product = {
   } & Record<string, unknown>
 }
 
+export interface ProductTheme {
+  bg: string
+  sectionBg?: string
+  textColor: string
+  primaryTextColor?: string
+  primaryBgColor?: string
+}
+
 export type Store = {
   store: {
     name: string
@@ -70,4 +78,15 @@ export interface ProductCardProps {
 
 export interface ProductPreviewSectionProps {
   product: Product | null
+}
+
+export interface ProductTheme {
+  bg: string
+  sectionBg?: string
+  textColor: string
+  primaryTextColor?: string
+  primaryBgColor?: string
+  badgeBgColor?: string
+  badgeOutlineColor?: string
+  descriptionTextColor?: string
 }
