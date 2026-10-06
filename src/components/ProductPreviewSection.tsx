@@ -46,7 +46,7 @@ const ProductPreviewSection = ({
             />
           </div>
 
-          <div className="mt-6 flex gap-3 pb-2">
+          <div className="mt-6 flex flex-wrap justify-center gap-3 pb-2">
             {product?.images.map((image, index) => (
               <button
                 key={`${image}-${index}`}
@@ -80,7 +80,7 @@ const ProductPreviewSection = ({
 
         <div className="relative min-w-0">
           <div
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black tracking-[0.12em] uppercase ${styles?.primaryBgColor || "bg-yellow-500 text-slate-900"} `}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black tracking-[0.12em] uppercase ring-1 ${styles?.badgeBgColor} ${styles?.primaryTextColor} ${styles?.badgeOutlineColor}`}
           >
             <Zap fill="currentColor" strokeWidth={0} className={`size-4`} />
             {product?.badge}
@@ -116,7 +116,7 @@ const ProductPreviewSection = ({
             <div className="mt-8 min-w-0">
               <div className="flex flex-wrap items-center gap-3">
                 <span
-                  className={`text-3xl font-black ${styles?.primaryTextColor || "text-yellow-400"}`}
+                  className={`text-3xl font-black sm:text-4xl ${styles?.primaryTextColor || "text-yellow-400"}`}
                 >
                   ৳ {product?.price.current.toLocaleString("bn-BD")}
                 </span>
@@ -124,7 +124,7 @@ const ProductPreviewSection = ({
                   ৳ {product?.price.regular.toLocaleString("bn-BD")}
                 </span>
               </div>
-              <p className="mt-3 text-sm text-white/70">
+              <p className="mt-3 text-base text-white/70">
                 সারা বাংলাদেশ ক্যাশ অন ডেলিভারি
               </p>
             </div>
@@ -132,7 +132,7 @@ const ProductPreviewSection = ({
             <div className="mt-8 flex w-full min-w-0 flex-col gap-4 sm:w-auto">
               <Button
                 variant="link"
-                className={`w-full rounded-full px-8 py-6 text-lg font-black ${styles?.primaryBgColor || "bg-yellow-500"} text-slate-900 transition-none hover:no-underline`}
+                className={`w-full rounded-full px-8 py-6 text-lg font-black sm:w-58 ${styles?.primaryBgColor || "bg-yellow-500"} text-slate-900 transition-none hover:no-underline`}
                 size="lg"
                 onClick={handleOrderClick}
               >

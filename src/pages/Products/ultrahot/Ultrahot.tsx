@@ -1,11 +1,13 @@
 import ProductPage from "@/pages/Products/ProductPage"
 
 const styles = {
-  bg: "bg-gradient-to-br from-[#1a0b15] via-[#2d0a1b] to-[#1a0b15]",
+  bg: "bg-gradient-to-br from-lx-bg via-lx-bg2 to-lx-bg",
   sectionBg: "bg-[#120910]",
   textColor: "text-white",
-  primaryTextColor: "text-[#d4af37]",
-  primaryBgColor: "bg-[#d4af37]",
+  primaryTextColor: "text-lx-gold",
+  primaryBgColor: "bg-lx-gold",
+  badgeBgColor: "bg-lx-gold/20",
+  badgeOutlineColor: "ring-lx-gold/40",
 }
 
 const Ultrahot = () => {

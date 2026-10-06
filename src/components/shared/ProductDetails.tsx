@@ -1,7 +1,7 @@
 import getProductsById from "@/lib/getProductsById"
 import type { Product } from "@/types/product"
 import ProductPreviewSection from "../ProductPreviewSection"
-import ProblemSection from "../../pages/Products/ultrahot/ProblemSection"
+import ProblemSection from "../../ProblemSection"
 
 export interface ProductPreviewSectionProps {
   product: Product | null
@@ -11,11 +11,13 @@ export interface ProductPreviewSectionProps {
     primaryColor?: string
     primaryTextColor?: string
     primaryBgColor?: string
+    badgeBgColor?: string
+    badgeOutlineColor?: string
   }
 }
 
 export interface ProblemSectionData {
-  title: string
+  title?: string
   subtitle?: string
   problems: { title: string; description: string; icon?: string }[] | undefined
   theme?: {

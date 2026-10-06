@@ -4,8 +4,9 @@ const styles = {
   bg: "bg-gradient-to-br from-[#1b1024] via-[#2d1632] to-[#140d1b]",
   sectionBg: "bg-[#140d1b]",
   textColor: "text-white",
-  primaryTextColor: "text-[#f4c95d]",
-  primaryBgColor: "bg-[#f4c95d]",
+  primaryTextColor: "text-[#d9b45f]",
+  primaryBgColor: "bg-[#d9b45f]",
+  badgeBgColor: "bg-[#d9b45f]/40",
 }
 
 const JingsengPlus = () => {

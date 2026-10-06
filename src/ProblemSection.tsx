@@ -1,5 +1,5 @@
-import type { ProblemSectionData } from "../../../components/shared/ProductDetails"
-import { FeatureCard } from "../../../components/ui/FeatureCard"
+import type { ProblemSectionData } from "./components/shared/ProductDetails"
+import { FeatureCard } from "./components/ui/FeatureCard"
 import { Progress } from "@/components/ui/progress"
 export default function ProblemSection({
   title,
