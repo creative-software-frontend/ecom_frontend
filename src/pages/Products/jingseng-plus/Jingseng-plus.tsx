@@ -1,9 +1,11 @@
 import ProblemSection from "@/ProblemSection"
-import ProductInfoSection from "@/components/ProductInfoSection"
 import ProductPreviewSection from "@/components/ProductPreviewSection"
 import ContactSection from "@/components/shared/ContactSection"
 import Footer from "@/components/shared/Footer"
 import OrderForm from "@/components/shared/OrderForm"
+import ProductPromoSection from "@/components/shared/ProductPromoSection"
+import ProductStickyActions from "@/components/shared/ProductStickyActions"
+import ProductTrustSection from "@/components/shared/ProductTrustSection"
 import getProductsById from "@/lib/getProductsById"
 import type { Product } from "@/types/product"
 
@@ -37,14 +39,26 @@ const JingsengPlus = () => {
         theme={styles}
         sectionStyles={whyChooseSectionStyles}
       />
+      <ProductPromoSection product={product} />
+      <ProductTrustSection
+        product={product}
+        theme={styles}
+        title="🔒 সম্পূর্ণ গোপন ডেলিভারি"
+      />
 
-      <ProductInfoSection product={product} styles={styles} />
-      <OrderForm />
+      <OrderForm
+        product={product}
+        theme={styles}
+        title={`আজই আপনার ${product.brand_name} অর্ডার করুন`}
+        subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
+        styles={whyChooseSectionStyles}
+      />
       <ContactSection
         title="যেকোনো প্রয়োজনে যোগাযোগ করুন"
         styles={whyChooseSectionStyles}
       />
-      <Footer />
+      <Footer theme={styles} />
+      <ProductStickyActions product={product} theme={styles} />
     </main>
   )
 }

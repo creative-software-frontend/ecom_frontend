@@ -13,6 +13,7 @@ export interface ProductPreviewSectionProps {
     primaryBgColor?: string
     badgeBgColor?: string
     badgeOutlineColor?: string
+    appearance?: "light" | "dark"
   }
 }
 
@@ -28,6 +29,7 @@ export interface ProblemSectionData {
     primaryTextColor?: string
     badgeBgColor?: string
     descriptionTextColor?: string
+    appearance?: "light" | "dark"
   }
   sectionStyles?: { sectionBg?: string }
 }

@@ -1,4 +1,4 @@
-import type { ProductTheme } from "@/types/product"
+import type { Product, ProductTheme } from "@/types/product"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -20,7 +20,7 @@ import {
 import { Button } from "../ui/button"
 
 type OrderFormProps = {
-  product?: unknown
+  product: Product
   theme?: ProductTheme
   styles?: {
     sectionBg?: string
@@ -30,8 +30,12 @@ type OrderFormProps = {
 }
 
 const OrderForm = (props: OrderFormProps) => {
-  void props
-  const accentText = props.theme?.primaryTextColor ?? "text-white"
+  const isLightTheme = props.theme?.appearance === "light"
+  const accentBg = props.theme?.primaryBgColor ?? "bg-[#d4af37]"
+  const accentText = props.theme?.primaryTextColor ?? "text-[#d4af37]"
+  const fieldLabelClass = isLightTheme ? "text-[#292929]" : "text-white/85"
+  const productPrice = props.product.price.current.toLocaleString("bn-BD")
+  const totalPrice = (props.product.price.current + 70).toLocaleString("bn-BD")
   const trustBadges = [
     "SECURED",
     "ORIGINAL",
@@ -42,9 +46,11 @@ const OrderForm = (props: OrderFormProps) => {
   return (
     <section
       id="order"
-      className={`scroll-mt-6 px-4 py-16 text-white md:py-20 ${props.styles?.sectionBg}`}
+      className={`scroll-mt-6 px-4 py-16 md:py-20 ${isLightTheme ? "text-[#171717]" : "text-white"} ${props.styles?.sectionBg}`}
     >
-      <div className="mx-auto max-w-full rounded-4xl border-4 border-white/10 bg-white/4 p-4 shadow-2xl shadow-black/20 backdrop-brightness-70 sm:max-w-2xl sm:border-8 sm:p-6 md:p-8">
+      <div
+        className={`mx-auto max-w-full rounded-4xl border-4 p-4 shadow-2xl sm:max-w-2xl sm:border-8 sm:p-6 md:p-8 ${isLightTheme ? "border-gray-200 bg-white shadow-gray-900/10" : "border-white/10 bg-white/4 shadow-black/20 backdrop-brightness-70"}`}
+      >
         <div className="mb-8 text-center">
           <div
             className={`mx-auto mb-4 flex size-18 items-center justify-center rounded-2xl ${props.theme?.badgeBgColor} ${props.theme?.primaryTextColor} `}
@@ -52,21 +58,23 @@ const OrderForm = (props: OrderFormProps) => {
             <ShieldCheck size={35} />
           </div>
           <h2 className="text-3xl font-black sm:text-4xl/tight">
-            {props.title}
+            {props.title ?? `আজই আপনার ${props.product.brand_name} অর্ডার করুন`}
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-lg leading-relaxed text-white/65 sm:text-base">
-            নিচের ফর্মটি সঠিক তথ্য দিয়ে পূরণ করুন, আমরা দ্রুত আপনার সাথে যোগাযোগ
-            করব।
+          <p
+            className={`mx-auto mt-3 max-w-xl text-lg leading-relaxed sm:text-base ${isLightTheme ? "text-gray-600" : "text-white/65"}`}
+          >
+            {props.subtitle ??
+              "নিচের ফর্মটি সঠিক তথ্য দিয়ে পূরণ করুন, আমরা দ্রুত আপনার সাথে যোগাযোগ করব।"}
           </p>
         </div>
 
         <div
-          className={`mb-6 rounded-2xl border-2 border-white/10 bg-white/5 ${props.theme?.badgeBgColor}`}
+          className={`mb-6 rounded-2xl border-2 ${isLightTheme ? "border-gray-200 bg-gray-50" : "border-white/10 bg-white/5"} ${props.theme?.badgeBgColor}`}
         >
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <span className="text-lg font-black">পণ্যের মূল্য:</span>
             <strong className={`text-2xl font-bold ${accentText}`}>
-              ৳ ১,৬০০
+              ৳ {productPrice}
             </strong>
           </div>
           <div className="flex items-center justify-between gap-3 px-4 py-3">
@@ -83,14 +91,16 @@ const OrderForm = (props: OrderFormProps) => {
           <FieldGroup className="gap-5">
             <FieldGroup className="grid gap-4 sm:grid-cols-2">
               <Field>
-                <FieldLabel className="text-white/85">আপনার নাম</FieldLabel>
+                <FieldLabel className={fieldLabelClass}>আপনার নাম</FieldLabel>
                 <Input
                   placeholder="সম্পূর্ণ নাম লিখুন"
                   className="mt-2 h-12 rounded-2xl border-white/15 bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground"
                 />
               </Field>
               <Field>
-                <FieldLabel className="text-white/85">মোবাইল নম্বর</FieldLabel>
+                <FieldLabel className={fieldLabelClass}>
+                  মোবাইল নম্বর
+                </FieldLabel>
                 <Input
                   placeholder="01XXXXXXXXX"
                   className="mt-2 h-12 rounded-2xl border-white/15 bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground"
@@ -99,7 +109,9 @@ const OrderForm = (props: OrderFormProps) => {
             </FieldGroup>
 
             <Field>
-              <FieldLabel className="text-white/85">সম্পূর্ণ ঠিকানা</FieldLabel>
+              <FieldLabel className={fieldLabelClass}>
+                সম্পূর্ণ ঠিকানা
+              </FieldLabel>
               <Textarea
                 placeholder="বাসা, রোড, এলাকা ও জেলার নাম লিখুন"
                 rows={3}
@@ -109,7 +121,7 @@ const OrderForm = (props: OrderFormProps) => {
 
             <FieldGroup className="grid gap-4 sm:grid-cols-2">
               <Field>
-                <FieldLabel className="text-white/85">
+                <FieldLabel className={fieldLabelClass}>
                   ডেলিভারি এলাকা
                 </FieldLabel>
                 <Select value="inside">
@@ -127,10 +139,14 @@ const OrderForm = (props: OrderFormProps) => {
                 </Select>
               </Field>
               <div>
-                <span className="block text-sm font-semibold text-white/85">
+                <span
+                  className={`block text-sm font-semibold ${fieldLabelClass}`}
+                >
                   পরিমাণ
                 </span>
-                <div className="mt-2 flex min-h-12 items-center justify-between rounded-lg border border-white/15 bg-black/20 px-2">
+                <div
+                  className={`mt-2 flex min-h-12 items-center justify-between rounded-lg border px-2 ${isLightTheme ? "border-gray-200 bg-gray-50 text-[#171717]" : "border-white/15 bg-black/20"}`}
+                >
                   <span className="flex size-9 items-center justify-center rounded-md text-white/75">
                     <Minus className="size-4" />
                   </span>
@@ -143,7 +159,7 @@ const OrderForm = (props: OrderFormProps) => {
             </FieldGroup>
 
             <Field>
-              <FieldLabel className="text-white/85">
+              <FieldLabel className={fieldLabelClass}>
                 অতিরিক্ত তথ্য
                 <span className="font-normal text-white/40">(ঐচ্ছিক)</span>
               </FieldLabel>
@@ -156,26 +172,32 @@ const OrderForm = (props: OrderFormProps) => {
           </FieldGroup>
 
           <div
-            className={`rounded-xl border border-white/10 bg-white/5 px-4 py-2 ${props.theme?.badgeBgColor}`}
+            className={`rounded-xl border px-4 py-2 ${isLightTheme ? "border-gray-200 bg-gray-50" : "border-white/10 bg-white/5"} ${props.theme?.badgeBgColor}`}
           >
-            <div className="flex justify-between gap-4 py-3 text-base text-white/65">
+            <div
+              className={`flex justify-between gap-4 py-3 text-base ${isLightTheme ? "text-gray-600" : "text-white/65"}`}
+            >
               <span>পণ্যের মূল্য</span>
-              <span>৳ ১,৬০০</span>
+              <span>৳ {productPrice}</span>
             </div>
-            <div className="flex justify-between gap-4 border-b border-white/10 py-3 text-base text-white/65">
+            <div
+              className={`flex justify-between gap-4 border-b py-3 text-base ${isLightTheme ? "border-gray-200 text-gray-600" : "border-white/10 text-white/65"}`}
+            >
               <span>ডেলিভারি চার্জ</span>
               <span>৳ ৭০</span>
             </div>
-            <div className="flex justify-between gap-4 py-3 text-xl font-bold text-white">
+            <div
+              className={`flex justify-between gap-4 py-3 text-xl font-bold ${isLightTheme ? "text-[#171717]" : "text-white"}`}
+            >
               <span>মোট মূল্য</span>
-              <span className={accentText}>৳ ১,৬৭০</span>
+              <span className={accentText}>৳ {totalPrice}</span>
             </div>
           </div>
 
           <Button
             variant="link"
             size="lg"
-            className={`h-18 w-full justify-center gap-2 rounded-2xl ${props.theme?.primaryBgColor} px-6 py-5 text-xl font-bold ${props.theme?.textColor} hover:no-underline sm:py-6`}
+            className={`h-18 w-full justify-center gap-2 rounded-2xl ${accentBg} px-6 py-5 text-xl font-bold ${isLightTheme ? "text-white" : (props.theme?.textColor ?? "text-slate-950")} hover:no-underline sm:py-6`}
           >
             <ShoppingCart className="size-8" />
             অর্ডার নিশ্চিত করুন
@@ -191,11 +213,13 @@ const OrderForm = (props: OrderFormProps) => {
           </p> */}
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 border-t border-white/10 pt-6 text-center sm:grid-cols-4">
+        <div
+          className={`mt-8 grid grid-cols-2 gap-3 border-t pt-6 text-center sm:grid-cols-4 ${isLightTheme ? "border-gray-200" : "border-white/10"}`}
+        >
           {trustBadges.map((badge) => (
             <div
               key={badge}
-              className="flex min-h-14 items-center justify-center gap-2 rounded-lg bg-white/4 px-2 text-[11px] font-bold text-white/60 uppercase"
+              className={`flex min-h-14 items-center justify-center gap-2 rounded-lg px-2 text-[11px] font-bold uppercase ${isLightTheme ? "bg-gray-50 text-gray-500" : "bg-white/4 text-white/60"}`}
             >
               <BadgeCheck className={`size-4 shrink-0 ${accentText}`} />
               {badge}

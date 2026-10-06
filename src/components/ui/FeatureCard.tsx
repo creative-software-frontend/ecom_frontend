@@ -6,6 +6,7 @@ type FeatureCardProps = {
   accentClass?: string
   accentTextClass?: string
   textClass?: string
+  appearance?: "light" | "dark"
 }
 
 export const FeatureCard = ({
@@ -16,16 +17,23 @@ export const FeatureCard = ({
   accentTextClass,
   textClass,
   iconTextClass,
+  appearance,
 }: FeatureCardProps) => {
   return (
-    <div className="flex items-start gap-4 rounded-[24px] border border-white/10 bg-white/5 p-6 shadow-[0_18px_40px_rgba(0,0,0,0.22)]">
+    <div
+      className={`flex items-start gap-4 rounded-[24px] border p-6 ${appearance === "light" ? "border-gray-200 bg-white shadow-sm" : "border-white/10 bg-white/5 shadow-[0_18px_40px_rgba(0,0,0,0.22)]"}`}
+    >
       <div
         className={`flex h-11 min-w-11 items-center justify-center rounded-full text-base font-black ${accentClass} ${iconTextClass}`}
       >
         {icon}
       </div>
       <div>
-        <h3 className={`mb-2 text-lg font-bold ${accentTextClass}`}>{title}</h3>
+        <h3
+          className={`mb-2 text-lg font-bold ${appearance === "light" ? "text-[#171717]" : accentTextClass}`}
+        >
+          {title}
+        </h3>
         <p
           className={`text-base leading-relaxed ${textClass} text-muted-foreground opacity-75`}
         >

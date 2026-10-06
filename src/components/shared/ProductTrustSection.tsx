@@ -1,0 +1,56 @@
+import type { Product, ProductTheme } from "@/types/product"
+
+const ProductTrustSection = ({
+  product,
+  theme,
+  title = "অরিজিনালিটি ও গোপনীয়তা",
+}: {
+  product: Product
+  theme: ProductTheme
+  title?: string
+}) => {
+  if (!product.trust?.length) return null
+
+  return (
+    <section className="bg-[#2d0a1b] px-4 py-10 text-white sm:py-12">
+      <div className="mx-auto max-w-5xl">
+        <div className="text-center">
+          <h2 className="text-3xl leading-tight font-black sm:text-4xl">
+            {title}
+          </h2>
+          <div className="mx-auto mt-6 flex h-1.5 w-24 overflow-hidden rounded-full bg-white/15">
+            <div
+              className={`h-full w-1/2 rounded-full ${theme.primaryBgColor ?? "bg-amber-400"}`}
+            />
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          {product.trust.map((item, index) => (
+            <article
+              key={`${item.title}-${index}`}
+              className="flex min-h-32 items-start gap-4 rounded-[28px] border border-white/8 bg-white/5 p-5 sm:p-6"
+            >
+              <span
+                className={`flex size-12 shrink-0 items-center justify-center rounded-full bg-[#512832] text-base font-black ${theme.primaryTextColor ?? "text-amber-400"}`}
+              >
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <div className="min-w-0">
+                <h3 className="flex items-center gap-2 text-lg leading-snug font-bold sm:text-xl">
+                  {item.icon && <span aria-hidden="true">{item.icon}</span>}
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/55 sm:text-base">
+                  {item.description}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export default ProductTrustSection

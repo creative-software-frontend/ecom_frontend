@@ -1,18 +1,26 @@
 import ProblemSection from "@/ProblemSection"
-import ProductInfoSection from "@/components/ProductInfoSection"
 import ProductPreviewSection from "@/components/ProductPreviewSection"
 import ContactSection from "@/components/shared/ContactSection"
 import Footer from "@/components/shared/Footer"
+import LingLongPromoBanner from "@/components/shared/LingLongPromoBanner"
 import OrderForm from "@/components/shared/OrderForm"
+import ProductIngredientsSection from "@/components/shared/ProductIngredientsSection"
+import ProductReviewsSection from "@/components/shared/ProductReviewsSection"
+import ProductStickyActions from "@/components/shared/ProductStickyActions"
+import WhyChooseUsSection from "@/components/shared/WhyChooseUsSection"
 import getProductsById from "@/lib/getProductsById"
 import type { Product } from "@/types/product"
 
 const styles = {
-  bg: "bg-gradient-to-br from-[#101b1d] via-[#163230] to-[#0d1718]",
-  sectionBg: "bg-[#0d1718]",
-  textColor: "text-white",
-  primaryTextColor: "text-[#d6b45a]",
-  primaryBgColor: "bg-[#d6b45a]",
+  appearance: "light" as const,
+  bg: "bg-white",
+  sectionBg: "bg-[#f7f8fa]",
+  textColor: "text-[#171717]",
+  primaryTextColor: "text-[#e1262f]",
+  primaryBgColor: "bg-[#e1262f]",
+  badgeBgColor: "bg-red-50",
+  badgeOutlineColor: "ring-red-200",
+  descriptionTextColor: "text-gray-500",
 }
 
 const LingLong = () => {
@@ -33,10 +41,20 @@ const LingLong = () => {
           theme={styles}
         />
       ) : null}
-      <ProductInfoSection product={product} styles={styles} />
-      <OrderForm />
-      <ContactSection title="যোগাযোগ" styles={styles} />
-      <Footer />
+      <ProductIngredientsSection product={product} />
+      <LingLongPromoBanner />
+      <WhyChooseUsSection />
+      <ProductReviewsSection />
+      <OrderForm
+        product={product}
+        theme={styles}
+        title={`অর্ডার করুন`}
+        subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
+        styles={styles}
+      />
+      <ContactSection title="যোগাযোগ" styles={styles} theme={styles} />
+      <Footer theme={styles} />
+      <ProductStickyActions product={product} theme={styles} />
     </main>
   )
 }

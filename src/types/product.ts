@@ -86,6 +86,7 @@ export interface ProductTheme {
   textColor: string
   primaryTextColor?: string
   primaryBgColor?: string
+  appearance?: "light" | "dark"
   badgeBgColor?: string
   badgeOutlineColor?: string
   descriptionTextColor?: string

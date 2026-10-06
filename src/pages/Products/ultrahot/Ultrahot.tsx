@@ -3,6 +3,8 @@ import ProductPreviewSection from "@/components/ProductPreviewSection"
 import ContactSection from "@/components/shared/ContactSection"
 import Footer from "@/components/shared/Footer"
 import OrderForm from "@/components/shared/OrderForm"
+import ProductStickyActions from "@/components/shared/ProductStickyActions"
+import ProductTrustSection from "@/components/shared/ProductTrustSection"
 import getProductsById from "@/lib/getProductsById"
 import type { Product, ProductTheme } from "@/types/product"
 
@@ -49,7 +51,7 @@ const Ultrahot = () => {
           sectionStyles={benefitSectionStyles}
         />
       ) : null}
-      {/* <ProductInfoSection product={product} styles={styles} /> */}
+      <ProductTrustSection product={product} theme={styles} />
       <OrderForm
         product={product}
         theme={styles}
@@ -58,7 +60,10 @@ const Ultrahot = () => {
         styles={problemSectionStyles}
       />
       <ContactSection title="যোগাযোগ" styles={benefitSectionStyles} />
-      <Footer />
+      <div className="">
+        <Footer classNames="bg-lx-bg2" theme={styles} />
+        <ProductStickyActions product={product} theme={styles} />
+      </div>
     </main>
   )
 }
