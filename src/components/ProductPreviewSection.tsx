@@ -1,3 +1,5 @@
+import { motion } from "motion/react"
+
 import {
   ArrowRight,
   BadgeCheck,
@@ -41,7 +43,13 @@ const ProductPreviewSection = ({
       )}
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 lg:grid-cols-2 lg:gap-12">
-        <div className="flex min-w-0 flex-col justify-center">
+        {/* left side with images */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="flex min-w-0 flex-col justify-center"
+        >
           <div
             className={
               isLightTheme
@@ -86,9 +94,14 @@ const ProductPreviewSection = ({
               </li>
             ))}
           </ul>
-        </div>
+        </motion.div>
 
-        <div className="relative min-w-0">
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="relative min-w-0"
+        >
           <div
             className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black tracking-[0.12em] uppercase ring-1 ${styles?.badgeBgColor} ${styles?.primaryTextColor} ${styles?.badgeOutlineColor}`}
           >
@@ -148,16 +161,21 @@ const ProductPreviewSection = ({
             </div>
 
             <div className="mt-8 flex w-full min-w-0 flex-col gap-4 sm:w-auto">
-              <Button
-                variant="link"
-                className={`w-full rounded-full px-8 py-6 text-lg font-black sm:w-58 ${styles?.primaryBgColor || "bg-yellow-500"} ${isLightTheme ? "text-white" : "text-slate-900"} transition-none hover:no-underline`}
-                size="lg"
-                onClick={handleOrderClick}
+              <motion.div
+                whileHover={{ scale: 1.04 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                <ShoppingCart className="size-5" />
-                অর্ডার করুন
-                <ArrowRight className="size-5" />
-              </Button>
+                <Button
+                  variant="link"
+                  className={`w-full rounded-full px-8 py-6 text-lg font-black sm:w-58 ${styles?.primaryBgColor || "bg-yellow-500"} ${isLightTheme ? "text-white" : "text-slate-900"} transition-none hover:no-underline`}
+                  size="lg"
+                  onClick={handleOrderClick}
+                >
+                  <ShoppingCart className="size-5" />
+                  অর্ডার করুন
+                  <ArrowRight className="size-5" />
+                </Button>
+              </motion.div>
 
               <a
                 href={
@@ -176,7 +194,7 @@ const ProductPreviewSection = ({
               </a>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

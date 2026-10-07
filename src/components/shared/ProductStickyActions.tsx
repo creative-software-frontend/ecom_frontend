@@ -1,6 +1,9 @@
+import { motion } from "motion/react"
+
 import { useEffect, useState } from "react"
-import { ArrowUp, MessageCircle, Phone, ShoppingCart } from "lucide-react"
+import { ChevronUp, MessageCircle, Phone, ShoppingCart } from "lucide-react"
 import type { Product, ProductTheme } from "@/types/product"
+import { Button } from "../ui/button"
 
 type ProductStickyActionsProps = {
   product: Product
@@ -84,14 +87,19 @@ const ProductStickyActions = ({
       </nav>
 
       {showBackToTop && (
-        <button
-          type="button"
-          aria-label="উপরে ফিরে যান"
-          onClick={scrollToTop}
-          className="fixed right-4 bottom-20 z-50 flex size-11 items-center justify-center rounded-full border border-red-700/20 bg-red-600 text-white shadow-lg transition hover:bg-red-500"
+        <motion.div
+          whileHover={{ scale: 1.09 }}
+          whileTap={{ scale: 0.95 }}
+          className="fixed right-4 bottom-20 z-50"
         >
-          <ArrowUp className="size-5" />
-        </button>
+          <Button
+            aria-label="উপরে ফিরে যান"
+            onClick={scrollToTop}
+            className="flex size-12 items-center justify-center rounded-full border border-red-700/20 bg-red-600/90 backdrop-blur-xl hover:bg-red-600"
+          >
+            <ChevronUp className="size-6" />
+          </Button>
+        </motion.div>
       )}
     </>
   )

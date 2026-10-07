@@ -70,7 +70,7 @@ const Ultrahot = () => {
       />
       <OrderForm
         product={product}
-        theme={styles}
+        theme={{ ...styles, primaryBgColor: "bg-red-500" }}
         title={`আজই আপনার ULTRAHOT অর্ডার করুন`}
         subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
         styles={{

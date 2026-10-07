@@ -1,11 +1,8 @@
 import { motion } from "motion/react"
 import { ArrowRight, ShoppingCart, Star } from "lucide-react"
 import { Button } from "../ui/button"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "../ui/carousel"
+import { Carousel, CarouselContent, CarouselItem } from "../ui/carousel"
+import { containerVariants, itemVariants } from "@/lib/motionVariants"
 
 const sampleReviews = [
   {
@@ -36,14 +33,26 @@ const goToOrder = () => {
 
 const ProductReviewsSection = () => (
   <section className="bg-white px-4 py-12 sm:py-16">
-    <div className="mx-auto max-w-4xl">
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      variants={containerVariants}
+      className="mx-auto max-w-4xl"
+    >
       <div className="text-center">
-        <h2 className="text-3xl leading-tight font-black text-[#171717] sm:text-4xl">
+        <motion.h2
+          variants={itemVariants}
+          className="text-3xl leading-tight font-black text-[#171717] sm:text-4xl md:text-5xl"
+        >
           গ্রাহকের মতামত
-        </h2>
-        <p className="mt-3 text-sm text-gray-500 sm:text-base">
+        </motion.h2>
+        <motion.p
+          variants={itemVariants}
+          className="mt-3 text-base text-gray-500 sm:text-lg"
+        >
           আমাদের পণ্য ও সেবা সম্পর্কে মতামত
-        </p>
+        </motion.p>
         <div className="mx-auto mt-5 h-1.5 w-24 rounded-full bg-red-100">
           <div className="h-1.5 w-1/2 rounded-full bg-[#e1262f]" />
         </div>
@@ -103,14 +112,14 @@ const ProductReviewsSection = () => (
           variant="link"
           size="lg"
           onClick={goToOrder}
-          className="h-16 justify-center gap-2 rounded-xl bg-gradient-to-r from-[#e1262f] to-[#ff4d55] px-8 text-xl font-bold text-white shadow-lg shadow-red-600/20 transition-all duration-300 hover:no-underline active:scale-95"
+          className="h-16 justify-center gap-2 rounded-xl bg-linear-to-r from-[#e1262f] to-[#ff4d55] px-8 text-xl font-bold text-white shadow-lg shadow-red-600/20 transition-all duration-300 hover:no-underline active:scale-95"
         >
           <ShoppingCart className="size-6" />
           এখনই অর্ডার করুন
           <ArrowRight className="size-4" />
         </Button>
       </motion.div>
-    </div>
+    </motion.div>
   </section>
 )
 

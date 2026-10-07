@@ -1,4 +1,6 @@
+import { motion } from "motion/react"
 import { BadgeCheck, Banknote, Truck } from "lucide-react"
+import { containerVariants, itemVariants } from "@/lib/motionVariants"
 
 const reasons = [
   {
@@ -20,11 +22,20 @@ const reasons = [
 
 const WhyChooseUsSection = () => (
   <section className="bg-[#f7f8fa] px-4 py-12 sm:py-16">
-    <div className="mx-auto max-w-4xl">
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      variants={containerVariants}
+      className="mx-auto max-w-4xl"
+    >
       <div className="text-center">
-        <h2 className="text-3xl leading-tight font-black text-[#171717] sm:text-4xl">
+        <motion.h2
+          variants={itemVariants}
+          className="text-3xl leading-tight font-black text-[#171717] sm:text-4xl"
+        >
           আমাদের কেন বেছে নেবেন?
-        </h2>
+        </motion.h2>
         <div className="mx-auto mt-5 h-1.5 w-24 rounded-full bg-red-100">
           <div className="h-1.5 w-1/2 rounded-full bg-[#e1262f]" />
         </div>
@@ -32,7 +43,8 @@ const WhyChooseUsSection = () => (
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         {reasons.map(({ icon: Icon, title, description }, index) => (
-          <article
+          <motion.article
+            variants={itemVariants}
             key={title}
             className="flex min-h-24 items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
           >
@@ -48,10 +60,10 @@ const WhyChooseUsSection = () => (
                 {description}
               </p>
             </div>
-          </article>
+          </motion.article>
         ))}
       </div>
-    </div>
+    </motion.div>
   </section>
 )
 

@@ -60,7 +60,7 @@ const JingsengPlus = () => {
       />
       <OrderForm
         product={product}
-        theme={styles}
+        theme={{ ...styles, textColor: "text-black" }}
         title={`আজই আপনার ${product.brand_name} অর্ডার করুন`}
         subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
         styles={{

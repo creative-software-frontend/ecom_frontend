@@ -1,3 +1,4 @@
+import { motion } from "framer-motion"
 import type { Product, ProductTheme } from "@/types/product"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -218,14 +219,36 @@ const OrderForm = (props: OrderFormProps) => {
             </div>
           </div>
 
-          <Button
-            variant="link"
-            size="lg"
-            className={`h-18 w-full justify-center gap-2 rounded-2xl ${accentBg} px-6 py-5 text-xl font-bold ${isLightTheme ? "text-white" : (props.theme?.textColor ?? "text-slate-950")} hover:no-underline sm:py-6`}
+          <motion.div
+            whileHover="hover"
+            whileTap={{ scale: 0.98 }}
+            variants={{
+              hover: { scale: 1.04 },
+            }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
           >
-            <ShoppingCart className="size-8" />
-            অর্ডার নিশ্চিত করুন
-          </Button>
+            <Button
+              variant="link"
+              size="lg"
+              className={`relative h-18 w-full justify-center gap-2 overflow-hidden rounded-2xl ${accentBg} px-6 py-5 text-xl font-bold ${
+                isLightTheme
+                  ? "text-white"
+                  : (props?.theme?.textColor ?? "text-slate-950")
+              } hover:no-underline sm:py-6`}
+            >
+              <motion.div
+                initial={{ x: "-100%" }}
+                variants={{
+                  hover: { x: "100%" },
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-0 bg-white/20"
+              ></motion.div>
+
+              <ShoppingCart className="size-8" />
+              <span>অর্ডার নিশ্চিত করুন</span>
+            </Button>
+          </motion.div>
           {/* <div
             className={`flex min-h-14 w-full items-center justify-center gap-2 rounded-xl px-6 text-base font-black text-slate-950 ${accentBg}`}
           ></div> */}

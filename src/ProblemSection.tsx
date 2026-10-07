@@ -1,6 +1,9 @@
 import type { ProblemSectionData } from "./components/shared/ProductDetails"
+import { motion } from "motion/react"
 import { FeatureCard } from "./components/ui/FeatureCard"
 import { Progress } from "@/components/ui/progress"
+import { containerVariants, itemVariants } from "./lib/motionVariants"
+
 export default function ProblemSection({
   title,
   subtitle,
@@ -17,11 +20,20 @@ export default function ProblemSection({
     <section
       className={`${sectionStyles?.sectionBg ?? theme?.sectionBg ?? ""} px-4 py-16 ${textClass} md:py-20`}
     >
-      <div className="mx-auto max-w-4xl text-center">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        variants={containerVariants}
+        className="mx-auto max-w-4xl text-center"
+      >
         {title && (
-          <h2 className="mb-4 text-3xl leading-tight font-extrabold md:text-5xl">
+          <motion.h2
+            variants={itemVariants}
+            className="mb-4 text-3xl leading-tight font-extrabold md:text-5xl"
+          >
             {title}
-          </h2>
+          </motion.h2>
         )}
         <Progress
           value={50}
@@ -30,7 +42,12 @@ export default function ProblemSection({
         />
 
         {subtitle && (
-          <p className="mb-12 text-lg leading-relaxed opacity-75">{subtitle}</p>
+          <motion.p
+            variants={itemVariants}
+            className="mb-12 text-lg leading-relaxed opacity-75"
+          >
+            {subtitle}
+          </motion.p>
         )}
 
         <div className="grid grid-cols-1 gap-6 text-left md:grid-cols-2">
@@ -51,7 +68,7 @@ export default function ProblemSection({
             )
           })}
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }

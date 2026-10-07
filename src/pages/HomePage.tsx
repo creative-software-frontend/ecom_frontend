@@ -1,3 +1,5 @@
+import { motion } from "motion/react"
+
 import ProductCard from "@/components/shared/ProductCard"
 import productData from "../data/ProductData.json"
 import type { Product } from "@/types/product"
@@ -7,7 +9,12 @@ const HomePage = () => {
   return (
     <>
       <main className="">
-        <header className="flex flex-col items-center pt-12">
+        <motion.header
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="flex flex-col items-center pt-12"
+        >
           <img
             className="size-46"
             alt="Power Zenox Logo"
@@ -22,14 +29,19 @@ const HomePage = () => {
               Explore our premium products
             </p>
           </section>
-        </header>
+        </motion.header>
         {/* products section */}
         <section className="mt-8 mb-16">
-          <div className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-2"
+          >
             {productData.products.map((product: Product) => (
               <ProductCard product={product} key={product.id} />
             ))}
-          </div>
+          </motion.div>
         </section>
       </main>
       <Footer />

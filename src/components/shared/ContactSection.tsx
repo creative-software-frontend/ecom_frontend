@@ -1,5 +1,7 @@
+import { motion } from "motion/react"
 import { ArrowRight, MessageCircle, Phone } from "lucide-react"
 import type { ProductTheme } from "@/types/product"
+import { containerVariants, itemVariants } from "@/lib/motionVariants"
 
 const contact = {
   phone: "01780212230",
@@ -21,21 +23,36 @@ const ContactSection = ({
   const isLightTheme = theme?.appearance === "light"
   const accentBg = theme?.primaryBgColor ?? "bg-[#d4af37]"
   const accentText = theme?.primaryTextColor ?? "text-[#d4af37]"
+  const hoverAccentBg = {
+    "--hover-border-color": theme?.primaryBgColor
+      ? `${theme.primaryBgColor}e6`
+      : "#d4af37e6",
+  } as React.CSSProperties
 
   return (
     <section
       className={`${styles.sectionBg} px-4 pt-4 pb-12 ${isLightTheme ? "text-[#171717]" : "text-white"}`}
     >
-      <div className="mx-auto max-w-5xl">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        variants={containerVariants}
+        className="mx-auto max-w-5xl"
+      >
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-black sm:text-4xl md:text-5xl">
+          <motion.h2
+            variants={itemVariants}
+            className="text-3xl font-black sm:text-4xl md:text-5xl"
+          >
             {title}
-          </h2>
-          <p
+          </motion.h2>
+          <motion.p
+            variants={itemVariants}
             className={`mt-3 text-lg ${isLightTheme ? "text-gray-600" : "text-white/65"}`}
           >
             যেকোনো প্রয়োজনে আমাদের সাথে যোগাযোগ করুন
-          </p>
+          </motion.p>
           <div
             className={`mx-auto mt-6 h-1.5 w-24 overflow-hidden rounded-full ${isLightTheme ? "bg-red-100" : "bg-white/10"}`}
           >
@@ -44,12 +61,17 @@ const ContactSection = ({
         </div>
 
         <div className="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
-          <a
+          {/* Phone Contact */}
+          <motion.a
+            style={hoverAccentBg}
+            whileHover={{ y: -5 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            variants={itemVariants}
             href={phoneUrl}
-            className={`group flex flex-col items-center rounded-3xl border p-6 transition ${isLightTheme ? "border-gray-200 bg-white hover:border-red-200" : "border-white/10 bg-white/4 hover:border-white/20"}`}
+            className={`group flex flex-col items-center rounded-3xl border-2 p-6 transition-colors hover:border-(--hover-border-color) ${isLightTheme ? "border-gray-200 bg-white" : "border-white/10 bg-white/4 hover:border-white/20"}`}
           >
             <span
-              className={`flex size-18 items-center justify-center rounded-full ${isLightTheme ? "bg-red-50 text-red-600" : "bg-white/6 text-amber-300"}`}
+              className={`flex size-18 items-center justify-center rounded-full transition-transform group-hover:scale-110 ${isLightTheme ? "bg-red-50 text-red-600" : "bg-white/6 text-amber-300"}`}
             >
               <Phone className="size-8" />
             </span>
@@ -62,26 +84,30 @@ const ContactSection = ({
             >
               Call Now <ArrowRight className="size-4" />
             </span>
-          </a>
-          <a
+          </motion.a>
+          {/* WhatsApp Contact */}
+          <motion.a
+            whileHover={{ y: -5 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            variants={itemVariants}
             href={whatsappUrl}
             target="_blank"
             rel="noreferrer"
-            className={`group flex flex-col items-center rounded-3xl border p-6 transition ${isLightTheme ? "border-gray-200 bg-white hover:border-red-200" : "border-white/10 bg-white/4 hover:border-white/20"}`}
+            className={`group flex flex-col items-center rounded-3xl border-2 p-6 transition ${isLightTheme ? "border-gray-200 bg-white hover:border-red-200" : "border-white/10 bg-white/4 hover:border-white/20"}`}
           >
-            <span className="flex size-18 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-400">
+            <span className="flex size-18 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-400 transition-all duration-300 group-hover:scale-110">
               <MessageCircle className="size-8" />
             </span>
             <h3 className="mt-5 text-xl font-bold">WhatsApp করুন</h3>
             <p className="mt-2 text-xl font-black text-emerald-400">
-              {phoneUrl.replace("tel:", "")}
+              {whatsappUrl.replace("https://wa.me/", "")}
             </p>
             <span className="mt-6 inline-flex min-h-10 items-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-bold text-white">
               Message Now <ArrowRight className="size-4" />
             </span>
-          </a>
+          </motion.a>
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }
