@@ -67,11 +67,11 @@ const ProductPromoSection = ({ product }: { product: Product }) => {
             variant="link"
             size="lg"
             onClick={orderNow}
-            className="mt-5 h-12 justify-center gap-2 rounded-xl bg-[#d9b45f] px-6 font-bold text-[#20170d] hover:no-underline"
+            className="mt-5 h-12 justify-center gap-2 rounded-2xl bg-[#d9b45f] px-8 py-7 text-lg font-bold text-[#20170d] hover:no-underline"
           >
-            <ShoppingCart className="size-4" />
+            <ShoppingCart className="size-6" />
             {product.cta.order_label}
-            <ArrowRight className="size-4" />
+            <ArrowRight className="size-6" />
           </Button>
         </motion.div>
       </div>

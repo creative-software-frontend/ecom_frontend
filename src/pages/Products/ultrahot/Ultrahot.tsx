@@ -7,24 +7,32 @@ import ProductStickyActions from "@/components/shared/ProductStickyActions"
 import ProductTrustSection from "@/components/shared/ProductTrustSection"
 import getProductsById from "@/lib/getProductsById"
 import type { Product, ProductTheme } from "@/types/product"
+import type { CSSProperties } from "react"
+
+const pageColors = {
+  "--ultrahot-background": "#1a0b15",
+  "--ultrahot-section": "#2d0a1b",
+  "--ultrahot-gold": "#d4af37",
+  "--ultrahot-gold-shadow": "rgba(212, 175, 55, 0.3)",
+} as CSSProperties
 
 const styles: ProductTheme = {
-  bg: "bg-gradient-to-br from-lx-bg via-lx-bg2 to-lx-bg",
+  bg: "bg-gradient-to-br from-[var(--ultrahot-background)] via-[var(--ultrahot-section)] to-[var(--ultrahot-background)]",
   textColor: "text-white",
-  primaryTextColor: "text-lx-gold",
-  primaryBgColor: "bg-lx-gold",
-  badgeBgColor: "bg-lx-gold/20",
-  badgeOutlineColor: "ring-lx-gold/40",
+  primaryTextColor: "text-[var(--ultrahot-gold)]",
+  primaryBgColor: "bg-[var(--ultrahot-gold)]",
+  badgeBgColor: "bg-[var(--ultrahot-gold)]/20",
+  badgeOutlineColor: "ring-[var(--ultrahot-gold)]/40",
   descriptionTextColor: "text-white/60",
-  productImageShadow: "drop-shadow-[0_35px_35px_rgba(212,175,55,0.3)]",
+  productImageShadow: "drop-shadow-[0_35px_35px_var(--ultrahot-gold-shadow)]",
 }
 
 const problemSectionStyles = {
-  sectionBg: "bg-lx-bg2",
+  sectionBg: "bg-[var(--ultrahot-section)]",
 }
 
 const benefitSectionStyles = {
-  sectionBg: "bg-lx-bg",
+  sectionBg: "bg-[var(--ultrahot-background)]",
 }
 
 const Ultrahot = () => {
@@ -33,7 +41,7 @@ const Ultrahot = () => {
   if (!product) return null
 
   return (
-    <main>
+    <main style={pageColors}>
       <ProductPreviewSection product={product} styles={styles} />
       {product.problems?.length ? (
         <ProblemSection
@@ -52,17 +60,27 @@ const Ultrahot = () => {
           sectionStyles={benefitSectionStyles}
         />
       ) : null}
-      <ProductTrustSection product={product} theme={styles} />
+      <ProductTrustSection
+        product={product}
+        theme={{
+          ...styles,
+          sectionBg: "bg-[var(--ultrahot-section)]",
+          badgeBgColor: "bg-[var(--ultrahot-gold)]/20",
+        }}
+      />
       <OrderForm
         product={product}
         theme={styles}
         title={`আজই আপনার ULTRAHOT অর্ডার করুন`}
         subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
-        styles={problemSectionStyles}
+        styles={{
+          sectionBg: "bg-[var(--ultrahot-background)]",
+          formBg: "bg-[var(--ultrahot-gold)]",
+        }}
       />
       <ContactSection title="যোগাযোগ" styles={benefitSectionStyles} />
       <div className="">
-        <Footer classNames="bg-lx-bg2" theme={styles} />
+        <Footer classNames="bg-[var(--ultrahot-section)]" theme={styles} />
         <ProductStickyActions product={product} theme={styles} />
       </div>
     </main>

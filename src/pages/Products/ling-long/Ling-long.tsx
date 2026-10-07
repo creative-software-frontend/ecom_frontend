@@ -10,18 +10,30 @@ import ProductStickyActions from "@/components/shared/ProductStickyActions"
 import WhyChooseUsSection from "@/components/shared/WhyChooseUsSection"
 import getProductsById from "@/lib/getProductsById"
 import type { Product } from "@/types/product"
+import type { CSSProperties } from "react"
+
+const pageColors = {
+  "--linglong-background": "#ffffff",
+  "--linglong-section": "#f7f8fa",
+  "--linglong-text": "#171717",
+  "--linglong-red": "#e1262f",
+  "--linglong-badge": "#fef2f2",
+  "--linglong-badge-outline": "#fecaca",
+  "--linglong-muted": "#6b7280",
+  "--linglong-shadow": "rgba(225, 38, 47, 0.16)",
+} as CSSProperties
 
 const styles = {
   appearance: "light" as const,
-  bg: "bg-white",
-  sectionBg: "bg-[#f7f8fa]",
-  textColor: "text-[#171717]",
-  primaryTextColor: "text-[#e1262f]",
-  primaryBgColor: "bg-[#e1262f]",
-  badgeBgColor: "bg-red-50",
-  badgeOutlineColor: "ring-red-200",
-  descriptionTextColor: "text-gray-500",
-  productImageShadow: "drop-shadow-[0_25px_28px_rgba(225,38,47,0.16)]",
+  bg: "bg-[var(--linglong-background)]",
+  sectionBg: "bg-[var(--linglong-section)]",
+  textColor: "text-[var(--linglong-text)]",
+  primaryTextColor: "text-[var(--linglong-red)]",
+  primaryBgColor: "bg-[var(--linglong-red)]",
+  badgeBgColor: "bg-[var(--linglong-badge)]",
+  badgeOutlineColor: "ring-[var(--linglong-badge-outline)]",
+  descriptionTextColor: "text-[var(--linglong-muted)]",
+  productImageShadow: "drop-shadow-[0_25px_28px_var(--linglong-shadow)]",
 }
 
 const LingLong = () => {
@@ -30,7 +42,7 @@ const LingLong = () => {
   if (!product) return null
 
   return (
-    <main>
+    <main style={pageColors}>
       <ProductPreviewSection product={product} styles={styles} />
       {product.problems?.length ? (
         <ProblemSection problems={product.problems} theme={styles} />

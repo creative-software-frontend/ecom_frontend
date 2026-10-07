@@ -9,11 +9,11 @@ const ProductTrustSection = ({
   theme: ProductTheme
   title?: string
 }) => {
+  console.log(theme)
   if (!product.trust?.length) return null
-
   return (
     <section
-      className={`${theme.badgeBgColor} px-4 py-10 text-white backdrop-brightness-2 sm:py-12`}
+      className={`${theme.sectionBg} px-4 py-10 text-white backdrop-brightness-2 sm:py-12`}
     >
       <div className="mx-auto max-w-5xl">
         <div className="text-center">

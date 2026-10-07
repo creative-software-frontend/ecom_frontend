@@ -8,18 +8,27 @@ import ProductStickyActions from "@/components/shared/ProductStickyActions"
 import ProductTrustSection from "@/components/shared/ProductTrustSection"
 import getProductsById from "@/lib/getProductsById"
 import type { Product } from "@/types/product"
+import type { CSSProperties } from "react"
+
+const pageColors = {
+  "--jingseng-dark": "#0a0908",
+  "--jingseng-brown": "#241a12",
+  "--jingseng-section": "#140d1b",
+  "--jingseng-gold": "#d9b45f",
+  "--jingseng-gold-shadow": "rgba(217, 180, 95, 0.3)",
+} as CSSProperties
 
 const styles = {
-  bg: "bg-gradient-to-br from-[#0a0908] via-[#241a12] to-[#0a0908]",
-  sectionBg: "bg-[#140d1b]",
+  bg: "bg-gradient-to-br from-[var(--jingseng-dark)] via-[var(--jingseng-brown)] to-[var(--jingseng-dark)]",
+  sectionBg: "bg-[var(--jingseng-section)]",
   textColor: "text-white",
-  primaryTextColor: "text-[#d9b45f]",
-  primaryBgColor: "bg-[#d9b45f]",
-  badgeBgColor: "bg-[#d9b45f]/30",
-  productImageShadow: "drop-shadow-[0_1px_80px_rgba(217,180,95,0.3)]",
+  primaryTextColor: "text-[var(--jingseng-gold)]",
+  primaryBgColor: "bg-[var(--jingseng-gold)]",
+  badgeBgColor: "bg-[var(--jingseng-gold)]/30",
+  productImageShadow: "drop-shadow-[0_1px_80px_var(--jingseng-gold-shadow)]",
 }
 const whyChooseSectionStyles = {
-  sectionBg: "bg-[#0a0908]",
+  sectionBg: "bg-[var(--jingseng-dark)]",
 }
 
 const JingsengPlus = () => {
@@ -28,7 +37,7 @@ const JingsengPlus = () => {
   if (!product) return null
 
   return (
-    <main>
+    <main style={pageColors}>
       <ProductPreviewSection product={product} styles={styles} />
       {/* {product.problems?.length ? (
         <ProblemSection problems={product.problems} theme={styles} />
@@ -43,7 +52,11 @@ const JingsengPlus = () => {
       <ProductPromoSection product={product} />
       <ProductTrustSection
         product={product}
-        theme={styles}
+        theme={{
+          ...styles,
+          sectionBg: "bg-[var(--jingseng-brown)]",
+          badgeBgColor: "bg-[var(--jingseng-gold)]/20",
+        }}
         title="🔒 সম্পূর্ণ গোপন ডেলিভারি"
       />
 

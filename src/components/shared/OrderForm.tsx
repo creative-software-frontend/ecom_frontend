@@ -42,14 +42,13 @@ const OrderForm = (props: OrderFormProps) => {
     "CASH ON DELIVERY",
     "24/7 SUPPORT",
   ]
-
   return (
     <section
       id="order"
       className={`scroll-mt-6 px-4 py-16 md:py-20 ${isLightTheme ? "text-[#171717]" : "text-white"} ${props.styles?.sectionBg}`}
     >
       <div
-        className={`mx-auto max-w-full rounded-4xl border-4 p-4 shadow-2xl sm:max-w-2xl sm:border-8 sm:p-6 md:p-8 ${isLightTheme ? "border-gray-200 bg-white shadow-gray-900/10" : "border-white/10 bg-white/4 shadow-black/20 backdrop-brightness-70"}`}
+        className={`mx-auto max-w-full rounded-4xl border-4 p-4 shadow-2xl sm:max-w-2xl sm:border-8 sm:p-6 md:p-8 ${isLightTheme ? "border-gray-200 bg-white shadow-gray-900/10" : `border-white/10 ${props.theme?.formBg} shadow-black/20 backdrop-brightness-70`}`}
       >
         <div className="mb-8 text-center">
           <div
