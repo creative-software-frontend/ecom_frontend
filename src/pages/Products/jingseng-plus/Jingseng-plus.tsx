@@ -42,7 +42,6 @@ const JingsengPlus = () => {
       {/* {product.problems?.length ? (
         <ProblemSection problems={product.problems} theme={styles} />
       ) : null} */}
-
       <ProblemSection
         title="কেন JINGSENG PLUS?"
         problems={product.benefits}
@@ -59,20 +58,28 @@ const JingsengPlus = () => {
         }}
         title="🔒 সম্পূর্ণ গোপন ডেলিভারি"
       />
-
       <OrderForm
         product={product}
         theme={styles}
         title={`আজই আপনার ${product.brand_name} অর্ডার করুন`}
         subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
-        styles={whyChooseSectionStyles}
+        styles={{
+          sectionBg: "bg-[var(--jingseng-dark)]",
+          formBg: "bg-[var(--jingseng-brown)]/40",
+          formBorderColor: "border-[var(--jingseng-gold)]/20",
+        }}
       />
-      <ContactSection
-        title="যেকোনো প্রয়োজনে যোগাযোগ করুন"
-        styles={whyChooseSectionStyles}
-      />
-      <Footer theme={styles} />
-      <ProductStickyActions product={product} theme={styles} />
+      <div className="pb-12 sm:pb-16">
+        <ContactSection
+          title="যেকোনো প্রয়োজনে যোগাযোগ করুন"
+          styles={whyChooseSectionStyles}
+        />
+        <Footer
+          // classNames="bg-[var(--ultrahot-background)]"
+          theme={{ sectionBg: "bg-[var(--jingseng-dark)]" }}
+        />
+        <ProductStickyActions product={product} theme={styles} />
+      </div>
     </main>
   )
 }

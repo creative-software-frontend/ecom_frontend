@@ -18,7 +18,7 @@ const pageColors = {
   "--linglong-text": "#171717",
   "--linglong-red": "#e1262f",
   "--linglong-badge": "#fef2f2",
-  "--linglong-badge-outline": "#fecaca",
+  "--linglong-outline": "#fecaca",
   "--linglong-muted": "#6b7280",
   "--linglong-shadow": "rgba(225, 38, 47, 0.16)",
 } as CSSProperties
@@ -31,7 +31,7 @@ const styles = {
   primaryTextColor: "text-[var(--linglong-red)]",
   primaryBgColor: "bg-[var(--linglong-red)]",
   badgeBgColor: "bg-[var(--linglong-badge)]",
-  badgeOutlineColor: "ring-[var(--linglong-badge-outline)]",
+  badgeOutlineColor: "ring-[var(--linglong-outline)]",
   descriptionTextColor: "text-[var(--linglong-muted)]",
   productImageShadow: "drop-shadow-[0_25px_28px_var(--linglong-shadow)]",
 }
@@ -63,11 +63,15 @@ const LingLong = () => {
         theme={styles}
         title={`অর্ডার করুন`}
         subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
-        styles={styles}
+        styles={{
+          formBorderColor: "border-[var(--linglong-outline)]/50",
+        }}
       />
-      <ContactSection title="যোগাযোগ" styles={styles} theme={styles} />
-      <Footer theme={styles} />
-      <ProductStickyActions product={product} theme={styles} />
+      <div className="pb-12 sm:pb-16">
+        <ContactSection title="যোগাযোগ" styles={styles} theme={styles} />
+        <Footer theme={{ sectionBg: "bg-[var(--linglong-background)]" }} />
+        <ProductStickyActions product={product} theme={styles} />
+      </div>
     </main>
   )
 }

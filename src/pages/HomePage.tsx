@@ -24,7 +24,7 @@ const HomePage = () => {
           </section>
         </header>
         {/* products section */}
-        <section className="mt-8">
+        <section className="mt-8 mb-16">
           <div className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-2">
             {productData.products.map((product: Product) => (
               <ProductCard product={product} key={product.id} />

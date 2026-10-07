@@ -45,14 +45,6 @@ export type Product = {
   } & Record<string, unknown>
 }
 
-export interface ProductTheme {
-  bg: string
-  sectionBg?: string
-  textColor: string
-  primaryTextColor?: string
-  primaryBgColor?: string
-}
-
 export type Store = {
   store: {
     name: string
@@ -81,9 +73,9 @@ export interface ProductPreviewSectionProps {
 }
 
 export interface ProductTheme {
-  bg: string
+  bg?: string
   sectionBg?: string
-  textColor: string
+  textColor?: string
   primaryTextColor?: string
   primaryBgColor?: string
   appearance?: "light" | "dark"
@@ -91,4 +83,5 @@ export interface ProductTheme {
   badgeOutlineColor?: string
   descriptionTextColor?: string
   productImageShadow?: string
+  [key: string]: string | undefined
 }

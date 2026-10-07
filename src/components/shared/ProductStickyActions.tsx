@@ -56,7 +56,7 @@ const ProductStickyActions = ({
     <>
       <nav
         aria-label="দ্রুত যোগাযোগ"
-        className={`inset-x-0 bottom-0 z-40 border-t px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] backdrop-blur ${isLightTheme ? "border-gray-200 bg-white/95" : "border-white/10 bg-[#160b13]/95"}`}
+        className={`fixed inset-x-0 bottom-0 z-40 border-t px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] backdrop-blur ${isLightTheme ? "border-gray-200 bg-white/95" : "border-white/10 bg-[#160b13]/95"}`}
       >
         <div className="mx-auto grid max-w-5xl grid-cols-[1fr_1fr_1.4fr] gap-2">
           <a

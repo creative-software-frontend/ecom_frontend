@@ -79,9 +79,9 @@ const Ultrahot = () => {
           formBorderColor: "border-[var(--ultrahot-gold)]/20",
         }}
       />
-      <div className="">
+      <div className="pb-12 sm:pb-16">
         <ContactSection title="যোগাযোগ" styles={benefitSectionStyles} />
-        <Footer classNames="bg-[var(--ultrahot-section)]" theme={styles} />
+        <Footer theme={{ sectionBg: "bg-[var(--ultrahot-background)]" }} />
         <ProductStickyActions product={product} theme={styles} />
       </div>
     </main>

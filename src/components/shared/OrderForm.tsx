@@ -57,14 +57,13 @@ const OrderForm = (props: OrderFormProps) => {
       label: "24/7 SUPPORT",
     },
   ]
-
   return (
     <section
       id="order"
       className={`scroll-mt-6 px-4 py-16 md:py-20 ${isLightTheme ? "text-[#171717]" : "text-white"} ${props.styles?.sectionBg}`}
     >
       <div
-        className={`mx-auto max-w-full rounded-4xl border-4 p-4 shadow-2xl sm:max-w-2xl sm:border-8 sm:p-6 md:p-8 ${isLightTheme ? "border-gray-200 bg-white shadow-gray-900/10" : `${props.styles?.formBorderColor} ${props.styles?.formBg} shadow-black/20`}`}
+        className={`mx-auto max-w-full rounded-4xl border-4 p-4 shadow-2xl sm:max-w-2xl sm:border-8 sm:p-6 md:p-8 ${isLightTheme ? "border-white bg-white shadow-gray-900/10" : `${props.styles?.formBorderColor} ${props.styles?.formBg} shadow-black/20`}`}
       >
         <div className="mb-8 text-center">
           <div
@@ -84,7 +83,7 @@ const OrderForm = (props: OrderFormProps) => {
         </div>
 
         <div
-          className={`mb-6 rounded-2xl border-2 ${isLightTheme ? "border-gray-200 bg-gray-50" : `${props.styles?.formBorderColor} bg-white/5!`}`}
+          className={`${props.styles?.formBorderColor} mb-6 rounded-2xl border-2 ${isLightTheme ? "bg-gray-50" : `$ bg-white/5!`}`}
         >
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <span className="text-lg font-black">পণ্যের মূল্য:</span>
@@ -109,7 +108,7 @@ const OrderForm = (props: OrderFormProps) => {
                 <FieldLabel className={fieldLabelClass}>আপনার নাম</FieldLabel>
                 <Input
                   placeholder="সম্পূর্ণ নাম লিখুন"
-                  className="mt-2 h-12 rounded-2xl border-white/15 bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground"
+                  className={`mt-2 h-12 rounded-2xl ${isLightTheme ? "border-gray-300" : "border-white/15"} bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground`}
                 />
               </Field>
               <Field>
@@ -118,7 +117,7 @@ const OrderForm = (props: OrderFormProps) => {
                 </FieldLabel>
                 <Input
                   placeholder="01XXXXXXXXX"
-                  className="mt-2 h-12 rounded-2xl border-white/15 bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground"
+                  className={`mt-2 h-12 rounded-2xl ${isLightTheme ? "border-gray-300" : "border-white/15"} bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground`}
                 />
               </Field>
             </FieldGroup>
@@ -130,17 +129,19 @@ const OrderForm = (props: OrderFormProps) => {
               <Textarea
                 placeholder="বাসা, রোড, এলাকা ও জেলার নাম লিখুন"
                 rows={3}
-                className="mt-2 h-26 min-h-20 resize-none border-white/15 bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground"
+                className={`mt-2 h-26 min-h-20 resize-none ${isLightTheme ? "border-gray-300" : "border-white/15"} bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground`}
               />
             </Field>
 
-            <FieldGroup className="grid gap-4 sm:grid-cols-2">
+            <FieldGroup className="grid items-center gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel className={fieldLabelClass}>
                   ডেলিভারি এলাকা
                 </FieldLabel>
                 <Select value="inside">
-                  <SelectTrigger className="mt-2 h-12 w-full border-white/15 bg-white/90 px-5 py-6 text-base text-black">
+                  <SelectTrigger
+                    className={`mt-2 h-12 w-full ${isLightTheme ? "border-gray-300" : "border-white/15"} bg-white/90 px-5 py-6 text-base text-black`}
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -162,11 +163,15 @@ const OrderForm = (props: OrderFormProps) => {
                 <div
                   className={`mt-2 flex min-h-12 items-center justify-between rounded-lg border px-2 ${isLightTheme ? "border-gray-200 bg-gray-50 text-[#171717]" : "border-white/15 bg-black/20"}`}
                 >
-                  <span className="flex size-9 items-center justify-center rounded-md text-white/75">
+                  <span
+                    className={`flex size-9 items-center justify-center rounded-md ${isLightTheme ? "text-gray-600" : "text-white/75"}`}
+                  >
                     <Minus className="size-4" />
                   </span>
                   <span className="font-bold">১</span>
-                  <span className="flex size-9 items-center justify-center rounded-md text-white/75">
+                  <span
+                    className={`flex size-9 items-center justify-center rounded-md ${isLightTheme ? "text-gray-600" : "text-white/75"}`}
+                  >
                     <Plus className="size-4" />
                   </span>
                 </div>
@@ -176,18 +181,22 @@ const OrderForm = (props: OrderFormProps) => {
             <Field>
               <FieldLabel className={fieldLabelClass}>
                 অতিরিক্ত তথ্য
-                <span className="font-normal text-white/40">(ঐচ্ছিক)</span>
+                <span
+                  className={`font-normal ${isLightTheme ? "text-gray-500" : "text-white/40"}`}
+                >
+                  (ঐচ্ছিক)
+                </span>
               </FieldLabel>
               <Textarea
                 placeholder="কোনো নির্দেশনা থাকলে লিখুন"
                 rows={2}
-                className="mt-2 h-26 min-h-20 resize-none border-white/15 bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground"
+                className={`mt-2 h-26 min-h-20 resize-none ${isLightTheme ? "border-gray-300" : "border-white/15"} bg-white/90 px-5 py-6 text-black placeholder:text-muted-foreground`}
               />
             </Field>
           </FieldGroup>
 
           <div
-            className={`rounded-xl border px-4 py-2 ${isLightTheme ? "border-gray-200 bg-gray-50" : "border-white/10 bg-white/5"} ${props.theme?.badgeBgColor}`}
+            className={`${props.styles?.formBorderColor} rounded-xl border-2 px-4 py-2 ${isLightTheme ? "bg-gray-50" : "bg-white/5"} `}
           >
             <div
               className={`flex justify-between gap-4 py-3 text-base ${isLightTheme ? "text-gray-600" : "text-white/65"}`}
@@ -196,7 +205,7 @@ const OrderForm = (props: OrderFormProps) => {
               <span>৳ {productPrice}</span>
             </div>
             <div
-              className={`flex justify-between gap-4 border-b py-3 text-base ${isLightTheme ? "border-gray-200 text-gray-600" : "border-white/10 text-white/65"}`}
+              className={`flex justify-between gap-4 ${props.styles?.formBorderColor} border-b-2 py-3 text-base ${isLightTheme ? "text-gray-600" : "text-white/65"}`}
             >
               <span>ডেলিভারি চার্জ</span>
               <span>৳ ৭০</span>
