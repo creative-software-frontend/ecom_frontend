@@ -75,11 +75,12 @@ const Ultrahot = () => {
         subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
         styles={{
           sectionBg: "bg-[var(--ultrahot-background)]",
-          formBg: "bg-[var(--ultrahot-gold)]",
+          formBg: "bg-[var(--ultrahot-section)]/60",
+          formBorderColor: "border-[var(--ultrahot-gold)]/20",
         }}
       />
-      <ContactSection title="যোগাযোগ" styles={benefitSectionStyles} />
       <div className="">
+        <ContactSection title="যোগাযোগ" styles={benefitSectionStyles} />
         <Footer classNames="bg-[var(--ultrahot-section)]" theme={styles} />
         <ProductStickyActions product={product} theme={styles} />
       </div>

@@ -12,7 +12,9 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import {
   BadgeCheck,
+  MapPin,
   Minus,
+  Phone,
   Plus,
   ShieldCheck,
   ShoppingCart,
@@ -24,6 +26,7 @@ type OrderFormProps = {
   theme?: ProductTheme
   styles?: {
     sectionBg?: string
+    [key: string]: string | undefined
   }
   title?: string
   subtitle?: string
@@ -37,18 +40,31 @@ const OrderForm = (props: OrderFormProps) => {
   const productPrice = props.product.price.current.toLocaleString("bn-BD")
   const totalPrice = (props.product.price.current + 70).toLocaleString("bn-BD")
   const trustBadges = [
-    "SECURED",
-    "ORIGINAL",
-    "CASH ON DELIVERY",
-    "24/7 SUPPORT",
+    {
+      icon: <ShieldCheck size={20} />,
+      label: "SECURED",
+    },
+    {
+      icon: <BadgeCheck size={20} />,
+      label: "ORIGINAL",
+    },
+    {
+      icon: <MapPin size={20} />,
+      label: "CASH ON DELIVERY",
+    },
+    {
+      icon: <Phone size={20} />,
+      label: "24/7 SUPPORT",
+    },
   ]
+
   return (
     <section
       id="order"
       className={`scroll-mt-6 px-4 py-16 md:py-20 ${isLightTheme ? "text-[#171717]" : "text-white"} ${props.styles?.sectionBg}`}
     >
       <div
-        className={`mx-auto max-w-full rounded-4xl border-4 p-4 shadow-2xl sm:max-w-2xl sm:border-8 sm:p-6 md:p-8 ${isLightTheme ? "border-gray-200 bg-white shadow-gray-900/10" : `border-white/10 ${props.theme?.formBg} shadow-black/20 backdrop-brightness-70`}`}
+        className={`mx-auto max-w-full rounded-4xl border-4 p-4 shadow-2xl sm:max-w-2xl sm:border-8 sm:p-6 md:p-8 ${isLightTheme ? "border-gray-200 bg-white shadow-gray-900/10" : `${props.styles?.formBorderColor} ${props.styles?.formBg} shadow-black/20`}`}
       >
         <div className="mb-8 text-center">
           <div
@@ -68,7 +84,7 @@ const OrderForm = (props: OrderFormProps) => {
         </div>
 
         <div
-          className={`mb-6 rounded-2xl border-2 ${isLightTheme ? "border-gray-200 bg-gray-50" : "border-white/10 bg-white/5"} ${props.theme?.badgeBgColor}`}
+          className={`mb-6 rounded-2xl border-2 ${isLightTheme ? "border-gray-200 bg-gray-50" : `${props.styles?.formBorderColor} bg-white/5!`}`}
         >
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <span className="text-lg font-black">পণ্যের মূল্য:</span>
@@ -215,13 +231,13 @@ const OrderForm = (props: OrderFormProps) => {
         <div
           className={`mt-8 grid grid-cols-2 gap-3 border-t pt-6 text-center sm:grid-cols-4 ${isLightTheme ? "border-gray-200" : "border-white/10"}`}
         >
-          {trustBadges.map((badge) => (
+          {trustBadges.map(({ label, icon }) => (
             <div
-              key={badge}
-              className={`flex min-h-14 items-center justify-center gap-2 rounded-lg px-2 text-[11px] font-bold uppercase ${isLightTheme ? "bg-gray-50 text-gray-500" : "bg-white/4 text-white/60"}`}
+              key={label}
+              className={`flex min-h-14 flex-col items-center justify-center gap-2 rounded-lg px-2 text-[11px] font-bold uppercase ${isLightTheme ? "text-gray-500" : "text-white/60"}`}
             >
-              <BadgeCheck className={`size-4 shrink-0 ${accentText}`} />
-              {badge}
+              {icon}
+              {label}
             </div>
           ))}
         </div>
