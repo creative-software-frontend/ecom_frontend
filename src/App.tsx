@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage"
 import Ultrahot from "./pages/Products/ultrahot/Ultrahot"
 import JingsengPlus from "./pages/Products/jingseng-plus/Jingseng-plus"
 import LingLong from "./pages/Products/ling-long/Ling-long"
+import NotFound from "./pages/NotFound"
 
 export function App() {
   return (
@@ -12,6 +13,7 @@ export function App() {
         <Route path="p/ultrahot" element={<Ultrahot />} />
         <Route path="p/jingseng-plus" element={<JingsengPlus />} />
         <Route path="p/ling-long" element={<LingLong />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )
