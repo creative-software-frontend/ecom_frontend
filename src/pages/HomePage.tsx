@@ -4,11 +4,12 @@ import ProductCard from "@/components/shared/ProductCard"
 import productData from "../data/ProductData.json"
 import type { Product } from "@/types/product"
 import Footer from "@/components/shared/Footer"
+import BackToTop from "@/components/shared/BackToTop"
 
 const HomePage = () => {
   return (
     <>
-      <main className="">
+      <main className="px-4">
         <motion.header
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -31,7 +32,7 @@ const HomePage = () => {
           </section>
         </motion.header>
         {/* products section */}
-        <section className="mt-8 mb-16">
+        <section className="mt-8 mb-16 px-2">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -43,6 +44,7 @@ const HomePage = () => {
             ))}
           </motion.div>
         </section>
+        <BackToTop />
       </main>
       <Footer />
     </>

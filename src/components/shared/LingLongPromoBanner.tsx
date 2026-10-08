@@ -11,12 +11,8 @@ const LingLongPromoBanner = () => {
     <section className="bg-white px-4 py-8 sm:py-12">
       <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[28px] bg-[#1a1a1a] text-white shadow-2xl md:min-h-80 md:grid-cols-2">
         <div className="relative min-h-64 md:min-h-full">
-          <img
-            src={LionImage}
-            alt="Lion"
-            className="absolute inset-0 size-full object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#1a1a1a]/80 md:bg-gradient-to-r md:from-transparent md:via-[#1a1a1a]/40 md:to-[#1a1a1a]" />
+          <img src={LionImage} alt="Lion" className="size-full object-cover" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#1a1a1a] to-transparent backdrop-blur-2xl md:bg-linear-to-r md:from-transparent md:via-[#1a1a1a]/40 md:to-[#1a1a1a]" />
         </div>
 
         <div className="flex flex-col justify-center bg-[#1a1a1a] p-6 sm:p-9 md:p-10">
@@ -24,7 +20,7 @@ const LingLongPromoBanner = () => {
             দুর্বলতা ও ক্লান্তি কাটিয়ে ফিরে পান আপনার আসল আত্মবিশ্বাস
           </h2>
 
-          <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-md">
+          <div className="mt-5 rounded-2xl border border-white/10 bg-white/6 p-4 backdrop-blur-md">
             <p className="text-sm text-gray-300">
               আত্মবিশ্বাসের সাথে খেলতে থাকুন
             </p>
@@ -50,6 +46,10 @@ const LingLongPromoBanner = () => {
 
           <motion.div
             animate={{ scale: 1.03 }}
+            whileHover={{
+              scale: 1.09,
+              transition: { duration: 0.2, ease: "easeOut" },
+            }}
             transition={{
               type: "spring",
               repeat: Infinity,
@@ -63,7 +63,7 @@ const LingLongPromoBanner = () => {
               variant="link"
               size="lg"
               onClick={goToOrder}
-              className="h-16 w-full justify-center gap-2 rounded-xl bg-gradient-to-r from-[#e1262f] to-[#ff4d55] text-xl font-bold text-white shadow-lg shadow-red-600/20 transition-all duration-300 hover:no-underline active:scale-95"
+              className="h-16 w-full justify-center gap-2 rounded-xl bg-linear-to-r from-[#e1262f] to-[#ff4d55] text-xl font-bold text-white shadow-lg shadow-red-600/20 transition-all duration-300 hover:no-underline active:scale-95"
             >
               <ShoppingCart className="size-6" />
               এখনই অর্ডার করুন

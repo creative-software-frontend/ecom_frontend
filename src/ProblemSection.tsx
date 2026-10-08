@@ -18,7 +18,7 @@ export default function ProblemSection({
 
   return (
     <section
-      className={`${sectionStyles?.sectionBg ?? theme?.sectionBg ?? ""} px-4 py-16 ${textClass} md:py-20`}
+      className={`${sectionStyles?.sectionBg ?? theme?.sectionBg ?? ""} px-4 py-8 sm:px-6 sm:py-12 ${textClass} md:py-20`}
     >
       <motion.div
         initial="hidden"
@@ -30,7 +30,7 @@ export default function ProblemSection({
         {title && (
           <motion.h2
             variants={itemVariants}
-            className="mb-4 text-3xl leading-tight font-extrabold md:text-5xl"
+            className="mb-4 text-center text-3xl leading-tight font-extrabold md:text-5xl"
           >
             {title}
           </motion.h2>
@@ -44,7 +44,7 @@ export default function ProblemSection({
         {subtitle && (
           <motion.p
             variants={itemVariants}
-            className="mb-12 text-lg leading-relaxed opacity-75"
+            className="mb-12 text-center text-lg leading-relaxed opacity-75"
           >
             {subtitle}
           </motion.p>

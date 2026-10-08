@@ -59,12 +59,17 @@ const ProductReviewsSection = () => (
       </div>
       {/* Carousel */}
       <Carousel
-        opts={{ loop: true, align: "start", slidesToScroll: 2 }}
+        opts={{
+          loop: true,
+          align: "start",
+          slidesToScroll: 1,
+          breakpoints: { "(min-width: 640px)": { slidesToScroll: 2 } },
+        }}
         className="mx-auto mt-8 max-w-2xl"
       >
         <CarouselContent>
           {sampleReviews.map((review) => (
-            <CarouselItem className="basis-1/2" key={review.name}>
+            <CarouselItem className="basis-full sm:basis-1/2" key={review.name}>
               <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
                 <div className="flex items-start gap-4">
                   <div className="flex size-9 items-center justify-center rounded-full bg-red-200 text-red-500">
@@ -98,7 +103,11 @@ const ProductReviewsSection = () => (
         </div> */}
       </Carousel>
       <motion.div
-        animate={{ scale: 1.03 }}
+        animate={{ scale: 1.02 }}
+        whileHover={{
+          scale: 1.05,
+          transition: { duration: 0.2, ease: "easeOut" },
+        }}
         transition={{
           type: "spring",
           repeat: Infinity,
@@ -112,7 +121,7 @@ const ProductReviewsSection = () => (
           variant="link"
           size="lg"
           onClick={goToOrder}
-          className="h-16 justify-center gap-2 rounded-xl bg-linear-to-r from-[#e1262f] to-[#ff4d55] px-8 text-xl font-bold text-white shadow-lg shadow-red-600/20 transition-all duration-300 hover:no-underline active:scale-95"
+          className="h-16 w-full justify-center gap-2 rounded-xl bg-linear-to-r from-[#e1262f] to-[#ff4d55] px-8 text-xl font-bold text-white shadow-lg shadow-red-600/20 transition-all duration-300 hover:no-underline active:scale-95 sm:w-auto"
         >
           <ShoppingCart className="size-6" />
           এখনই অর্ডার করুন

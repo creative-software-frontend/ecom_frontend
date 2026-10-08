@@ -1,9 +1,6 @@
-import { motion } from "motion/react"
-
-import { useEffect, useState } from "react"
-import { ChevronUp, MessageCircle, Phone, ShoppingCart } from "lucide-react"
+import { MessageCircle, Phone, ShoppingCart } from "lucide-react"
 import type { Product, ProductTheme } from "@/types/product"
-import { Button } from "../ui/button"
+import BackToTop from "./BackToTop"
 
 type ProductStickyActionsProps = {
   product: Product
@@ -14,7 +11,6 @@ const ProductStickyActions = ({
   product,
   theme,
 }: ProductStickyActionsProps) => {
-  const [showBackToTop, setShowBackToTop] = useState(false)
   const isLightTheme = theme.appearance === "light"
   const phoneUrl =
     typeof product.cta.call_url === "string"
@@ -39,27 +35,11 @@ const ProductStickyActions = ({
     window.open(orderUrl.toString(), "_blank", "noopener,noreferrer")
   }
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    const updateBackToTopVisibility = () => {
-      setShowBackToTop(window.scrollY > 500)
-    }
-
-    window.addEventListener("scroll", updateBackToTopVisibility, {
-      passive: true,
-    })
-    updateBackToTopVisibility()
-    return () => window.removeEventListener("scroll", updateBackToTopVisibility)
-  }, [])
-
   return (
     <>
       <nav
         aria-label="দ্রুত যোগাযোগ"
-        className={`fixed inset-x-0 bottom-0 z-40 border-t px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] backdrop-blur ${isLightTheme ? "border-gray-200 bg-white/95" : "border-white/10 bg-[#160b13]/95"}`}
+        className={`fixed inset-x-0 bottom-0 z-40 border-t px-2 pt-2 pb-[max(env(safe-area-inset-bottom),8px)] backdrop-blur ${isLightTheme ? "border-gray-200 bg-white/95" : `border-white/10 ${theme?.sectionBg}`}`}
       >
         <div className="mx-auto grid max-w-5xl grid-cols-[1fr_1fr_1.4fr] gap-2">
           <a
@@ -86,21 +66,7 @@ const ProductStickyActions = ({
         </div>
       </nav>
 
-      {showBackToTop && (
-        <motion.div
-          whileHover={{ scale: 1.09 }}
-          whileTap={{ scale: 0.95 }}
-          className="fixed right-4 bottom-20 z-50"
-        >
-          <Button
-            aria-label="উপরে ফিরে যান"
-            onClick={scrollToTop}
-            className="flex size-12 items-center justify-center rounded-full border border-red-700/20 bg-red-600/90 backdrop-blur-xl hover:bg-red-600"
-          >
-            <ChevronUp className="size-6" />
-          </Button>
-        </motion.div>
-      )}
+      <BackToTop />
     </>
   )
 }

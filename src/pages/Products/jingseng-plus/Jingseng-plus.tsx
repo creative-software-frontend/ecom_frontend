@@ -71,6 +71,7 @@ const JingsengPlus = () => {
       />
       <div className="pb-12 sm:pb-16">
         <ContactSection
+          borderColorVar={"var(--jingseng-gold)"}
           title="যেকোনো প্রয়োজনে যোগাযোগ করুন"
           styles={whyChooseSectionStyles}
         />
@@ -78,7 +79,10 @@ const JingsengPlus = () => {
           // classNames="bg-[var(--ultrahot-background)]"
           theme={{ sectionBg: "bg-[var(--jingseng-dark)]" }}
         />
-        <ProductStickyActions product={product} theme={styles} />
+        <ProductStickyActions
+          product={product}
+          theme={{ ...styles, sectionBg: "bg-[var(--jingseng-dark)]" }}
+        />
       </div>
     </main>
   )

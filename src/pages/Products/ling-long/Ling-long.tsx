@@ -68,9 +68,17 @@ const LingLong = () => {
         }}
       />
       <div className="pb-12 sm:pb-16">
-        <ContactSection title="যোগাযোগ" styles={styles} theme={styles} />
+        <ContactSection
+          borderColorVar={"var(--linglong-red)"}
+          title="যোগাযোগ"
+          styles={styles}
+          theme={styles}
+        />
         <Footer theme={{ sectionBg: "bg-[var(--linglong-background)]" }} />
-        <ProductStickyActions product={product} theme={styles} />
+        <ProductStickyActions
+          product={product}
+          theme={{ ...styles, sectionBg: "bg-[var(--linglong-background)]" }}
+        />
       </div>
     </main>
   )

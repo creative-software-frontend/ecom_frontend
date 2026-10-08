@@ -61,7 +61,7 @@ const OrderForm = (props: OrderFormProps) => {
   return (
     <section
       id="order"
-      className={`scroll-mt-6 px-4 py-16 md:py-20 ${isLightTheme ? "text-[#171717]" : "text-white"} ${props.styles?.sectionBg}`}
+      className={`scroll-mt-6 px-4 py-12 sm:py-16 md:py-20 ${isLightTheme ? "text-[#171717]" : "text-white"} ${props.styles?.sectionBg}`}
     >
       <div
         className={`mx-auto max-w-full rounded-4xl border-4 p-4 shadow-2xl sm:max-w-2xl sm:border-8 sm:p-6 md:p-8 ${isLightTheme ? "border-white bg-white shadow-gray-900/10" : `${props.styles?.formBorderColor} ${props.styles?.formBg} shadow-black/20`}`}
@@ -76,7 +76,7 @@ const OrderForm = (props: OrderFormProps) => {
             {props.title ?? `আজই আপনার ${props.product.brand_name} অর্ডার করুন`}
           </h2>
           <p
-            className={`mx-auto mt-3 max-w-xl text-lg leading-relaxed sm:text-base ${isLightTheme ? "text-gray-600" : "text-white/65"}`}
+            className={`mt-4 text-lg sm:text-base ${isLightTheme ? "text-gray-600" : "text-white/65"}`}
           >
             {props.subtitle ??
               "নিচের ফর্মটি সঠিক তথ্য দিয়ে পূরণ করুন, আমরা দ্রুত আপনার সাথে যোগাযোগ করব।"}

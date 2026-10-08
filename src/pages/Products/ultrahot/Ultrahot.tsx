@@ -80,9 +80,16 @@ const Ultrahot = () => {
         }}
       />
       <div className="pb-12 sm:pb-16">
-        <ContactSection title="যোগাযোগ" styles={benefitSectionStyles} />
+        <ContactSection
+          title="যোগাযোগ"
+          borderColorVar={"var(--ultrahot-gold)"}
+          styles={benefitSectionStyles}
+        />
         <Footer theme={{ sectionBg: "bg-[var(--ultrahot-background)]" }} />
-        <ProductStickyActions product={product} theme={styles} />
+        <ProductStickyActions
+          product={product}
+          theme={{ ...styles, sectionBg: "bg-[var(--ultrahot-background)]" }}
+        />
       </div>
     </main>
   )

@@ -36,13 +36,13 @@ const ProductPreviewSection = ({
 
   return (
     <section
-      className={`relative overflow-hidden py-12 md:py-16 ${styles?.bg || "bg-[#1a0b15]"}`}
+      className={`relative overflow-hidden pt-12 pb-8 md:py-16 ${styles?.bg || "bg-[#1a0b15]"}`}
     >
       {!isLightTheme && (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.10),transparent_25%)]" />
       )}
 
-      <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 lg:grid-cols-2 lg:gap-12">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 direction-alternate lg:grid-cols-2 lg:gap-12">
         {/* left side with images */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -64,11 +64,11 @@ const ProductPreviewSection = ({
             />
           </div>
 
-          <div className="mt-6 flex flex-wrap justify-center gap-3 pb-2">
+          <div className="-mx-4 mt-6 flex scrollbar-none justify-start gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:justify-center">
             {product?.images.map((image, index) => (
               <button
                 key={`${image}-${index}`}
-                className={`size-22 shrink-0 overflow-hidden rounded-2xl border p-1 ring-1 transition outline-none ${isLightTheme ? "border-gray-200 bg-white ring-gray-100 hover:ring-red-300" : "border-white/15 bg-white/5 ring-white/10 hover:ring-white/30"}`}
+                className={`size-16 shrink-0 overflow-hidden rounded-2xl border p-1 ring-1 transition outline-none sm:size-22 ${isLightTheme ? "border-gray-200 bg-white ring-gray-100 hover:ring-red-300" : "border-white/15 bg-white/5 ring-white/10 hover:ring-white/30"}`}
               >
                 <img
                   src={image}
@@ -79,7 +79,7 @@ const ProductPreviewSection = ({
             ))}
           </div>
 
-          <ul className="mt-8 flex gap-4">
+          <ul className="mt-8 hidden gap-4 sm:flex">
             {product?.specs.map((spec, i) => (
               <li
                 key={`${spec.label}-${i}`}
@@ -96,11 +96,12 @@ const ProductPreviewSection = ({
           </ul>
         </motion.div>
 
+        {/* right side */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className="relative min-w-0"
+          className="relative -order-1 min-w-0 md:order-0"
         >
           <div
             className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black tracking-[0.12em] uppercase ring-1 ${styles?.badgeBgColor} ${styles?.primaryTextColor} ${styles?.badgeOutlineColor}`}

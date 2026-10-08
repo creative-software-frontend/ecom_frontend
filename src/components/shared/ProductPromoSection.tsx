@@ -61,7 +61,7 @@ const ProductPromoSection = ({ product }: { product: Product }) => {
             stiffness: 35,
             damping: 15,
           }}
-          className="mt-8 flex justify-center"
+          className="mt-4 flex justify-center"
         >
           <Button
             variant="link"
