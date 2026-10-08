@@ -10,11 +10,15 @@ import {
 } from "lucide-react"
 import type { ProductPreviewSectionProps } from "./shared/ProductDetails"
 import { Button } from "./ui/button"
+import { useState } from "react"
 
 const ProductPreviewSection = ({
   product,
   styles,
 }: ProductPreviewSectionProps) => {
+  const [selectedImage, setSelectedImage] = useState<string | undefined>(
+    product?.images[0]
+  )
   const isLightTheme = styles?.appearance === "light"
 
   const handleOrderClick = () => {
@@ -32,6 +36,11 @@ const ProductPreviewSection = ({
       `আমি ${product.brand_name} অর্ডার করতে চাই। মূল্য: ৳ ${product.price.current.toLocaleString("bn-BD")}`
     )
     window.open(orderUrl.toString(), "_blank", "noopener,noreferrer")
+  }
+
+  // select image by click
+  const handelSelectImage = (i: number) => {
+    setSelectedImage(product?.images[i])
   }
 
   return (
@@ -58,7 +67,7 @@ const ProductPreviewSection = ({
             }
           >
             <img
-              src={product?.images[0]}
+              src={selectedImage}
               alt={product?.name || "product"}
               className={`w-full object-cover filter ${styles?.productImageShadow || "drop-shadow-[0_20px_25px_rgba(0,0,0,0.2)]"}`}
             />
@@ -68,6 +77,10 @@ const ProductPreviewSection = ({
             {product?.images.map((image, index) => (
               <button
                 key={`${image}-${index}`}
+                onClick={() => handelSelectImage(index)}
+                style={{
+                  ...(selectedImage === image && { borderColor: "yellow" }),
+                }}
                 className={`size-16 shrink-0 overflow-hidden rounded-2xl border p-1 ring-1 transition outline-none sm:size-22 ${isLightTheme ? "border-gray-200 bg-white ring-gray-100 hover:ring-red-300" : "border-white/15 bg-white/5 ring-white/10 hover:ring-white/30"}`}
               >
                 <img

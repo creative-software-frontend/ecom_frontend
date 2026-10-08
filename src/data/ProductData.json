@@ -51,12 +51,12 @@
       "quantity": 60,
       "quantity_unit": "capsules",
       "images": [
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/dkijjvxex89-1786397783745.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9ka2lqanZ4ZXg4OS0xNzg2Mzk3NzgzNzQ1LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.LstVhFhobsXWddcdpjdh9b8OvDLhxfNZjSrYkxhEKlw",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/0q6g8j2c2wtg-1786397803201.jpg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS8wcTZnOGoyYzJ3dGctMTc4NjM5NzgwMzIwMS5qcGciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.RYvmGcVmPJGJUpgJBZ3QUfB9o_MSwPx6_boUaa5-oLs",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/8l4s9vf1ycr-1786397810669.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS84bDRzOXZmMXljci0xNzg2Mzk3ODEwNjY5LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.iBnKfY8BIcceSl18pgfm7sx-vG9dmepWnEW0St8Qy2c",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/up89zylwhrd-1786397817584.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS91cDg5enlsd2hyZC0xNzg2Mzk3ODE3NTg0LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.x5lobdxUom5bMGe6xqG9VL1YJnJieKq6Ca-c_Hk0fbY",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/l25p8xe713k-1786397825864.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9sMjVwOHhlNzEzay0xNzg2Mzk3ODI1ODY0LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDM0LCJleHAiOjE4MjI2NTUwMzR9.PhhaFLczkKnSgmS0ARxydOR4ijaBbC8XAGBj45j4QKM",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/zvzygbkkom-1786397835682.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS96dnp5Z2Jra29tLTE3ODYzOTc4MzU2ODIuanBlZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTExMTkwMzQsImV4cCI6MTgyMjY1NTAzNH0.HJFbL54MB6YOj--Db9-CYby9tfw4bT34Fr6XuAlkrg8"
+        "/images/products/ultrahot/1.webp",
+        "/images/products/ultrahot/2.webp",
+        "/images/products/ultrahot/3.webp",
+        "/images/products/ultrahot/4.webp",
+        "/images/products/ultrahot/5.webp",
+        "/images/products/ultrahot/6.webp"
       ],
       "problems": [
         {
@@ -176,13 +176,13 @@
       ],
       "duration_minutes": "40-50",
       "images": [
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/jko89sk7bxn-1787508825236.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9qa284OXNrN2J4bi0xNzg3NTA4ODI1MjM2LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.JEKvRyewKDUOyzoZA0vHO3B350_DsaIe8o14BNS7Yqg",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/2s6f8adxvjt-1787508840932.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS8yczZmOGFkeHZqdC0xNzg3NTA4ODQwOTMyLmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.-d2UoXycQb9t_8JOYryck_k8vfEI41QVEBXwEncOz9s",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/mm6wlp7bnyf-1787508852660.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9tbTZ3bHA3Ym55Zi0xNzg3NTA4ODUyNjYwLmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.PoWLw0BJJnMhNHfPb6QrnVtKzUdiMAYHYH_hhYb3_AU",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/tmjivbnxw8-1787508861162.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS90bWppdmJueHc4LTE3ODc1MDg4NjExNjIuanBlZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTExMTkwNzYsImV4cCI6MTgyMjY1NTA3Nn0.FdGPeSOO4rPetX-mhRcVL14cHtFdA12v_seHCpidWgE",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/kmoqbspusi-1787508870822.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9rbW9xYnNwdXNpLTE3ODc1MDg4NzA4MjIuanBlZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTExMTkwNzYsImV4cCI6MTgyMjY1NTA3Nn0.-IJs-CVbHSjzD4DwT5rJI6XmoymMGNgJpnbZCmlkcJU",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/mioqk576y2r-1787508879169.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9taW9xazU3Nnkyci0xNzg3NTA4ODc5MTY5LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.EIwbtxJET_sqTnptLObDageBtoTcSnsjMmYC_p3AY78",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/g339sgsgc1r-1787508906606.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9nMzM5c2dzZ2Mxci0xNzg3NTA4OTA2NjA2LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDc2LCJleHAiOjE4MjI2NTUwNzZ9.k7-Daw1fdpOY1drVLavMkDFrefbcQP2vX91mPIOdfhU"
+        "/images/products/jingseng-plus/1.webp",
+        "/images/products/jingseng-plus/2.webp",
+        "/images/products/jingseng-plus/3.webp",
+        "/images/products/jingseng-plus/4.webp",
+        "/images/products/jingseng-plus/5.webp",
+        "/images/products/jingseng-plus/6.webp",
+        "/images/products/jingseng-plus/7.webp"
       ],
       "benefits": [
         {
@@ -261,11 +261,11 @@
         { "label": "প্রিমিয়াম প্যাকিং" }
       ],
       "images": [
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/q74cn2xbelp-1786101725975.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9xNzRjbjJ4YmVscC0xNzg2MTAxNzI1OTc1LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDgzLCJleHAiOjE4MjI2NTUwODN9.3w6z2ax8dlebD56BfrRviaOp9LqOY6ymfMVz4m4jmxQ",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/k6a3881l2hc-1786035852427.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9rNmEzODgxbDJoYy0xNzg2MDM1ODUyNDI3LmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDgzLCJleHAiOjE4MjI2NTUwODN9.viZpmbZsR1wR69sDnogGrdE19gG-KFQuQsPxUjv673M",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/dl7az3ojjao-1786035861180.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9kbDdhejNvamphby0xNzg2MDM1ODYxMTgwLmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDgzLCJleHAiOjE4MjI2NTUwODN9.IXRPEFBd09OAbP0TrY8_6GlE5fuCVTBtWmDHsHGOpYc",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/spf535c5se-1786035865881.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS9zcGY1MzVjNXNlLTE3ODYwMzU4NjU4ODEuanBlZyIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTExMTkwODMsImV4cCI6MTgyMjY1NTA4M30.W0NAes2u-8uCnfYkmRP2ML8161J_6DJp-Pni9-9iWts",
-        "https://bqrobmupmtrsisgzveli.supabase.co/storage/v1/object/sign/media/w1jdyj3abvl-1786035871062.jpeg?token=eyJraWQiOiIxZTI2Njc0ZC0xNTYwLTQxZDEtOThmMi05MjllZmVhM2M4MTciLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJtZWRpYS93MWpkeWozYWJ2bC0xNzg2MDM1ODcxMDYyLmpwZWciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkxMTE5MDgzLCJleHAiOjE4MjI2NTUwODN9.rUZR_LycEuEQbfk4vPBRrZgnGwF21nPrPQaNPUU1ryg"
+        "/images/products/ling-long/1.webp",
+        "/images/products/ling-long/2.webp",
+        "/images/products/ling-long/3.webp",
+        "/images/products/ling-long/4.webp",
+        "/images/products/ling-long/5.webp"
       ],
       "benefits": [
         { "title": "প্রাকৃতিক উপাদান", "description": "সম্পূর্ণ প্রাকৃতিক এবং নিরাপদ উপাদান দিয়ে তৈরি।" },
