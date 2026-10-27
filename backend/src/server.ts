@@ -30,7 +30,7 @@ app.use("/api/orders", orderRoutes);
 // });
 
 // ফ্রন্টএন্ডের dist ফোল্ডার স্ট্যাটিক হিসেবে সার্ভ করা
-const frontendDistPath = path.join(import.meta.dirname, "../../frontend/dist");
+const frontendDistPath = path.resolve(process.cwd(), "../frontend/dist");
 app.use(express.static(frontendDistPath));
 
 // SPA ফলব্যাক মিডলওয়্যার
