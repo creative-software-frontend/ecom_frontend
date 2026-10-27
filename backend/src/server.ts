@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import productRoutes from "./routes/product.routes.js";
 import storeRoutes from "./routes/store.routes.js";
 import orderRoutes from "./routes/order.routes.js";
+import path from "node:path";
 
 dotenv.config();
 
@@ -20,12 +21,24 @@ app.use("/api/products", productRoutes);
 app.use("/api/store", storeRoutes);
 app.use("/api/orders", orderRoutes);
 
-// Health check route
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Server is running successfully.",
-  });
+// // Health check route
+// app.get("/", (req, res) => {
+//   res.status(200).json({
+//     success: true,
+//     message: "Server is running successfully.",
+//   });
+// });
+
+// ফ্রন্টএন্ডের dist ফোল্ডার স্ট্যাটিক হিসেবে সার্ভ করা
+const frontendDistPath = path.join(import.meta.dirname, "../../frontend/dist");
+app.use(express.static(frontendDistPath));
+
+// SPA ফলব্যাক মিডলওয়্যার
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api")) {
+    return next();
+  }
+  res.sendFile(path.join(frontendDistPath, "index.html"));
 });
 
 app.listen(PORT, () => {
