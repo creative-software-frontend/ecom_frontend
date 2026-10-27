@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Product {
+  id              String      @id @default(uuid())
+  slug            String      @unique
+  name            String
+  brandName       String      @map("brand_name")
+  category        String      @default("Herbal Supplement")
+  currentPrice    Float       @map("current_price")
+  regularPrice    Float       @map("regular_price")
+  discountPercent Int         @default(0) @map("discount_percent")
+  inStock         Boolean     @default(true) @map("in_stock")
+  stockQuantity   Int         @default(0) @map("stock_quantity")
+  images          Json
+  orderFormConfig Json?       @map("order_form_config")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  orders          OrderItem[]
+  reviews         Review[]
+
+  @@map("products")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique @map("order_number")
+  customerName    String      @map("customer_name")
+  customerPhone   String      @map("customer_phone")
+  customerAddress String      @map("customer_address")
+  notes           String?
+  deliveryArea    String      @map("delivery_area")
+  deliveryCharge  Float       @map("delivery_charge")
+  subtotal        Float
+  total           Float
+  paymentMethod   String      @default("cod") @map("payment_method")
+  paymentStatus   String      @default("unpaid") @map("payment_status")
+  status          String      @default("pending")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  items           OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String  @map("order_id")
+  productId String  @map("product_id")
+  quantity  Int
+  unitPrice Float   @map("unit_price")
+  lineTotal Float   @map("line_total")
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String   @map("product_id")
+  name      String
+  location  String?
+  rating    Int
+  comment   String   @db.Text
+  status    String   @default("pending")
+  createdAt DateTime @default(now()) @map("created_at")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
