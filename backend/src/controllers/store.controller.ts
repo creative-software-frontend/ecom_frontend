@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { readJsonFile } from "../services/db.service.js";
 
-export async function getStoreSettings(req: Request, res: Response) {
+export async function getStoreSettings(_req: Request, res: Response) {
   try {
     const store = await readJsonFile("store.json");
     return res.status(200).json({ success: true, data: store });

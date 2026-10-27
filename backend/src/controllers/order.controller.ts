@@ -65,13 +65,13 @@ export async function createOrder(req: Request, res: Response) {
       },
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Order placed successfully",
       data: newOrder,
     });
   } catch (error) {
     console.error("Error placing order:", error);
-    res.status(500).json({ success: false, message: "Failed to place order" });
+    return res.status(500).json({ success: false, message: "Failed to place order" });
   }
 }

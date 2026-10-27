@@ -1,16 +1,15 @@
 import type { Request, Response } from "express";
-import { readJsonFile } from "../services/db.service.js";
 import { prisma } from "../lib/prisma.js";
 
-export async function getProducts(req: Request, res: Response) {
+export async function getProducts(_req: Request, res: Response) {
   try {
     const products = await prisma.product.findMany({
       orderBy: { createdAt: "desc" },
     });
-    res.json({ success: true, data: products });
+    return res.json({ success: true, data: products });
   } catch (error) {
     console.error("Error fetching products:", error);
-    res
+    return res
       .status(500)
       .json({ success: false, message: "Failed to fetch products" });
   }
@@ -36,10 +35,10 @@ export async function getProductBySlug(req: Request, res: Response) {
         .json({ success: false, message: "Product not found" });
     }
 
-    res.json({ success: true, data: product });
+    return res.json({ success: true, data: product });
   } catch (error) {
     console.error("Error fetching product:", error);
-    res
+    return res
       .status(500)
       .json({ success: false, message: "Failed to fetch product" });
   }
