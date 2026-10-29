@@ -13,6 +13,11 @@ export const adminMenu: MenuItem[] = [
     href: "/admin",
   },
   {
+    label: "Profile",
+    type: "link",
+    href: "/admin/profile",
+  },
+  {
     label: "Products",
     type: "group",
     items: [
