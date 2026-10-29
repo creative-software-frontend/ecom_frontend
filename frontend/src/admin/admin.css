@@ -310,20 +310,6 @@
   }
 }
 
-@utility admin-template-button--danger {
-  background: var(--admin-form-error-color);
-  color: #fff;
-
-  &:hover:not(:disabled) {
-    background: #b91c3c;
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--admin-form-error-color);
-    outline-offset: 2px;
-  }
-}
-
 @utility admin-icon-button {
   display: inline-flex;
   width: 2.25rem;
@@ -657,70 +643,39 @@
   }
 }
 
-@utility admin-confirm-dialog {
-  width: min(32rem, calc(100vw - 2rem));
-  max-width: 32rem;
-  max-height: calc(100vh - 2rem);
-  overflow: auto;
-  border: 1px solid rgba(30, 48, 95, 0.12);
-  border-radius: 0.5rem;
-  background: var(--admin-sidebar-background);
-  padding: 0;
-  color: var(--admin-sidebar-text);
-  box-shadow: 0 1.25rem 3rem rgba(30, 48, 95, 0.2);
-
-  &::backdrop {
-    background: rgba(18, 27, 45, 0.48);
-  }
-}
-
-@utility admin-confirm-dialog-header {
-  border-bottom: 1px solid var(--admin-sidebar-border);
-  padding: 1rem 1.25rem;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-@utility admin-confirm-dialog-body {
-  padding: 1.25rem;
-  color: var(--admin-sidebar-submenu-text);
-  line-height: 1.6;
-
-  & strong {
-    color: var(--admin-sidebar-text);
-  }
-}
-
-@utility admin-confirm-dialog-error {
-  margin-top: 0.75rem;
-  border: 1px solid #fecaca;
-  border-radius: 0.25rem;
-  background: #fef2f2;
-  padding: 0.625rem 0.75rem;
-  color: var(--admin-form-error-color);
-  font-size: 0.875rem;
-}
-
-@utility admin-confirm-dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  border-top: 1px solid var(--admin-sidebar-border);
-  padding: 1rem 1.25rem;
-}
-
 @utility bg-midnight-bloom {
-  background-image: linear-gradient(-20deg, #2b5876 0%, #4e4376 100%) !important;
+  background-image: linear-gradient(
+    -20deg,
+    #2b5876 0%,
+    #4e4376 100%
+  ) !important;
 }
 
 @utility bg-arielle-smile {
-  background-image: radial-gradient(circle 248px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%) !important;
+  background-image: radial-gradient(
+    circle 248px at center,
+    #16d9e3 0%,
+    #30c7ec 47%,
+    #46aef7 100%
+  ) !important;
 }
 
 @utility bg-grow-early {
-  background-image: linear-gradient(to top, #0ba360 0%, #3cba92 100%) !important;
+  background-image: linear-gradient(
+    to top,
+    #0ba360 0%,
+    #3cba92 100%
+  ) !important;
 }
 
 @utility bg-premium-dark {
-  background-image: linear-gradient(to right, #434343 0%, black 100%) !important;
+  background-image: linear-gradient(
+    to right,
+    #434343 0%,
+    black 100%
+  ) !important;
+}
+
+button {
+  cursor: pointer;
 }

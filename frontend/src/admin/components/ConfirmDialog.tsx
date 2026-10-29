@@ -1,4 +1,13 @@
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 type ConfirmDialogProps = {
   open: boolean
@@ -28,26 +37,12 @@ export function ConfirmDialog({
   onCancel,
   onConfirm,
 }: ConfirmDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const cancelButtonRef = useRef<HTMLButtonElement>(null)
   const [pending, setPending] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    if (open && !dialog.open) {
-      setErrorMessage(null)
-      dialog.showModal()
-      cancelButtonRef.current?.focus()
-    } else if (!open && dialog.open) {
-      dialog.close()
-    }
-  }, [open])
-
   const handleCancel = () => {
     if (pending) return
+    setErrorMessage(null)
     onCancel()
   }
 
@@ -64,57 +59,55 @@ export function ConfirmDialog({
   }
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="admin-confirm-dialog"
-      aria-labelledby="admin-confirm-dialog-title"
-      aria-describedby="admin-confirm-dialog-description"
-      onCancel={(event) => {
-        event.preventDefault()
-        handleCancel()
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          event.preventDefault()
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen && !pending) {
           handleCancel()
         }
       }}
-      onClose={onCancel}
     >
-      <div className="admin-confirm-dialog-header">
-        <h2 id="admin-confirm-dialog-title">Delete product?</h2>
-      </div>
-      <div className="admin-confirm-dialog-body">
-        <p id="admin-confirm-dialog-description">
-          Delete <strong>{productName}</strong>? This action is permanent and
-          cannot be undone.
-        </p>
+      <DialogContent className="max-w-md rounded" showCloseButton={false}>
+        <DialogHeader>
+          <DialogTitle>Delete product?</DialogTitle>
+          <DialogDescription>
+            Delete{" "}
+            <strong className="font-semibold text-foreground">
+              {productName}
+            </strong>
+            ? This action is permanent and cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
         {errorMessage ? (
-          <p className="admin-confirm-dialog-error" role="alert">
+          <p
+            className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-destructive"
+            role="alert"
+          >
             {errorMessage}
           </p>
         ) : null}
-      </div>
-      <div className="admin-confirm-dialog-footer">
-        <button
-          ref={cancelButtonRef}
-          type="button"
-          className="admin-template-button admin-template-button--secondary"
-          disabled={pending}
-          onClick={handleCancel}
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          className="admin-template-button admin-template-button--danger"
-          disabled={pending}
-          onClick={() => void handleConfirm()}
-        >
-          {pending ? "Deleting..." : "Delete"}
-        </button>
-      </div>
-    </dialog>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending}
+            onClick={handleCancel}
+            className="rounded"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={pending}
+            onClick={() => void handleConfirm()}
+            className="rounded"
+          >
+            {pending ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
