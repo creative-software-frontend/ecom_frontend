@@ -6,11 +6,14 @@ import JingsengPlus from "./pages/Products/jingseng-plus/Jingseng-plus"
 import LingLong from "./pages/Products/ling-long/Ling-long"
 import NotFound from "./pages/NotFound"
 
+const AdminRoot = lazy(() => import("./admin/auth/AdminRoot"))
+const RequireAdmin = lazy(() => import("./admin/auth/RequireAdmin"))
 const AdminLayout = lazy(() => import("./admin/layout/AdminLayout"))
 const DashboardPage = lazy(() => import("./admin/pages/DashboardPage"))
 const ProductsPage = lazy(() => import("./admin/pages/ProductsPage"))
 const ProductCreatePage = lazy(() => import("./admin/pages/ProductCreatePage"))
 const ProductEditPage = lazy(() => import("./admin/pages/ProductEditPage"))
+const LoginPage = lazy(() => import("./admin/pages/LoginPage"))
 
 export function App() {
   return (
@@ -23,43 +26,30 @@ export function App() {
         <Route
           path="/admin"
           element={
-            <Suspense fallback={null}>
-              <AdminLayout />
+            <Suspense
+              fallback={
+                <div
+                  className="admin-root flex min-h-screen items-center justify-center bg-[#f1f4f6] text-sm text-gray-600"
+                  role="status"
+                  aria-live="polite"
+                >
+                  Loading admin…
+                </div>
+              }
+            >
+              <AdminRoot />
             </Suspense>
           }
         >
-          <Route
-            index
-            element={
-              <Suspense fallback={null}>
-                <DashboardPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="products"
-            element={
-              <Suspense fallback={null}>
-                <ProductsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="products/new"
-            element={
-              <Suspense fallback={null}>
-                <ProductCreatePage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="products/:id/edit"
-            element={
-              <Suspense fallback={null}>
-                <ProductEditPage />
-              </Suspense>
-            }
-          />
+          <Route path="login" element={<LoginPage />} />
+          <Route element={<RequireAdmin />}>
+            <Route element={<AdminLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="products" element={<ProductsPage />} />
+              <Route path="products/new" element={<ProductCreatePage />} />
+              <Route path="products/:id/edit" element={<ProductEditPage />} />
+            </Route>
+          </Route>
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

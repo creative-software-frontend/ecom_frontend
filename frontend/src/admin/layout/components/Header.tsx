@@ -1,9 +1,24 @@
 import { useState } from "react"
 import { Bell, Menu, X } from "lucide-react"
+import { useNavigate } from "react-router"
+import { useAuth } from "../../auth/AuthProvider"
 import { Sidebar } from "./Sidebar"
 
 export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const [userOpen, setUserOpen] = useState(false)
+  const { state, logout } = useAuth()
+  const navigate = useNavigate()
+
+  async function handleLogout() {
+    setUserOpen(false)
+    try {
+      await logout()
+    } catch (error: unknown) {
+      console.error("Admin logout failed", error)
+    } finally {
+      navigate("/admin/login", { replace: true })
+    }
+  }
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm">
@@ -38,16 +53,20 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
             onKeyDown={(e) => {
               if (e.key === "Escape") setUserOpen(false)
             }}
+            aria-expanded={userOpen}
+            aria-haspopup="menu"
           >
             <div className="h-8 w-8 rounded-full bg-gray-200" />
             <div className="hidden text-left sm:block">
-              <div className="text-sm font-medium">Admin User</div>
-              <div className="text-xs text-gray-500">Administrator</div>
+              <div className="text-sm font-medium">
+                {state.status === "authenticated" ? state.user.email : ""}
+              </div>
             </div>
           </button>
           {userOpen ? (
             <div
               className="absolute right-0 mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg"
+              role="menu"
               onMouseLeave={() => setUserOpen(false)}
             >
               <button
@@ -67,7 +86,8 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
               <button
                 type="button"
                 className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
-                onClick={() => setUserOpen(false)}
+                role="menuitem"
+                onClick={() => void handleLogout()}
               >
                 Logout
               </button>
