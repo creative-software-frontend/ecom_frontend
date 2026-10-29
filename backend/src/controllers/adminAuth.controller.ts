@@ -58,7 +58,12 @@ export async function login(req: Request, res: Response) {
 
     return res.status(200).json({
       success: true,
-      data: { id: admin.id, email: admin.email },
+      data: {
+        id: admin.id,
+        email: admin.email,
+        createdAt: admin.createdAt,
+        updatedAt: admin.updatedAt,
+      },
     });
   } catch (error) {
     console.error("Error during admin login:", error);
@@ -82,6 +87,70 @@ export function me(req: Request, res: Response) {
 
   return res.json({
     success: true,
-    data: { id: admin.id, email: admin.email },
+    data: {
+      id: admin.id,
+      email: admin.email,
+      createdAt: admin.createdAt,
+      updatedAt: admin.updatedAt,
+    },
   });
+}
+
+const updateProfileSchema = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email("Enter a valid email address")),
+});
+
+export async function updateProfile(req: Request, res: Response) {
+  const admin = req.admin;
+
+  if (!admin) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  const parsed = updateProfileSchema.safeParse(req.body);
+  if (!parsed.success) {
+    const errorMsg =
+      parsed.error.issues[0]?.message || "Invalid email address";
+    return res.status(400).json({
+      success: false,
+      message: errorMsg,
+      errors: { email: errorMsg },
+    });
+  }
+
+  const { email } = parsed.data;
+
+  try {
+    if (email !== admin.email) {
+      const existing = await prisma.admin.findUnique({ where: { email } });
+      if (existing && existing.id !== admin.id) {
+        return res.status(400).json({
+          success: false,
+          message: "This email is already in use by another admin",
+          errors: { email: "This email is already in use by another admin" },
+        });
+      }
+    }
+
+    const updated = await prisma.admin.update({
+      where: { id: admin.id },
+      data: { email },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: {
+        id: updated.id,
+        email: updated.email,
+        createdAt: updated.createdAt,
+        updatedAt: updated.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating admin profile:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
 }
