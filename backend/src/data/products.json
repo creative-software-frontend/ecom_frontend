@@ -93,6 +93,7 @@
         }
       ],
       "in_stock": true,
+      "isActive": true,
       "stock_note": "স্টক দ্রুত ফুরিয়ে যাচ্ছে!",
       "order_form": {
         "enabled": true,
@@ -204,6 +205,7 @@
         "urgency": "⏳ স্টক দ্রুত ফুরিয়ে যাচ্ছে!"
       },
       "in_stock": true,
+      "isActive": true,
       "order_form": { "enabled": false },
       "cta": {
         "order_label": "এখনই অর্ডার করুন",
@@ -267,6 +269,7 @@
         ]
       },
       "in_stock": true,
+      "isActive": true,
       "order_form": { "enabled": false },
       "cta": {
         "order_label": "অর্ডার করুন",

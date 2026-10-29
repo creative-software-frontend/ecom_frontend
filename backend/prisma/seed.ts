@@ -43,6 +43,7 @@ async function main() {
         regularPrice: p.price?.regular || p.regularPrice || 0,
         discountPercent: p.price?.discount_percent || p.discountPercent || 0,
         inStock: p.in_stock ?? true,
+        isActive: p.isActive ?? p.is_active ?? true,
         stockQuantity: p.stock_quantity || 100,
         images: p.images || [],
         orderFormConfig: p.order_form || null,

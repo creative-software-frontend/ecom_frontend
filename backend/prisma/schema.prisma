@@ -16,10 +16,11 @@ model Product {
   name            String
   brandName       String      @map("brand_name")
   category        String      @default("Herbal Supplement")
-  currentPrice    Float       @map("current_price")
-  regularPrice    Float       @map("regular_price")
+  currentPrice    Int         @map("current_price")
+  regularPrice    Int         @map("regular_price")
   discountPercent Int         @default(0) @map("discount_percent")
   inStock         Boolean     @default(true) @map("in_stock")
+  isActive        Boolean     @default(true) @map("is_active")
   stockQuantity   Int         @default(0) @map("stock_quantity")
   images          Json
   orderFormConfig Json?       @map("order_form_config")
@@ -39,9 +40,9 @@ model Order {
   customerAddress String      @map("customer_address")
   notes           String?
   deliveryArea    String      @map("delivery_area")
-  deliveryCharge  Float       @map("delivery_charge")
-  subtotal        Float
-  total           Float
+  deliveryCharge  Int         @map("delivery_charge")
+  subtotal        Int
+  total           Int
   paymentMethod   String      @default("cod") @map("payment_method")
   paymentStatus   String      @default("unpaid") @map("payment_status")
   status          String      @default("pending")
@@ -56,8 +57,8 @@ model OrderItem {
   orderId   String  @map("order_id")
   productId String  @map("product_id")
   quantity  Int
-  unitPrice Float   @map("unit_price")
-  lineTotal Float   @map("line_total")
+  unitPrice Int     @map("unit_price")
+  lineTotal Int     @map("line_total")
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id])
 
@@ -76,4 +77,14 @@ model Review {
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
 }

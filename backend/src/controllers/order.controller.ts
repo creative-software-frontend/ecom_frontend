@@ -1,6 +1,22 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
 
+interface OrderItemInput {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+interface CreateOrderBody {
+  customerName?: string;
+  customerPhone?: string;
+  customerAddress?: string;
+  notes?: string;
+  deliveryArea?: string;
+  deliveryCharge?: number;
+  items?: OrderItemInput[];
+}
+
 export async function createOrder(req: Request, res: Response) {
   try {
     const {
@@ -11,7 +27,7 @@ export async function createOrder(req: Request, res: Response) {
       deliveryArea,
       deliveryCharge,
       items,
-    } = req.body;
+    } = req.body as CreateOrderBody;
 
     if (
       !customerName ||
@@ -25,9 +41,24 @@ export async function createOrder(req: Request, res: Response) {
         .json({ success: false, message: "Required fields are missing" });
     }
 
+    const hasFractionalValues =
+      !Number.isInteger(deliveryCharge || 0) ||
+      items.some(
+        (item) =>
+          !Number.isInteger(item.unitPrice) ||
+          !Number.isInteger(item.quantity),
+      );
+
+    if (hasFractionalValues) {
+      return res.status(400).json({
+        success: false,
+        message: "Prices and quantities must be whole numbers",
+      });
+    }
+
     // সাবটোটাল এবং মোট হিসাব করা
     let subtotal = 0;
-    const orderItemsData = items.map((item: any) => {
+    const orderItemsData = items.map((item) => {
       const lineTotal = item.unitPrice * item.quantity;
       subtotal += lineTotal;
       return {

@@ -1,10 +1,13 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 
+import { CORS_ORIGINS } from "./config/env.js";
 import productRoutes from "./routes/product.routes.js";
 import storeRoutes from "./routes/store.routes.js";
 import orderRoutes from "./routes/order.routes.js";
+import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import path from "node:path";
 
 dotenv.config();
@@ -13,13 +16,15 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: CORS_ORIGINS, credentials: true }));
+app.use(cookieParser());
 app.use(express.json());
 
 // API Routes
 app.use("/api/products", productRoutes);
 app.use("/api/store", storeRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/admin/auth", adminAuthRoutes);
 
 // // Health check route
 // app.get("/", (req, res) => {

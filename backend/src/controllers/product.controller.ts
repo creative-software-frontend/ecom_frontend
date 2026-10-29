@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.js";
 export async function getProducts(_req: Request, res: Response) {
   try {
     const products = await prisma.product.findMany({
+      where: { isActive: true },
       orderBy: { createdAt: "desc" },
     });
     return res.json({ success: true, data: products });
@@ -29,7 +30,7 @@ export async function getProductBySlug(req: Request, res: Response) {
       include: { reviews: true },
     });
 
-    if (!product) {
+    if (!product || !product.isActive) {
       return res
         .status(404)
         .json({ success: false, message: "Product not found" });
