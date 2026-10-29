@@ -33,6 +33,11 @@ export const adminMenu: MenuItem[] = [
       },
     ],
   },
+  {
+    label: "Settings",
+    type: "link",
+    href: "/admin/settings",
+  },
   { label: "UI Components", type: "disabled", disabled: true },
   { label: "Tables", type: "disabled", disabled: true },
   { label: "Widgets", type: "disabled", disabled: true },

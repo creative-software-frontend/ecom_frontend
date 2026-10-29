@@ -12,6 +12,8 @@ import { apiRequest, ApiError, registerOnUnauthorized } from "../api/client"
 export type AdminUser = {
   id: string
   email: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type AuthState =
@@ -23,6 +25,7 @@ type AuthContextValue = {
   state: AuthState
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
+  updateUser: (user: AdminUser) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -71,7 +74,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await apiRequest<void>("/admin/auth/logout", { method: "POST" })
   }, [])
 
-  const value = useMemo(() => ({ state, login, logout }), [state, login, logout])
+  const updateUser = useCallback((user: AdminUser) => {
+    setState({ status: "authenticated", user })
+  }, [])
+
+  const value = useMemo(
+    () => ({ state, login, logout, updateUser }),
+    [state, login, logout, updateUser]
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
