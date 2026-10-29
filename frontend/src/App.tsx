@@ -33,6 +33,7 @@ export function App() {
                   role="status"
                   aria-live="polite"
                 >
+                  {/* TODO */}
                   Loading admin…
                 </div>
               }

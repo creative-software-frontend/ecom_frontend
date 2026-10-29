@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react"
+import { ApiError } from "../../api/client"
 import {
   productSchema,
   type ProductFormInitialValues,
@@ -14,6 +15,7 @@ const defaultValues: Partial<ProductFormValues> = {
   category: "",
   slug: "",
   stockQuantity: 0,
+  isActive: true,
   images: [],
 }
 
@@ -77,6 +79,8 @@ export function ProductForm({
     control,
     register,
     setValue,
+    setError,
+    clearErrors,
     trigger,
     handleSubmit,
     formState: { errors, isDirty, isSubmitting },
@@ -91,6 +95,7 @@ export function ProductForm({
     name: "images",
   })
   const [newImage, setNewImage] = useState("")
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const name = useWatch({ control, name: "name" }) ?? ""
   const regularPrice = useWatch({ control, name: "regularPrice" }) ?? 0
   const currentPrice = useWatch({ control, name: "currentPrice" }) ?? 0
@@ -112,6 +117,65 @@ export function ProductForm({
         : "Generated from Latin letters in the name; Bengali-only names need a manual slug."
   const slugRegistration = register("slug")
   const imageError = errors.images?.message
+  const isActiveRegistration = register("isActive")
+
+  const submitForm = async (values: ProductFormValues) => {
+    setSubmitError(null)
+    clearErrors()
+
+    try {
+      await onSubmit(values)
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        if (error.status === 409) {
+          setError("slug", {
+            type: "server",
+            message: error.fieldErrors?.slug ?? error.message,
+          })
+          return
+        }
+
+        const setters: Record<string, (message: string) => void> = {
+          name: (message) => setError("name", { type: "server", message }),
+          brandName: (message) =>
+            setError("brandName", { type: "server", message }),
+          category: (message) =>
+            setError("category", { type: "server", message }),
+          slug: (message) => setError("slug", { type: "server", message }),
+          regularPrice: (message) =>
+            setError("regularPrice", { type: "server", message }),
+          currentPrice: (message) =>
+            setError("currentPrice", { type: "server", message }),
+          stockQuantity: (message) =>
+            setError("stockQuantity", { type: "server", message }),
+          images: (message) => setError("images", { type: "server", message }),
+          isActive: (message) =>
+            setError("isActive", { type: "server", message }),
+        }
+        let mappedFieldError = false
+        let unmappedFieldError = false
+        for (const [field, message] of Object.entries(error.fieldErrors ?? {})) {
+          const setter = setters[field]
+          if (setter) {
+            setter(message)
+            mappedFieldError = true
+          } else {
+            unmappedFieldError = true
+          }
+        }
+        if (mappedFieldError && !unmappedFieldError) return
+
+        setSubmitError(error.message)
+        return
+      }
+
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Could not save this product. Please try again."
+      )
+    }
+  }
 
   useEffect(() => {
     if (mode === "create" && !slugEdited.current) {
@@ -158,7 +222,7 @@ export function ProductForm({
                 <dd>
                   {new Intl.DateTimeFormat("en-BD", {
                     dateStyle: "medium",
-                  }).format(initialValues.createdAt)}
+                  }).format(new Date(initialValues.createdAt))}
                 </dd>
               </div>
             ) : null}
@@ -168,7 +232,7 @@ export function ProductForm({
                 <dd>
                   {new Intl.DateTimeFormat("en-BD", {
                     dateStyle: "medium",
-                  }).format(initialValues.updatedAt)}
+                  }).format(new Date(initialValues.updatedAt))}
                 </dd>
               </div>
             ) : null}
@@ -176,7 +240,20 @@ export function ProductForm({
         ) : null}
       </header>
 
-      <form className="space-y-6" noValidate onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="space-y-6"
+        noValidate
+        onSubmit={handleSubmit(submitForm)}
+      >
+        {submitError ? (
+          <p
+            className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            role="alert"
+          >
+            {submitError}
+          </p>
+        ) : null}
+
         <section
           className="admin-dashboard-card overflow-hidden bg-white"
           aria-labelledby="product-basic-info"
@@ -399,6 +476,29 @@ export function ProductForm({
               >
                 {inStock ? "In stock" : "Out of stock"}
               </span>
+            </div>
+            <div className="admin-form-field md:col-span-2">
+              <label
+                className="flex items-center gap-3 text-sm text-gray-700"
+                htmlFor="product-is-active"
+              >
+                <input
+                  {...isActiveRegistration}
+                  id="product-is-active"
+                  type="checkbox"
+                  role="switch"
+                  className="h-4 w-4 accent-[#3f6ad8]"
+                  aria-invalid={Boolean(errors.isActive)}
+                  aria-describedby={
+                    errors.isActive ? "product-active-error" : undefined
+                  }
+                />
+                Active (visible on the public site)
+              </label>
+              <FieldError
+                id="product-active-error"
+                message={errors.isActive?.message}
+              />
             </div>
           </div>
         </section>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router"
 import { ProductForm } from "../components/products/ProductForm"
-import { getProduct, updateProduct } from "../data/mockProductsApi"
+import { ApiError } from "../api/client"
+import { productsApi } from "../api/productsApi"
 import type { Product } from "../types/product"
 import type {
   ProductFormInitialValues,
@@ -9,21 +10,15 @@ import type {
 } from "../schemas/productSchema"
 
 function isNotFoundError(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "status" in error &&
-    error.status === 404
-  )
+  return error instanceof ApiError && error.status === 404
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return "Could not load this product. Please try again."
 }
 
 function toFormValues(product: Product): ProductFormInitialValues {
-  const images = Array.isArray(product.images)
-    ? product.images.filter(
-        (image): image is string => typeof image === "string"
-      )
-    : []
-
   return {
     id: product.id,
     createdAt: product.createdAt,
@@ -35,7 +30,8 @@ function toFormValues(product: Product): ProductFormInitialValues {
     regularPrice: product.regularPrice,
     currentPrice: product.currentPrice,
     stockQuantity: product.stockQuantity,
-    images: images.map((src) => ({ src })),
+    isActive: product.isActive,
+    images: product.images.map((src) => ({ src })),
   }
 }
 
@@ -86,9 +82,10 @@ export function ProductEditPage() {
   const requestKey = `${id}:${attempt}`
 
   useEffect(() => {
+    const controller = new AbortController()
     let active = true
 
-    getProduct(id).then(
+    productsApi.get(id, controller.signal).then(
       (loadedProduct) => {
         if (active) setLoadState({ requestKey, product: loadedProduct })
       },
@@ -99,6 +96,7 @@ export function ProductEditPage() {
 
     return () => {
       active = false
+      controller.abort()
     }
   }, [id, requestKey])
 
@@ -134,7 +132,9 @@ export function ProductEditPage() {
           <h1 className="text-xl font-normal text-gray-800">
             Could not load product
           </h1>
-          <p className="pt-[3px] text-base text-gray-500">Please try again.</p>
+          <p className="pt-[3px] text-base text-gray-500">
+            {getErrorMessage(loadState.error)}
+          </p>
         </header>
         <button
           type="button"
@@ -150,21 +150,16 @@ export function ProductEditPage() {
   const product = loadState.product
 
   const submitProduct = async (values: ProductFormValues) => {
-    const regularPrice = values.regularPrice
-    const currentPrice = values.currentPrice
-    await updateProduct(product.id, {
+    await productsApi.update(product.id, {
       name: values.name,
       brandName: values.brandName,
       category: values.category,
       slug: values.slug,
-      regularPrice,
-      currentPrice,
-      discountPercent: Math.round(
-        ((regularPrice - currentPrice) / regularPrice) * 100
-      ),
+      regularPrice: values.regularPrice,
+      currentPrice: values.currentPrice,
       stockQuantity: values.stockQuantity,
-      inStock: values.stockQuantity > 0,
       images: values.images.map((image) => image.src),
+      isActive: values.isActive,
     })
     navigate("/admin/products", {
       state: { productStatus: `${values.name} was updated` },

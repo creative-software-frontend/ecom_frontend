@@ -17,12 +17,12 @@ export const adminMenu: MenuItem[] = [
     type: "group",
     items: [
       {
-        label: "View All Products",
+        label: "View Products",
         type: "link",
         href: "/admin/products",
       },
       {
-        label: "Add New Product",
+        label: "Add Product",
         type: "link",
         href: "/admin/products/new",
       },

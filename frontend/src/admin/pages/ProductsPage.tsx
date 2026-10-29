@@ -1,13 +1,12 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Link, useLocation } from "react-router"
 import { Pencil, Trash2 } from "lucide-react"
 import DataTable, { Column } from "datatables.net-react"
 import DataTablesCore from "datatables.net-dt"
 import "datatables.net-dt/css"
-import { products as initialProducts } from "../data/products"
-import { deleteProduct } from "../data/mockProductsApi"
+import { productsApi } from "../api/productsApi"
 import { ConfirmDialog } from "../components/ConfirmDialog"
-import type { Product } from "../types/product"
+import type { Product, ProductWriteInput } from "../types/product"
 
 const setDataTablesCore = DataTable.use
 setDataTablesCore(DataTablesCore)
@@ -30,10 +29,30 @@ function formatPrice(price: number): string {
   return `৳ ${new Intl.NumberFormat("en-BD").format(price)}`
 }
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return "Could not load products. Please try again."
+}
+
+function getEditableProductValues(
+  product: Product,
+  isActive = product.isActive
+): ProductWriteInput {
+  return {
+    name: product.name,
+    brandName: product.brandName,
+    category: product.category,
+    slug: product.slug,
+    regularPrice: product.regularPrice,
+    currentPrice: product.currentPrice,
+    stockQuantity: product.stockQuantity,
+    images: product.images,
+    isActive,
+  }
+}
+
 function getProductImage(product: Product): string | undefined {
-  const firstImage = Array.isArray(product.images)
-    ? product.images[0]
-    : undefined
+  const firstImage = product.images[0]
   return typeof firstImage === "string" ? firstImage : undefined
 }
 
@@ -52,7 +71,7 @@ function getStockStatus(product: Product): {
 
 const tableOptions = {
   autoWidth: false,
-  columnDefs: [{ targets: [0, 6], orderable: false, searchable: false }],
+  columnDefs: [{ targets: [0, 7], orderable: false, searchable: false }],
   info: true,
   language: {
     emptyTable: "No products found",
@@ -135,13 +154,26 @@ const ProductTable = memo(function ProductTable({
           )
         }}
       </Column>
+      <Column title="Status" data="isActive">
+        {(_data: unknown, type: string, product: Product) =>
+          type === "display" ? (
+            <span
+              className={`admin-product-stock ${product.isActive ? "admin-product-stock--in" : "admin-product-stock--out"}`}
+            >
+              {product.isActive ? "Active" : "Inactive"}
+            </span>
+          ) : (
+            Number(product.isActive)
+          )
+        }
+      </Column>
       <Column title="Created date" data="createdAt">
         {(_data: unknown, type: string, product: Product) =>
           type === "display"
             ? new Intl.DateTimeFormat("en-BD", { dateStyle: "medium" }).format(
-                product.createdAt
+                new Date(product.createdAt)
               )
-            : product.createdAt.getTime()
+            : new Date(product.createdAt).getTime()
         }
       </Column>
       <Column
@@ -176,21 +208,48 @@ const ProductTable = memo(function ProductTable({
 export function ProductsPage() {
   const location = useLocation()
   const [search, setSearch] = useState("")
-  const [products, setProducts] = useState(initialProducts)
+  const [loadAttempt, setLoadAttempt] = useState(0)
+  const [loadState, setLoadState] = useState<
+    | { status: "loading" }
+    | { status: "error"; error: unknown }
+    | { status: "loaded"; products: Product[] }
+  >({ status: "loading" })
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
   const [deleteStatus, setDeleteStatus] = useState<string | null>(() =>
     getNavigationStatus(location.state)
   )
   const deleteTriggerRef = useRef<HTMLButtonElement | null>(null)
   const deleteStatusRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const controller = new AbortController()
+    let active = true
+
+    productsApi.list(controller.signal).then(
+      (loadedProducts) => {
+        if (active) setLoadState({ status: "loaded", products: loadedProducts })
+      },
+      (error: unknown) => {
+        if (active) setLoadState({ status: "error", error })
+      }
+    )
+
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [loadAttempt])
+
   const filteredProducts = useMemo(
-    () =>
-      products.filter((product) =>
+    () => {
+      const products =
+        loadState.status === "loaded" ? loadState.products : []
+      return products.filter((product) =>
         product.name
           .toLocaleLowerCase()
           .includes(search.trim().toLocaleLowerCase())
-      ),
-    [products, search]
+      )
+    },
+    [loadState, search]
   )
 
   const openDeleteDialog = useCallback(
@@ -206,11 +265,40 @@ export function ProductsPage() {
     if (!productToDelete) return
 
     const product = productToDelete
-    await deleteProduct(product.id)
-    setProducts((currentProducts) =>
-      currentProducts.filter((item) => item.id !== product.id)
+    await productsApi.remove(product.id)
+    setLoadState((currentState) =>
+      currentState.status === "loaded"
+        ? {
+            ...currentState,
+            products: currentState.products.filter(
+              (item) => item.id !== product.id
+            ),
+          }
+        : currentState
     )
     setDeleteStatus(`${product.name} was deleted`)
+    setProductToDelete(null)
+  }
+
+  const handleDeactivate = async () => {
+    if (!productToDelete) return
+
+    const product = productToDelete
+    const updatedProduct = await productsApi.update(
+      product.id,
+      getEditableProductValues(product, false)
+    )
+    setLoadState((currentState) =>
+      currentState.status === "loaded"
+        ? {
+            ...currentState,
+            products: currentState.products.map((item) =>
+              item.id === updatedProduct.id ? updatedProduct : item
+            ),
+          }
+        : currentState
+    )
+    setDeleteStatus(`${product.name} was deactivated`)
     setProductToDelete(null)
   }
 
@@ -250,37 +338,82 @@ export function ProductsPage() {
         </div>
       ) : null}
 
-      <section
-        className="admin-dashboard-card min-w-0 overflow-hidden bg-white"
-        aria-labelledby="products-table-title"
-      >
-        <div className="flex flex-col gap-3 border-b border-gray-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <h2
-            id="products-table-title"
-            className="text-sm font-bold text-gray-700"
-          >
-            All products
-          </h2>
-          <label className="flex w-full max-w-sm items-center gap-2 text-sm text-gray-600">
-            <span className="shrink-0">Search by name</span>
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.currentTarget.value)}
-              placeholder="Search products..."
-              className="admin-products-search min-w-0 flex-1 rounded border px-3 py-2 text-sm"
-            />
-          </label>
+      {loadState.status === "loading" ? (
+        <div
+          className="admin-dashboard-card bg-white p-6 text-sm text-gray-600"
+          role="status"
+        >
+          Loading products...
         </div>
+      ) : null}
 
-        <div className="admin-products-table-wrap">
-          <ProductTable
-            products={filteredProducts}
-            onDelete={openDeleteDialog}
-          />
+      {loadState.status === "error" ? (
+        <div
+          className="admin-dashboard-card space-y-4 bg-white p-6"
+          role="alert"
+        >
+          <p className="text-sm text-red-700">
+            {getErrorMessage(loadState.error)}
+          </p>
+          <button
+            type="button"
+            className="admin-template-button admin-template-button--primary"
+            onClick={() => {
+              setLoadState({ status: "loading" })
+              setLoadAttempt((attempt) => attempt + 1)
+            }}
+          >
+            Retry
+          </button>
         </div>
-      </section>
+      ) : null}
+
+      {loadState.status === "loaded" && loadState.products.length === 0 ? (
+        <div className="admin-dashboard-card bg-white p-6">
+          <p className="mb-4 text-sm text-gray-600">No products yet</p>
+          <Link
+            to="/admin/products/new"
+            className="admin-template-button admin-template-button--primary"
+          >
+            Add product
+          </Link>
+        </div>
+      ) : null}
+
+      {loadState.status === "loaded" && loadState.products.length > 0 ? (
+        <section
+          className="admin-dashboard-card min-w-0 overflow-hidden bg-white"
+          aria-labelledby="products-table-title"
+        >
+          <div className="flex flex-col gap-3 border-b border-gray-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <h2
+              id="products-table-title"
+              className="text-sm font-bold text-gray-700"
+            >
+              All products
+            </h2>
+            <label className="flex w-full max-w-sm items-center gap-2 text-sm text-gray-600">
+              <span className="shrink-0">Search by name</span>
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.currentTarget.value)}
+                placeholder="Search products..."
+                className="admin-products-search min-w-0 flex-1 rounded border px-3 py-2 text-sm"
+              />
+            </label>
+          </div>
+
+          <div className="admin-products-table-wrap">
+            <ProductTable
+              products={filteredProducts}
+              onDelete={openDeleteDialog}
+            />
+          </div>
+        </section>
+      ) : null}
       <ConfirmDialog
+        key={productToDelete?.id ?? "closed"}
         open={productToDelete !== null}
         productName={productToDelete?.name ?? ""}
         onCancel={() => {
@@ -294,6 +427,7 @@ export function ProductsPage() {
           })
         }}
         onConfirm={handleDelete}
+        onDeactivate={handleDeactivate}
       />
     </div>
   )

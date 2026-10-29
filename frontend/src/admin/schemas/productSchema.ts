@@ -26,6 +26,7 @@ export const productSchema = z
       .number({ error: "Enter a stock quantity." })
       .int("Enter a whole number.")
       .min(0, "Stock quantity cannot be negative."),
+    isActive: z.boolean(),
     images: z
       .array(
         z.object({
@@ -47,4 +48,7 @@ export const productSchema = z
 export type ProductFormValues = z.infer<typeof productSchema>
 
 export type ProductFormInitialValues = ProductFormValues &
-  Partial<Pick<Product, "id" | "createdAt" | "updatedAt">>
+  Partial<Pick<Product, "id">> & {
+    createdAt?: string
+    updatedAt?: string
+  }

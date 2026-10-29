@@ -1,6 +1,3 @@
-export type JsonValue =
-  string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue }
-
 export type Product = {
   id: string
   slug: string
@@ -12,23 +9,20 @@ export type Product = {
   discountPercent: number
   inStock: boolean
   stockQuantity: number
-  images: JsonValue
-  orderFormConfig: JsonValue | null
-  createdAt: Date
-  updatedAt: Date
+  images: string[]
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
-export type ProductCreateInput = Pick<
-  Product,
-  | "slug"
-  | "name"
-  | "brandName"
-  | "category"
-  | "currentPrice"
-  | "regularPrice"
-  | "discountPercent"
-  | "inStock"
-  | "stockQuantity"
-> & {
+export type ProductWriteInput = {
+  name: string
+  brandName: string
+  category: string
+  slug: string
+  regularPrice: number
+  currentPrice: number
+  stockQuantity: number
   images: string[]
+  isActive: boolean
 }

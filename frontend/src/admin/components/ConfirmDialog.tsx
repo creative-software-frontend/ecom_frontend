@@ -14,21 +14,26 @@ type ConfirmDialogProps = {
   productName: string
   onCancel: () => void
   onConfirm: () => Promise<void>
+  onDeactivate: () => Promise<void>
 }
 
 function getErrorMessage(error: unknown): string {
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "status" in error &&
-    error.status === 409
-  ) {
-    return "This product has orders and cannot be deleted."
-  }
   if (error instanceof Error) {
     return error.message
   }
   return "Could not delete this product. Please try again."
+}
+
+function getErrorStatus(error: unknown): number | undefined {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof error.status === "number"
+  ) {
+    return error.status
+  }
+  return undefined
 }
 
 export function ConfirmDialog({
@@ -36,23 +41,42 @@ export function ConfirmDialog({
   productName,
   onCancel,
   onConfirm,
+  onDeactivate,
 }: ConfirmDialogProps) {
   const [pending, setPending] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [canDeactivate, setCanDeactivate] = useState(false)
 
   const handleCancel = () => {
     if (pending) return
     setErrorMessage(null)
+    setCanDeactivate(false)
     onCancel()
   }
 
   const handleConfirm = async () => {
     setPending(true)
     setErrorMessage(null)
+    setCanDeactivate(false)
     try {
       await onConfirm()
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error))
+      setCanDeactivate(getErrorStatus(error) === 409)
+    } finally {
+      setPending(false)
+    }
+  }
+
+  const handleDeactivate = async () => {
+    setPending(true)
+    setErrorMessage(null)
+    setCanDeactivate(false)
+    try {
+      await onDeactivate()
+    } catch (error: unknown) {
+      setErrorMessage(getErrorMessage(error))
+      setCanDeactivate(getErrorStatus(error) === 409)
     } finally {
       setPending(false)
     }
@@ -87,6 +111,17 @@ export function ConfirmDialog({
           </p>
         ) : null}
         <DialogFooter>
+          {canDeactivate ? (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={() => void handleDeactivate()}
+              className="rounded"
+            >
+              Deactivate instead
+            </Button>
+          ) : null}
           <Button
             type="button"
             variant="outline"
