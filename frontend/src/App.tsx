@@ -15,6 +15,7 @@ const ProductCreatePage = lazy(() => import("./admin/pages/ProductCreatePage"))
 const ProductEditPage = lazy(() => import("./admin/pages/ProductEditPage"))
 const LoginPage = lazy(() => import("./admin/pages/LoginPage"))
 const ProfilePage = lazy(() => import("./admin/pages/ProfilePage"))
+const SettingsPage = lazy(() => import("./admin/pages/SettingsPage"))
 
 export function App() {
   return (
@@ -48,6 +49,7 @@ export function App() {
             <Route element={<AdminLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="products/new" element={<ProductCreatePage />} />
               <Route path="products/:id/edit" element={<ProductEditPage />} />

@@ -83,7 +83,11 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
               <button
                 type="button"
                 className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
-                onClick={() => setUserOpen(false)}
+                role="menuitem"
+                onClick={() => {
+                  setUserOpen(false)
+                  navigate("/admin/settings")
+                }}
               >
                 Settings
               </button>
