@@ -45,7 +45,19 @@ export const productInputSchema = z
       .min(0, "Stock quantity cannot be negative.")
       .max(MAX_STOCK_QUANTITY, "Stock quantity is too large."),
     images: z
-      .array(z.string().trim().min(1, "Enter an image URL or path."))
+      .array(
+        z
+          .string()
+          .trim()
+          .min(1, "Enter an image URL or path.")
+          .max(500, "Image URL or path must be 500 characters or fewer.")
+          .refine(
+            (value) =>
+              (value.startsWith("/") && !value.startsWith("//")) ||
+              value.startsWith("https://"),
+            "Image URL or path must start with / or https://.",
+          ),
+      )
       .min(1, "Add at least one product image.")
       .max(10, "You can add up to 10 product images."),
     isActive: z.boolean({ error: "Enter a valid active status." }).optional(),
@@ -68,7 +80,8 @@ export function formatProductValidationErrors(
   const errors: Record<string, string> = {};
 
   for (const issue of error.issues) {
-    const field = issue.path.length > 0 ? issue.path.join(".") : "form";
+    const field =
+      typeof issue.path[0] === "string" ? issue.path[0] : "form";
 
     if (!(field in errors)) {
       errors[field] = issue.message;
