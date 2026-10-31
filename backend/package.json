@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "node init && tsc",
-    "start": "node init && node dist/src/server.js",
-    "dev": "node init && tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/src/server.js",
+    "dev": "tsx watch src/server.ts",
     "seed": "tsx prisma/seed.ts",
     "create-admin": "tsx scripts/createAdmin.ts",
     "postinstall": "prisma skills sync || exit 0"
