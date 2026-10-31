@@ -1,5 +1,10 @@
 import { apiRequest } from "./client"
-import type { OrdersListResponse, OrderListParams } from "../types/order"
+import type {
+  OrdersListResponse,
+  OrderListParams,
+  OrderDetail,
+  UpdateStatusBody,
+} from "../types/order"
 
 export const ordersApi = {
   list(
@@ -14,5 +19,18 @@ export const ordersApi = {
     const qs = query.toString()
     const path = `/admin/orders${qs ? `?${qs}` : ""}`
     return apiRequest<OrdersListResponse>(path, { signal })
+  },
+
+  get(id: string, signal?: AbortSignal): Promise<OrderDetail> {
+    return apiRequest<OrderDetail>(`/admin/orders/${encodeURIComponent(id)}`, {
+      signal,
+    })
+  },
+
+  updateStatus(id: string, body: UpdateStatusBody): Promise<OrderDetail> {
+    return apiRequest<OrderDetail>(
+      `/admin/orders/${encodeURIComponent(id)}/status`,
+      { method: "PATCH", body },
+    )
   },
 }

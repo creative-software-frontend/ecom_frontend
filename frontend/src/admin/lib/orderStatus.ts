@@ -49,6 +49,28 @@ export const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, StatusConfig> = {
   },
 }
 
+/**
+ * Which order statuses each status can transition to.
+ * Empty array means it is a final state.
+ * The server is the authority; this only controls which buttons to render.
+ */
+export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  pending: ["confirmed", "cancelled"],
+  confirmed: ["shipped", "cancelled"],
+  shipped: ["delivered", "cancelled"],
+  delivered: [],
+  cancelled: [],
+}
+
+/** Label shown on the action button for each target status */
+export const ORDER_STATUS_ACTION_LABEL: Record<OrderStatus, string> = {
+  pending: "Mark as pending",
+  confirmed: "Mark as confirmed",
+  shipped: "Mark as shipped",
+  delivered: "Mark as delivered",
+  cancelled: "Cancel order",
+}
+
 export function getOrderStatusConfig(status: OrderStatus): StatusConfig {
   return (
     ORDER_STATUS_CONFIG[status] ?? {
