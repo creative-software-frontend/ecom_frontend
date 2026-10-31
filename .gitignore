@@ -10,8 +10,6 @@ frontend/dist/
 backend/dist/
 
 # --- Environment & Secrets ---
-.env
-.env.local
 .env.*.local
 backend/.env
 frontend/.env
@@ -33,7 +31,6 @@ lerna-debug.log*
 # --- Operating System Files ---
 .DS_Store
 Thumbs.db
-.vscode/
 .idea/
 
 
@@ -53,7 +50,6 @@ dist-ssr
 *.local
 
 # Editor directories and files
-.vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
@@ -714,3 +710,4 @@ template-reference/src/scripts-init/charts/chartjs.js
 template-reference/src/scripts-init/charts/chartsjs-utils.js
 ADMIN_DASHBOARD_PLAN.md
 session-ses_e7e9.md
+config.bat
