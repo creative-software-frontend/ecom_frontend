@@ -34,6 +34,11 @@ export const adminMenu: MenuItem[] = [
     ],
   },
   {
+    label: "Orders",
+    type: "link",
+    href: "/admin/orders",
+  },
+  {
     label: "Settings",
     type: "link",
     href: "/admin/settings",
@@ -43,4 +48,4 @@ export const adminMenu: MenuItem[] = [
   { label: "Widgets", type: "disabled", disabled: true },
   { label: "Forms", type: "disabled", disabled: true },
   { label: "Charts", type: "disabled", disabled: true },
-]
+];
