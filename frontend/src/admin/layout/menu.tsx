@@ -43,9 +43,9 @@ export const adminMenu: MenuItem[] = [
     type: "link",
     href: "/admin/settings",
   },
-  { label: "UI Components", type: "disabled", disabled: true },
-  { label: "Tables", type: "disabled", disabled: true },
-  { label: "Widgets", type: "disabled", disabled: true },
-  { label: "Forms", type: "disabled", disabled: true },
-  { label: "Charts", type: "disabled", disabled: true },
-];
+  // { label: "UI Components", type: "disabled", disabled: true },
+  // { label: "Tables", type: "disabled", disabled: true },
+  // { label: "Widgets", type: "disabled", disabled: true },
+  // { label: "Forms", type: "disabled", disabled: true },
+  // { label: "Charts", type: "disabled", disabled: true },
+]

@@ -21,6 +21,7 @@ import { ApiError } from "../api/client"
 import { profileApi } from "../api/profileApi"
 import { settingsApi } from "../api/settingsApi"
 import { useAuth } from "../auth/AuthProvider"
+import { PasswordShowHide } from "../components/PasswordShowHide"
 
 function formatDate(dateString?: string): string {
   if (!dateString) return "N/A"
@@ -45,18 +46,35 @@ export function ProfilePage() {
   const currentUser = state.status === "authenticated" ? state.user : null
   const [email, setEmail] = useState(() => currentUser?.email ?? "")
   const [isSavingEmail, setIsSavingEmail] = useState(false)
-  const [profileSuccessMessage, setProfileSuccessMessage] = useState<string | null>(null)
-  const [profileErrorMessage, setProfileErrorMessage] = useState<string | null>(null)
+  const [profileSuccessMessage, setProfileSuccessMessage] = useState<
+    string | null
+  >(null)
+  const [profileErrorMessage, setProfileErrorMessage] = useState<string | null>(
+    null
+  )
   const [copiedId, setCopiedId] = useState(false)
 
   // Password update form state
   const [currentPassword, setCurrentPassword] = useState("")
+  const [visibleCurrentPassword, setVisibleCurrentPassword] =
+    useState<boolean>(false)
   const [newPassword, setNewPassword] = useState("")
+  const [visibleNewPassword, setVisibleNewPassword] = useState<boolean>(false)
+
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [visibleConfirmPassword, setVisibleConfirmPassword] =
+    useState<boolean>(false)
+
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
-  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState<string | null>(null)
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState<string | null>(null)
-  const [passwordFieldErrors, setPasswordFieldErrors] = useState<Record<string, string>>({})
+  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState<
+    string | null
+  >(null)
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState<
+    string | null
+  >(null)
+  const [passwordFieldErrors, setPasswordFieldErrors] = useState<
+    Record<string, string>
+  >({})
 
   // Logout state
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -64,7 +82,7 @@ export function ProfilePage() {
   if (state.status !== "authenticated" || !currentUser) {
     return (
       <div
-        className="admin-dashboard-content min-w-0 p-4 md:p-[30px]"
+        className="min-w-0 p-4 admin-dashboard-content md:p-7.5"
         role="status"
       >
         Loading profile...
@@ -104,7 +122,9 @@ export function ProfilePage() {
     setIsSavingEmail(true)
 
     try {
-      const updatedUser = await profileApi.updateProfile({ email: trimmedEmail })
+      const updatedUser = await profileApi.updateProfile({
+        email: trimmedEmail,
+      })
       updateUser(updatedUser)
       setEmail(updatedUser.email)
       setProfileSuccessMessage("Profile email updated successfully.")
@@ -157,7 +177,9 @@ export function ProfilePage() {
           setPasswordFieldErrors(error.fieldErrors)
         }
       } else {
-        setPasswordErrorMessage("An unexpected error occurred while updating password.")
+        setPasswordErrorMessage(
+          "An unexpected error occurred while updating password."
+        )
       }
     } finally {
       setIsUpdatingPassword(false)
@@ -176,18 +198,19 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="admin-dashboard-content min-w-0 p-4 md:p-[30px]">
+    <div className="min-w-0 p-4 admin-dashboard-content md:p-[30px]">
       <header className="admin-page-title">
         <h1 className="text-xl font-normal text-gray-800">Admin profile</h1>
         <p className="pt-[3px] text-base text-gray-500">
-          Manage your administrator account details, security credentials, and active session.
+          Manage your administrator account details, security credentials, and
+          active session.
         </p>
       </header>
 
       <div className="space-y-6">
         {/* Profile Hero Header Card */}
         <section
-          className="admin-dashboard-card overflow-hidden bg-white"
+          className="overflow-hidden admin-dashboard-card bg-white"
           aria-labelledby="profile-account-heading"
         >
           <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -244,8 +267,8 @@ export function ProfilePage() {
         </section>
 
         {/* Edit Profile Information Form */}
-        <section className="admin-dashboard-card overflow-hidden bg-white">
-          <div className="admin-form-card-header flex items-center gap-2">
+        <section className="overflow-hidden admin-dashboard-card bg-white">
+          <div className="flex items-center gap-2 admin-form-card-header">
             <UserRound className="h-5 w-5 text-[#3f6ad8]" />
             <div>
               <h2 className="text-base font-semibold">Account Information</h2>
@@ -289,7 +312,7 @@ export function ProfilePage() {
                     className="admin-form-control pr-10"
                     required
                   />
-                  <Mail className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <Mail className="pointer-events-none absolute top-2.5 right-3 h-4 w-4 text-gray-400" />
                 </div>
                 <p className="admin-form-help">
                   This email is used to log in to the admin dashboard.
@@ -306,12 +329,12 @@ export function ProfilePage() {
                     type="text"
                     value={user.id}
                     readOnly
-                    className="admin-form-control admin-form-control--readonly font-mono text-xs"
+                    className="admin-form-control--readonly admin-form-control font-mono text-xs"
                   />
                   <button
                     type="button"
                     onClick={() => void handleCopyId()}
-                    className="admin-template-button admin-template-button--secondary shrink-0"
+                    className="admin-template-button shrink-0 admin-template-button--secondary"
                     title="Copy Admin ID"
                     aria-label="Copy Admin ID"
                   >
@@ -351,8 +374,8 @@ export function ProfilePage() {
         </section>
 
         {/* Change Password Card */}
-        <section className="admin-dashboard-card overflow-hidden bg-white">
-          <div className="admin-form-card-header flex items-center gap-2">
+        <section className="overflow-hidden admin-dashboard-card bg-white">
+          <div className="flex items-center gap-2 admin-form-card-header">
             <KeyRound className="h-5 w-5 text-[#3f6ad8]" />
             <div>
               <h2 className="text-base font-semibold">Change Password</h2>
@@ -384,18 +407,28 @@ export function ProfilePage() {
 
             <div className="max-w-md space-y-4">
               <div className="admin-form-field">
-                <label htmlFor="profile-current-password" className="admin-form-label">
+                <label
+                  htmlFor="profile-current-password"
+                  className="admin-form-label"
+                >
                   Current Password
                 </label>
-                <input
-                  id="profile-current-password"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="admin-form-control"
-                  required
-                  aria-invalid={Boolean(passwordFieldErrors.currentPassword)}
-                />
+                <div className="relative">
+                  <input
+                    id="profile-current-password"
+                    type={visibleCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="admin-form-control"
+                    required
+                    aria-invalid={Boolean(passwordFieldErrors.currentPassword)}
+                  />
+                  <PasswordShowHide
+                    passwordVisible={visibleCurrentPassword}
+                    setPasswordVisible={setVisibleCurrentPassword}
+                  />
+                </div>
+
                 {passwordFieldErrors.currentPassword && (
                   <p className="admin-form-error">
                     {passwordFieldErrors.currentPassword}
@@ -404,18 +437,27 @@ export function ProfilePage() {
               </div>
 
               <div className="admin-form-field">
-                <label htmlFor="profile-new-password" className="admin-form-label">
+                <label
+                  htmlFor="profile-new-password"
+                  className="admin-form-label"
+                >
                   New Password
                 </label>
-                <input
-                  id="profile-new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="admin-form-control"
-                  required
-                  aria-invalid={Boolean(passwordFieldErrors.newPassword)}
-                />
+                <div className="relative">
+                  <input
+                    id="profile-new-password"
+                    type={visibleNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="admin-form-control"
+                    required
+                    aria-invalid={Boolean(passwordFieldErrors.newPassword)}
+                  />
+                  <PasswordShowHide
+                    passwordVisible={visibleNewPassword}
+                    setPasswordVisible={setVisibleNewPassword}
+                  />
+                </div>
                 <p className="admin-form-help">
                   Must be at least 8 characters long.
                 </p>
@@ -427,18 +469,29 @@ export function ProfilePage() {
               </div>
 
               <div className="admin-form-field">
-                <label htmlFor="profile-confirm-password" className="admin-form-label">
+                <label
+                  htmlFor="profile-confirm-password"
+                  className="admin-form-label"
+                >
                   Confirm New Password
                 </label>
-                <input
-                  id="profile-confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="admin-form-control"
-                  required
-                  aria-invalid={Boolean(passwordFieldErrors.confirmPassword)}
-                />
+                <div className="relative">
+                  <input
+                    id="profile-confirm-password"
+                    type={visibleConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="admin-form-control"
+                    required
+                    aria-invalid={Boolean(passwordFieldErrors.confirmPassword)}
+                  />
+
+                  <PasswordShowHide
+                    passwordVisible={visibleConfirmPassword}
+                    setPasswordVisible={setVisibleConfirmPassword}
+                  />
+                </div>
+
                 {passwordFieldErrors.confirmPassword && (
                   <p className="admin-form-error">
                     {passwordFieldErrors.confirmPassword}
@@ -470,11 +523,13 @@ export function ProfilePage() {
         </section>
 
         {/* Security & System Metadata Overview */}
-        <section className="admin-dashboard-card overflow-hidden bg-white">
-          <div className="admin-form-card-header flex items-center gap-2">
+        <section className="overflow-hidden admin-dashboard-card bg-white">
+          <div className="flex items-center gap-2 admin-form-card-header">
             <ShieldCheck className="h-5 w-5 text-green-600" />
             <div>
-              <h2 className="text-base font-semibold">Security & Session Status</h2>
+              <h2 className="text-base font-semibold">
+                Security & Session Status
+              </h2>
               <p className="text-xs text-gray-500">
                 Overview of current session credentials and security settings
               </p>
@@ -485,29 +540,39 @@ export function ProfilePage() {
             <div className="flex items-start gap-3 rounded-md border border-gray-200 p-4">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
               <div className="min-w-0">
-                <dt className="text-xs font-medium text-gray-500">Authentication</dt>
+                <dt className="text-xs font-medium text-gray-500">
+                  Authentication
+                </dt>
                 <dd className="mt-1 text-sm font-semibold text-gray-800">
                   HTTP-Only JWT Cookie
                 </dd>
-                <dd className="text-xs text-gray-500">8-hour session lifespan</dd>
+                <dd className="text-xs text-gray-500">
+                  8-hour session lifespan
+                </dd>
               </div>
             </div>
 
             <div className="flex items-start gap-3 rounded-md border border-gray-200 p-4">
               <IdCard className="mt-0.5 h-5 w-5 shrink-0 text-[#3f6ad8]" />
               <div className="min-w-0">
-                <dt className="text-xs font-medium text-gray-500">Role Permissions</dt>
+                <dt className="text-xs font-medium text-gray-500">
+                  Role Permissions
+                </dt>
                 <dd className="mt-1 text-sm font-semibold text-gray-800">
                   Super Administrator
                 </dd>
-                <dd className="text-xs text-gray-500">Full catalog & store access</dd>
+                <dd className="text-xs text-gray-500">
+                  Full catalog & store access
+                </dd>
               </div>
             </div>
 
             <div className="flex items-start gap-3 rounded-md border border-gray-200 p-4">
               <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
               <div className="min-w-0">
-                <dt className="text-xs font-medium text-gray-500">Member Since</dt>
+                <dt className="text-xs font-medium text-gray-500">
+                  Member Since
+                </dt>
                 <dd className="mt-1 text-sm font-semibold text-gray-800">
                   {formatDate(user.createdAt)}
                 </dd>

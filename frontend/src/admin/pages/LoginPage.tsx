@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Eye, EyeOff } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { Navigate, useLocation, useNavigate, type Location } from "react-router"
 import { z } from "zod"
 import { ApiError } from "../api/client"
 import { useAuth } from "../auth/AuthProvider"
+import { PasswordShowHide } from "../components/PasswordShowHide"
 
 const loginSchema = z.object({
   email: z.string().trim().email({ message: "Enter a valid email address." }),
@@ -167,19 +167,11 @@ export function LoginPage() {
                 }
                 disabled={isSubmitting}
               />
-              <button
-                className="absolute top-1/2 right-1 admin-icon-button -translate-y-1/2 border-0"
-                type="button"
-                aria-label={passwordVisible ? "Hide password" : "Show password"}
-                aria-pressed={passwordVisible}
-                onClick={() => setPasswordVisible((visible) => !visible)}
-              >
-                {passwordVisible ? (
-                  <EyeOff className="h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <Eye className="h-4 w-4" aria-hidden="true" />
-                )}
-              </button>
+
+              <PasswordShowHide
+                passwordVisible={passwordVisible}
+                setPasswordVisible={setPasswordVisible}
+              />
             </div>
             {errors.password?.message ? (
               <p
