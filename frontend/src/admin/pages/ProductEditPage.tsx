@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router"
+import { useCallback, useMemo } from "react"
+import { useNavigate, useParams } from "react-router"
 import { ProductForm } from "../components/products/ProductForm"
+import { ErrorState } from "../components/common/ErrorState"
+import { LoadingState } from "../components/common/LoadingState"
+import { NotFoundState } from "../components/common/NotFoundState"
+import { useApiQuery } from "../hooks/useApiQuery"
 import { ApiError } from "../api/client"
 import { productsApi } from "../api/productsApi"
 import type { Product } from "../types/product"
@@ -37,10 +41,9 @@ function toFormValues(product: Product): ProductFormInitialValues {
 
 function ProductEditSkeleton() {
   return (
-    <div
+    <LoadingState
       className="admin-dashboard-content min-w-0 p-4 md:p-[30px]"
-      role="status"
-      aria-label="Loading product"
+      ariaLabel="Loading product"
     >
       <header className="admin-page-title">
         <div className="h-7 w-40 animate-pulse rounded bg-gray-200" />
@@ -66,88 +69,66 @@ function ProductEditSkeleton() {
           </section>
         ))}
       </div>
-    </div>
+    </LoadingState>
   )
 }
-
-type ProductLoadState =
-  | { requestKey: string; product: Product }
-  | { requestKey: string; error: unknown }
 
 export function ProductEditPage() {
   const { id = "" } = useParams()
   const navigate = useNavigate()
-  const [loadState, setLoadState] = useState<ProductLoadState | null>(null)
-  const [attempt, setAttempt] = useState(0)
-  const requestKey = `${id}:${attempt}`
+  const queryDeps = useMemo(() => [id], [id])
+  const fetchProduct = useCallback(
+    (signal: AbortSignal) => productsApi.get(id, signal),
+    [id]
+  )
+  const { data: product, error, isLoading, reload } = useApiQuery(
+    fetchProduct,
+    queryDeps
+  )
 
-  useEffect(() => {
-    const controller = new AbortController()
-    let active = true
-
-    productsApi.get(id, controller.signal).then(
-      (loadedProduct) => {
-        if (active) setLoadState({ requestKey, product: loadedProduct })
-      },
-      (loadError: unknown) => {
-        if (active) setLoadState({ requestKey, error: loadError })
-      }
-    )
-
-    return () => {
-      active = false
-      controller.abort()
-    }
-  }, [id, requestKey])
-
-  if (!loadState || loadState.requestKey !== requestKey) {
+  if (isLoading) {
     return <ProductEditSkeleton />
   }
 
-  if ("error" in loadState && isNotFoundError(loadState.error)) {
+  if (error && isNotFoundError(error)) {
     return (
-      <div className="admin-dashboard-content min-w-0 p-4 md:p-[30px]">
-        <header className="admin-page-title">
-          <h1 className="text-xl font-normal text-gray-800">
-            Product not found
-          </h1>
-          <p className="pt-[3px] text-base text-gray-500">
-            The product may have been removed or the link is incorrect.
-          </p>
-        </header>
-        <Link
-          to="/admin/products"
-          className="admin-template-button admin-template-button--secondary"
-        >
-          Back to products
-        </Link>
-      </div>
+      <NotFoundState
+        title="Product not found"
+        description="The product may have been removed or the link is incorrect."
+        backTo="/admin/products"
+        backLabel="Back to products"
+        className="admin-dashboard-content min-w-0 p-4 md:p-[30px]"
+        titleElement="h1"
+        titleContainerClassName="admin-page-title"
+        titleClassName="text-xl font-normal text-gray-800"
+        descriptionClassName="pt-[3px] text-base text-gray-500"
+        linkClassName="admin-template-button admin-template-button--secondary"
+      />
     )
   }
 
-  if ("error" in loadState) {
+  if (error) {
     return (
-      <div className="admin-dashboard-content min-w-0 p-4 md:p-[30px]">
-        <header className="admin-page-title">
-          <h1 className="text-xl font-normal text-gray-800">
-            Could not load product
-          </h1>
-          <p className="pt-[3px] text-base text-gray-500">
-            {getErrorMessage(loadState.error)}
-          </p>
-        </header>
-        <button
-          type="button"
-          className="admin-template-button admin-template-button--primary"
-          onClick={() => setAttempt((currentAttempt) => currentAttempt + 1)}
-        >
-          Retry
-        </button>
-      </div>
+      <ErrorState
+        message={
+          <header className="admin-page-title">
+            <h1 className="text-xl font-normal text-gray-800">
+              Could not load product
+            </h1>
+            <p className="pt-[3px] text-base text-gray-500">
+              {getErrorMessage(error)}
+            </p>
+          </header>
+        }
+        wrapMessage={false}
+        className="admin-dashboard-content min-w-0 p-4 md:p-[30px]"
+        buttonClassName="admin-template-button admin-template-button--primary"
+        onRetry={reload}
+      />
     )
   }
 
-  const product = loadState.product
+  if (!product) return <ProductEditSkeleton />
 
   const submitProduct = async (values: ProductFormValues) => {
     await productsApi.update(product.id, {

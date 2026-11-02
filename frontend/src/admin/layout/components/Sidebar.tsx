@@ -1,75 +1,30 @@
-import { ChevronDown } from "lucide-react"
-import { useState } from "react"
 import { NavLink } from "react-router"
-import { adminMenu } from "../menu"
+import { adminMenu, type MenuItem } from "../menu"
 
 export function Sidebar() {
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    Dashboards: true,
-  })
-
-  const toggleGroup = (label: string) => {
-    setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }))
-  }
-
   return (
-    <nav className="h-full overflow-y-auto admin-sidebar-nav">
-      <div className="px-6 py-3 admin-sidebar-section-label tracking-wide uppercase">
-        Menu
+    <nav className="h-full overflow-y-auto border-r border-[var(--border-light)] bg-[var(--bg-surface)] px-3 py-4">
+      <div className="mb-6 px-3">
+        <span className="text-xs font-bold tracking-wider text-[var(--text-muted)] uppercase">
+          Power Zenox
+        </span>
+        <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+          Store Admin • BD
+        </h2>
       </div>
-      <ul className="space-y-1 px-2">
-        {adminMenu.map((item) => {
-          if (item.type === "group") {
-            const isOpen = openGroups[item.label] ?? false
+
+      <ul className="space-y-1">
+        {adminMenu.map((item: MenuItem, index: number) => {
+          if (item.type === "section") {
             return (
-              <li key={item.label}>
-                <button
-                  type="button"
-                  className="admin-sidebar-group-toggle"
-                  aria-expanded={isOpen}
-                  onClick={() => toggleGroup(item.label)}
-                >
-                  <span>{item.label}</span>
-                  <ChevronDown className="h-4 w-4 admin-sidebar-state-icon" />
-                </button>
-                {isOpen && item.items ? (
-                  <ul className="admin-sidebar-group-children space-y-1">
-                    {item.items.map((child) => (
-                      <li key={child.label}>
-                        {child.type === "link" && child.href ? (
-                          <NavLink
-                            to={child.href}
-                            end
-                            className={({ isActive }) =>
-                              `admin-sidebar-link ${isActive ? "admin-sidebar-link--active" : ""}`
-                            }
-                          >
-                            {child.label}
-                          </NavLink>
-                        ) : (
-                          <div
-                            className="admin-sidebar-disabled"
-                            title="Coming soon"
-                          >
-                            {child.label}
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </li>
-            )
-          }
-          if (item.type === "disabled") {
-            return (
-              <li key={item.label}>
-                <div className="admin-sidebar-disabled" title="Coming soon">
+              <li key={`section-${index}`} className="px-3 pt-4 pb-2">
+                <span className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">
                   {item.label}
-                </div>
+                </span>
               </li>
             )
           }
+
           if (item.type === "link" && item.href) {
             return (
               <li key={item.label}>
@@ -77,19 +32,28 @@ export function Sidebar() {
                   to={item.href}
                   end
                   className={({ isActive }) =>
-                    `admin-sidebar-link ${isActive ? "admin-sidebar-link--active" : ""}`
+                    `flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-[var(--primary-soft)] font-semibold text-[var(--primary)]"
+                        : "text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)]"
+                    }`
                   }
                 >
-                  {item.label}
+                  <span>{item.label}</span>
+                  {item.badge !== undefined && (
+                    <span className="rounded-full bg-[var(--status-pending-bg)] px-2 py-0.5 text-xs font-semibold text-[var(--status-pending-text)]">
+                      {item.badge}
+                    </span>
+                  )}
                 </NavLink>
               </li>
             )
           }
+
           return null
         })}
       </ul>
     </nav>
   )
 }
-
 export default Sidebar

@@ -3,6 +3,7 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react"
 import { ApiError } from "../../api/client"
+import { StatusBadge } from "../common/StatusBadge"
 import {
   productSchema,
   type ProductFormInitialValues,
@@ -470,12 +471,11 @@ export function ProductForm({
             </div>
             <div className="admin-form-field">
               <span className="admin-form-label">In stock</span>
-              <span
-                className={`admin-product-stock ${inStock ? "admin-product-stock--in" : "admin-product-stock--out"}`}
+              <StatusBadge
+                variant={inStock ? "in-stock" : "out-of-stock"}
+                label={inStock ? "In stock" : "Out of stock"}
                 aria-live="polite"
-              >
-                {inStock ? "In stock" : "Out of stock"}
-              </span>
+              />
             </div>
             <div className="admin-form-field md:col-span-2">
               <label

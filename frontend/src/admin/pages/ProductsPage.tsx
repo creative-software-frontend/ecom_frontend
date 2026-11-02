@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { memo, useCallback, useMemo, useRef, useState } from "react"
 import { Link, useLocation } from "react-router"
 import { Pencil, Trash2 } from "lucide-react"
 import DataTable, { Column } from "datatables.net-react"
@@ -6,6 +6,13 @@ import DataTablesCore from "datatables.net-dt"
 import "datatables.net-dt/css"
 import { productsApi } from "../api/productsApi"
 import { ConfirmDialog } from "../components/ConfirmDialog"
+import { EmptyState } from "../components/common/EmptyState"
+import { ErrorState } from "../components/common/ErrorState"
+import { InlineNotice } from "../components/common/InlineNotice"
+import { LoadingState } from "../components/common/LoadingState"
+import { SearchInput } from "../components/common/SearchInput"
+import { StatusBadge } from "../components/common/StatusBadge"
+import { useApiQuery } from "../hooks/useApiQuery"
 import type { Product, ProductWriteInput } from "../types/product"
 
 const setDataTablesCore = DataTable.use
@@ -58,15 +65,15 @@ function getProductImage(product: Product): string | undefined {
 
 function getStockStatus(product: Product): {
   label: string
-  className: string
+  variant: "in-stock" | "low-stock" | "out-of-stock"
 } {
   if (!product.inStock || product.stockQuantity === 0) {
-    return { label: "Out of stock", className: "admin-product-stock--out" }
+    return { label: "Out of stock", variant: "out-of-stock" }
   }
   if (product.stockQuantity <= LOW_STOCK_THRESHOLD) {
-    return { label: "Low stock", className: "admin-product-stock--low" }
+    return { label: "Low stock", variant: "low-stock" }
   }
-  return { label: "In stock", className: "admin-product-stock--in" }
+  return { label: "In stock", variant: "in-stock" }
 }
 
 const tableOptions = {
@@ -147,21 +154,16 @@ const ProductTable = memo(function ProductTable({
             return product.stockQuantity
           }
           const status = getStockStatus(product)
-          return (
-            <span className={`admin-product-stock ${status.className}`}>
-              {status.label}
-            </span>
-          )
+          return <StatusBadge variant={status.variant} label={status.label} />
         }}
       </Column>
       <Column title="Status" data="isActive">
         {(_data: unknown, type: string, product: Product) =>
           type === "display" ? (
-            <span
-              className={`admin-product-stock ${product.isActive ? "admin-product-stock--in" : "admin-product-stock--out"}`}
-            >
-              {product.isActive ? "Active" : "Inactive"}
-            </span>
+            <StatusBadge
+              variant={product.isActive ? "active" : "inactive"}
+              label={product.isActive ? "Active" : "Inactive"}
+            />
           ) : (
             Number(product.isActive)
           )
@@ -208,45 +210,35 @@ const ProductTable = memo(function ProductTable({
 export function ProductsPage() {
   const location = useLocation()
   const [search, setSearch] = useState("")
-  const [loadAttempt, setLoadAttempt] = useState(0)
-  const [loadState, setLoadState] = useState<
-    | { status: "loading" }
-    | { status: "error"; error: unknown }
-    | { status: "loaded"; products: Product[] }
-  >({ status: "loading" })
+  const listDeps = useMemo(() => [], [])
+  const fetchProducts = useCallback(
+    (signal: AbortSignal) => productsApi.list(signal),
+    []
+  )
+  const {
+    data: loadedProducts,
+    error: loadError,
+    isLoading,
+    reload,
+  } = useApiQuery(fetchProducts, listDeps)
+  const [productsOverride, setProductsOverride] = useState<Product[] | null>(
+    null
+  )
+  const products = productsOverride ?? loadedProducts
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
   const [deleteStatus, setDeleteStatus] = useState<string | null>(() =>
     getNavigationStatus(location.state)
   )
   const deleteTriggerRef = useRef<HTMLButtonElement | null>(null)
   const deleteStatusRef = useRef<HTMLDivElement | null>(null)
-  useEffect(() => {
-    const controller = new AbortController()
-    let active = true
-
-    productsApi.list(controller.signal).then(
-      (loadedProducts) => {
-        if (active) setLoadState({ status: "loaded", products: loadedProducts })
-      },
-      (error: unknown) => {
-        if (active) setLoadState({ status: "error", error })
-      }
-    )
-
-    return () => {
-      active = false
-      controller.abort()
-    }
-  }, [loadAttempt])
 
   const filteredProducts = useMemo(() => {
-    const products = loadState.status === "loaded" ? loadState.products : []
-    return products.filter((product) =>
+    return (products ?? []).filter((product) =>
       product.name
         .toLocaleLowerCase()
         .includes(search.trim().toLocaleLowerCase())
     )
-  }, [loadState, search])
+  }, [products, search])
 
   const openDeleteDialog = useCallback(
     (product: Product, trigger: HTMLButtonElement) => {
@@ -262,15 +254,10 @@ export function ProductsPage() {
 
     const product = productToDelete
     await productsApi.remove(product.id)
-    setLoadState((currentState) =>
-      currentState.status === "loaded"
-        ? {
-            ...currentState,
-            products: currentState.products.filter(
-              (item) => item.id !== product.id
-            ),
-          }
-        : currentState
+    setProductsOverride(
+      (productsOverride ?? loadedProducts ?? []).filter(
+        (item) => item.id !== product.id
+      )
     )
     setDeleteStatus(`${product.name} was deleted`)
     setProductToDelete(null)
@@ -284,15 +271,10 @@ export function ProductsPage() {
       product.id,
       getEditableProductValues(product, false)
     )
-    setLoadState((currentState) =>
-      currentState.status === "loaded"
-        ? {
-            ...currentState,
-            products: currentState.products.map((item) =>
-              item.id === updatedProduct.id ? updatedProduct : item
-            ),
-          }
-        : currentState
+    setProductsOverride(
+      (productsOverride ?? loadedProducts ?? []).map((item) =>
+        item.id === updatedProduct.id ? updatedProduct : item
+      )
     )
     setDeleteStatus(`${product.name} was deactivated`)
     setProductToDelete(null)
@@ -316,67 +298,55 @@ export function ProductsPage() {
       </header>
 
       {deleteStatus ? (
-        <div
-          ref={deleteStatusRef}
+        <InlineNotice
+          rootRef={deleteStatusRef}
           className="admin-product-status"
-          role="status"
           tabIndex={-1}
-        >
-          <span>{deleteStatus}</span>
-          <button
-            type="button"
-            className="admin-product-status-dismiss"
-            aria-label="Dismiss status message"
-            onClick={() => setDeleteStatus(null)}
-          >
-            ×
-          </button>
-        </div>
+          message={deleteStatus}
+          variant="success"
+          dismissLabel="Dismiss status message"
+          dismissText="×"
+          dismissClassName="admin-product-status-dismiss"
+          onDismiss={() => setDeleteStatus(null)}
+        />
       ) : null}
 
-      {loadState.status === "loading" ? (
-        <div
+      {isLoading ? (
+        <LoadingState
           className="admin-dashboard-card bg-white p-6 text-sm text-gray-600"
-          role="status"
         >
           Loading products...
-        </div>
+        </LoadingState>
       ) : null}
 
-      {loadState.status === "error" ? (
-        <div
+      {loadError ? (
+        <ErrorState
           className="space-y-4 admin-dashboard-card bg-white p-6"
           role="alert"
-        >
-          <p className="text-sm text-red-700">
-            {getErrorMessage(loadState.error)}
-          </p>
-          <button
-            type="button"
-            className="admin-template-button admin-template-button--primary"
-            onClick={() => {
-              setLoadState({ status: "loading" })
-              setLoadAttempt((attempt) => attempt + 1)
-            }}
-          >
-            Retry
-          </button>
-        </div>
+          message={getErrorMessage(loadError)}
+          messageClassName="text-sm text-red-700"
+          buttonClassName="admin-template-button admin-template-button--primary"
+          onRetry={reload}
+        />
       ) : null}
 
-      {loadState.status === "loaded" && loadState.products.length === 0 ? (
-        <div className="admin-dashboard-card bg-white p-6">
-          <p className="mb-4 text-sm text-gray-600">No products yet</p>
-          <Link
+      {!isLoading && !loadError && products?.length === 0 ? (
+        <EmptyState
+          className="admin-dashboard-card bg-white p-6"
+          title="No products yet"
+          titleClassName="mb-4 text-sm text-gray-600"
+          action={
+            <Link
             to="/admin/products/new"
             className="admin-template-button admin-template-button--primary"
           >
             Add product
           </Link>
-        </div>
+          }
+        />
       ) : null}
 
-      {loadState.status === "loaded" && loadState.products.length > 0 ? (
+      {!isLoading && !loadError && products && products.length > 0 ? (
         <section
           className="min-w-0 overflow-hidden admin-dashboard-card bg-white"
           aria-labelledby="products-table-title"
@@ -388,16 +358,14 @@ export function ProductsPage() {
             >
               All products
             </h2>
-            <label className="flex w-full max-w-sm items-center gap-2 text-sm text-gray-600">
-              <span className="shrink-0">Search by name</span>
-              <input
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.currentTarget.value)}
-                placeholder="Search products..."
-                className="min-w-0 flex-1 rounded border admin-products-search px-3 py-2 text-sm"
-              />
-            </label>
+            <SearchInput
+              label="Search by name"
+              placeholder="Search products..."
+              value={search}
+              onChange={(event) => setSearch(event.currentTarget.value)}
+              labelClassName="flex w-full max-w-sm items-center gap-2 text-sm text-gray-600"
+              inputClassName="min-w-0 flex-1 rounded border admin-products-search px-3 py-2 text-sm"
+            />
           </div>
 
           <div className="admin-products-table-wrap">

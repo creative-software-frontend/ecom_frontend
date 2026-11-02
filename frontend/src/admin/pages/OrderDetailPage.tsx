@@ -12,6 +12,11 @@ import {
   formatTaka,
 } from "../lib/orderStatus"
 import { ChevronLeft } from "lucide-react"
+import { ErrorState } from "../components/common/ErrorState"
+import { InlineNotice } from "../components/common/InlineNotice"
+import { LoadingState } from "../components/common/LoadingState"
+import { NotFoundState } from "../components/common/NotFoundState"
+import { StatusBadge } from "../components/common/StatusBadge"
 
 // Load-state reducer
 
@@ -210,45 +215,42 @@ export default function OrderDetailPage() {
   // -------------------------------------------------------------------
   if (loadState.phase === "loading") {
     return (
-      <div
+      <LoadingState
         className="flex items-center justify-center py-20 text-sm text-gray-500"
-        role="status"
         aria-live="polite"
       >
         Loading order…
-      </div>
+      </LoadingState>
     )
   }
 
   if (loadState.phase === "notfound") {
     return (
-      <div className="flex flex-col items-center gap-4 py-20 text-center">
-        <p className="text-lg font-semibold text-gray-700">Order not found.</p>
-        <Link
-          to="/admin/orders"
-          className="text-sm text-[#3f6ad8] hover:underline"
-        >
-          ← Back to orders
-        </Link>
-      </div>
+      <NotFoundState
+        title="Order not found."
+        backTo="/admin/orders"
+        backLabel="← Back to orders"
+        className="flex flex-col items-center gap-4 py-20 text-center"
+        titleClassName="text-lg font-semibold text-gray-700"
+        linkClassName="text-sm text-[#3f6ad8] hover:underline"
+      />
     )
   }
 
   if (loadState.phase === "error") {
     return (
-      <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <p className="text-sm font-medium text-red-600">{loadState.message}</p>
-        <button
-          type="button"
-          onClick={handleRetry}
-          className="rounded bg-[#3f6ad8] px-4 py-2 text-sm font-medium text-white hover:bg-[#3458b5]"
-        >
-          Retry
-        </button>
-        <Link to={backHref} className="text-sm text-[#3f6ad8] hover:underline">
-          ← Back to orders
-        </Link>
-      </div>
+      <ErrorState
+        message={loadState.message}
+        onRetry={handleRetry}
+        className="flex flex-col items-center gap-3 py-20 text-center"
+        messageClassName="text-sm font-medium text-red-600"
+        buttonClassName="rounded bg-[#3f6ad8] px-4 py-2 text-sm font-medium text-white hover:bg-[#3458b5]"
+        backLink={{
+          to: backHref,
+          label: "← Back to orders",
+          className: "text-sm text-[#3f6ad8] hover:underline",
+        }}
+      />
     )
   }
 
@@ -280,48 +282,46 @@ export default function OrderDetailPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className={orderCfg.badgeClassName}>{orderCfg.label}</span>
-            <span className={payCfg.badgeClassName}>{payCfg.label}</span>
+            <StatusBadge
+              variant={orderCfg.variant}
+              label={orderCfg.label}
+              className={orderCfg.badgeClassName}
+            />
+            <StatusBadge
+              variant={payCfg.variant}
+              label={payCfg.label}
+              className={payCfg.badgeClassName}
+            />
           </div>
         </div>
       </div>
 
       {/* Success banner */}
       {successMessage && (
-        <div
-          role="status"
-          aria-live="polite"
+        <InlineNotice
           className="flex items-center justify-between gap-3 rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
-        >
-          <span>{successMessage}</span>
-          <button
-            type="button"
-            aria-label="Dismiss"
-            onClick={() => setSuccessMessage(null)}
-            className="rounded px-2 py-0.5 text-xs font-medium text-green-700 hover:bg-green-100"
-          >
-            ✕
-          </button>
-        </div>
+          message={successMessage}
+          variant="success"
+          ariaLive="polite"
+          dismissLabel="Dismiss"
+          dismissText="✕"
+          dismissClassName="rounded px-2 py-0.5 text-xs font-medium text-green-700 hover:bg-green-100"
+          onDismiss={() => setSuccessMessage(null)}
+        />
       )}
 
       {/* Error banner */}
       {mutationError && (
-        <div
-          role="alert"
-          aria-live="assertive"
+        <InlineNotice
           className="flex items-center justify-between gap-3 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          <span>{mutationError}</span>
-          <button
-            type="button"
-            aria-label="Dismiss error"
-            onClick={() => setMutationError(null)}
-            className="rounded px-2 py-0.5 text-xs font-medium text-red-700 hover:bg-red-100"
-          >
-            ✕
-          </button>
-        </div>
+          message={mutationError}
+          variant="error"
+          ariaLive="assertive"
+          dismissLabel="Dismiss error"
+          dismissText="✕"
+          dismissClassName="rounded px-2 py-0.5 text-xs font-medium text-red-700 hover:bg-red-100"
+          onDismiss={() => setMutationError(null)}
+        />
       )}
 
       {/* Content grid */}
