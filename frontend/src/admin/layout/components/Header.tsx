@@ -1,5 +1,13 @@
 import { useState } from "react"
-import { Bell, Menu, X } from "lucide-react"
+import {
+  Bell,
+  ExternalLink,
+  Leaf,
+  Menu,
+  Search,
+  UserRound,
+  X,
+} from "lucide-react"
 import { useNavigate } from "react-router"
 import { useAuth } from "../../auth/AuthProvider"
 import { Sidebar } from "./Sidebar"
@@ -21,34 +29,56 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm">
-      <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b border-(--border-light) bg-white px-3">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
+          className="inline-flex items-center justify-center rounded-md p-2 text-(--text-muted) hover:bg-(--bg-surface-hover) lg:hidden"
           onClick={onToggleSidebar}
           aria-label="Toggle sidebar"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="size-5" />
         </button>
-        <input
-          type="search"
-          placeholder="Search..."
-          className="hidden rounded border border-gray-300 px-3 py-1.5 text-sm md:block"
-        />
+        <label className="relative hidden w-full max-w-md md:block">
+          <span className="sr-only">Search admin workspace</span>
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-(--text-muted)"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            placeholder="Search orders, customers, products..."
+            className="h-8 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-3 pl-9 text-[11px] text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-(--primary)"
+          />
+        </label>
       </div>
-      <div className="flex items-center gap-3">
+
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <span className="hidden items-center gap-1.5 rounded-full bg-[#c6eee8] px-2 py-1 text-[9px] font-medium text-(--primary) sm:inline-flex">
+          <span className="size-1.5 rounded-full bg-(--primary)" />
+          Live Store (BD)
+        </span>
+        <a
+          href="/"
+          target="_blank"
+          rel="noreferrer"
+          className="hidden items-center gap-1 text-[10px] text-(--text-primary) hover:text-(--primary) sm:inline-flex"
+        >
+          <ExternalLink className="size-3" aria-hidden="true" />
+          Storefront
+        </a>
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100"
+          className="relative inline-flex items-center justify-center rounded-md p-1.5 text-(--text-muted) hover:bg-(--bg-surface-hover)"
           aria-label="Notifications"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="size-4" />
+          <span className="absolute top-1 right-1 size-1.5 rounded-full bg-[#e07047]" />
         </button>
         <div className="relative">
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-100"
+            className="inline-flex items-center justify-center rounded-md p-1.5 text-(--primary) hover:bg-(--bg-surface-hover)"
             onClick={() => setUserOpen((v) => !v)}
             onKeyDown={(e) => {
               if (e.key === "Escape") setUserOpen(false)
@@ -56,22 +86,20 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
             aria-expanded={userOpen}
             aria-haspopup="menu"
           >
-            <div className="h-8 w-8 rounded-full bg-gray-200" />
-            <div className="hidden text-left sm:block">
-              <div className="text-sm font-medium">
-                {state.status === "authenticated" ? state.user.email : ""}
-              </div>
-            </div>
+            <UserRound className="size-4" />
+            <span className="sr-only">
+              {state.status === "authenticated" ? state.user.email : "Admin"}
+            </span>
           </button>
           {userOpen ? (
             <div
-              className="absolute right-0 mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg"
+              className="absolute right-0 z-30 mt-2 w-48 rounded-md border border-(--border-light) bg-white py-1 shadow-lg"
               role="menu"
               onMouseLeave={() => setUserOpen(false)}
             >
               <button
                 type="button"
-                className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+                className="block w-full px-3 py-2 text-left text-xs hover:bg-(--bg-surface-hover)"
                 role="menuitem"
                 onClick={() => {
                   setUserOpen(false)
@@ -82,7 +110,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
               </button>
               <button
                 type="button"
-                className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+                className="block w-full px-3 py-2 text-left text-xs hover:bg-(--bg-surface-hover)"
                 role="menuitem"
                 onClick={() => {
                   setUserOpen(false)
@@ -93,7 +121,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
               </button>
               <button
                 type="button"
-                className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+                className="block w-full px-3 py-2 text-left text-xs hover:bg-(--bg-surface-hover)"
                 role="menuitem"
                 onClick={() => void handleLogout()}
               >
@@ -118,14 +146,23 @@ export function MobileSidebar({
   return (
     <div className="fixed inset-0 z-30 lg:hidden">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="absolute top-0 left-0 h-full admin-sidebar-shell">
-        <div className="flex h-14 items-center justify-between px-4 admin-sidebar-brand">
-          <div className="text-lg font-semibold">ArchitectUI</div>
+      <div className="absolute top-0 left-0 flex h-full w-64 flex-col admin-sidebar-shell">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-(--border-light) px-4 admin-sidebar-brand">
+          <div className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-md bg-(--primary) text-white">
+              <Leaf className="size-4" aria-hidden="true" />
+            </span>
+            <span className="text-xs font-semibold text-(--text-primary)">
+              Power Zenox
+            </span>
+          </div>
           <button type="button" onClick={onClose} aria-label="Close sidebar">
-            <X className="h-5 w-5" />
+            <X className="size-5" />
           </button>
         </div>
-        <Sidebar />
+        <div className="min-h-0 flex-1">
+          <Sidebar />
+        </div>
       </div>
     </div>
   )

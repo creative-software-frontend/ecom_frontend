@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react"
 import { Link, useLocation, useParams } from "react-router"
+import DataTable, { type TableColumn } from "react-data-table-component"
 import { ordersApi } from "../api/ordersApi"
 import { ApiError } from "../api/client"
-import type { OrderDetail, OrderStatus, PaymentStatus } from "../types/order"
+import type {
+  OrderDetail,
+  OrderItemDetail,
+  OrderStatus,
+  PaymentStatus,
+} from "../types/order"
 import {
   ORDER_STATUS_CONFIG,
   ORDER_STATUS_ACTION_LABEL,
@@ -11,7 +17,15 @@ import {
   formatOrderDate,
   formatTaka,
 } from "../lib/orderStatus"
-import { ChevronLeft } from "lucide-react"
+import {
+  ArrowLeft,
+  Check,
+  Clock3,
+  MapPin,
+  Package,
+  Printer,
+  UserRound,
+} from "lucide-react"
 import { ErrorState } from "../components/common/ErrorState"
 import { InlineNotice } from "../components/common/InlineNotice"
 import { LoadingState } from "../components/common/LoadingState"
@@ -64,6 +78,111 @@ function getErrorMessage(err: unknown): string {
   return "An unexpected error occurred."
 }
 
+function getPaymentMethodLabel(method: string): string {
+  if (method.toLowerCase() === "cod") return "Cash on delivery"
+  return method
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+const orderItemColumns: TableColumn<OrderItemDetail>[] = [
+  {
+    name: "Product",
+    selector: (item) => item.product.name,
+    minWidth: "220px",
+    cell: (item) => (
+      <div className="flex min-w-0 items-center gap-3 py-2">
+        {item.product.image ? (
+          <img
+            src={item.product.image}
+            alt=""
+            className="size-11 shrink-0 rounded-md border border-(--border-light) object-cover"
+          />
+        ) : (
+          <span
+            className="flex size-11 shrink-0 items-center justify-center rounded-md bg-(--bg-table-header) text-(--text-muted)"
+            aria-hidden="true"
+          >
+            <Package className="size-5" />
+          </span>
+        )}
+        <span className="min-w-0 font-medium text-(--text-primary)">
+          {item.product.name}
+        </span>
+      </div>
+    ),
+  },
+  {
+    name: "Qty",
+    selector: (item) => item.quantity,
+    center: true,
+    width: "76px",
+  },
+  {
+    name: "Unit price",
+    selector: (item) => item.unitPrice,
+    right: true,
+    minWidth: "130px",
+    cell: (item) => (
+      <span className="whitespace-nowrap text-(--text-muted) tabular-nums">
+        {formatTaka(item.unitPrice)}
+      </span>
+    ),
+  },
+  {
+    name: "Total",
+    selector: (item) => item.lineTotal,
+    right: true,
+    minWidth: "130px",
+    cell: (item) => (
+      <span className="font-semibold whitespace-nowrap text-(--text-primary) tabular-nums">
+        {formatTaka(item.lineTotal)}
+      </span>
+    ),
+  },
+]
+
+const orderItemTableStyles = {
+  table: {
+    style: {
+      backgroundColor: "var(--bg-surface)",
+      color: "var(--text-primary)",
+    },
+  },
+  headRow: {
+    style: {
+      minHeight: "40px",
+      backgroundColor: "var(--bg-table-header)",
+      borderBottom: "1px solid var(--border-light)",
+    },
+  },
+  headCells: {
+    style: {
+      color: "var(--text-muted)",
+      fontSize: "11px",
+      fontWeight: "600",
+      textTransform: "uppercase" as const,
+      paddingLeft: "12px",
+      paddingRight: "12px",
+    },
+  },
+  rows: {
+    style: {
+      minHeight: "60px",
+      backgroundColor: "var(--bg-surface)",
+      borderBottom: "1px solid var(--border-light)",
+    },
+  },
+  cells: {
+    style: {
+      paddingLeft: "12px",
+      paddingRight: "12px",
+      color: "var(--text-primary)",
+      fontSize: "13px",
+    },
+  },
+}
+
 function Card({
   title,
   children,
@@ -72,12 +191,12 @@ function Card({
   children: React.ReactNode
 }) {
   return (
-    <div className="overflow-hidden admin-dashboard-card bg-white">
-      <div className="border-b border-gray-200 px-5 py-3">
-        <h2 className="text-sm font-bold text-gray-700">{title}</h2>
+    <section className="admin-dashboard-card overflow-hidden">
+      <div className="border-b border-(--border-light) px-5 py-4">
+        <h2 className="text-sm font-semibold text-(--text-primary)">{title}</h2>
       </div>
       <div className="px-5 py-4">{children}</div>
-    </div>
+    </section>
   )
 }
 
@@ -89,11 +208,9 @@ function Row({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-0.5 py-1.5">
-      <dt className="w-36 shrink-0 text-xs font-medium text-gray-500 uppercase">
-        {label}
-      </dt>
-      <dd className="flex-1 text-sm text-gray-700">{children}</dd>
+    <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-x-3 gap-y-1 py-2">
+      <dt className="text-xs font-medium text-(--text-muted)">{label}</dt>
+      <dd className="min-w-0 text-sm text-(--text-primary)">{children}</dd>
     </div>
   )
 }
@@ -216,7 +333,7 @@ export default function OrderDetailPage() {
   if (loadState.phase === "loading") {
     return (
       <LoadingState
-        className="flex items-center justify-center py-20 text-sm text-gray-500"
+        className="flex min-h-80 items-center justify-center p-6 text-sm text-(--text-muted)"
         aria-live="polite"
       >
         Loading order…
@@ -230,9 +347,9 @@ export default function OrderDetailPage() {
         title="Order not found."
         backTo="/admin/orders"
         backLabel="← Back to orders"
-        className="flex flex-col items-center gap-4 py-20 text-center"
-        titleClassName="text-lg font-semibold text-gray-700"
-        linkClassName="text-sm text-[#3f6ad8] hover:underline"
+        className="flex min-h-80 flex-col items-center justify-center gap-4 p-6 text-center"
+        titleClassName="text-lg font-semibold text-(--text-primary)"
+        linkClassName="text-sm font-medium text-(--primary) hover:underline"
       />
     )
   }
@@ -242,13 +359,13 @@ export default function OrderDetailPage() {
       <ErrorState
         message={loadState.message}
         onRetry={handleRetry}
-        className="flex flex-col items-center gap-3 py-20 text-center"
+        className="flex min-h-80 flex-col items-center justify-center gap-3 p-6 text-center"
         messageClassName="text-sm font-medium text-red-600"
-        buttonClassName="rounded bg-[#3f6ad8] px-4 py-2 text-sm font-medium text-white hover:bg-[#3458b5]"
+        buttonClassName="admin-template-button admin-template-button--primary"
         backLink={{
           to: backHref,
           label: "← Back to orders",
-          className: "text-sm text-[#3f6ad8] hover:underline",
+          className: "text-sm font-medium text-(--primary) hover:underline",
         }}
       />
     )
@@ -260,28 +377,27 @@ export default function OrderDetailPage() {
   const payCfg = PAYMENT_STATUS_CONFIG[order.paymentStatus]
   const nextStatuses = ORDER_STATUS_TRANSITIONS[order.orderStatus]
   const isCancelled = order.orderStatus === "cancelled"
+  const itemCount = order.items.reduce(
+    (total, item) => total + item.quantity,
+    0
+  )
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* Page header */}
-      <div className="overflow-hidden admin-dashboard-card bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4">
-          <div className="flex flex-col gap-1">
-            <Link
-              to={backHref}
-              className="flex items-center text-xs text-[#3f6ad8]"
-            >
-              <ChevronLeft size={20} />
-              <span>Back to orders</span>
-            </Link>
-            <h1 className="text-base font-bold text-gray-800">
-              {order.orderNumber}
-            </h1>
-            <p className="text-xs text-gray-500">
-              {formatOrderDate(order.createdAt)}
-            </p>
-          </div>
+    <div className="admin-dashboard-content min-w-0 space-y-5 p-4 sm:p-6">
+      <Link
+        to={backHref}
+        className="inline-flex items-center gap-2 text-sm font-medium text-(--text-muted) transition-colors hover:text-(--primary)"
+      >
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        Back to orders
+      </Link>
+
+      <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-bold text-(--text-primary)">
+              Order details
+            </h1>
             <StatusBadge
               variant={orderCfg.variant}
               label={orderCfg.label}
@@ -293,13 +409,54 @@ export default function OrderDetailPage() {
               className={payCfg.badgeClassName}
             />
           </div>
+          <p className="mt-1 text-sm text-(--text-muted)">
+            <span className="font-semibold text-(--text-primary)">
+              {order.orderNumber}
+            </span>
+            <span className="mx-2" aria-hidden="true">
+              ·
+            </span>
+            Placed {formatOrderDate(order.createdAt)}
+          </p>
         </div>
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="admin-template-button admin-template-button--secondary self-start"
+        >
+          <Printer className="icon-size" aria-hidden="true" />
+          Print order
+        </button>
+      </header>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <article className="admin-dashboard-card p-4">
+          <p className="text-xs font-medium text-(--text-muted)">Order total</p>
+          <p className="mt-1 text-xl font-bold text-(--text-primary) tabular-nums">
+            {formatTaka(order.total)}
+          </p>
+        </article>
+        <article className="admin-dashboard-card p-4">
+          <p className="text-xs font-medium text-(--text-muted)">Items</p>
+          <p className="mt-1 text-xl font-bold text-(--text-primary) tabular-nums">
+            {itemCount}
+            <span className="ml-1 text-sm font-medium text-(--text-muted)">
+              {itemCount === 1 ? "item" : "items"}
+            </span>
+          </p>
+        </article>
+        <article className="admin-dashboard-card p-4">
+          <p className="text-xs font-medium text-(--text-muted)">Payment</p>
+          <p className="mt-1 text-xl font-bold text-(--text-primary)">
+            {payCfg.label}
+          </p>
+        </article>
       </div>
 
       {/* Success banner */}
       {successMessage && (
         <InlineNotice
-          className="flex items-center justify-between gap-3 rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+          className="flex items-center justify-between gap-3 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
           message={successMessage}
           variant="success"
           ariaLive="polite"
@@ -313,7 +470,7 @@ export default function OrderDetailPage() {
       {/* Error banner */}
       {mutationError && (
         <InlineNotice
-          className="flex items-center justify-between gap-3 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
           message={mutationError}
           variant="error"
           ariaLive="assertive"
@@ -324,136 +481,113 @@ export default function OrderDetailPage() {
         />
       )}
 
-      {/* Content grid */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {/* Left 2/3 */}
-        <div className="flex flex-col gap-5 lg:col-span-2">
-          <Card title="Customer">
-            <dl>
-              <Row label="Name">{order.customerName}</Row>
-              <Row label="Phone">
+      <div className="grid min-w-0 grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(18rem,1fr)]">
+        <div className="flex min-w-0 flex-col gap-5">
+          <Card title="Order items">
+            <DataTable
+              ariaLabel="Order items"
+              columns={orderItemColumns}
+              data={order.items}
+              customStyles={orderItemTableStyles}
+              responsive
+              noDataComponent={
+                <p className="py-8 text-center text-sm text-(--text-muted)">
+                  No items were recorded for this order.
+                </p>
+              }
+            />
+          </Card>
+
+          <Card title="Customer & delivery">
+            <div className="flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-(--primary-soft) text-(--primary)">
+                <UserRound className="size-5" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <p className="font-semibold text-(--text-primary)">
+                  {order.customerName}
+                </p>
                 <a
                   href={`tel:${order.customerPhone}`}
-                  className="text-[#3f6ad8] hover:underline"
+                  className="mt-0.5 inline-block text-sm text-(--primary) hover:underline"
                 >
                   {order.customerPhone}
                 </a>
-              </Row>
-              <Row label="Address">{order.customerAddress}</Row>
-              <Row label="Notes">
-                {order.notes ? (
-                  order.notes
-                ) : (
-                  <span className="text-gray-400 italic">No notes</span>
-                )}
-              </Row>
-            </dl>
-          </Card>
-
-          <Card title="Items">
-            <div className="admin-orders-scroll overflow-x-auto">
-              <table
-                aria-label="Order items"
-                className="w-full min-w-130 border-collapse text-sm"
-              >
-                <thead>
-                  <tr className="border-b border-gray-200 text-left">
-                    <th
-                      scope="col"
-                      className="pr-3 pb-2 text-xs font-bold text-gray-500 uppercase"
-                    >
-                      Product
-                    </th>
-                    <th
-                      scope="col"
-                      className="pr-3 pb-2 text-center text-xs font-bold text-gray-500 uppercase"
-                    >
-                      Qty
-                    </th>
-                    <th
-                      scope="col"
-                      className="pr-3 pb-2 text-right text-xs font-bold text-gray-500 uppercase"
-                    >
-                      Unit price
-                    </th>
-                    <th
-                      scope="col"
-                      className="pb-2 text-right text-xs font-bold text-gray-500 uppercase"
-                    >
-                      Line total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-gray-100 last:border-0"
-                    >
-                      <td className="py-3 pr-3">
-                        <div className="flex items-center gap-3">
-                          {item.product.image ? (
-                            <img
-                              src={item.product.image}
-                              alt=""
-                              className="h-10 w-10 shrink-0 rounded object-cover"
-                            />
-                          ) : (
-                            <div
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-gray-100 text-xs text-gray-400"
-                              aria-hidden="true"
-                            >
-                              —
-                            </div>
-                          )}
-                          <span className="font-medium text-gray-700">
-                            {item.product.name}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-3 pr-3 text-center text-gray-600">
-                        {item.quantity}
-                      </td>
-                      <td className="py-3 pr-3 text-right text-gray-600">
-                        {formatTaka(item.unitPrice)}
-                      </td>
-                      <td className="py-3 text-right font-medium text-gray-700">
-                        {formatTaka(item.lineTotal)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              </div>
+            </div>
+            <div className="mt-4 border-t border-(--border-light) pt-3">
+              <div className="flex items-start gap-2">
+                <MapPin
+                  className="mt-0.5 size-4 shrink-0 text-(--text-muted)"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="text-xs font-medium text-(--text-muted)">
+                    Delivery address
+                  </p>
+                  <p className="mt-1 text-sm whitespace-pre-line text-(--text-primary)">
+                    {order.customerAddress}
+                  </p>
+                  <p className="mt-1 text-sm text-(--text-muted)">
+                    {order.deliveryArea}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 border-t border-(--border-light) pt-3">
+                <p className="text-xs font-medium text-(--text-muted)">
+                  Order note
+                </p>
+                <p className="mt-1 text-sm text-(--text-primary)">
+                  {order.notes || (
+                    <span className="text-(--text-muted) italic">
+                      No note provided
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
           </Card>
         </div>
 
-        {/* Right 1/3 */}
-        <div className="flex flex-col gap-5">
-          <Card title="Summary">
-            <dl>
+        <aside className="flex flex-col gap-5">
+          <Card title="Payment summary">
+            <dl className="divide-y divide-(--border-light)">
               <Row label="Subtotal">{formatTaka(order.subtotal)}</Row>
               <Row label="Delivery">{formatTaka(order.deliveryCharge)}</Row>
-              <Row label="Total">
-                <span className="font-semibold text-gray-800">
+              <div className="flex items-center justify-between gap-3 py-3">
+                <dt className="text-sm font-semibold text-(--text-primary)">
+                  Total
+                </dt>
+                <dd className="text-lg font-bold text-(--primary) tabular-nums">
                   {formatTaka(order.total)}
+                </dd>
+              </div>
+              <Row label="Method">
+                {getPaymentMethodLabel(order.paymentMethod)}
+              </Row>
+              <Row label="Payment status">
+                <span className="inline-flex items-center gap-1.5">
+                  {order.paymentStatus === "paid" && (
+                    <Check
+                      className="size-4 text-emerald-600"
+                      aria-hidden="true"
+                    />
+                  )}
+                  {payCfg.label}
                 </span>
               </Row>
-              <Row label="Area">{order.deliveryArea}</Row>
-              <Row label="Payment">{order.paymentMethod}</Row>
             </dl>
           </Card>
 
-          <Card title="Actions">
-            <div className="flex flex-col gap-4">
-              {/* Order status transitions */}
+          <Card title="Update order">
+            <div className="space-y-5">
               <div>
-                <p className="mb-2 text-xs font-medium text-gray-500 uppercase">
+                <p className="mb-2 text-xs font-semibold tracking-wide text-(--text-muted) uppercase">
                   Order status
                 </p>
                 {nextStatuses.length === 0 ? (
-                  <p className="text-sm text-gray-400 italic">
-                    This order is final.
+                  <p className="rounded-md bg-(--bg-table-header) px-3 py-2.5 text-sm text-(--text-muted)">
+                    This order is in a final status.
                   </p>
                 ) : (
                   <div className="flex flex-col gap-2">
@@ -468,10 +602,10 @@ export default function OrderDetailPage() {
                           type="button"
                           disabled={mutating}
                           onClick={() => handleOrderStatusClick(next)}
-                          className={`rounded px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                          className={`admin-template-button w-full disabled:cursor-not-allowed disabled:opacity-50 ${
                             isCancelBtn
-                              ? "border border-red-300 text-red-600 hover:bg-red-50"
-                              : "bg-[#3f6ad8] text-white hover:bg-[#3458b5]"
+                              ? "border border-red-200 bg-white text-red-700 hover:bg-red-50"
+                              : "admin-template-button--primary"
                           }`}
                         >
                           {isPending
@@ -483,33 +617,21 @@ export default function OrderDetailPage() {
                   </div>
                 )}
               </div>
-
-              {/* Payment toggle */}
-              <div>
-                <p className="mb-2 text-xs font-medium text-gray-500 uppercase">
+              <div className="border-t border-(--border-light) pt-4">
+                <p className="mb-2 text-xs font-semibold tracking-wide text-(--text-muted) uppercase">
                   Payment status
                 </p>
                 {isCancelled ? (
-                  <div>
-                    <button
-                      type="button"
-                      disabled
-                      className="w-full cursor-not-allowed rounded border border-gray-200 px-4 py-2 text-sm font-medium text-gray-400"
-                    >
-                      {order.paymentStatus === "paid"
-                        ? "Mark as unpaid"
-                        : "Mark as paid"}
-                    </button>
-                    <p className="mt-1 text-xs text-gray-400">
-                      Cannot change payment on a cancelled order.
-                    </p>
-                  </div>
+                  <p className="text-xs leading-relaxed text-(--text-muted)">
+                    Payment status cannot be changed after an order is
+                    cancelled.
+                  </p>
                 ) : (
                   <button
                     type="button"
                     disabled={mutating}
                     onClick={() => handlePaymentToggle(order.paymentStatus)}
-                    className="w-full rounded border border-[#3f6ad8] px-4 py-2 text-sm font-medium text-[#3f6ad8] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="admin-template-button admin-template-button--secondary w-full disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {mutating && pendingAction?.startsWith("pay-")
                       ? "Updating…"
@@ -521,7 +643,18 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </Card>
-        </div>
+
+          <div className="flex items-start gap-3 rounded-md border border-(--border-light) bg-white p-4">
+            <Clock3
+              className="mt-0.5 size-4 shrink-0 text-(--primary)"
+              aria-hidden="true"
+            />
+            <p className="text-xs leading-relaxed text-(--text-muted)">
+              Order received on {formatOrderDate(order.createdAt)}. Status
+              changes are saved immediately.
+            </p>
+          </div>
+        </aside>
       </div>
 
       {/* Cancel confirmation (inline dialog) */}
@@ -533,37 +666,40 @@ export default function OrderDetailPage() {
           aria-describedby="cancel-dialog-desc"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
         >
-          <div className="w-full max-w-md rounded-lg bg-white shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-(--border-light) bg-white shadow-xl">
             <div className="px-6 py-5">
               <h2
                 id="cancel-dialog-title"
-                className="text-base font-bold text-gray-800"
+                className="text-base font-bold text-(--text-primary)"
               >
                 Cancel order?
               </h2>
-              <p id="cancel-dialog-desc" className="mt-2 text-sm text-gray-600">
+              <p
+                id="cancel-dialog-desc"
+                className="mt-2 text-sm text-(--text-muted)"
+              >
                 Cancel order{" "}
-                <strong className="font-semibold text-gray-800">
+                <strong className="font-semibold text-(--text-primary)">
                   {order.orderNumber}
                 </strong>
                 ? This action cannot be undone.
               </p>
             </div>
-            <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4">
+            <div className="flex justify-end gap-3 border-t border-(--border-light) px-6 py-4">
               <button
                 type="button"
                 onClick={() => {
                   setConfirmCancelOpen(false)
                   cancelTriggerRef.current?.focus()
                 }}
-                className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                className="admin-template-button admin-template-button--secondary"
               >
                 Go back
               </button>
               <button
                 type="button"
                 onClick={handleConfirmCancel}
-                className="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                className="admin-template-button border border-red-600 bg-red-600 text-white hover:bg-red-700"
               >
                 Cancel order
               </button>

@@ -19,16 +19,16 @@ const pageColors = {
 } as CSSProperties
 
 const styles = {
-  bg: "bg-gradient-to-br from-[var(--jingseng-dark)] via-[var(--jingseng-brown)] to-[var(--jingseng-dark)]",
-  sectionBg: "bg-[var(--jingseng-section)]",
+  bg: "bg-linear-to-br from-(--jingseng-dark) via-(--jingseng-brown) to-(--jingseng-dark)",
+  sectionBg: "bg-(--jingseng-section)",
   textColor: "text-white",
-  primaryTextColor: "text-[var(--jingseng-gold)]",
-  primaryBgColor: "bg-[var(--jingseng-gold)]",
-  badgeBgColor: "bg-[var(--jingseng-gold)]/30",
+  primaryTextColor: "text-(--jingseng-gold)",
+  primaryBgColor: "bg-(--jingseng-gold)",
+  badgeBgColor: "bg-(--jingseng-gold)/30",
   productImageShadow: "drop-shadow-[0_1px_80px_var(--jingseng-gold-shadow)]",
 }
 const whyChooseSectionStyles = {
-  sectionBg: "bg-[var(--jingseng-dark)]",
+  sectionBg: "bg-(--jingseng-dark)",
 }
 
 const JingsengPlus = () => {
@@ -53,8 +53,8 @@ const JingsengPlus = () => {
         product={product}
         theme={{
           ...styles,
-          sectionBg: "bg-[var(--jingseng-brown)]",
-          badgeBgColor: "bg-[var(--jingseng-gold)]/20",
+          sectionBg: "bg-(--jingseng-brown)",
+          badgeBgColor: "bg-(--jingseng-gold)/20",
         }}
         title="🔒 সম্পূর্ণ গোপন ডেলিভারি"
       />
@@ -64,9 +64,9 @@ const JingsengPlus = () => {
         title={`আজই আপনার ${product.brand_name} অর্ডার করুন`}
         subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
         styles={{
-          sectionBg: "bg-[var(--jingseng-dark)]",
-          formBg: "bg-[var(--jingseng-brown)]/40",
-          formBorderColor: "border-[var(--jingseng-gold)]/20",
+          sectionBg: "bg-(--jingseng-dark)",
+          formBg: "bg-(--jingseng-brown)/40",
+          formBorderColor: "border-(--jingseng-gold)/20",
         }}
       />
       <div className="pb-12 sm:pb-16">
@@ -76,12 +76,12 @@ const JingsengPlus = () => {
           styles={whyChooseSectionStyles}
         />
         <Footer
-          // classNames="bg-[var(--ultrahot-background)]"
-          theme={{ sectionBg: "bg-[var(--jingseng-dark)]" }}
+          // classNames="bg-(--ultrahot-background)"
+          theme={{ sectionBg: "bg-(--jingseng-dark)" }}
         />
         <ProductStickyActions
           product={product}
-          theme={{ ...styles, sectionBg: "bg-[var(--jingseng-dark)]" }}
+          theme={{ ...styles, sectionBg: "bg-(--jingseng-dark)" }}
         />
       </div>
     </main>

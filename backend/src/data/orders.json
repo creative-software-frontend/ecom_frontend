@@ -1,1 +1,438 @@
-[]
+[
+  {
+    "orderNumber": "PZ-DEMO-1001",
+    "customerName": "Md. Rakib Hasan",
+    "customerPhone": "01711223344",
+    "customerAddress": "House 12, Road 5, Dhanmondi, Dhaka",
+    "notes": "Please call before delivery.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 3200,
+    "total": 3200,
+    "paymentMethod": "cod",
+    "paymentStatus": "paid",
+    "status": "delivered",
+    "createdAt": "2026-09-27T10:15:00.000Z",
+    "items": [
+      {
+        "productSlug": "ultrahot",
+        "quantity": 2,
+        "unitPrice": 1600
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1002",
+    "customerName": "Sadia Akter",
+    "customerPhone": "01822334455",
+    "customerAddress": "Flat 4B, Green Villa, Uttara Sector 10, Dhaka",
+    "notes": null,
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 3200,
+    "total": 3200,
+    "paymentMethod": "cod",
+    "paymentStatus": "paid",
+    "status": "delivered",
+    "createdAt": "2026-09-29T13:40:00.000Z",
+    "items": [
+      {
+        "productSlug": "jingseng-plus",
+        "quantity": 1,
+        "unitPrice": 1700
+      },
+      {
+        "productSlug": "ling-long",
+        "quantity": 1,
+        "unitPrice": 1500
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1003",
+    "customerName": "Tanvir Ahmed",
+    "customerPhone": "01933445566",
+    "customerAddress": "Plot 27, Lane 3, Bashundhara R/A, Dhaka",
+    "notes": "Deliver after 6 PM.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 1500,
+    "total": 1500,
+    "paymentMethod": "cod",
+    "paymentStatus": "paid",
+    "status": "delivered",
+    "createdAt": "2026-10-02T09:05:00.000Z",
+    "items": [
+      {
+        "productSlug": "ling-long",
+        "quantity": 1,
+        "unitPrice": 1500
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1004",
+    "customerName": "Nusrat Jahan",
+    "customerPhone": "01644556677",
+    "customerAddress": "House 8, Road 2, Banani, Dhaka",
+    "notes": null,
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 3300,
+    "total": 3300,
+    "paymentMethod": "cod",
+    "paymentStatus": "paid",
+    "status": "confirmed",
+    "createdAt": "2026-10-08T16:25:00.000Z",
+    "items": [
+      {
+        "productSlug": "ultrahot",
+        "quantity": 1,
+        "unitPrice": 1600
+      },
+      {
+        "productSlug": "jingseng-plus",
+        "quantity": 1,
+        "unitPrice": 1700
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1005",
+    "customerName": "Imran Hossain",
+    "customerPhone": "01755667788",
+    "customerAddress": "House 45, CDA Avenue, Sholoshahar, Chattogram",
+    "notes": "Gift wrap is not required.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 3400,
+    "total": 3400,
+    "paymentMethod": "cod",
+    "paymentStatus": "paid",
+    "status": "shipped",
+    "createdAt": "2026-10-12T11:10:00.000Z",
+    "items": [
+      {
+        "productSlug": "jingseng-plus",
+        "quantity": 2,
+        "unitPrice": 1700
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1006",
+    "customerName": "Farzana Rahman",
+    "customerPhone": "01866778899",
+    "customerAddress": "House 19, Road 7, Rampura, Dhaka",
+    "notes": "Please use a discreet package.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 4600,
+    "total": 4600,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "shipped",
+    "createdAt": "2026-10-16T14:30:00.000Z",
+    "items": [
+      {
+        "productSlug": "ultrahot",
+        "quantity": 1,
+        "unitPrice": 1600
+      },
+      {
+        "productSlug": "ling-long",
+        "quantity": 2,
+        "unitPrice": 1500
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1007",
+    "customerName": "Mahin Chowdhury",
+    "customerPhone": "01977889900",
+    "customerAddress": "Flat 2A, Sun Rise Apartments, Mirpur 10, Dhaka",
+    "notes": null,
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 1600,
+    "total": 1600,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "pending",
+    "createdAt": "2026-10-20T08:45:00.000Z",
+    "items": [
+      {
+        "productSlug": "ultrahot",
+        "quantity": 1,
+        "unitPrice": 1600
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1008",
+    "customerName": "Sharmin Sultana",
+    "customerPhone": "01688990011",
+    "customerAddress": "House 33, Road 12, Mohammadpur, Dhaka",
+    "notes": "Call after 4 PM.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 1700,
+    "total": 1700,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "pending",
+    "createdAt": "2026-10-22T17:20:00.000Z",
+    "items": [
+      {
+        "productSlug": "jingseng-plus",
+        "quantity": 1,
+        "unitPrice": 1700
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1009",
+    "customerName": "Arif Mahmud",
+    "customerPhone": "01799001122",
+    "customerAddress": "House 11, Road 4, Khulshi, Chattogram",
+    "notes": null,
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 1500,
+    "total": 1500,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "confirmed",
+    "createdAt": "2026-10-24T12:00:00.000Z",
+    "items": [
+      {
+        "productSlug": "ling-long",
+        "quantity": 1,
+        "unitPrice": 1500
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1010",
+    "customerName": "Mehedi Hasan",
+    "customerPhone": "01810012233",
+    "customerAddress": "House 56, Zindabazar, Sylhet",
+    "notes": "Please deliver within 3 days.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 6500,
+    "total": 6500,
+    "paymentMethod": "cod",
+    "paymentStatus": "paid",
+    "status": "shipped",
+    "createdAt": "2026-10-26T10:50:00.000Z",
+    "items": [
+      {
+        "productSlug": "ultrahot",
+        "quantity": 1,
+        "unitPrice": 1600
+      },
+      {
+        "productSlug": "jingseng-plus",
+        "quantity": 2,
+        "unitPrice": 1700
+      },
+      {
+        "productSlug": "ling-long",
+        "quantity": 1,
+        "unitPrice": 1500
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1011",
+    "customerName": "Rumana Islam",
+    "customerPhone": "01921123344",
+    "customerAddress": "House 7, Road 9, Uttara Sector 3, Dhaka",
+    "notes": "Customer requested cancellation.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 1600,
+    "total": 1600,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "cancelled",
+    "createdAt": "2026-10-27T15:35:00.000Z",
+    "items": [
+      {
+        "productSlug": "ultrahot",
+        "quantity": 1,
+        "unitPrice": 1600
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1012",
+    "customerName": "Kamrul Islam",
+    "customerPhone": "01632234455",
+    "customerAddress": "House 22, Bogura Sadar, Bogura",
+    "notes": null,
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 1700,
+    "total": 1700,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "cancelled",
+    "createdAt": "2026-10-28T09:25:00.000Z",
+    "items": [
+      {
+        "productSlug": "jingseng-plus",
+        "quantity": 1,
+        "unitPrice": 1700
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1013",
+    "customerName": "Sabrina Khan",
+    "customerPhone": "01743345566",
+    "customerAddress": "Flat 5C, Lake View Apartments, Gulshan 2, Dhaka",
+    "notes": "Please confirm the order by phone.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 4700,
+    "total": 4700,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "pending",
+    "createdAt": "2026-10-29T18:05:00.000Z",
+    "items": [
+      {
+        "productSlug": "ultrahot",
+        "quantity": 2,
+        "unitPrice": 1600
+      },
+      {
+        "productSlug": "ling-long",
+        "quantity": 1,
+        "unitPrice": 1500
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1014",
+    "customerName": "Shahriar Kabir",
+    "customerPhone": "01854456677",
+    "customerAddress": "House 14, Road 6, Agrabad, Chattogram",
+    "notes": null,
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 3000,
+    "total": 3000,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "confirmed",
+    "createdAt": "2026-10-30T11:45:00.000Z",
+    "items": [
+      {
+        "productSlug": "ling-long",
+        "quantity": 2,
+        "unitPrice": 1500
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1015",
+    "customerName": "Fahim Reza",
+    "customerPhone": "01965567788",
+    "customerAddress": "House 9, Mirzapur Road, Tangail",
+    "notes": "Please call 30 minutes before arrival.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 3300,
+    "total": 3300,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "shipped",
+    "createdAt": "2026-10-31T13:15:00.000Z",
+    "items": [
+      {
+        "productSlug": "jingseng-plus",
+        "quantity": 1,
+        "unitPrice": 1700
+      },
+      {
+        "productSlug": "ultrahot",
+        "quantity": 1,
+        "unitPrice": 1600
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1016",
+    "customerName": "Tahmina Begum",
+    "customerPhone": "01676678899",
+    "customerAddress": "House 18, Road 3, Cox's Bazar Sadar, Cox's Bazar",
+    "notes": "Customer changed their mind.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 1500,
+    "total": 1500,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "cancelled",
+    "createdAt": "2026-11-01T10:20:00.000Z",
+    "items": [
+      {
+        "productSlug": "ling-long",
+        "quantity": 1,
+        "unitPrice": 1500
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1017",
+    "customerName": "Rashedul Karim",
+    "customerPhone": "01787788990",
+    "customerAddress": "Flat 3A, Rose Garden, Mohakhali, Dhaka",
+    "notes": null,
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 3300,
+    "total": 3300,
+    "paymentMethod": "cod",
+    "paymentStatus": "unpaid",
+    "status": "pending",
+    "createdAt": "2026-11-02T08:30:00.000Z",
+    "items": [
+      {
+        "productSlug": "ultrahot",
+        "quantity": 1,
+        "unitPrice": 1600
+      },
+      {
+        "productSlug": "jingseng-plus",
+        "quantity": 1,
+        "unitPrice": 1700
+      }
+    ]
+  },
+  {
+    "orderNumber": "PZ-DEMO-1018",
+    "customerName": "Ayesha Siddiqua",
+    "customerPhone": "01898899001",
+    "customerAddress": "House 31, Road 8, Banasree, Dhaka",
+    "notes": "Paid in advance via bank transfer.",
+    "deliveryArea": "Free Delivery",
+    "deliveryCharge": 0,
+    "subtotal": 3400,
+    "total": 3400,
+    "paymentMethod": "cod",
+    "paymentStatus": "paid",
+    "status": "confirmed",
+    "createdAt": "2026-11-03T09:10:00.000Z",
+    "items": [
+      {
+        "productSlug": "jingseng-plus",
+        "quantity": 2,
+        "unitPrice": 1700
+      }
+    ]
+  }
+]

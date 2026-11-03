@@ -12,7 +12,7 @@ import {
 } from "../schemas/order.schema.js";
 
 // get order details by id
-async function fetchOrderDetail(id: string) {
+async function fetchOrderDetail(id: number) {
   const order = await prisma.order.findUnique({
     where: { id },
     include: {
@@ -193,7 +193,7 @@ export async function listOrders(req: Request, res: Response) {
 export async function getOrderById(req: Request, res: Response) {
   const { id } = req.params;
 
-  if (!id || typeof id !== "string") {
+  if (!id || typeof id !== "number") {
     return res.status(404).json({ success: false, message: "Order not found" });
   }
 
@@ -216,9 +216,10 @@ export async function getOrderById(req: Request, res: Response) {
 }
 
 export async function updateOrderStatus(req: Request, res: Response) {
-  const { id } = req.params;
+  const idString = req.params.id;
+  const id = parseInt(idString as string);
 
-  if (!id || typeof id !== "string") {
+  if (!id || typeof id !== "number") {
     return res.status(404).json({ success: false, message: "Order not found" });
   }
 

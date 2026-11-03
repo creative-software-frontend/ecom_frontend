@@ -36,6 +36,11 @@ const dotStyles: Partial<Record<StatusBadgeVariant, string>> = {
   primary: "bg-indigo-600",
   success: "bg-emerald-600",
   danger: "bg-red-600",
+  active: "bg-emerald-600",
+  inactive: "bg-red-600",
+  "in-stock": "bg-emerald-600",
+  "low-stock": "bg-amber-600",
+  "out-of-stock": "bg-red-600",
 }
 
 export function StatusBadge({

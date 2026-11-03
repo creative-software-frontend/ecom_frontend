@@ -11,7 +11,7 @@ export default function NotFound() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[clamp(12rem,38vw,34rem)] leading-none font-black text-[#1a0b15]/[0.025] select-none"
+        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[clamp(12rem,38vw,34rem)] leading-none font-black text-[#1a0b15]/2.5 select-none"
       >
         404
       </div>

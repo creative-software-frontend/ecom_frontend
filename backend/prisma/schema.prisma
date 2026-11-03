@@ -33,7 +33,7 @@ model Product {
 }
 
 model Order {
-  id              String      @id @default(uuid())
+  id              Int         @id @default(autoincrement())
   orderNumber     String      @unique @map("order_number")
   customerName    String      @map("customer_name")
   customerPhone   String      @map("customer_phone")
@@ -54,7 +54,7 @@ model Order {
 
 model OrderItem {
   id        String  @id @default(uuid())
-  orderId   String  @map("order_id")
+  orderId   Int     @map("order_id")
   productId String  @map("product_id")
   quantity  Int
   unitPrice Int     @map("unit_price")

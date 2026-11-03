@@ -25,14 +25,14 @@ const pageColors = {
 
 const styles = {
   appearance: "light" as const,
-  bg: "bg-[var(--linglong-background)]",
-  sectionBg: "bg-[var(--linglong-section)]",
-  textColor: "text-[var(--linglong-text)]",
-  primaryTextColor: "text-[var(--linglong-red)]",
-  primaryBgColor: "bg-[var(--linglong-red)]",
-  badgeBgColor: "bg-[var(--linglong-badge)]",
-  badgeOutlineColor: "ring-[var(--linglong-outline)]",
-  descriptionTextColor: "text-[var(--linglong-muted)]",
+  bg: "bg-(--linglong-background)",
+  sectionBg: "bg-(--linglong-section)",
+  textColor: "text-(--linglong-text)",
+  primaryTextColor: "text-(--linglong-red)",
+  primaryBgColor: "bg-(--linglong-red)",
+  badgeBgColor: "bg-(--linglong-badge)",
+  badgeOutlineColor: "ring-(--linglong-outline)",
+  descriptionTextColor: "text-(--linglong-muted)",
   productImageShadow: "drop-shadow-[0_25px_28px_var(--linglong-shadow)]",
 }
 
@@ -64,7 +64,7 @@ const LingLong = () => {
         title={`অর্ডার করুন`}
         subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
         styles={{
-          formBorderColor: "border-[var(--linglong-outline)]/50",
+          formBorderColor: "border-(--linglong-outline)/50",
         }}
       />
       <div className="pb-12 sm:pb-16">
@@ -74,10 +74,10 @@ const LingLong = () => {
           styles={styles}
           theme={styles}
         />
-        <Footer theme={{ sectionBg: "bg-[var(--linglong-background)]" }} />
+        <Footer theme={{ sectionBg: "bg-(--linglong-background)" }} />
         <ProductStickyActions
           product={product}
-          theme={{ ...styles, sectionBg: "bg-[var(--linglong-background)]" }}
+          theme={{ ...styles, sectionBg: "bg-(--linglong-background)" }}
         />
       </div>
     </main>

@@ -17,22 +17,22 @@ const pageColors = {
 } as CSSProperties
 
 const styles: ProductTheme = {
-  bg: "bg-gradient-to-br from-[var(--ultrahot-background)] via-[var(--ultrahot-section)] to-[var(--ultrahot-background)]",
+  bg: "bg-linear-to-br from-(--ultrahot-background) via-(--ultrahot-section) to-(--ultrahot-background)",
   textColor: "text-white",
-  primaryTextColor: "text-[var(--ultrahot-gold)]",
-  primaryBgColor: "bg-[var(--ultrahot-gold)]",
-  badgeBgColor: "bg-[var(--ultrahot-gold)]/20",
-  badgeOutlineColor: "ring-[var(--ultrahot-gold)]/40",
+  primaryTextColor: "text-(--ultrahot-gold)",
+  primaryBgColor: "bg-(--ultrahot-gold)",
+  badgeBgColor: "bg-(--ultrahot-gold)/20",
+  badgeOutlineColor: "ring-(--ultrahot-gold)/40",
   descriptionTextColor: "text-white/60",
   productImageShadow: "drop-shadow-[0_35px_35px_var(--ultrahot-gold-shadow)]",
 }
 
 const problemSectionStyles = {
-  sectionBg: "bg-[var(--ultrahot-section)]",
+  sectionBg: "bg-(--ultrahot-section)",
 }
 
 const benefitSectionStyles = {
-  sectionBg: "bg-[var(--ultrahot-background)]",
+  sectionBg: "bg-(--ultrahot-background)",
 }
 
 const Ultrahot = () => {
@@ -64,8 +64,8 @@ const Ultrahot = () => {
         product={product}
         theme={{
           ...styles,
-          sectionBg: "bg-[var(--ultrahot-section)]",
-          badgeBgColor: "bg-[var(--ultrahot-gold)]/20",
+          sectionBg: "bg-(--ultrahot-section)",
+          badgeBgColor: "bg-(--ultrahot-gold)/20",
         }}
       />
       <OrderForm
@@ -74,9 +74,9 @@ const Ultrahot = () => {
         title={`আজই আপনার ULTRAHOT অর্ডার করুন`}
         subtitle="অর্ডার করার পর আমাদের প্রতিনিধি আপনাকে কল করে নিশ্চিত করবেন।"
         styles={{
-          sectionBg: "bg-[var(--ultrahot-background)]",
-          formBg: "bg-[var(--ultrahot-section)]/60",
-          formBorderColor: "border-[var(--ultrahot-gold)]/20",
+          sectionBg: "bg-(--ultrahot-background)",
+          formBg: "bg-(--ultrahot-section)/60",
+          formBorderColor: "border-(--ultrahot-gold)/20",
         }}
       />
       <div className="pb-12 sm:pb-16">
@@ -85,10 +85,10 @@ const Ultrahot = () => {
           borderColorVar={"var(--ultrahot-gold)"}
           styles={benefitSectionStyles}
         />
-        <Footer theme={{ sectionBg: "bg-[var(--ultrahot-background)]" }} />
+        <Footer theme={{ sectionBg: "bg-(--ultrahot-background)" }} />
         <ProductStickyActions
           product={product}
-          theme={{ ...styles, sectionBg: "bg-[var(--ultrahot-background)]" }}
+          theme={{ ...styles, sectionBg: "bg-(--ultrahot-background)" }}
         />
       </div>
     </main>

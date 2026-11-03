@@ -23,9 +23,9 @@ import {
   formatOrderDate,
   formatTaka,
 } from "../lib/orderStatus"
-import { Download } from "lucide-react"
+import { Download, Plus } from "lucide-react"
 
-const PAGE_LIMIT = 20
+const PAGE_LIMIT = 10
 const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
   { value: "", label: "All" },
   { value: "pending", label: "Pending" },
@@ -200,7 +200,7 @@ export default function OrdersPage() {
   const columns: TableColumn<OrderListItem>[] = useMemo(
     () => [
       {
-        name: "Order #",
+        name: "Order",
         selector: (row) => row.orderNumber,
         sortable: false,
         cell: (row) => (
@@ -326,7 +326,7 @@ export default function OrdersPage() {
             to="/admin/orders/new"
             className="admin-template-button admin-template-button--primary"
           >
-            + Create Order
+            <Plus className="icon-size" /> Create Order
           </Link>
         </div>
       </div>
@@ -365,7 +365,7 @@ export default function OrdersPage() {
             placeholder="Search by order number, name or phone"
             value={inputValue}
             onChange={handleSearchChange}
-            inputClassName="rounded-md border border-[var(--border-light)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] w-80"
+            inputClassName="rounded-md border border-(--border-light) px-3 py-1.5 text-sm text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary) w-80"
           />
         </div>
 
@@ -392,7 +392,7 @@ export default function OrdersPage() {
             paginationTotalRows={total}
             paginationDefaultPage={page}
             paginationPerPage={PAGE_LIMIT}
-            paginationRowsPerPageOptions={[20]}
+            paginationRowsPerPageOptions={[10, 20, 50]}
             onChangePage={(newPage) => {
               setSearchParams((prev) => {
                 const next = new URLSearchParams(prev)
