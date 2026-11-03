@@ -11,6 +11,15 @@ import {
   updateOrderStatusSchema,
 } from "../schemas/order.schema.js";
 
+function getDhakaDayStart(date: string, dayOffset = 0): Date {
+  const year = Number(date.slice(0, 4));
+  const month = Number(date.slice(5, 7));
+  const day = Number(date.slice(8, 10));
+  return new Date(
+    Date.UTC(year, month - 1, day + dayOffset) - 6 * 60 * 60 * 1000,
+  );
+}
+
 // get order details by id
 async function fetchOrderDetail(id: number) {
   const order = await prisma.order.findUnique({
@@ -85,12 +94,25 @@ export async function listOrders(req: Request, res: Response) {
     });
   }
 
-  const { page, limit, status, q } = parsed.data;
+  const { page, limit, status, paymentStatus, area, dateFrom, dateTo, q } =
+    parsed.data;
 
   const where: Prisma.OrderWhereInput = {};
 
   if (status) {
     where.status = status;
+  }
+  if (paymentStatus) {
+    where.paymentStatus = paymentStatus;
+  }
+  if (area) {
+    where.deliveryArea = area;
+  }
+  if (dateFrom || dateTo) {
+    const dateFilter: Prisma.DateTimeFilter = {};
+    if (dateFrom) dateFilter.gte = getDhakaDayStart(dateFrom);
+    if (dateTo) dateFilter.lt = getDhakaDayStart(dateTo, 1);
+    where.createdAt = dateFilter;
   }
 
   const trimmedQ = q?.trim();
@@ -106,7 +128,7 @@ export async function listOrders(req: Request, res: Response) {
   const take = limit;
 
   try {
-    const [orders, total, statusGroups] = await prisma.$transaction([
+    const [orders, total, statusGroups, areaGroups] = await prisma.$transaction([
       prisma.order.findMany({
         where,
         skip,
@@ -136,6 +158,11 @@ export async function listOrders(req: Request, res: Response) {
         _count: {
           _all: true,
         },
+      }),
+      prisma.order.findMany({
+        distinct: ["deliveryArea"],
+        select: { deliveryArea: true },
+        orderBy: { deliveryArea: "asc" },
       }),
     ]);
 
@@ -179,6 +206,7 @@ export async function listOrders(req: Request, res: Response) {
         page,
         limit,
         total,
+        areas: areaGroups.map(({ deliveryArea }) => deliveryArea),
         counts,
       },
     });
@@ -191,15 +219,13 @@ export async function listOrders(req: Request, res: Response) {
 }
 
 export async function getOrderById(req: Request, res: Response) {
-  const { id } = req.params;
-
+  const id = parseInt(req.params.id as string);
   if (!id || typeof id !== "number") {
     return res.status(404).json({ success: false, message: "Order not found" });
   }
 
   try {
     const order = await fetchOrderDetail(id);
-
     if (!order) {
       return res
         .status(404)

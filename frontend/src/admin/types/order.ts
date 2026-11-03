@@ -1,9 +1,5 @@
 export type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "shipped"
-  | "delivered"
-  | "cancelled"
+  "pending" | "confirmed" | "shipped" | "delivered" | "cancelled"
 
 export type PaymentStatus = "unpaid" | "paid"
 
@@ -35,6 +31,7 @@ export type OrdersListResponse = {
   page: number
   limit: number
   total: number
+  areas: string[]
   counts: OrderCounts
 }
 
@@ -42,6 +39,10 @@ export type OrderListParams = {
   page?: number
   limit?: number
   status?: OrderStatus
+  paymentStatus?: PaymentStatus
+  area?: string
+  dateFrom?: string
+  dateTo?: string
   q?: string
 }
 
@@ -80,4 +81,3 @@ export type UpdateStatusBody = {
   orderStatus?: OrderStatus
   paymentStatus?: PaymentStatus
 }
-

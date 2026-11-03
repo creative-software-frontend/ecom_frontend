@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react"
 import { Link } from "react-router"
 
 type NotFoundStateProps = {
@@ -44,8 +45,8 @@ export function NotFoundState({
           ) : null}
         </>
       ) : null}
-      <Link to={backTo} className={linkClassName}>
-        {backLabel}
+      <Link to={backTo} className={`${linkClassName} flex items-center gap-2`}>
+        <ArrowLeft className="size-5" /> {backLabel}
       </Link>
     </div>
   )

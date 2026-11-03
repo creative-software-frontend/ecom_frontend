@@ -9,7 +9,6 @@ import { ApiError } from "../api/client"
 import { EmptyState } from "../components/common/EmptyState"
 import { ErrorState } from "../components/common/ErrorState"
 import { LoadingState } from "../components/common/LoadingState"
-import { SearchInput } from "../components/common/SearchInput"
 import { StatusBadge } from "../components/common/StatusBadge"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import type {
@@ -23,7 +22,7 @@ import {
   formatOrderDate,
   formatTaka,
 } from "../lib/orderStatus"
-import { Download, Plus } from "lucide-react"
+import { CalendarDays, Download, Plus, Search } from "lucide-react"
 
 const PAGE_LIMIT = 10
 const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
@@ -52,11 +51,11 @@ const tableCustomStyles = {
   headCells: {
     style: {
       color: "var(--text-muted)",
-      fontSize: "12px",
+      fontSize: "10px",
       fontWeight: "600",
       textTransform: "uppercase" as const,
-      paddingLeft: "16px",
-      paddingRight: "16px",
+      paddingLeft: "12px",
+      paddingRight: "12px",
     },
   },
   rows: {
@@ -72,10 +71,10 @@ const tableCustomStyles = {
   },
   cells: {
     style: {
-      paddingLeft: "16px",
-      paddingRight: "16px",
+      paddingLeft: "12px",
+      paddingRight: "12px",
       color: "var(--text-primary)",
-      fontSize: "13px",
+      fontSize: "12px",
     },
   },
   pagination: {
@@ -83,8 +82,8 @@ const tableCustomStyles = {
       borderTop: "1px solid var(--border-light)",
       backgroundColor: "var(--bg-surface)",
       color: "var(--text-muted)",
-      fontSize: "13px",
-      minHeight: "52px",
+      fontSize: "10px",
+      minHeight: "44px",
     },
   },
 }
@@ -93,6 +92,10 @@ export default function OrdersPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const status = (searchParams.get("status") ?? "") as OrderStatus | ""
   const q = searchParams.get("q") ?? ""
+  const paymentStatus = searchParams.get("paymentStatus") ?? ""
+  const area = searchParams.get("area") ?? ""
+  const dateFrom = searchParams.get("dateFrom") ?? ""
+  const dateTo = searchParams.get("dateTo") ?? ""
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1)
 
   const [inputValue, setInputValue] = useState(q)
@@ -119,6 +122,12 @@ export default function OrdersPage() {
         limit: PAGE_LIMIT,
       }
       if (status) params.status = status as OrderStatus
+      if (paymentStatus === "paid" || paymentStatus === "unpaid") {
+        params.paymentStatus = paymentStatus
+      }
+      if (area) params.area = area
+      if (dateFrom) params.dateFrom = dateFrom
+      if (dateTo) params.dateTo = dateTo
       if (q.trim()) params.q = q.trim()
 
       ordersApi
@@ -139,7 +148,7 @@ export default function OrdersPage() {
           )
         })
     },
-    [page, status, q]
+    [page, status, paymentStatus, area, dateFrom, dateTo, q]
   )
 
   useEffect(() => {
@@ -166,6 +175,19 @@ export default function OrdersPage() {
     searchScheduledRef.current = true
     setInputValue(e.target.value)
     setSearchSequence((seq) => seq + 1)
+  }
+
+  function updateFilter(key: string, value: string) {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        if (value) next.set(key, value)
+        else next.delete(key)
+        next.set("page", "1")
+        return next
+      },
+      { replace: true }
+    )
   }
 
   useEffect(() => {
@@ -270,7 +292,13 @@ export default function OrdersPage() {
         center: true,
         cell: (row) => {
           const payCfg = PAYMENT_STATUS_CONFIG[row.paymentStatus]
-          return <StatusBadge variant={payCfg.variant} label={payCfg.label} />
+          return (
+            <StatusBadge
+              variant={payCfg.variant}
+              label={payCfg.label}
+              className="!text-[10px]"
+            />
+          )
         },
       },
       {
@@ -280,7 +308,11 @@ export default function OrdersPage() {
         cell: (row) => {
           const orderCfg = ORDER_STATUS_CONFIG[row.orderStatus]
           return (
-            <StatusBadge variant={orderCfg.variant} label={orderCfg.label} />
+            <StatusBadge
+              variant={orderCfg.variant}
+              label={orderCfg.label}
+              className="!text-[10px]"
+            />
           )
         },
       },
@@ -299,12 +331,12 @@ export default function OrdersPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-(--text-primary)">Orders</h1>
-            <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-(--text-muted)">
+            <h1 className="text-lg font-bold text-(--text-primary)">Orders</h1>
+            <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-(--text-muted)">
               {total} Total
             </span>
           </div>
-          <p className="mt-0.5 text-sm text-(--text-muted)">
+          <p className="mt-0.5 text-xs text-(--text-muted)">
             Manage and confirm customer orders across Bangladesh
           </p>
         </div>
@@ -312,19 +344,19 @@ export default function OrdersPage() {
           <button
             type="button"
             onClick={() => download("orders.csv")}
-            className="admin-template-button admin-template-button--secondary"
+            className="admin-template-button admin-template-button--secondary h-8 px-3 text-[11px]"
           >
             <Download className="icon-size" /> Export CSV
           </button>
           <button
             type="button"
-            className="admin-template-button admin-template-button--secondary"
+            className="admin-template-button admin-template-button--secondary h-8 px-3 text-[11px]"
           >
             Bulk Status
           </button>
           <Link
             to="/admin/orders/new"
-            className="admin-template-button admin-template-button--primary"
+            className="admin-template-button admin-template-button--primary h-8 px-3 text-[11px]"
           >
             <Plus className="icon-size" /> Create Order
           </Link>
@@ -357,16 +389,86 @@ export default function OrdersPage() {
         </div>
 
         {/* Search & Filters Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-(--border-light) bg-white px-4 py-3">
-          <SearchInput
-            id="orders-search"
-            label="Search orders"
-            labelClassName="sr-only"
-            placeholder="Search by order number, name or phone"
-            value={inputValue}
-            onChange={handleSearchChange}
-            inputClassName="rounded-md border border-(--border-light) px-3 py-1.5 text-sm text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary) w-80"
-          />
+        <div className="flex flex-wrap items-center gap-2 border-b border-(--border-light) bg-white px-3 py-3">
+          <label className="relative min-w-[220px] flex-1">
+            <span className="sr-only">Search orders</span>
+            <Search
+              className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-(--text-muted)"
+              aria-hidden="true"
+            />
+            <input
+              id="orders-search"
+              type="search"
+              placeholder="Search by order number, name or phone"
+              value={inputValue}
+              onChange={handleSearchChange}
+              className="h-9 w-full rounded-md border border-(--border-light) bg-white pr-3 pl-9 text-xs text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
+            />
+          </label>
+          <div className="flex h-9 min-w-[230px] flex-1 items-center gap-2 rounded-md border border-(--border-light) bg-white px-2.5 text-xs text-(--text-primary) sm:flex-none">
+            <CalendarDays
+              className="size-3.5 shrink-0 text-(--text-muted)"
+              aria-hidden="true"
+            />
+            <label className="min-w-0 flex-1">
+              <span className="sr-only">Start date</span>
+              <input
+                type="date"
+                value={dateFrom}
+                max={dateTo || undefined}
+                onChange={(event) =>
+                  updateFilter("dateFrom", event.target.value)
+                }
+                className="w-full min-w-0 bg-transparent text-xs outline-none"
+              />
+            </label>
+            <span className="shrink-0 text-(--text-muted)" aria-hidden="true">
+              –
+            </span>
+            <label className="min-w-0 flex-1">
+              <span className="sr-only">End date</span>
+              <input
+                type="date"
+                value={dateTo}
+                min={dateFrom || undefined}
+                onChange={(event) => updateFilter("dateTo", event.target.value)}
+                className="w-full min-w-0 bg-transparent text-xs outline-none"
+              />
+            </label>
+          </div>
+          <label className="min-w-[120px] flex-1 sm:flex-none">
+            <span className="sr-only">Filter by delivery area</span>
+            <select
+              value={area}
+              onChange={(event) => updateFilter("area", event.target.value)}
+              className="h-9 w-full rounded-md border border-(--border-light) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
+            >
+              <option value="">All Areas</option>
+              {(data?.areas ?? []).map((orderArea) => (
+                <option key={orderArea} value={orderArea}>
+                  {orderArea}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="min-w-[130px] flex-1 sm:flex-none">
+            <span className="sr-only">Filter by payment status</span>
+            <select
+              value={paymentStatus}
+              onChange={(event) =>
+                updateFilter("paymentStatus", event.target.value)
+              }
+              className="h-9 w-full rounded-md border border-(--border-light) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
+            >
+              <option value="">All Payment</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
+            </select>
+          </label>
+          <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-[#eef0ff] px-3 text-xs font-medium text-(--text-primary)">
+            <span className="size-1.5 rounded-full bg-(--primary)" />
+            {total} of {counts.all} shown
+          </span>
         </div>
 
         {/* Content Table / Loading / Error states */}

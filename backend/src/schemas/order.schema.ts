@@ -1,29 +1,41 @@
 import { z } from "zod";
 import { ORDER_STATUSES, PAYMENT_STATUSES } from "../constants/order.js";
 
-export const orderListQuerySchema = z.object({
-  page: z.coerce
-    .number({ error: "Page must be an integer" })
-    .int("Page must be an integer")
-    .min(1, "Page must be at least 1")
-    .default(1),
-  limit: z.coerce
-    .number({ error: "Limit must be an integer" })
-    .int("Limit must be an integer")
-    .min(1, "Limit must be at least 1")
-    .max(100, "Limit cannot exceed 100")
-    .default(20),
-  status: z
-    .enum(ORDER_STATUSES, {
-      error: "Invalid order status",
-    })
-    .optional(),
-  q: z
-    .string()
-    .trim()
-    .max(100, "Search query must be 100 characters or fewer")
-    .optional(),
-});
+export const orderListQuerySchema = z
+  .object({
+    page: z.coerce
+      .number({ error: "Page must be an integer" })
+      .int("Page must be an integer")
+      .min(1, "Page must be at least 1")
+      .default(1),
+    limit: z.coerce
+      .number({ error: "Limit must be an integer" })
+      .int("Limit must be an integer")
+      .min(1, "Limit must be at least 1")
+      .max(100, "Limit cannot exceed 100")
+      .default(20),
+    status: z
+      .enum(ORDER_STATUSES, {
+        error: "Invalid order status",
+      })
+      .optional(),
+    paymentStatus: z.enum(PAYMENT_STATUSES).optional(),
+    area: z.string().trim().max(100).optional(),
+    dateFrom: z.iso.date().optional(),
+    dateTo: z.iso.date().optional(),
+    q: z
+      .string()
+      .trim()
+      .max(100, "Search query must be 100 characters or fewer")
+      .optional(),
+  })
+  .refine(
+    ({ dateFrom, dateTo }) => !dateFrom || !dateTo || dateFrom <= dateTo,
+    {
+      message: "Start date must be on or before end date",
+      path: ["dateTo"],
+    },
+  );
 
 export type OrderListQuery = z.infer<typeof orderListQuerySchema>;
 
@@ -68,4 +80,3 @@ export function formatOrderValidationErrors(
 
   return errors;
 }
-

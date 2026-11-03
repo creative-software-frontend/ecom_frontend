@@ -15,6 +15,10 @@ export const ordersApi = {
     if (params.page !== undefined) query.set("page", String(params.page))
     if (params.limit !== undefined) query.set("limit", String(params.limit))
     if (params.status) query.set("status", params.status)
+    if (params.paymentStatus) query.set("paymentStatus", params.paymentStatus)
+    if (params.area) query.set("area", params.area)
+    if (params.dateFrom) query.set("dateFrom", params.dateFrom)
+    if (params.dateTo) query.set("dateTo", params.dateTo)
     if (params.q) query.set("q", params.q.trim())
     const qs = query.toString()
     const path = `/admin/orders${qs ? `?${qs}` : ""}`
@@ -30,7 +34,7 @@ export const ordersApi = {
   updateStatus(id: string, body: UpdateStatusBody): Promise<OrderDetail> {
     return apiRequest<OrderDetail>(
       `/admin/orders/${encodeURIComponent(id)}/status`,
-      { method: "PATCH", body },
+      { method: "PATCH", body }
     )
   },
 }

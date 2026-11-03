@@ -173,7 +173,7 @@ const productColumns: TableColumn<Product>[] = [
                   ? "Low stock"
                   : "Out of stock"
             }
-            className="mt-0.5 !justify-start !px-1.5 !py-0 !text-[9px]"
+            className="mt-0.5 !justify-start !px-1.5 !py-0 !text-[10px]"
           />
         </div>
       )
@@ -227,9 +227,6 @@ export function ProductCatalogTable({
   onPageChange,
   onPageSizeChange,
 }: ProductCatalogTableProps) {
-  const firstItem = total === 0 ? 0 : (page - 1) * pageSize + 1
-  const lastItem = Math.min(page * pageSize, total)
-
   return (
     <>
       <DataTable
@@ -253,16 +250,6 @@ export function ProductCatalogTable({
           </div>
         }
       />
-
-      <div className="flex flex-col gap-3 border-t border-(--border-light) px-3 py-2.5 text-[10px] text-(--text-muted) sm:flex-row sm:items-center sm:justify-between">
-        <p>
-          Showing {firstItem}–{lastItem} of {total} products
-          <span className="ml-2 inline-flex items-center gap-1 text-(--primary)">
-            <span className="size-1.5 rounded-full bg-(--primary)" />
-            Catalog loaded
-          </span>
-        </p>
-      </div>
     </>
   )
 }

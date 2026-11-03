@@ -219,7 +219,6 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
   const backHref = getBackHref(location.state)
-
   // Load state as a reducer — dispatch is stable so the lint rule
   // (react-hooks/set-state-in-effect) does not flag it inside effects
   const [loadState, dispatch] = useReducer(loadReducer, { phase: "loading" })
@@ -256,6 +255,7 @@ export default function OrderDetailPage() {
     ordersApi
       .get(id, controller.signal)
       .then((data) => {
+        console.log(data)
         if (reqId !== requestIdRef.current) return
         dispatch({ type: "READY", order: data })
       })
@@ -274,9 +274,8 @@ export default function OrderDetailPage() {
     }
   }, [id, retryCount])
 
-  // -------------------------------------------------------------------
   // Mutations
-  // -------------------------------------------------------------------
+
   async function applyStatus(
     body: { orderStatus?: OrderStatus; paymentStatus?: PaymentStatus },
     actionKey: string
@@ -327,9 +326,8 @@ export default function OrderDetailPage() {
     void applyStatus({ paymentStatus: next }, `pay-${next}`)
   }
 
-  // -------------------------------------------------------------------
   // Render: non-ready phases
-  // -------------------------------------------------------------------
+
   if (loadState.phase === "loading") {
     return (
       <LoadingState
@@ -346,7 +344,7 @@ export default function OrderDetailPage() {
       <NotFoundState
         title="Order not found."
         backTo="/admin/orders"
-        backLabel="← Back to orders"
+        backLabel="Back to orders"
         className="flex min-h-80 flex-col items-center justify-center gap-4 p-6 text-center"
         titleClassName="text-lg font-semibold text-(--text-primary)"
         linkClassName="text-sm font-medium text-(--primary) hover:underline"
