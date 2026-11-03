@@ -1,21 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Link, useSearchParams } from "react-router"
+import DataTable, {
+  useTableExport,
+  type TableColumn,
+} from "react-data-table-component"
 import { ordersApi } from "../api/ordersApi"
 import { ApiError } from "../api/client"
 import { EmptyState } from "../components/common/EmptyState"
 import { ErrorState } from "../components/common/ErrorState"
 import { LoadingState } from "../components/common/LoadingState"
-import { Pagination } from "../components/common/Pagination"
 import { SearchInput } from "../components/common/SearchInput"
 import { StatusBadge } from "../components/common/StatusBadge"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
-import type { OrderStatus, OrdersListResponse } from "../types/order"
+import type {
+  OrderStatus,
+  OrdersListResponse,
+  OrderListItem,
+} from "../types/order"
 import {
   ORDER_STATUS_CONFIG,
   PAYMENT_STATUS_CONFIG,
   formatOrderDate,
   formatTaka,
 } from "../lib/orderStatus"
+import { Download } from "lucide-react"
 
 const PAGE_LIMIT = 20
 const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
@@ -26,6 +34,60 @@ const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
   { value: "delivered", label: "Delivered" },
   { value: "cancelled", label: "Cancelled" },
 ]
+
+const tableCustomStyles = {
+  table: {
+    style: {
+      backgroundColor: "var(--bg-surface)",
+      color: "var(--text-primary)",
+    },
+  },
+  headRow: {
+    style: {
+      backgroundColor: "var(--bg-table-header)",
+      borderBottom: "1px solid var(--border-light)",
+      minHeight: "36px",
+    },
+  },
+  headCells: {
+    style: {
+      color: "var(--text-muted)",
+      fontSize: "12px",
+      fontWeight: "600",
+      textTransform: "uppercase" as const,
+      paddingLeft: "16px",
+      paddingRight: "16px",
+    },
+  },
+  rows: {
+    style: {
+      minHeight: "44px",
+      backgroundColor: "var(--bg-surface)",
+      borderBottom: "1px solid var(--border-light)",
+      "&:hover": {
+        backgroundColor: "var(--bg-surface-hover)",
+        transition: "background-color 0.15s ease",
+      },
+    },
+  },
+  cells: {
+    style: {
+      paddingLeft: "16px",
+      paddingRight: "16px",
+      color: "var(--text-primary)",
+      fontSize: "13px",
+    },
+  },
+  pagination: {
+    style: {
+      borderTop: "1px solid var(--border-light)",
+      backgroundColor: "var(--bg-surface)",
+      color: "var(--text-muted)",
+      fontSize: "13px",
+      minHeight: "52px",
+    },
+  },
+}
 
 export default function OrdersPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -134,29 +196,125 @@ export default function OrdersPage() {
     cancelled: 0,
   }
 
+  // React Data Table Column Definitions
+  const columns: TableColumn<OrderListItem>[] = useMemo(
+    () => [
+      {
+        name: "Order #",
+        selector: (row) => row.orderNumber,
+        sortable: false,
+        cell: (row) => (
+          <Link
+            to={`/admin/orders/${row.id}`}
+            className="font-medium text-primary hover:underline"
+          >
+            {row.orderNumber}
+          </Link>
+        ),
+        width: "110px",
+      },
+      {
+        name: "Date & Time",
+        selector: (row) => row.createdAt,
+        cell: (row) => (
+          <span className="text-xs text-(--text-muted) tabular-nums">
+            {formatOrderDate(row.createdAt)}
+          </span>
+        ),
+      },
+      {
+        name: "Customer",
+        selector: (row) => row.customerName,
+        cell: (row) => (
+          <div>
+            <div className="font-medium text-(--text-primary)">
+              {row.customerName}
+            </div>
+            <div className="text-xs text-(--text-muted) tabular-nums">
+              {row.customerPhone}
+            </div>
+          </div>
+        ),
+        minWidth: "180px",
+      },
+      {
+        name: "Delivery Area",
+        selector: (row) => row.deliveryArea,
+        cell: (row) => (
+          <span className="text-(--text-muted)">{row.deliveryArea}</span>
+        ),
+      },
+      {
+        name: "Items",
+        selector: (row) => row.itemCount,
+        cell: (row) => (
+          <span className="font-medium text-(--text-primary)">
+            {row.itemCount} {row.itemCount === 1 ? "item" : "items"}
+          </span>
+        ),
+        width: "90px",
+      },
+      {
+        name: "Total",
+        selector: (row) => row.total,
+        right: true,
+        cell: (row) => (
+          <span className="font-semibold text-(--text-primary) tabular-nums">
+            {formatTaka(row.total)}
+          </span>
+        ),
+      },
+      {
+        name: "Payment",
+        selector: (row) => row.paymentStatus,
+        center: true,
+        cell: (row) => {
+          const payCfg = PAYMENT_STATUS_CONFIG[row.paymentStatus]
+          return <StatusBadge variant={payCfg.variant} label={payCfg.label} />
+        },
+      },
+      {
+        name: "Status",
+        selector: (row) => row.orderStatus,
+        center: true,
+        cell: (row) => {
+          const orderCfg = ORDER_STATUS_CONFIG[row.orderStatus]
+          return (
+            <StatusBadge variant={orderCfg.variant} label={orderCfg.label} />
+          )
+        },
+      },
+    ],
+    []
+  )
+
+  const { download } = useTableExport<OrderListItem>({
+    columns,
+    rows: data?.items ?? [],
+  })
+
   return (
     <div className="admin-dashboard-content min-w-0 space-y-6 p-6">
       {/* Header Section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-[var(--text-primary)]">
-              Orders
-            </h1>
-            <span className="rounded-full bg-[var(--border-light)] px-2.5 py-0.5 text-xs font-semibold text-[var(--text-muted)]">
+            <h1 className="text-xl font-bold text-(--text-primary)">Orders</h1>
+            <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-(--text-muted)">
               {total} Total
             </span>
           </div>
-          <p className="mt-0.5 text-sm text-[var(--text-muted)]">
+          <p className="mt-0.5 text-sm text-(--text-muted)">
             Manage and confirm customer orders across Bangladesh
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
+            onClick={() => download("orders.csv")}
             className="admin-template-button admin-template-button--secondary"
           >
-            Export CSV
+            <Download className="icon-size" /> Export CSV
           </button>
           <button
             type="button"
@@ -176,7 +334,7 @@ export default function OrdersPage() {
       {/* Main Container Card */}
       <div className="admin-dashboard-card overflow-hidden">
         {/* Status Filter Tabs */}
-        <div className="flex flex-wrap gap-1 border-b border-[var(--border-light)] bg-[var(--bg-table-header)] px-4 py-3">
+        <div className="flex flex-wrap gap-1 border-b border-(--border-light) bg-(--bg-table-header) px-4 pt-3">
           {STATUS_TABS.map(({ value, label }) => {
             const count =
               value === "" ? counts.all : counts[value as keyof typeof counts]
@@ -186,10 +344,10 @@ export default function OrdersPage() {
                 key={value}
                 type="button"
                 onClick={() => handleStatusTab(value)}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                   isActive
-                    ? "bg-[var(--primary)] text-white shadow-sm"
-                    : "text-[var(--text-muted)] hover:bg-[var(--border-light)] hover:text-[var(--text-primary)]"
+                    ? "border-b-2 border-b-primary text-primary"
+                    : "cursor-pointer border-b-2 border-b-transparent text-(--text-muted) hover:text-(--text-primary)"
                 }`}
               >
                 {label} <span className="ml-1 opacity-75">({count})</span>
@@ -199,7 +357,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Search & Filters Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-light)] bg-white px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-(--border-light) bg-white px-4 py-3">
           <SearchInput
             id="orders-search"
             label="Search orders"
@@ -213,7 +371,7 @@ export default function OrdersPage() {
 
         {/* Content Table / Loading / Error states */}
         {loading && !hasLoaded ? (
-          <LoadingState className="flex items-center justify-center py-16 text-sm text-[var(--text-muted)]">
+          <LoadingState className="flex items-center justify-center py-16 text-sm text-(--text-muted)">
             Loading orders…
           </LoadingState>
         ) : error ? (
@@ -225,104 +383,29 @@ export default function OrdersPage() {
             className="flex flex-col items-center gap-3 py-16 text-center"
           />
         ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm">
-                <thead className="border-b border-[var(--border-light)] bg-[var(--bg-table-header)] text-xs font-semibold text-[var(--text-muted)] uppercase">
-                  <tr>
-                    <th className="px-4 py-3">Order #</th>
-                    <th className="px-4 py-3">Date & Time</th>
-                    <th className="px-4 py-3">Customer</th>
-                    <th className="px-4 py-3">Delivery Area</th>
-                    <th className="px-4 py-3">Items Summary</th>
-                    <th className="px-4 py-3 text-right">Total</th>
-                    <th className="px-4 py-3 text-center">Payment</th>
-                    <th className="px-4 py-3 text-center">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border-light)]">
-                  {data?.items.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={8}
-                        className="px-4 py-12 text-center text-[var(--text-muted)]"
-                      >
-                        <EmptyState title="No orders found." />
-                      </td>
-                    </tr>
-                  ) : (
-                    data?.items.map((order) => {
-                      const orderCfg = ORDER_STATUS_CONFIG[order.orderStatus]
-                      const payCfg = PAYMENT_STATUS_CONFIG[order.paymentStatus]
-                      return (
-                        <tr
-                          key={order.id}
-                          className="transition-colors hover:bg-[var(--bg-surface-hover)]"
-                        >
-                          <td className="px-4 py-3 font-medium text-[var(--primary)]">
-                            <Link
-                              to={`/admin/orders/${order.id}`}
-                              className="hover:underline"
-                            >
-                              {order.orderNumber}
-                            </Link>
-                          </td>
-                          <td className="px-4 py-3 text-xs text-[var(--text-muted)] tabular-nums">
-                            {formatOrderDate(order.createdAt)}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="font-medium text-[var(--text-primary)]">
-                              {order.customerName}
-                            </div>
-                            <div className="text-xs text-[var(--text-muted)] tabular-nums">
-                              {order.customerPhone}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-[var(--text-muted)]">
-                            {order.deliveryArea}
-                          </td>
-                          <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                            {order.itemCount}{" "}
-                            {order.itemCount === 1 ? "item" : "items"}
-                          </td>
-                          <td className="px-4 py-3 text-right font-semibold text-[var(--text-primary)] tabular-nums">
-                            {formatTaka(order.total)}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <StatusBadge
-                              variant={payCfg.variant}
-                              label={payCfg.label}
-                            />
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <StatusBadge
-                              variant={orderCfg.variant}
-                              label={orderCfg.label}
-                            />
-                          </td>
-                        </tr>
-                      )
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {total > 0 && (
-              <Pagination
-                page={page}
-                pageSize={PAGE_LIMIT}
-                total={total}
-                onChange={(newPage) => {
-                  setSearchParams((prev) => {
-                    const next = new URLSearchParams(prev)
-                    next.set("page", String(newPage))
-                    return next
-                  })
-                }}
-              />
-            )}
-          </>
+          <DataTable
+            columns={columns}
+            data={data?.items ?? []}
+            customStyles={tableCustomStyles}
+            pagination
+            paginationServer
+            paginationTotalRows={total}
+            paginationDefaultPage={page}
+            paginationPerPage={PAGE_LIMIT}
+            paginationRowsPerPageOptions={[20]}
+            onChangePage={(newPage) => {
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev)
+                next.set("page", String(newPage))
+                return next
+              })
+            }}
+            noDataComponent={
+              <div className="py-12 text-center text-(--text-muted)">
+                <EmptyState title="No orders found." />
+              </div>
+            }
+          />
         )}
       </div>
     </div>

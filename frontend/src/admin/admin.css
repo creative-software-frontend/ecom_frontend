@@ -81,3 +81,8 @@
   background-color: var(--bg-surface-hover);
   border-color: var(--border-hover);
 }
+
+.icon-size {
+  width: 1rem;
+  height: 1rem;
+}
