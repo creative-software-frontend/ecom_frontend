@@ -168,7 +168,6 @@ export async function listOrders(req: Request, res: Response) {
         }),
       ],
     );
-    console.log(orders);
     const counts: Record<OrderStatus | "all", number> = {
       all: 0,
       pending: 0,
