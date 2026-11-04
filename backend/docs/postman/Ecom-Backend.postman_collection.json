@@ -1,0 +1,561 @@
+{
+  "info": {
+    "_postman_id": "b7e6c1a2-4f3d-4c8e-9a1b-2d3e4f5a6b7c",
+    "name": "Ecom Backend API",
+    "description": "Complete Postman collection for the Ecom backend. Import together with Ecom-Local.postman_environment.json, select the environment, then run Admin Auth -> Login first. Admin routes use the HttpOnly admin_token cookie, which Postman stores automatically.\n\nBase URL: http://localhost:5000\nFull docs: docs/API_REFERENCE.md",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "description": "Endpoints that do not require authentication.",
+      "item": [
+        {
+          "name": "Products",
+          "item": [
+            {
+              "name": "List Products",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products"]
+                },
+                "description": "Returns all active products (isActive = true), newest first."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Product by Slug",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/products/{{productSlug}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "products", "{{productSlug}}"]
+                },
+                "description": "Returns one active product and its reviews. Use a real slug, e.g. ultrahot. Returns 404 for inactive or missing products."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Store",
+          "item": [
+            {
+              "name": "Get Store Settings",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/store",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "store"]
+                },
+                "description": "Returns the public store settings from src/data/store.json."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Orders",
+          "item": [
+            {
+              "name": "Place Order",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status code is 201', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "const json = pm.response.json();",
+                      "if (json.data && json.data.id !== undefined) {",
+                      "    pm.collectionVariables.set('orderId', json.data.id);",
+                      "}",
+                      "if (json.data && json.data.orderNumber) {",
+                      "    console.log('Created order:', json.data.orderNumber);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"customerName\": \"Md. Rakib Hasan\",\n  \"customerPhone\": \"01711223344\",\n  \"customerAddress\": \"House 12, Road 5, Dhanmondi, Dhaka\",\n  \"notes\": \"Please call before delivery.\",\n  \"deliveryArea\": \"Inside Dhaka\",\n  \"deliveryCharge\": 60,\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 2,\n      \"unitPrice\": 1600\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "orders"]
+                },
+                "description": "Place an order. productId must be a real product UUID (run List Products first and copy an id, or run Create Product). Prices and quantities must be whole numbers."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin Auth",
+      "description": "Login first. The admin_token HttpOnly cookie is stored automatically by Postman and sent to all Admin requests.",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.test('Login succeeded', function () {",
+                  "    pm.expect(json.success).to.eql(true);",
+                  "});",
+                  "",
+                  "if (json.data && json.data.id) {",
+                  "    pm.collectionVariables.set('adminId', json.data.id);",
+                  "}",
+                  "const token = pm.cookies.get('admin_token');",
+                  "if (token) {",
+                  "    pm.collectionVariables.set('adminToken', token);",
+                  "    console.log('admin_token cookie captured.');",
+                  "} else {",
+                  "    console.warn('No admin_token cookie found. Check that cookies are enabled in Postman.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "auth", "login"]
+            },
+            "description": "Logs in and sets the HttpOnly admin_token cookie (8h). Rate limit: 5 failed attempts per 15 minutes. Set adminEmail/adminPassword in the Ecom Local environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "auth", "logout"]
+            },
+            "description": "Clears the admin_token cookie."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "auth", "me"]
+            },
+            "description": "Returns the currently authenticated admin. Requires the admin_token cookie."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new-admin@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "auth", "profile"]
+            },
+            "description": "Updates the logged-in admin email. Returns 400 if the email is invalid or already used by another admin."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Products",
+      "description": "Requires the admin_token cookie. Run Admin Auth -> Login first.",
+      "item": [
+        {
+          "name": "List All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "products"]
+            },
+            "description": "Returns all products, including inactive ones."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "products", "{{productId}}"]
+            },
+            "description": "Returns one product by UUID. 404 if not found."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.id) {",
+                  "    pm.collectionVariables.set('productId', json.data.id);",
+                  "}",
+                  "if (json.data && json.data.slug) {",
+                  "    pm.collectionVariables.set('productSlug', json.data.slug);",
+                  "}",
+                  "if (json.data && json.data.id) {",
+                  "    console.log('Saved productId:', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Herbal Capsules\",\n  \"brandName\": \"Power Zenox\",\n  \"category\": \"Herbal Supplement\",\n  \"slug\": \"test-herbal-capsules\",\n  \"regularPrice\": 2990,\n  \"currentPrice\": 1600,\n  \"stockQuantity\": 100,\n  \"images\": [\n    \"https://example.com/product.webp\",\n    \"/images/products/ultrahot/1.webp\"\n  ],\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "products"]
+            },
+            "description": "Creates a product. slug must be unique, lowercase, hyphen-separated. currentPrice must be <= regularPrice. discountPercent and inStock are calculated server-side. The new id/slug are saved as collection variables automatically."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Herbal Capsules Updated\",\n  \"brandName\": \"Power Zenox\",\n  \"category\": \"Herbal Supplement\",\n  \"slug\": \"test-herbal-capsules\",\n  \"regularPrice\": 2990,\n  \"currentPrice\": 1490,\n  \"stockQuantity\": 75,\n  \"images\": [\n    \"https://example.com/product.webp\"\n  ],\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "products", "{{productId}}"]
+            },
+            "description": "Full update (not partial). Same body schema as Create Product; all fields are required except isActive."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "products", "{{productId}}"]
+            },
+            "description": "Deletes the product. Fails if it is referenced by an order."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Orders",
+      "description": "Requires the admin_token cookie. Run Admin Auth -> Login first.",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/orders?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number, >= 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "1-100"
+                },
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "description": "pending | confirmed | shipped | delivered | cancelled",
+                  "disabled": true
+                },
+                {
+                  "key": "paymentStatus",
+                  "value": "unpaid",
+                  "description": "unpaid | paid",
+                  "disabled": true
+                },
+                {
+                  "key": "area",
+                  "value": "Inside Dhaka",
+                  "description": "Exact delivery area match",
+                  "disabled": true
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "2026-01-01",
+                  "description": "YYYY-MM-DD (Dhaka time)",
+                  "disabled": true
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2026-12-31",
+                  "description": "YYYY-MM-DD (Dhaka time)",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "rahim",
+                  "description": "Search order number, customer name, or phone",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lists orders with pagination, filters, area list, and per-status counts. Enable the optional query params you want to test."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "orders", "{{orderId}}"]
+            },
+            "description": "Returns full order details with product info per line item. orderId is captured automatically when you Place Order."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderStatus\": \"confirmed\",\n  \"paymentStatus\": \"paid\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/orders/{{orderId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "orders", "{{orderId}}", "status"]
+            },
+            "description": "At least one of orderStatus/paymentStatus is required. Allowed transitions: pending -> confirmed|cancelled; confirmed -> shipped|cancelled; shipped -> delivered|cancelled; delivered and cancelled are final. Payment status of a cancelled order cannot change. Returns 409 on invalid transition."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Settings",
+      "description": "Requires the admin_token cookie. Run Admin Auth -> Login first.",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "settings"]
+            },
+            "description": "Returns the store settings."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Store Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Power Zenox\",\n  \"url\": \"https://powerzenox.com/\",\n  \"tagline\": \"Explore our premium products\",\n  \"currency\": \"BDT\",\n  \"currency_symbol\": \"৳\",\n  \"language\": \"bn\",\n  \"contact\": {\n    \"phone\": \"01780212230\",\n    \"whatsapp\": \"01780212230\"\n  },\n  \"delivery\": {\n    \"method\": \"Cash on Delivery\",\n    \"note\": \"সারা বাংলাদেশ ক্যাশ অন ডেলিভারি\",\n    \"free_delivery\": true,\n    \"delivery_charge\": 0\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "settings"]
+            },
+            "description": "Replaces the whole store settings object. All fields are required."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"old-password\",\n  \"newPassword\": \"new-password-min-8\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/settings/password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "settings", "password"]
+            },
+            "description": "Changes the logged-in admin password. newPassword must be at least 8 characters. Returns 400 if currentPassword is incorrect."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

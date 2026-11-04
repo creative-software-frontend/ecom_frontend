@@ -128,44 +128,47 @@ export async function listOrders(req: Request, res: Response) {
   const take = limit;
 
   try {
-    const [orders, total, statusGroups, areaGroups] = await prisma.$transaction([
-      prisma.order.findMany({
-        where,
-        skip,
-        take,
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          orderNumber: true,
-          customerName: true,
-          customerPhone: true,
-          deliveryArea: true,
-          total: true,
-          status: true,
-          paymentStatus: true,
-          paymentMethod: true,
-          createdAt: true,
-          _count: {
-            select: {
-              items: true,
+    const [orders, total, statusGroups, areaGroups] = await prisma.$transaction(
+      [
+        prisma.order.findMany({
+          where,
+          skip,
+          take,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            orderNumber: true,
+            customerName: true,
+            customerPhone: true,
+            deliveryArea: true,
+            customerAddress: true,
+            total: true,
+            status: true,
+            paymentStatus: true,
+            paymentMethod: true,
+            createdAt: true,
+            _count: {
+              select: {
+                items: true,
+              },
             },
           },
-        },
-      }),
-      prisma.order.count({ where }),
-      prisma.order.groupBy({
-        by: ["status"],
-        _count: {
-          _all: true,
-        },
-      }),
-      prisma.order.findMany({
-        distinct: ["deliveryArea"],
-        select: { deliveryArea: true },
-        orderBy: { deliveryArea: "asc" },
-      }),
-    ]);
-
+        }),
+        prisma.order.count({ where }),
+        prisma.order.groupBy({
+          by: ["status"],
+          _count: {
+            _all: true,
+          },
+        }),
+        prisma.order.findMany({
+          distinct: ["deliveryArea"],
+          select: { deliveryArea: true },
+          orderBy: { deliveryArea: "asc" },
+        }),
+      ],
+    );
+    console.log(orders);
     const counts: Record<OrderStatus | "all", number> = {
       all: 0,
       pending: 0,
@@ -190,6 +193,7 @@ export async function listOrders(req: Request, res: Response) {
       customerName: o.customerName,
       customerPhone: o.customerPhone,
       deliveryArea: o.deliveryArea,
+      customerAddress: o.customerAddress,
       total: o.total,
       orderStatus: o.status,
       status: o.status,
