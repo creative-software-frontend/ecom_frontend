@@ -11,6 +11,7 @@ import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import adminProductRoutes from "./routes/adminProduct.routes.js";
 import adminSettingsRoutes from "./routes/adminSettings.routes.js";
 import adminOrderRoutes from "./routes/adminOrder.routes.js";
+import adminDashboardRoutes from "./routes/adminDashboard.routes.js";
 import path from "node:path";
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/products", adminProductRoutes);
 app.use("/api/admin/settings", adminSettingsRoutes);
 app.use("/api/admin/orders", adminOrderRoutes);
+app.use("/api/admin/dashboard", adminDashboardRoutes);
 
 // // Health check route
 // app.get("/", (req, res) => {
