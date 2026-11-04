@@ -41,7 +41,7 @@ export function WeeklyChartCard({
                 style={{ height: `${heightPercent}%` }}
                 className={`w-full rounded-t transition-all ${
                   item.active
-                    ? "bg-(--primary)"
+                    ? "bg-primary"
                     : "bg-(--border-light) hover:bg-(--primary-hover)"
                 }`}
               />

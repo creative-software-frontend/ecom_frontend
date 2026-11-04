@@ -26,7 +26,7 @@ export function Sidebar() {
   }
 
   return (
-    <nav className="h-full overflow-y-auto bg-(--bg-surface) px-2 py-2">
+    <nav className="h-dvh overflow-y-auto bg-(--bg-surface) px-2 py-2">
       <ul className="space-y-1">
         {adminMenu.map((item: MenuItem, index: number) => {
           if (item.type === "section") {

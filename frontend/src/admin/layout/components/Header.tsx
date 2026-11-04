@@ -48,21 +48,21 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
           <input
             type="search"
             placeholder="Search orders, customers, products..."
-            className="h-8 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-3 pl-9 text-[11px] text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-(--primary)"
+            className="h-8 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-3 pl-9 text-[11px] text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-primary"
           />
         </label>
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        <span className="hidden items-center gap-1.5 rounded-full bg-[#c6eee8] px-2 py-1 text-[9px] font-medium text-(--primary) sm:inline-flex">
-          <span className="size-1.5 rounded-full bg-(--primary)" />
+        <span className="hidden items-center gap-1.5 rounded-full bg-brand-soft px-2 py-1 text-[9px] font-medium text-primary sm:inline-flex">
+          <span className="size-1.5 rounded-full bg-primary" />
           Live Store (BD)
         </span>
         <a
           href="/"
           target="_blank"
           rel="noreferrer"
-          className="hidden items-center gap-1 text-[10px] text-(--text-primary) hover:text-(--primary) sm:inline-flex"
+          className="hidden items-center gap-1 text-[10px] text-(--text-primary) hover:text-primary sm:inline-flex"
         >
           <ExternalLink className="size-3" aria-hidden="true" />
           Storefront
@@ -78,7 +78,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
         <div className="relative">
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-md p-1.5 text-(--primary) hover:bg-(--bg-surface-hover)"
+            className="inline-flex items-center justify-center rounded-md p-1.5 text-primary hover:bg-(--bg-surface-hover)"
             onClick={() => setUserOpen((v) => !v)}
             onKeyDown={(e) => {
               if (e.key === "Escape") setUserOpen(false)
@@ -146,10 +146,10 @@ export function MobileSidebar({
   return (
     <div className="fixed inset-0 z-30 lg:hidden">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="absolute top-0 left-0 flex h-full w-64 flex-col admin-sidebar-shell">
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-(--border-light) px-4 admin-sidebar-brand">
+      <div className="admin-sidebar-shell absolute top-0 left-0 flex h-full w-64 flex-col">
+        <div className="admin-sidebar-brand flex h-14 shrink-0 items-center justify-between border-b border-(--border-light) px-4">
           <div className="flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-md bg-(--primary) text-white">
+            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-white">
               <Leaf className="size-4" aria-hidden="true" />
             </span>
             <span className="text-xs font-semibold text-(--text-primary)">

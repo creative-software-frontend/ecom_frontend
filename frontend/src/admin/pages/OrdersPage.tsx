@@ -341,7 +341,7 @@ export default function OrdersPage() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-(--text-primary)">Orders</h1>
-            <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-(--text-muted)">
+            <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-(--text-muted)">
               {total} Total
             </span>
           </div>
@@ -353,13 +353,13 @@ export default function OrdersPage() {
           <button
             type="button"
             onClick={() => download("orders.csv")}
-            className="admin-template-button admin-template-button--secondary h-8 px-3 text-[11px]"
+            className="admin-template-button admin-template-button--secondary h-8 px-3 text-xs"
           >
             <Download className="icon-size" /> Export CSV
           </button>
           <Link
             to="/admin/orders/new"
-            className="admin-template-button admin-template-button--primary h-8 px-3 text-[11px]"
+            className="admin-template-button admin-template-button--primary h-8 px-3 text-xs"
           >
             <Plus className="icon-size" /> Create Order
           </Link>
@@ -382,7 +382,7 @@ export default function OrdersPage() {
               placeholder="Search by order number, name or phone"
               value={inputValue}
               onChange={handleSearchChange}
-              className="h-9 w-full rounded-md border border-(--border-light) bg-white pr-3 pl-9 text-xs text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
+              className="h-9 w-full rounded-md border border-(--border-light) bg-white pr-3 pl-9 text-xs text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </label>
           <div className="flex h-9 min-w-57.5 flex-1 items-center gap-2 rounded-md border border-(--border-light) bg-white px-2.5 text-xs text-(--text-primary) sm:flex-none">
@@ -421,7 +421,7 @@ export default function OrdersPage() {
             <select
               value={area}
               onChange={(event) => updateFilter("area", event.target.value)}
-              className="h-9 w-full rounded-md border border-(--border-light) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
+              className="h-9 w-full rounded-md border border-(--border-light) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               <option value="">All Areas</option>
               {(data?.areas ?? []).map((orderArea) => (
@@ -438,7 +438,7 @@ export default function OrdersPage() {
               onChange={(event) =>
                 updateFilter("paymentStatus", event.target.value)
               }
-              className="h-9 w-full rounded-md border border-(--border-light) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
+              className="h-9 w-full rounded-md border border-(--border-light) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               <option value="">All Payment</option>
               <option value="paid">Paid</option>
@@ -504,7 +504,7 @@ export default function OrdersPage() {
                 setBulkStatus(event.target.value as OrderStatus | "")
               }
               disabled={selectedOrders.length === 0 || bulkUpdating}
-              className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary) disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Update status</option>
               {STATUS_TABS.filter(({ value }) => value !== "").map(
