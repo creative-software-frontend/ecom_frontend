@@ -24,7 +24,7 @@ export function PendingVerificationCard({
         </div>
         <Link
           to="/admin/orders?status=pending"
-          className="flex items-center gap-1 text-xs font-medium whitespace-nowrap text-(--primary) hover:underline"
+          className="flex items-center gap-1 text-xs font-medium whitespace-nowrap text-primary hover:underline"
         >
           View all {totalPending} pending <ArrowRight className="size-3" />
         </Link>
@@ -52,7 +52,7 @@ export function PendingVerificationCard({
                   key={order.id}
                   className="transition-colors hover:bg-(--bg-surface-hover)"
                 >
-                  <td className="px-4 py-3 font-medium text-(--primary)">
+                  <td className="px-4 py-3 font-medium text-primary">
                     <Link
                       to={`/admin/orders/${order.id}`}
                       className="hover:underline"

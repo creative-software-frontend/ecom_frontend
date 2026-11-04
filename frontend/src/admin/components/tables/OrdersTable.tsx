@@ -90,7 +90,7 @@ export function OrdersTable({
                   <Link
                     to={`/admin/orders/${order.id}`}
                     state={{ q: searchParamsString }}
-                    className="font-semibold text-(--primary) tabular-nums hover:underline"
+                    className="font-semibold text-primary tabular-nums hover:underline"
                   >
                     {order.orderNumber}
                   </Link>
@@ -135,7 +135,7 @@ export function OrdersTable({
                   <div className="flex items-center justify-center gap-1 opacity-60 transition-opacity group-hover:opacity-100">
                     <a
                       href={`tel:${order.customerPhone}`}
-                      className="rounded p-1.5 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--primary)"
+                      className="rounded p-1.5 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-primary"
                       title="Call"
                     >
                       <Phone size={16} />
@@ -144,7 +144,7 @@ export function OrdersTable({
                       href={`https://wa.me/88${order.customerPhone.replace(/[^0-9]/g, "")}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded p-1.5 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--primary)"
+                      className="rounded p-1.5 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-primary"
                       title="WhatsApp"
                     >
                       <MessageCircle size={16} />

@@ -19,14 +19,14 @@ export function AdminLayout() {
       <div className="flex min-h-screen">
         <aside className="admin-sidebar-shell hidden w-48 shrink-0 flex-col border-r border-(--border-light) bg-white lg:flex">
           <div className="admin-sidebar-brand flex h-14 shrink-0 items-center gap-2 border-b border-(--border-light) px-3">
-            <span className="flex size-7 items-center justify-center rounded-md bg-(--primary) text-white">
+            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-white">
               <Leaf className="size-4" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-(--text-primary)">
+              <p className="truncate text-xl font-semibold text-(--text-primary)">
                 Power Zenox
               </p>
-              <p className="text-[9px] text-(--text-muted)">Store Admin • BD</p>
+              <p className="text-(--text-muted)">Store Admin • BD</p>
             </div>
           </div>
           <div className="min-h-0 flex-1">
@@ -36,7 +36,7 @@ export function AdminLayout() {
             to="/admin/profile"
             className="flex shrink-0 items-center gap-2 border-t border-(--border-light) p-3 hover:bg-(--bg-surface-hover)"
           >
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-(--primary) text-[10px] font-semibold text-white">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-white">
               {userInitial}
             </span>
             <span className="min-w-0 flex-1">

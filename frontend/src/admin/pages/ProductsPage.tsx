@@ -211,7 +211,7 @@ export default function ProductsPage() {
             <h1 className="text-lg font-bold text-(--text-primary)">
               Products
             </h1>
-            <span className="rounded-full bg-[#c6eee8] px-2 py-0.5 text-[10px] font-semibold text-primary">
+            <span className="rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-semibold text-primary">
               {metrics.activeProducts} SKUs Active
             </span>
           </div>
@@ -225,7 +225,7 @@ export default function ProductsPage() {
             type="button"
             onClick={() => downloadCatalog(products)}
             disabled={loading || products.length === 0}
-            className="admin-template-button admin-template-button--secondary h-8 px-3 text-[11px] disabled:cursor-not-allowed disabled:opacity-50"
+            className="admin-template-button admin-template-button--secondary h-8 px-3 text-xs disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="icon-size" />
             Export Catalog

@@ -28,6 +28,49 @@
   --status-paid-bg: #d1fae5;
   --status-paid-text: #065f46;
 
+  /*
+   * Semantic token bridge.
+   * Maps the admin palette onto the standard Tailwind/shadcn token names so
+   * admin components can use utilities like bg-background, text-foreground,
+   * border-border, bg-card, text-muted-foreground, etc.
+   */
+  --background: var(--bg-app);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --muted: var(--bg-surface-hover);
+  --muted-foreground: var(--text-muted);
+  --border: var(--border-light);
+  --input: var(--border-light);
+  --ring: var(--primary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--bg-surface-hover);
+  --secondary-foreground: var(--text-primary);
+  --accent: var(--bg-surface-hover);
+  --accent-foreground: var(--text-primary);
+
+  --sidebar: var(--bg-surface);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--bg-surface-hover);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-light);
+  --sidebar-ring: var(--primary);
+
+  /*
+   * Compatibility aliases for older admin pages. These were referenced but
+   * never defined; map them to the existing semantic values so current pages
+   * keep rendering while their usages are migrated in later phases.
+   */
+  --admin-form-primary: var(--primary);
+  --admin-form-error-color: var(--destructive);
+  --admin-sidebar-text: var(--text-primary);
+  --admin-sidebar-submenu-text: var(--text-muted);
+  --admin-form-control-border: var(--border-light);
+
   --font-main: "Inter", "Hind Siliguri", "Noto Sans Bengali", sans-serif;
 
   background-color: var(--bg-app);
