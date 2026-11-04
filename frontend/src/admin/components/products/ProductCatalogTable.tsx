@@ -5,6 +5,7 @@ import { StatusBadge } from "../common/StatusBadge"
 import { formatTaka } from "../../lib/orderStatus"
 import type { Product } from "../../types/product"
 import { getProductStockStatus } from "./productCatalog"
+import { tableCustomStyles } from "@/admin/lib/dataTableStyles"
 
 type ProductCatalogTableProps = {
   products: Product[]
@@ -13,69 +14,6 @@ type ProductCatalogTableProps = {
   total: number
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
-}
-
-const tableCustomStyles = {
-  table: {
-    style: {
-      backgroundColor: "var(--bg-surface)",
-      color: "var(--text-primary)",
-    },
-  },
-  headRow: {
-    style: {
-      minHeight: "38px",
-      backgroundColor: "var(--bg-table-header)",
-      borderBottom: "1px solid var(--border-light)",
-    },
-  },
-  headCells: {
-    style: {
-      color: "var(--text-muted)",
-      fontSize: "10px",
-      fontWeight: "600",
-      textTransform: "uppercase" as const,
-      paddingLeft: "12px",
-      paddingRight: "12px",
-    },
-  },
-  rows: {
-    style: {
-      minHeight: "68px",
-      backgroundColor: "var(--bg-surface)",
-      borderBottom: "1px solid var(--border-light)",
-      "&:hover": {
-        backgroundColor: "var(--bg-surface-hover)",
-        transition: "background-color 0.15s ease",
-      },
-    },
-  },
-  cells: {
-    style: {
-      paddingLeft: "12px",
-      paddingRight: "12px",
-      color: "var(--text-primary)",
-      fontSize: "12px",
-    },
-  },
-  pagination: {
-    style: {
-      minHeight: "44px",
-      borderTop: "1px solid var(--border-light)",
-      backgroundColor: "var(--bg-surface)",
-      color: "var(--text-muted)",
-      fontSize: "10px",
-    },
-    pageButtonsStyle: {
-      fill: "var(--text-muted)",
-      "&:disabled": {
-        fill: "var(--border-hover)",
-      },
-      "&:hover:not(:disabled)": {
-        backgroundColor: "var(--bg-surface-hover)",
-      },
-    },
-  },
 }
 
 const productColumns: TableColumn<Product>[] = [
@@ -87,7 +25,7 @@ const productColumns: TableColumn<Product>[] = [
       <input
         type="checkbox"
         aria-label={`Select ${product.name}`}
-        className="size-3.5 accent-(--primary)"
+        className="size-3.5 accent-primary"
       />
     ),
   },
@@ -105,7 +43,7 @@ const productColumns: TableColumn<Product>[] = [
           <p className="truncate text-[10px] text-(--text-muted)">
             {product.brandName}
           </p>
-          <p className="mt-0.5 truncate font-mono text-[10px] text-(--primary)">
+          <p className="mt-0.5 truncate font-mono text-[10px] text-primary">
             {product.slug}
           </p>
         </div>
@@ -173,7 +111,7 @@ const productColumns: TableColumn<Product>[] = [
                   ? "Low stock"
                   : "Out of stock"
             }
-            className="mt-0.5 !justify-start !px-1.5 !py-0 !text-[10px]"
+            className="mt-0.5 justify-start! px-1.5! py-0! text-[10px]!"
           />
         </div>
       )

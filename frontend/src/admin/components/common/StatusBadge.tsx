@@ -1,4 +1,4 @@
-type StatusBadgeVariant =
+export type StatusBadgeVariant =
   | "active"
   | "inactive"
   | "in-stock"
@@ -9,6 +9,7 @@ type StatusBadgeVariant =
   | "primary"
   | "success"
   | "danger"
+  | "delivered"
 
 type StatusBadgeProps = {
   variant: StatusBadgeVariant
@@ -28,6 +29,7 @@ const variantStyles: Record<StatusBadgeVariant, string> = {
   "in-stock": "bg-emerald-100 text-emerald-800",
   "low-stock": "bg-amber-100 text-amber-800",
   "out-of-stock": "bg-red-100 text-red-800",
+  delivered: "bg-emerald-100 text-emerald-800",
 }
 
 const dotStyles: Partial<Record<StatusBadgeVariant, string>> = {
@@ -41,6 +43,7 @@ const dotStyles: Partial<Record<StatusBadgeVariant, string>> = {
   "in-stock": "bg-emerald-600",
   "low-stock": "bg-amber-600",
   "out-of-stock": "bg-red-600",
+  delivered: "bg-emerald-600",
 }
 
 export function StatusBadge({

@@ -12,6 +12,11 @@ export const adminMenu: MenuItem[] = [
     type: "section",
   },
   {
+    label: "Dashboard",
+    type: "link",
+    href: "/admin",
+  },
+  {
     label: "Orders",
     type: "link",
     href: "/admin/orders",

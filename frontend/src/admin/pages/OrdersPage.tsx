@@ -22,7 +22,15 @@ import {
   formatOrderDate,
   formatTaka,
 } from "../lib/orderStatus"
-import { CalendarDays, Download, Plus, Search } from "lucide-react"
+import {
+  CalendarDays,
+  Check,
+  Download,
+  Plus,
+  Printer,
+  Search,
+} from "lucide-react"
+import { tableCustomStyles } from "../lib/dataTableStyles"
 
 const PAGE_LIMIT = 10
 const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
@@ -33,60 +41,6 @@ const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
   { value: "delivered", label: "Delivered" },
   { value: "cancelled", label: "Cancelled" },
 ]
-
-const tableCustomStyles = {
-  table: {
-    style: {
-      backgroundColor: "var(--bg-surface)",
-      color: "var(--text-primary)",
-    },
-  },
-  headRow: {
-    style: {
-      backgroundColor: "var(--bg-table-header)",
-      borderBottom: "1px solid var(--border-light)",
-      minHeight: "36px",
-    },
-  },
-  headCells: {
-    style: {
-      color: "var(--text-muted)",
-      fontSize: "10px",
-      fontWeight: "600",
-      textTransform: "uppercase" as const,
-      paddingLeft: "12px",
-      paddingRight: "12px",
-    },
-  },
-  rows: {
-    style: {
-      minHeight: "44px",
-      backgroundColor: "var(--bg-surface)",
-      borderBottom: "1px solid var(--border-light)",
-      "&:hover": {
-        backgroundColor: "var(--bg-surface-hover)",
-        transition: "background-color 0.15s ease",
-      },
-    },
-  },
-  cells: {
-    style: {
-      paddingLeft: "12px",
-      paddingRight: "12px",
-      color: "var(--text-primary)",
-      fontSize: "12px",
-    },
-  },
-  pagination: {
-    style: {
-      borderTop: "1px solid var(--border-light)",
-      backgroundColor: "var(--bg-surface)",
-      color: "var(--text-muted)",
-      fontSize: "10px",
-      minHeight: "44px",
-    },
-  },
-}
 
 export default function OrdersPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -112,6 +66,12 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const requestIdRef = useRef(0)
+  const [selectedOrders, setSelectedOrders] = useState<OrderListItem[]>([])
+  const [clearSelectedRows, setClearSelectedRows] = useState(false)
+  const [bulkStatus, setBulkStatus] = useState<OrderStatus | "">("")
+  const [bulkUpdating, setBulkUpdating] = useState(false)
+  const [bulkMessage, setBulkMessage] = useState<string | null>(null)
+  const [refreshSequence, setRefreshSequence] = useState(0)
 
   const doFetch = useCallback(
     (signal: AbortSignal, id: number) => {
@@ -156,9 +116,16 @@ export default function OrdersPage() {
     const id = ++requestIdRef.current
     doFetch(controller.signal, id)
     return () => controller.abort()
-  }, [doFetch])
+  }, [doFetch, refreshSequence])
+
+  function resetSelectedOrders() {
+    setSelectedOrders([])
+    setClearSelectedRows((previous) => !previous)
+    setBulkMessage(null)
+  }
 
   function handleStatusTab(value: "" | OrderStatus) {
+    resetSelectedOrders()
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev)
@@ -172,12 +139,14 @@ export default function OrdersPage() {
   }
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
+    resetSelectedOrders()
     searchScheduledRef.current = true
     setInputValue(e.target.value)
     setSearchSequence((seq) => seq + 1)
   }
 
   function updateFilter(key: string, value: string) {
+    resetSelectedOrders()
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev)
@@ -193,6 +162,7 @@ export default function OrdersPage() {
   useEffect(() => {
     if (!searchScheduledRef.current) return
     searchScheduledRef.current = false
+    setBulkMessage(null)
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev)
@@ -207,6 +177,35 @@ export default function OrdersPage() {
       { replace: false }
     )
   }, [debouncedSearch, setSearchParams])
+
+  async function handleBulkStatusUpdate() {
+    if (!bulkStatus || selectedOrders.length === 0 || bulkUpdating) return
+
+    setBulkUpdating(true)
+    setBulkMessage(null)
+    const results = await Promise.allSettled(
+      selectedOrders.map((order) =>
+        ordersApi.updateStatus(order.id, { orderStatus: bulkStatus })
+      )
+    )
+    const failedCount = results.filter(
+      (result) => result.status === "rejected"
+    ).length
+
+    setBulkUpdating(false)
+    setBulkStatus("")
+    resetSelectedOrders()
+    setRefreshSequence((sequence) => sequence + 1)
+
+    if (failedCount > 0) {
+      setBulkMessage(
+        `${results.length - failedCount} order(s) updated; ${failedCount} could not be updated. Check that the selected status transitions are allowed.`
+      )
+      return
+    }
+
+    setBulkMessage(`${results.length} order(s) updated successfully.`)
+  }
 
   const total = data?.total ?? 0
   const counts = data?.counts ?? {
@@ -224,7 +223,7 @@ export default function OrdersPage() {
       {
         name: "Order",
         selector: (row) => row.orderNumber,
-        sortable: false,
+        sortable: true,
         cell: (row) => (
           <Link
             to={`/admin/orders/${row.id}`}
@@ -238,6 +237,7 @@ export default function OrdersPage() {
       {
         name: "Date & Time",
         selector: (row) => row.createdAt,
+        sortable: true,
         cell: (row) => (
           <span className="text-xs text-(--text-muted) tabular-nums">
             {formatOrderDate(row.createdAt)}
@@ -247,13 +247,17 @@ export default function OrdersPage() {
       {
         name: "Customer",
         selector: (row) => row.customerName,
+        sortable: true,
         cell: (row) => (
-          <div>
+          <div className="space-y-0.5 py-0.5">
             <div className="font-medium text-(--text-primary)">
               {row.customerName}
             </div>
             <div className="text-xs text-(--text-muted) tabular-nums">
               {row.customerPhone}
+            </div>
+            <div className="text-xs text-(--text-muted) tabular-nums">
+              {row.customerAddress}
             </div>
           </div>
         ),
@@ -262,6 +266,7 @@ export default function OrdersPage() {
       {
         name: "Delivery Area",
         selector: (row) => row.deliveryArea,
+        sortable: true,
         cell: (row) => (
           <span className="text-(--text-muted)">{row.deliveryArea}</span>
         ),
@@ -269,6 +274,7 @@ export default function OrdersPage() {
       {
         name: "Items",
         selector: (row) => row.itemCount,
+        sortable: true,
         cell: (row) => (
           <span className="font-medium text-(--text-primary)">
             {row.itemCount} {row.itemCount === 1 ? "item" : "items"}
@@ -279,6 +285,7 @@ export default function OrdersPage() {
       {
         name: "Total",
         selector: (row) => row.total,
+        sortable: true,
         right: true,
         cell: (row) => (
           <span className="font-semibold text-(--text-primary) tabular-nums">
@@ -289,6 +296,7 @@ export default function OrdersPage() {
       {
         name: "Payment",
         selector: (row) => row.paymentStatus,
+        sortable: true,
         center: true,
         cell: (row) => {
           const payCfg = PAYMENT_STATUS_CONFIG[row.paymentStatus]
@@ -296,7 +304,7 @@ export default function OrdersPage() {
             <StatusBadge
               variant={payCfg.variant}
               label={payCfg.label}
-              className="!text-[10px]"
+              className="text-[10px]!"
             />
           )
         },
@@ -304,6 +312,7 @@ export default function OrdersPage() {
       {
         name: "Status",
         selector: (row) => row.orderStatus,
+        sortable: true,
         center: true,
         cell: (row) => {
           const orderCfg = ORDER_STATUS_CONFIG[row.orderStatus]
@@ -311,7 +320,7 @@ export default function OrdersPage() {
             <StatusBadge
               variant={orderCfg.variant}
               label={orderCfg.label}
-              className="!text-[10px]"
+              className="text-[10px]!"
             />
           )
         },
@@ -328,7 +337,7 @@ export default function OrdersPage() {
   return (
     <div className="admin-dashboard-content min-w-0 space-y-6 p-6">
       {/* Header Section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-(--text-primary)">Orders</h1>
@@ -348,12 +357,6 @@ export default function OrdersPage() {
           >
             <Download className="icon-size" /> Export CSV
           </button>
-          <button
-            type="button"
-            className="admin-template-button admin-template-button--secondary h-8 px-3 text-[11px]"
-          >
-            Bulk Status
-          </button>
           <Link
             to="/admin/orders/new"
             className="admin-template-button admin-template-button--primary h-8 px-3 text-[11px]"
@@ -364,30 +367,7 @@ export default function OrdersPage() {
       </div>
 
       {/* Main Container Card */}
-      <div className="admin-dashboard-card overflow-hidden">
-        {/* Status Filter Tabs */}
-        <div className="flex flex-wrap gap-1 border-b border-(--border-light) bg-(--bg-table-header) px-4 pt-3">
-          {STATUS_TABS.map(({ value, label }) => {
-            const count =
-              value === "" ? counts.all : counts[value as keyof typeof counts]
-            const isActive = status === value
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => handleStatusTab(value)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                  isActive
-                    ? "border-b-2 border-b-primary text-primary"
-                    : "cursor-pointer border-b-2 border-b-transparent text-(--text-muted) hover:text-(--text-primary)"
-                }`}
-              >
-                {label} <span className="ml-1 opacity-75">({count})</span>
-              </button>
-            )
-          })}
-        </div>
-
+      <div className="admin-dashboard-card overflow-hidden print:hidden">
         {/* Search & Filters Toolbar */}
         <div className="flex flex-wrap items-center gap-2 border-b border-(--border-light) bg-white px-3 py-3">
           <label className="relative min-w-[220px] flex-1">
@@ -471,6 +451,122 @@ export default function OrdersPage() {
           </span>
         </div>
 
+        {/* Status Filter Tabs */}
+        <div className="flex flex-wrap gap-1 border-b border-(--border-light) bg-(--bg-table-header) px-4 pt-3">
+          {STATUS_TABS.map(({ value, label }) => {
+            const count =
+              value === "" ? counts.all : counts[value as keyof typeof counts]
+            const isActive = status === value
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => handleStatusTab(value)}
+                aria-pressed={isActive}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  isActive
+                    ? "border-b-2 border-b-primary text-primary"
+                    : "cursor-pointer border-b-2 border-b-transparent text-(--text-muted) hover:text-(--text-primary)"
+                }`}
+              >
+                {label} <span className="ml-1 opacity-75">({count})</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Bulk Actions Toolbar */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-(--border-light) bg-white px-3 py-2.5">
+          <span className="inline-flex h-9 shrink-0 items-center rounded-full bg-[#fce8e8] px-3 text-xs font-semibold text-[#9b1c1c]">
+            Selected ({selectedOrders.length})
+          </span>
+          <button
+            type="button"
+            disabled
+            title="SMS sending is not configured"
+            className="admin-template-button admin-template-button--secondary h-9 px-3 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            SMS
+          </button>
+          <button
+            type="button"
+            disabled={selectedOrders.length === 0}
+            onClick={() => window.print()}
+            className="admin-template-button admin-template-button--secondary h-9 px-3 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Printer className="icon-size" /> Print
+          </button>
+          <label>
+            <span className="sr-only">Update selected order status</span>
+            <select
+              value={bulkStatus}
+              onChange={(event) =>
+                setBulkStatus(event.target.value as OrderStatus | "")
+              }
+              disabled={selectedOrders.length === 0 || bulkUpdating}
+              className="h-9 min-w-[145px] rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary) disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="">Update status</option>
+              {STATUS_TABS.filter(({ value }) => value !== "").map(
+                ({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                )
+              )}
+            </select>
+          </label>
+          <label>
+            <span className="sr-only">Update selected order source</span>
+            <select
+              disabled
+              title="Order sources are not configured"
+              className="h-9 min-w-[145px] rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option>Update source</option>
+            </select>
+          </label>
+          <label>
+            <span className="sr-only">Assign selected orders to employee</span>
+            <select
+              disabled
+              title="Employee assignment is not configured"
+              className="h-9 min-w-[155px] rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option>Assign employee</option>
+            </select>
+          </label>
+          <label>
+            <span className="sr-only">Assign selected orders to courier</span>
+            <select
+              disabled
+              title="Courier assignment is not configured"
+              className="h-9 min-w-[145px] rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option>Assign courier</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            disabled={
+              selectedOrders.length === 0 || !bulkStatus || bulkUpdating
+            }
+            onClick={handleBulkStatusUpdate}
+            className="admin-template-button admin-template-button--primary h-9 px-3 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Check className="icon-size" />
+            {bulkUpdating ? "Applying…" : "Apply"}
+          </button>
+        </div>
+        {bulkMessage ? (
+          <p
+            role="status"
+            className="border-b border-(--border-light) bg-white px-4 py-2 text-xs text-(--text-muted)"
+          >
+            {bulkMessage}
+          </p>
+        ) : null}
+
         {/* Content Table / Loading / Error states */}
         {loading && !hasLoaded ? (
           <LoadingState className="flex items-center justify-center py-16 text-sm text-(--text-muted)">
@@ -486,9 +582,16 @@ export default function OrdersPage() {
           />
         ) : (
           <DataTable
+            keyField="id"
             columns={columns}
             data={data?.items ?? []}
             customStyles={tableCustomStyles}
+            selectableRows
+            selectableRowsHighlight
+            clearSelectedRows={clearSelectedRows}
+            onSelectedRowsChange={({ selectedRows }) =>
+              setSelectedOrders(selectedRows)
+            }
             pagination
             paginationServer
             paginationTotalRows={total}
@@ -496,6 +599,7 @@ export default function OrdersPage() {
             paginationPerPage={PAGE_LIMIT}
             paginationRowsPerPageOptions={[10, 20, 50]}
             onChangePage={(newPage) => {
+              resetSelectedOrders()
               setSearchParams((prev) => {
                 const next = new URLSearchParams(prev)
                 next.set("page", String(newPage))
@@ -510,6 +614,35 @@ export default function OrdersPage() {
           />
         )}
       </div>
+      <section className="hidden p-8 print:block">
+        <h1 className="mb-4 text-xl font-bold">Selected Orders</h1>
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              <th className="border p-2 text-left">Order</th>
+              <th className="border p-2 text-left">Customer</th>
+              <th className="border p-2 text-left">Phone</th>
+              <th className="border p-2 text-left">Delivery Area</th>
+              <th className="border p-2 text-left">Status</th>
+              <th className="border p-2 text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selectedOrders.map((order) => (
+              <tr key={order.id}>
+                <td className="border p-2">{order.orderNumber}</td>
+                <td className="border p-2">{order.customerName}</td>
+                <td className="border p-2">{order.customerPhone}</td>
+                <td className="border p-2">{order.deliveryArea}</td>
+                <td className="border p-2">{order.orderStatus}</td>
+                <td className="border p-2 text-right">
+                  {formatTaka(order.total)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
     </div>
   )
 }

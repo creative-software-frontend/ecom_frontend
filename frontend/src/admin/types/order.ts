@@ -18,6 +18,7 @@ export type OrderListItem = {
   customerName: string
   customerPhone: string
   deliveryArea: string
+  customerAddress: string
   total: number
   orderStatus: OrderStatus
   paymentStatus: PaymentStatus
