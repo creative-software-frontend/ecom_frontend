@@ -341,7 +341,7 @@ export default function OrdersPage() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-(--text-primary)">Orders</h1>
-            <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-(--text-muted)">
+            <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-(--text-muted)">
               {total} Total
             </span>
           </div>
@@ -353,13 +353,13 @@ export default function OrdersPage() {
           <button
             type="button"
             onClick={() => download("orders.csv")}
-            className="admin-template-button admin-template-button--secondary h-8 px-3 text-[11px]"
+            className="admin-template-button admin-template-button--secondary h-8 px-3 text-xs"
           >
             <Download className="icon-size" /> Export CSV
           </button>
           <Link
             to="/admin/orders/new"
-            className="admin-template-button admin-template-button--primary h-8 px-3 text-[11px]"
+            className="admin-template-button admin-template-button--primary h-8 px-3 text-xs"
           >
             <Plus className="icon-size" /> Create Order
           </Link>

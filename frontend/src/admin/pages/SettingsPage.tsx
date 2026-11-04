@@ -15,91 +15,72 @@ import {
 import { ApiError } from "../api/client"
 import { settingsApi } from "../api/settingsApi"
 import { useAuth } from "../auth/AuthProvider"
+import { useStoreQuery, useUpdateStoreMutation } from "../hooks/useStoreQuery"
 import type { StoreSettings } from "../types/settings"
 
 type TabType = "store" | "security"
-
-type LoadState =
-  | { status: "loading" }
-  | { status: "error"; message: string }
-  | { status: "loaded"; settings: StoreSettings }
 
 export function SettingsPage() {
   const { state: authState } = useAuth()
   const [activeTab, setActiveTab] = useState<TabType>("store")
 
-  // Store settings state
-  const [loadState, setLoadState] = useState<LoadState>({ status: "loading" })
-  const [loadAttempt, setLoadAttempt] = useState(0)
-  const [storeSettings, setStoreSettings] = useState<StoreSettings | null>(null)
-  const [isSavingStore, setIsSavingStore] = useState(false)
-  const [storeSuccessMessage, setStoreSuccessMessage] = useState<string | null>(null)
-  const [storeErrorMessage, setStoreErrorMessage] = useState<string | null>(null)
-  const [storeFieldErrors, setStoreFieldErrors] = useState<Record<string, string>>({})
+  /* ---------------- Store Settings (TanStack Query) ---------------- */
+  const { data: storeData, isLoading, error, refetch } = useStoreQuery()
+  const updateStore = useUpdateStoreMutation()
 
-  // Security / Password state
+  // Local form state — ডেটা লোড হলে একবার সিঙ্ক করব
+  const [formState, setFormState] = useState<StoreSettings | null>(null)
+  const [storeSuccessMessage, setStoreSuccessMessage] = useState<string | null>(
+    null
+  )
+  const [storeErrorMessage, setStoreErrorMessage] = useState<string | null>(
+    null
+  )
+  const [storeFieldErrors, setStoreFieldErrors] = useState<
+    Record<string, string>
+  >({})
+
+  // সার্ভার থেকে ডেটা আসলে form-এ কপি করি
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (storeData) setFormState(storeData)
+  }, [storeData])
+
+  /* ---------------- Password Change (আগের মতোই) ---------------- */
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
-  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState<string | null>(null)
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState<string | null>(null)
-  const [passwordFieldErrors, setPasswordFieldErrors] = useState<Record<string, string>>({})
+  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState<
+    string | null
+  >(null)
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState<
+    string | null
+  >(null)
+  const [passwordFieldErrors, setPasswordFieldErrors] = useState<
+    Record<string, string>
+  >({})
 
-  useEffect(() => {
-    const controller = new AbortController()
-    let active = true
-
-    settingsApi.get(controller.signal).then(
-      (data) => {
-        if (!active) return
-        setStoreSettings(data)
-        setLoadState({ status: "loaded", settings: data })
-      },
-      (error: unknown) => {
-        if (!active) return
-        if (error instanceof DOMException && error.name === "AbortError") return
-        const message =
-          error instanceof Error ? error.message : "Failed to load store settings"
-        setLoadState({ status: "error", message })
-      }
-    )
-
-    return () => {
-      active = false
-      controller.abort()
-    }
-  }, [loadAttempt])
-
-  function handleRetry() {
-    setLoadState({ status: "loading" })
-    setLoadAttempt((c) => c + 1)
-  }
+  /* ---------------- Handlers ---------------- */
 
   async function handleStoreSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!storeSettings) return
+    if (!formState) return
 
-    setIsSavingStore(true)
     setStoreSuccessMessage(null)
     setStoreErrorMessage(null)
     setStoreFieldErrors({})
 
     try {
-      const updated = await settingsApi.updateStore(storeSettings)
-      setStoreSettings(updated)
+      await updateStore.mutateAsync(formState)
       setStoreSuccessMessage("Store settings saved successfully.")
-    } catch (error) {
-      if (error instanceof ApiError) {
-        setStoreErrorMessage(error.message)
-        if (error.fieldErrors) {
-          setStoreFieldErrors(error.fieldErrors)
-        }
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setStoreErrorMessage(err.message)
+        if (err.fieldErrors) setStoreFieldErrors(err.fieldErrors)
       } else {
         setStoreErrorMessage("An unexpected error occurred while saving.")
       }
-    } finally {
-      setIsSavingStore(false)
     }
   }
 
@@ -115,16 +96,12 @@ export function SettingsPage() {
       })
       return
     }
-
     if (newPassword !== confirmPassword) {
-      setPasswordFieldErrors({
-        confirmPassword: "Passwords do not match.",
-      })
+      setPasswordFieldErrors({ confirmPassword: "Passwords do not match." })
       return
     }
 
     setIsUpdatingPassword(true)
-
     try {
       const res = await settingsApi.changePassword({
         currentPassword,
@@ -134,31 +111,42 @@ export function SettingsPage() {
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
-    } catch (error) {
-      if (error instanceof ApiError) {
-        setPasswordErrorMessage(error.message)
-        if (error.fieldErrors) {
-          setPasswordFieldErrors(error.fieldErrors)
-        }
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setPasswordErrorMessage(err.message)
+        if (err.fieldErrors) setPasswordFieldErrors(err.fieldErrors)
       } else {
-        setPasswordErrorMessage("An unexpected error occurred while updating password.")
+        setPasswordErrorMessage(
+          "An unexpected error occurred while updating password."
+        )
       }
     } finally {
       setIsUpdatingPassword(false)
     }
   }
 
+  /* ---------------- Helper: update form field ---------------- */
+  const updateField = <K extends keyof StoreSettings>(
+    key: K,
+    value: StoreSettings[K]
+  ) => {
+    setFormState((prev) => (prev ? { ...prev, [key]: value } : prev))
+  }
+
+  /* ---------------- Render ---------------- */
+
   return (
-    <div className="admin-dashboard-content min-w-0 p-4 md:p-7.5">
-      <header className="admin-page-title">
-        <h1 className="text-xl font-normal text-gray-800">Settings</h1>
-        <p className="pt-0.75 text-base text-gray-500">
-          Manage your store configuration, contact details, delivery, and account security.
+    <div className="min-w-0 space-y-6 bg-(--bg-app) p-4 sm:p-6">
+      <header>
+        <h1 className="text-xl font-bold text-(--text-primary)">Settings</h1>
+        <p className="mt-1 text-sm text-(--text-muted)">
+          Manage your store configuration, contact details, delivery, and
+          account security.
         </p>
       </header>
 
       {/* Tabs */}
-      <div className="mb-6 flex border-b border-gray-200">
+      <div className="flex border-b border-(--border-light)">
         <button
           type="button"
           onClick={() => {
@@ -168,13 +156,11 @@ export function SettingsPage() {
           }}
           className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium transition-colors ${
             activeTab === "store"
-              ? "border-[#3f6ad8] text-[#3f6ad8]"
-              : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              ? "border-primary text-primary"
+              : "border-transparent text-(--text-muted) hover:text-(--text-primary)"
           }`}
-          aria-selected={activeTab === "store"}
-          role="tab"
         >
-          <Store className="h-4 w-4" />
+          <Store className="size-4" />
           Store Settings
         </button>
         <button
@@ -186,54 +172,60 @@ export function SettingsPage() {
           }}
           className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium transition-colors ${
             activeTab === "security"
-              ? "border-[#3f6ad8] text-[#3f6ad8]"
-              : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              ? "border-primary text-primary"
+              : "border-transparent text-(--text-muted) hover:text-(--text-primary)"
           }`}
-          aria-selected={activeTab === "security"}
-          role="tab"
         >
-          <Lock className="h-4 w-4" />
+          <Lock className="size-4" />
           Security & Password
         </button>
       </div>
 
-      {/* Store Settings Tab */}
+      {/* ------------------- STORE TAB ------------------- */}
       {activeTab === "store" && (
         <div className="space-y-6">
-          {loadState.status === "loading" ? (
+          {isLoading && (
             <div
-              className="admin-dashboard-card flex items-center justify-center bg-white p-12 text-sm text-gray-500"
+              className="flex items-center justify-center rounded-lg border border-(--border-light) bg-(--bg-surface) p-12 text-sm text-(--text-muted)"
               role="status"
             >
-              <Loader2 className="mr-2 h-5 w-5 animate-spin text-[#3f6ad8]" />
+              <Loader2 className="mr-2 size-5 animate-spin text-primary" />
               Loading store settings...
             </div>
-          ) : loadState.status === "error" ? (
+          )}
+
+          {error && !isLoading && (
             <div
-              className="admin-dashboard-card space-y-4 bg-white p-6"
+              className="space-y-4 rounded-lg border border-(--border-light) bg-(--bg-surface) p-6"
               role="alert"
             >
               <div className="flex items-center gap-2 text-red-600">
-                <AlertCircle className="h-5 w-5 shrink-0" />
-                <p className="text-sm font-medium">{loadState.message}</p>
+                <AlertCircle className="size-5 shrink-0" />
+                <p className="text-sm font-medium">
+                  {error instanceof Error
+                    ? error.message
+                    : "Failed to load store settings"}
+                </p>
               </div>
               <button
                 type="button"
-                onClick={handleRetry}
+                onClick={() => void refetch()}
                 className="admin-template-button admin-template-button--secondary"
               >
                 Retry
               </button>
             </div>
-          ) : storeSettings ? (
-            <form onSubmit={(e) => void handleStoreSubmit(e)} className="space-y-6">
-              {/* Feedback banners */}
+          )}
+
+          {!isLoading && !error && formState && (
+            <form onSubmit={handleStoreSubmit} className="space-y-6">
+              {/* Success / Error alerts */}
               {storeSuccessMessage && (
                 <div
-                  className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+                  className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
                   role="status"
                 >
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
+                  <CheckCircle2 className="size-5 shrink-0 text-emerald-600" />
                   <span>{storeSuccessMessage}</span>
                 </div>
               )}
@@ -242,242 +234,209 @@ export function SettingsPage() {
                   className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
                   role="alert"
                 >
-                  <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
+                  <AlertCircle className="size-5 shrink-0 text-red-600" />
                   <span>{storeErrorMessage}</span>
                 </div>
               )}
 
-              {/* General Store Profile */}
-              <section className="admin-dashboard-card overflow-hidden bg-white">
-                <div className="admin-form-card-header flex items-center gap-2">
-                  <Store className="h-5 w-5 text-[#3f6ad8]" />
+              {/* Store Profile Card */}
+              <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+                <div className="flex items-center gap-2 border-b border-(--border-light) px-6 py-4">
+                  <Store className="size-5 text-primary" />
                   <div>
-                    <h2 className="text-base font-semibold">Store Profile</h2>
-                    <p className="text-xs text-gray-500">
+                    <h2 className="text-base font-semibold text-(--text-primary)">
+                      Store Profile
+                    </h2>
+                    <p className="text-xs text-(--text-muted)">
                       General details about your brand and online shop
                     </p>
                   </div>
                 </div>
-
                 <div className="space-y-4 p-6">
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="admin-form-field">
-                      <label htmlFor="store-name" className="admin-form-label">
+                    <div>
+                      <label
+                        htmlFor="store-name"
+                        className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                      >
                         Store Name
                       </label>
                       <input
                         id="store-name"
                         type="text"
-                        value={storeSettings.name}
-                        onChange={(e) =>
-                          setStoreSettings({
-                            ...storeSettings,
-                            name: e.target.value,
-                          })
-                        }
-                        className="admin-form-control"
-                        required
-                        aria-invalid={Boolean(storeFieldErrors.name)}
+                        value={formState.name}
+                        onChange={(e) => updateField("name", e.target.value)}
+                        className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                       />
                       {storeFieldErrors.name && (
-                        <p className="admin-form-error">{storeFieldErrors.name}</p>
+                        <p className="mt-1 text-xs text-red-600">
+                          {storeFieldErrors.name}
+                        </p>
                       )}
                     </div>
-
-                    <div className="admin-form-field">
-                      <label htmlFor="store-url" className="admin-form-label">
+                    <div>
+                      <label
+                        htmlFor="store-url"
+                        className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                      >
                         Website URL
                       </label>
                       <input
                         id="store-url"
                         type="text"
-                        value={storeSettings.url}
-                        onChange={(e) =>
-                          setStoreSettings({
-                            ...storeSettings,
-                            url: e.target.value,
-                          })
-                        }
-                        className="admin-form-control"
-                        required
-                        aria-invalid={Boolean(storeFieldErrors.url)}
+                        value={formState.url}
+                        onChange={(e) => updateField("url", e.target.value)}
+                        className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                       />
                       {storeFieldErrors.url && (
-                        <p className="admin-form-error">{storeFieldErrors.url}</p>
+                        <p className="mt-1 text-xs text-red-600">
+                          {storeFieldErrors.url}
+                        </p>
                       )}
                     </div>
                   </div>
-
-                  <div className="admin-form-field">
-                    <label htmlFor="store-tagline" className="admin-form-label">
+                  <div>
+                    <label
+                      htmlFor="store-tagline"
+                      className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                    >
                       Tagline / Slogan
                     </label>
                     <input
                       id="store-tagline"
                       type="text"
-                      value={storeSettings.tagline}
-                      onChange={(e) =>
-                        setStoreSettings({
-                          ...storeSettings,
-                          tagline: e.target.value,
-                        })
-                      }
-                      className="admin-form-control"
-                      required
-                      aria-invalid={Boolean(storeFieldErrors.tagline)}
+                      value={formState.tagline}
+                      onChange={(e) => updateField("tagline", e.target.value)}
+                      className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                     />
                     {storeFieldErrors.tagline && (
-                      <p className="admin-form-error">{storeFieldErrors.tagline}</p>
+                      <p className="mt-1 text-xs text-red-600">
+                        {storeFieldErrors.tagline}
+                      </p>
                     )}
                   </div>
-
                   <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="admin-form-field">
-                      <label htmlFor="store-currency" className="admin-form-label">
+                    <div>
+                      <label
+                        htmlFor="store-currency"
+                        className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                      >
                         Currency Code
                       </label>
                       <input
                         id="store-currency"
                         type="text"
-                        value={storeSettings.currency}
+                        value={formState.currency}
                         onChange={(e) =>
-                          setStoreSettings({
-                            ...storeSettings,
-                            currency: e.target.value,
-                          })
+                          updateField("currency", e.target.value)
                         }
-                        className="admin-form-control"
-                        required
                         placeholder="BDT"
-                        aria-invalid={Boolean(storeFieldErrors.currency)}
+                        className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                       />
-                      {storeFieldErrors.currency && (
-                        <p className="admin-form-error">{storeFieldErrors.currency}</p>
-                      )}
                     </div>
-
-                    <div className="admin-form-field">
+                    <div>
                       <label
                         htmlFor="store-currency-symbol"
-                        className="admin-form-label"
+                        className="mb-1.5 block text-sm font-medium text-(--text-primary)"
                       >
                         Currency Symbol
                       </label>
                       <input
                         id="store-currency-symbol"
                         type="text"
-                        value={storeSettings.currency_symbol}
+                        value={formState.currency_symbol}
                         onChange={(e) =>
-                          setStoreSettings({
-                            ...storeSettings,
-                            currency_symbol: e.target.value,
-                          })
+                          updateField("currency_symbol", e.target.value)
                         }
-                        className="admin-form-control"
-                        required
                         placeholder="৳"
-                        aria-invalid={Boolean(storeFieldErrors.currency_symbol)}
+                        className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                       />
-                      {storeFieldErrors.currency_symbol && (
-                        <p className="admin-form-error">
-                          {storeFieldErrors.currency_symbol}
-                        </p>
-                      )}
                     </div>
-
-                    <div className="admin-form-field">
-                      <label htmlFor="store-language" className="admin-form-label">
+                    <div>
+                      <label
+                        htmlFor="store-language"
+                        className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                      >
                         Language Code
                       </label>
                       <input
                         id="store-language"
                         type="text"
-                        value={storeSettings.language}
+                        value={formState.language}
                         onChange={(e) =>
-                          setStoreSettings({
-                            ...storeSettings,
-                            language: e.target.value,
-                          })
+                          updateField("language", e.target.value)
                         }
-                        className="admin-form-control"
-                        required
                         placeholder="bn"
-                        aria-invalid={Boolean(storeFieldErrors.language)}
+                        className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                       />
-                      {storeFieldErrors.language && (
-                        <p className="admin-form-error">{storeFieldErrors.language}</p>
-                      )}
                     </div>
                   </div>
                 </div>
               </section>
 
-              {/* Contact Information */}
-              <section className="admin-dashboard-card overflow-hidden bg-white">
-                <div className="admin-form-card-header flex items-center gap-2">
-                  <Phone className="h-5 w-5 text-[#3f6ad8]" />
+              {/* Contact Card */}
+              <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+                <div className="flex items-center gap-2 border-b border-(--border-light) px-6 py-4">
+                  <Phone className="size-5 text-primary" />
                   <div>
-                    <h2 className="text-base font-semibold">Contact & Support</h2>
-                    <p className="text-xs text-gray-500">
-                      Contact phone and WhatsApp support numbers shown to customers
+                    <h2 className="text-base font-semibold text-(--text-primary)">
+                      Contact & Support
+                    </h2>
+                    <p className="text-xs text-(--text-muted)">
+                      Contact phone and WhatsApp support numbers shown to
+                      customers
                     </p>
                   </div>
                 </div>
-
                 <div className="grid gap-4 p-6 sm:grid-cols-2">
-                  <div className="admin-form-field">
-                    <label htmlFor="contact-phone" className="admin-form-label">
+                  <div>
+                    <label
+                      htmlFor="contact-phone"
+                      className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                    >
                       Phone Number
                     </label>
                     <input
                       id="contact-phone"
                       type="text"
-                      value={storeSettings.contact.phone}
+                      value={formState.contact.phone}
                       onChange={(e) =>
-                        setStoreSettings({
-                          ...storeSettings,
-                          contact: {
-                            ...storeSettings.contact,
-                            phone: e.target.value,
-                          },
+                        updateField("contact", {
+                          ...formState.contact,
+                          phone: e.target.value,
                         })
                       }
-                      className="admin-form-control"
-                      required
                       placeholder="017XXXXXXXX"
-                      aria-invalid={Boolean(storeFieldErrors["contact.phone"])}
+                      className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                     />
                     {storeFieldErrors["contact.phone"] && (
-                      <p className="admin-form-error">
+                      <p className="mt-1 text-xs text-red-600">
                         {storeFieldErrors["contact.phone"]}
                       </p>
                     )}
                   </div>
-
-                  <div className="admin-form-field">
-                    <label htmlFor="contact-whatsapp" className="admin-form-label">
+                  <div>
+                    <label
+                      htmlFor="contact-whatsapp"
+                      className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                    >
                       WhatsApp Number
                     </label>
                     <input
                       id="contact-whatsapp"
                       type="text"
-                      value={storeSettings.contact.whatsapp}
+                      value={formState.contact.whatsapp}
                       onChange={(e) =>
-                        setStoreSettings({
-                          ...storeSettings,
-                          contact: {
-                            ...storeSettings.contact,
-                            whatsapp: e.target.value,
-                          },
+                        updateField("contact", {
+                          ...formState.contact,
+                          whatsapp: e.target.value,
                         })
                       }
-                      className="admin-form-control"
-                      required
                       placeholder="017XXXXXXXX"
-                      aria-invalid={Boolean(storeFieldErrors["contact.whatsapp"])}
+                      className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                     />
                     {storeFieldErrors["contact.whatsapp"] && (
-                      <p className="admin-form-error">
+                      <p className="mt-1 text-xs text-red-600">
                         {storeFieldErrors["contact.whatsapp"]}
                       </p>
                     )}
@@ -485,174 +444,142 @@ export function SettingsPage() {
                 </div>
               </section>
 
-              {/* Delivery Settings */}
-              <section className="admin-dashboard-card overflow-hidden bg-white">
-                <div className="admin-form-card-header flex items-center gap-2">
-                  <Truck className="h-5 w-5 text-[#3f6ad8]" />
+              {/* Delivery Card */}
+              <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+                <div className="flex items-center gap-2 border-b border-(--border-light) px-6 py-4">
+                  <Truck className="size-5 text-primary" />
                   <div>
-                    <h2 className="text-base font-semibold">Delivery & Shipping</h2>
-                    <p className="text-xs text-gray-500">
+                    <h2 className="text-base font-semibold text-(--text-primary)">
+                      Delivery & Shipping
+                    </h2>
+                    <p className="text-xs text-(--text-muted)">
                       Default shipping policy, charges, and delivery notices
                     </p>
                   </div>
                 </div>
-
                 <div className="space-y-4 p-6">
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="admin-form-field">
-                      <label htmlFor="delivery-method" className="admin-form-label">
+                    <div>
+                      <label
+                        htmlFor="delivery-method"
+                        className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                      >
                         Delivery Method
                       </label>
                       <input
                         id="delivery-method"
                         type="text"
-                        value={storeSettings.delivery.method}
+                        value={formState.delivery.method}
                         onChange={(e) =>
-                          setStoreSettings({
-                            ...storeSettings,
-                            delivery: {
-                              ...storeSettings.delivery,
-                              method: e.target.value,
-                            },
+                          updateField("delivery", {
+                            ...formState.delivery,
+                            method: e.target.value,
                           })
                         }
-                        className="admin-form-control"
-                        required
                         placeholder="Cash on Delivery"
-                        aria-invalid={Boolean(storeFieldErrors["delivery.method"])}
+                        className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                       />
-                      {storeFieldErrors["delivery.method"] && (
-                        <p className="admin-form-error">
-                          {storeFieldErrors["delivery.method"]}
-                        </p>
-                      )}
                     </div>
-
-                    <div className="admin-form-field">
+                    <div>
                       <label
                         htmlFor="delivery-charge"
-                        className="admin-form-label"
+                        className="mb-1.5 block text-sm font-medium text-(--text-primary)"
                       >
-                        Delivery Charge ({storeSettings.currency_symbol})
+                        Delivery Charge ({formState.currency_symbol})
                       </label>
                       <input
                         id="delivery-charge"
                         type="number"
                         min="0"
-                        value={storeSettings.delivery.delivery_charge}
+                        value={formState.delivery.delivery_charge}
                         onChange={(e) =>
-                          setStoreSettings({
-                            ...storeSettings,
-                            delivery: {
-                              ...storeSettings.delivery,
-                              delivery_charge: Number(e.target.value) || 0,
-                            },
+                          updateField("delivery", {
+                            ...formState.delivery,
+                            delivery_charge: Number(e.target.value) || 0,
                           })
                         }
-                        className="admin-form-control"
-                        required
-                        aria-invalid={Boolean(
-                          storeFieldErrors["delivery.delivery_charge"]
-                        )}
+                        className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                       />
-                      {storeFieldErrors["delivery.delivery_charge"] && (
-                        <p className="admin-form-error">
-                          {storeFieldErrors["delivery.delivery_charge"]}
-                        </p>
-                      )}
                     </div>
                   </div>
-
-                  <div className="admin-form-field">
+                  <div>
                     <label className="flex cursor-pointer items-center gap-2">
                       <input
                         type="checkbox"
-                        checked={storeSettings.delivery.free_delivery}
+                        checked={formState.delivery.free_delivery}
                         onChange={(e) =>
-                          setStoreSettings({
-                            ...storeSettings,
-                            delivery: {
-                              ...storeSettings.delivery,
-                              free_delivery: e.target.checked,
-                            },
+                          updateField("delivery", {
+                            ...formState.delivery,
+                            free_delivery: e.target.checked,
                           })
                         }
-                        className="h-4 w-4 rounded border-gray-300 text-[#3f6ad8] focus:ring-[#3f6ad8]"
+                        className="size-4 rounded border-(--border-light) text-primary focus:ring-primary"
                       />
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-sm font-medium text-(--text-primary)">
                         Enable Free Delivery Offer
                       </span>
                     </label>
-                    <p className="admin-form-help">
+                    <p className="mt-1 text-xs text-(--text-muted)">
                       When checked, delivery is marked as free for customers.
                     </p>
                   </div>
-
-                  <div className="admin-form-field">
-                    <label htmlFor="delivery-note" className="admin-form-label">
+                  <div>
+                    <label
+                      htmlFor="delivery-note"
+                      className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                    >
                       Delivery Note
                     </label>
                     <input
                       id="delivery-note"
                       type="text"
-                      value={storeSettings.delivery.note}
+                      value={formState.delivery.note}
                       onChange={(e) =>
-                        setStoreSettings({
-                          ...storeSettings,
-                          delivery: {
-                            ...storeSettings.delivery,
-                            note: e.target.value,
-                          },
+                        updateField("delivery", {
+                          ...formState.delivery,
+                          note: e.target.value,
                         })
                       }
-                      className="admin-form-control"
                       placeholder="সারা বাংলাদেশ ক্যাশ অন ডেলিভারি"
-                      aria-invalid={Boolean(storeFieldErrors["delivery.note"])}
+                      className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                     />
-                    {storeFieldErrors["delivery.note"] && (
-                      <p className="admin-form-error">
-                        {storeFieldErrors["delivery.note"]}
-                      </p>
-                    )}
                   </div>
                 </div>
               </section>
 
-              {/* Submit Button */}
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={isSavingStore}
-                  className="admin-template-button admin-template-button--primary px-6"
+                  disabled={updateStore.isPending}
+                  className="admin-template-button admin-template-button--primary px-6 disabled:opacity-50"
                 >
-                  {isSavingStore ? (
+                  {updateStore.isPending ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="size-4 animate-spin" />
                       Saving settings...
                     </>
                   ) : (
                     <>
-                      <Save className="h-4 w-4" />
+                      <Save className="size-4" />
                       Save Store Settings
                     </>
                   )}
                 </button>
               </div>
             </form>
-          ) : null}
+          )}
         </div>
       )}
 
-      {/* Security Tab */}
+      {/* ------------------- SECURITY TAB ------------------- */}
       {activeTab === "security" && (
         <div className="space-y-6">
-          {/* Feedback banners */}
           {passwordSuccessMessage && (
             <div
-              className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+              className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
               role="status"
             >
-              <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
+              <CheckCircle2 className="size-5 shrink-0 text-emerald-600" />
               <span>{passwordSuccessMessage}</span>
             </div>
           )}
@@ -661,27 +588,30 @@ export function SettingsPage() {
               className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
               role="alert"
             >
-              <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
+              <AlertCircle className="size-5 shrink-0 text-red-600" />
               <span>{passwordErrorMessage}</span>
             </div>
           )}
 
-          {/* Change Password Card */}
-          <section className="admin-dashboard-card overflow-hidden bg-white">
-            <div className="admin-form-card-header flex items-center gap-2">
-              <KeyRound className="h-5 w-5 text-[#3f6ad8]" />
+          <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+            <div className="flex items-center gap-2 border-b border-(--border-light) px-6 py-4">
+              <KeyRound className="size-5 text-primary" />
               <div>
-                <h2 className="text-base font-semibold">Change Password</h2>
-                <p className="text-xs text-gray-500">
+                <h2 className="text-base font-semibold text-(--text-primary)">
+                  Change Password
+                </h2>
+                <p className="text-xs text-(--text-muted)">
                   Update your administrator account password
                 </p>
               </div>
             </div>
-
-            <form onSubmit={(e) => void handlePasswordSubmit(e)} className="p-6">
+            <form onSubmit={handlePasswordSubmit} className="p-6">
               <div className="max-w-md space-y-4">
-                <div className="admin-form-field">
-                  <label htmlFor="current-password" className="admin-form-label">
+                <div>
+                  <label
+                    htmlFor="current-password"
+                    className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                  >
                     Current Password
                   </label>
                   <input
@@ -689,19 +619,20 @@ export function SettingsPage() {
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="admin-form-control"
                     required
-                    aria-invalid={Boolean(passwordFieldErrors.currentPassword)}
+                    className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                   />
                   {passwordFieldErrors.currentPassword && (
-                    <p className="admin-form-error">
+                    <p className="mt-1 text-xs text-red-600">
                       {passwordFieldErrors.currentPassword}
                     </p>
                   )}
                 </div>
-
-                <div className="admin-form-field">
-                  <label htmlFor="new-password" className="admin-form-label">
+                <div>
+                  <label
+                    htmlFor="new-password"
+                    className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                  >
                     New Password
                   </label>
                   <input
@@ -709,22 +640,23 @@ export function SettingsPage() {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="admin-form-control"
                     required
-                    aria-invalid={Boolean(passwordFieldErrors.newPassword)}
+                    className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                   />
-                  <p className="admin-form-help">
+                  <p className="mt-1 text-xs text-(--text-muted)">
                     Must be at least 8 characters long.
                   </p>
                   {passwordFieldErrors.newPassword && (
-                    <p className="admin-form-error">
+                    <p className="mt-1 text-xs text-red-600">
                       {passwordFieldErrors.newPassword}
                     </p>
                   )}
                 </div>
-
-                <div className="admin-form-field">
-                  <label htmlFor="confirm-password" className="admin-form-label">
+                <div>
+                  <label
+                    htmlFor="confirm-password"
+                    className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                  >
                     Confirm New Password
                   </label>
                   <input
@@ -732,31 +664,29 @@ export function SettingsPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="admin-form-control"
                     required
-                    aria-invalid={Boolean(passwordFieldErrors.confirmPassword)}
+                    className="block w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                   />
                   {passwordFieldErrors.confirmPassword && (
-                    <p className="admin-form-error">
+                    <p className="mt-1 text-xs text-red-600">
                       {passwordFieldErrors.confirmPassword}
                     </p>
                   )}
                 </div>
-
                 <div className="pt-2">
                   <button
                     type="submit"
                     disabled={isUpdatingPassword}
-                    className="admin-template-button admin-template-button--primary"
+                    className="admin-template-button admin-template-button--primary disabled:opacity-50"
                   >
                     {isUpdatingPassword ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="size-4 animate-spin" />
                         Updating password...
                       </>
                     ) : (
                       <>
-                        <Lock className="h-4 w-4" />
+                        <Lock className="size-4" />
                         Update Password
                       </>
                     )}
@@ -766,24 +696,27 @@ export function SettingsPage() {
             </form>
           </section>
 
-          {/* Account Summary */}
           {authState.status === "authenticated" && (
-            <section className="admin-dashboard-card overflow-hidden bg-white">
-              <div className="admin-form-card-header flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-green-600" />
+            <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+              <div className="flex items-center gap-2 border-b border-(--border-light) px-6 py-4">
+                <ShieldCheck className="size-5 text-emerald-600" />
                 <div>
-                  <h2 className="text-base font-semibold">Account Info</h2>
-                  <p className="text-xs text-gray-500">
+                  <h2 className="text-base font-semibold text-(--text-primary)">
+                    Account Info
+                  </h2>
+                  <p className="text-xs text-(--text-muted)">
                     Administrator account credentials
                   </p>
                 </div>
               </div>
               <div className="p-6">
                 <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <Mail className="size-5 text-(--text-muted)" />
                   <div>
-                    <div className="text-xs text-gray-500">Signed in as</div>
-                    <div className="font-medium text-gray-800">
+                    <div className="text-xs text-(--text-muted)">
+                      Signed in as
+                    </div>
+                    <div className="text-sm font-medium text-(--text-primary)">
                       {authState.user.email}
                     </div>
                   </div>
