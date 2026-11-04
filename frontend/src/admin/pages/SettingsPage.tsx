@@ -149,10 +149,10 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="admin-dashboard-content min-w-0 p-4 md:p-[30px]">
+    <div className="admin-dashboard-content min-w-0 p-4 md:p-7.5">
       <header className="admin-page-title">
         <h1 className="text-xl font-normal text-gray-800">Settings</h1>
-        <p className="pt-[3px] text-base text-gray-500">
+        <p className="pt-0.75 text-base text-gray-500">
           Manage your store configuration, contact details, delivery, and account security.
         </p>
       </header>

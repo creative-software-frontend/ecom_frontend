@@ -54,7 +54,7 @@ export function OrdersTable({
 
   return (
     <div className="w-full overflow-x-auto">
-      <table className="w-full min-w-[900px] border-collapse text-left text-[13px]">
+      <table className="w-full min-w-225 border-collapse text-left text-[13px]">
         <thead className="bg-(--bg-table-header)">
           <tr>
             {[

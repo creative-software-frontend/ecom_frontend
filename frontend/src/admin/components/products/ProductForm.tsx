@@ -197,13 +197,13 @@ export function ProductForm({
   }, [isDirty])
 
   return (
-    <div className="admin-dashboard-content min-w-0 p-4 md:p-[30px]">
+    <div className="admin-dashboard-content min-w-0 p-4 md:p-7.5">
       <header className="admin-page-title flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-normal text-gray-800">
             {mode === "create" ? "Add product" : "Edit product"}
           </h1>
-          <p className="pt-[3px] text-base text-gray-500">
+          <p className="pt-0.75 text-base text-gray-500">
             {mode === "create"
               ? "Enter product details for your catalog"
               : "Update product details for your catalog"}

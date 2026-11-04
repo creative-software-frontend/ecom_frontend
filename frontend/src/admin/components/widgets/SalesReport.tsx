@@ -67,7 +67,7 @@ function SalesReportTab({
           >
             <div className="flex items-center gap-3 py-3">
               <img
-                className="h-[42px] w-[42px] shrink-0 rounded-full object-cover"
+                className="h-10.5 w-10.5 shrink-0 rounded-full object-cover"
                 src={entry.avatar}
                 alt=""
               />
@@ -120,7 +120,7 @@ export function SalesReport({ data }: SalesReportProps) {
       className="admin-dashboard-card min-w-0 overflow-hidden bg-white"
       aria-labelledby="sales-report-title"
     >
-      <header className="flex min-h-[56px] items-center justify-between border-b border-gray-200 px-4 sm:px-6">
+      <header className="flex min-h-14 items-center justify-between border-b border-gray-200 px-4 sm:px-6">
         <h2
           id="sales-report-title"
           className="text-sm font-bold tracking-wide text-gray-600 uppercase"

@@ -2,7 +2,14 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { StatusBadge } from "../components/common/StatusBadge"
 import { formatTaka } from "../lib/orderStatus"
-import { Plus, RefreshCw } from "lucide-react"
+import {
+  ArrowRight,
+  Calendar,
+  HandCoins,
+  Plus,
+  RefreshCw,
+  ShoppingBag,
+} from "lucide-react"
 
 export type PendingOrderItem = {
   id: string
@@ -158,7 +165,7 @@ export default function DashboardPage() {
 
   if (loading || !data) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center text-sm text-[var(--text-muted)]">
+      <div className="flex min-h-100 items-center justify-center text-sm text-(--text-muted)">
         Loading dashboard…
       </div>
     )
@@ -170,7 +177,7 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-[var(--text-primary)]">
+            <h1 className="text-xl font-bold text-(--text-primary)">
               Dashboard
             </h1>
             <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
@@ -178,14 +185,14 @@ export default function DashboardPage() {
               Live Operations
             </span>
           </div>
-          <p className="mt-0.5 text-sm text-[var(--text-muted)]">
+          <p className="mt-0.5 text-sm text-(--text-muted)">
             Real-time orders, telephone verification queue, and fulfillment
             overview across Bangladesh
           </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="admin-template-button admin-template-button--secondary text-xs">
-            📅 Today: 30 Oct 2024
+            <Calendar className="icon-size" /> Today: 30 Oct 2024
           </div>
           <button
             type="button"
@@ -207,15 +214,15 @@ export default function DashboardPage() {
         {/* Card 1 */}
         <div className="admin-dashboard-card flex flex-col justify-between p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold tracking-wider text-[var(--text-muted)] uppercase">
+            <span className="text-xs font-bold tracking-wider text-(--text-muted) uppercase">
               New orders today
             </span>
-            <span className="text-[var(--text-muted)]">🛍️</span>
+            <ShoppingBag className="text-(--text-muted)" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+          <div className="mt-2 text-2xl font-bold text-(--text-primary) tabular-nums">
             {data.metrics.newOrdersToday.count}
           </div>
-          <div className="mt-1 text-xs text-[var(--text-muted)]">
+          <div className="mt-1 text-xs text-(--text-muted)">
             {data.metrics.newOrdersToday.change} •{" "}
             {data.metrics.newOrdersToday.cod} COD,{" "}
             {data.metrics.newOrdersToday.bKash} bKash
@@ -225,17 +232,17 @@ export default function DashboardPage() {
         {/* Card 2 */}
         <div className="admin-dashboard-card flex flex-col justify-between border-l-4 border-l-amber-500 bg-amber-50/20 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold tracking-wider text-[var(--text-muted)] uppercase">
+            <span className="text-xs font-bold tracking-wider text-(--text-muted) uppercase">
               Waiting for confirmation
             </span>
-            <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 uppercase">
+            <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold whitespace-nowrap text-amber-800 uppercase">
               Requires Action
             </span>
           </div>
           <div className="mt-2 text-2xl font-bold text-amber-700 tabular-nums">
             {data.metrics.waitingConfirmation.count}
           </div>
-          <div className="mt-1 text-xs text-[var(--text-muted)]">
+          <div className="mt-1 text-xs text-(--text-muted)">
             {data.metrics.waitingConfirmation.oldestTime}
           </div>
         </div>
@@ -243,15 +250,15 @@ export default function DashboardPage() {
         {/* Card 3 */}
         <div className="admin-dashboard-card flex flex-col justify-between p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold tracking-wider text-[var(--text-muted)] uppercase">
+            <span className="text-xs font-bold tracking-wider text-(--text-muted) uppercase">
               Delivered revenue (Month)
             </span>
-            <span className="text-[var(--text-muted)]">📈</span>
+            <HandCoins className="text-(--text-muted)" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+          <div className="mt-2 text-2xl font-bold text-(--text-primary) tabular-nums">
             {formatTaka(data.metrics.deliveredRevenueMonth.amount)}
           </div>
-          <div className="mt-1 text-xs text-[var(--text-muted)]">
+          <div className="mt-1 text-xs text-(--text-muted)">
             {data.metrics.deliveredRevenueMonth.parcelCount} delivered parcels •
             Avg. {formatTaka(data.metrics.deliveredRevenueMonth.avgPerOrder)}
             /order
@@ -261,7 +268,7 @@ export default function DashboardPage() {
         {/* Card 4 */}
         <div className="admin-dashboard-card flex flex-col justify-between p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold tracking-wider text-[var(--text-muted)] uppercase">
+            <span className="text-xs font-bold tracking-wider text-(--text-muted) uppercase">
               Low-stock products
             </span>
             <span className="rounded bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-800 uppercase">
@@ -271,7 +278,7 @@ export default function DashboardPage() {
           <div className="mt-2 text-2xl font-bold text-red-600 tabular-nums">
             {data.metrics.lowStockProducts.count}
           </div>
-          <div className="mt-1 truncate text-xs text-[var(--text-muted)]">
+          <div className="mt-1 truncate text-xs text-(--text-muted)">
             {data.metrics.lowStockProducts.alertText}
           </div>
         </div>
@@ -282,9 +289,9 @@ export default function DashboardPage() {
         {/* Left Section: Needs Attention Table (8 Columns) */}
         <div className="space-y-4 lg:col-span-8">
           <div className="admin-dashboard-card overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[var(--border-light)] bg-[var(--bg-table-header)] px-4 py-3">
+            <div className="flex items-center justify-between border-b border-(--border-light) bg-(--bg-table-header) px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-[var(--text-primary)]">
+                <span className="text-sm font-semibold text-(--text-primary)">
                   Needs attention — Pending phone verification
                 </span>
                 <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
@@ -293,19 +300,19 @@ export default function DashboardPage() {
               </div>
               <Link
                 to="/admin/orders?status=pending"
-                className="text-xs font-medium text-[var(--primary)] hover:underline"
+                className="flex gap-1 text-xs font-medium whitespace-nowrap text-primary hover:underline"
               >
-                View all 12 pending orders →
+                View all 12 pending orders <ArrowRight className="icon-size" />
               </Link>
             </div>
-            <div className="border-b border-[var(--border-light)] bg-amber-50/50 px-4 py-2 text-xs text-[var(--text-muted)]">
+            <div className="border-b border-(--border-light) bg-amber-50/50 px-4 py-2 text-xs text-(--text-muted)">
               5 oldest pending cash-on-delivery orders awaiting customer
               confirmation call
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
-                <thead className="border-b border-[var(--border-light)] bg-[var(--bg-table-header)] text-xs font-semibold text-[var(--text-muted)] uppercase">
+                <thead className="border-b border-(--border-light) bg-(--bg-table-header) text-xs font-semibold text-(--text-muted) uppercase">
                   <tr>
                     <th className="px-4 py-3">Order #</th>
                     <th className="px-4 py-3">Placed</th>
@@ -314,13 +321,13 @@ export default function DashboardPage() {
                     <th className="px-4 py-3">Items</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border-light)]">
+                <tbody className="divide-y divide-(--border-light)">
                   {data.pendingVerificationOrders.map((order) => (
                     <tr
                       key={order.id}
-                      className="transition-colors hover:bg-[var(--bg-surface-hover)]"
+                      className="transition-colors hover:bg-(--bg-surface-hover)"
                     >
-                      <td className="px-4 py-3 font-medium text-[var(--primary)]">
+                      <td className="px-4 py-3 font-medium text-(--primary)">
                         <Link
                           to={`/admin/orders/${order.id}`}
                           className="hover:underline"
@@ -328,23 +335,23 @@ export default function DashboardPage() {
                           {order.orderNumber}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-xs text-[var(--text-muted)] tabular-nums">
+                      <td className="px-4 py-3 text-xs text-(--text-muted) tabular-nums">
                         {order.placedTime}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-[var(--text-primary)]">
+                        <div className="font-medium text-(--text-primary)">
                           {order.customerName}
                         </div>
-                        <div className="text-xs text-[var(--text-muted)] tabular-nums">
+                        <div className="text-xs text-(--text-muted) tabular-nums">
                           {order.customerPhone}
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded bg-[var(--status-confirmed-bg)] px-2 py-1 text-xs font-medium text-[var(--status-confirmed-text)]">
+                        <span className="rounded bg-(--status-confirmed-bg) px-2 py-1 text-xs font-medium text-(--status-confirmed-text)">
                           {order.deliveryArea}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
+                      <td className="px-4 py-3 font-medium text-(--text-primary)">
                         {order.itemSummary}
                       </td>
                     </tr>
@@ -353,7 +360,7 @@ export default function DashboardPage() {
               </table>
             </div>
 
-            <div className="flex items-center justify-between border-t border-[var(--border-light)] bg-[var(--bg-table-header)] px-4 py-3 text-xs text-[var(--text-muted)]">
+            <div className="flex items-center justify-between border-t border-(--border-light) bg-(--bg-table-header) px-4 py-3 text-xs text-(--text-muted)">
               <span>
                 ● All items held from dispatch until phone verification
                 completed
@@ -371,21 +378,21 @@ export default function DashboardPage() {
           <div className="admin-dashboard-card space-y-4 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+                <h3 className="text-sm font-semibold text-(--text-primary)">
                   Orders in last 7 days
                 </h3>
-                <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+                <p className="mt-0.5 text-xs text-(--text-muted)">
                   {data.weeklyChart.totalOrders} orders total •{" "}
                   {formatTaka(data.weeklyChart.totalValue)} value
                 </p>
               </div>
-              <span className="text-xs font-medium text-[var(--text-muted)]">
+              <span className="text-xs font-medium text-(--text-muted)">
                 {data.weeklyChart.dateRange}
               </span>
             </div>
 
             {/* Custom CSS Bar Chart Simulation */}
-            <div className="flex h-32 items-end justify-between gap-2 border-b border-[var(--border-light)] pt-6 pb-2">
+            <div className="flex h-32 items-end justify-between gap-2 border-b border-(--border-light) pt-6 pb-2">
               {data.weeklyChart.days.map((item) => {
                 const heightPercent = Math.round((item.count / 25) * 100)
                 return (
@@ -393,7 +400,7 @@ export default function DashboardPage() {
                     key={item.day}
                     className="group flex h-full flex-1 flex-col items-center justify-end gap-1"
                   >
-                    <span className="text-[10px] text-[var(--text-muted)] tabular-nums opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="text-[10px] text-(--text-muted) tabular-nums opacity-0 transition-opacity group-hover:opacity-100">
                       {item.count}
                     </span>
                     <div
@@ -404,7 +411,7 @@ export default function DashboardPage() {
                           : "bg-[var(--border-light)] hover:bg-[var(--primary-hover)]"
                       }`}
                     ></div>
-                    <span className="text-[11px] font-medium text-[var(--text-muted)]">
+                    <span className="text-[11px] font-medium text-(--text-muted)">
                       {item.day}
                     </span>
                   </div>
@@ -412,9 +419,9 @@ export default function DashboardPage() {
               })}
             </div>
 
-            <div className="flex items-center justify-between pt-1 text-xs text-[var(--text-muted)]">
+            <div className="flex items-center justify-between pt-1 text-xs text-(--text-muted)">
               <span>Daily volume average</span>
-              <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+              <span className="font-semibold text-(--text-primary) tabular-nums">
                 {data.weeklyChart.dailyAverage} orders/day
               </span>
             </div>
@@ -422,61 +429,61 @@ export default function DashboardPage() {
 
           {/* Steadfast Courier Widget */}
           <div className="admin-dashboard-card space-y-4 p-4">
-            <div className="flex items-center justify-between border-b border-[var(--border-light)] pb-3">
+            <div className="flex items-center justify-between border-b border-(--border-light) pb-3">
               <div className="flex items-center gap-2">
                 <span className="flex h-6 w-6 items-center justify-center rounded bg-emerald-100 text-xs font-bold text-emerald-800">
                   🚚
                 </span>
-                <span className="text-sm font-semibold text-[var(--text-primary)]">
+                <span className="text-sm font-semibold text-(--text-primary)">
                   {data.courierSummary.provider}
                 </span>
               </div>
               <StatusBadge variant="delivered" label="Manifest Printed" />
             </div>
 
-            <div className="flex items-center justify-between rounded-lg border border-[var(--border-light)] bg-[var(--bg-table-header)] p-3">
+            <div className="flex items-center justify-between rounded-lg border border-(--border-light) bg-(--bg-table-header) p-3">
               <div>
-                <div className="text-xs font-bold text-[var(--text-muted)] uppercase">
+                <div className="text-xs font-bold text-(--text-muted) uppercase">
                   Ready for Pickup
                 </div>
-                <div className="mt-0.5 text-xl font-bold text-[var(--text-primary)] tabular-nums">
+                <div className="mt-0.5 text-xl font-bold text-(--text-primary) tabular-nums">
                   {data.courierSummary.readyForPickup} Parcels
                 </div>
               </div>
-              <div className="max-w-[140px] text-right text-xs text-[var(--text-muted)]">
+              <div className="max-w-35 text-right text-xs text-(--text-muted)">
                 {data.courierSummary.pickupTime}
               </div>
             </div>
 
-            <div className="space-y-2 divide-y divide-[var(--border-light)] text-xs text-[var(--text-muted)]">
+            <div className="space-y-2 divide-y divide-(--border-light) text-xs text-(--text-muted)">
               <div className="flex justify-between pt-1">
                 <span>Inside Dhaka (Next Day):</span>
-                <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+                <span className="font-semibold text-(--text-primary) tabular-nums">
                   {data.courierSummary.insideDhaka} parcels
                 </span>
               </div>
               <div className="flex justify-between pt-2">
                 <span>Outside Dhaka (48-72h):</span>
-                <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+                <span className="font-semibold text-(--text-primary) tabular-nums">
                   {data.courierSummary.outsideDhaka} parcels
                 </span>
               </div>
               <div className="flex justify-between pt-2 font-medium">
                 <span>Total COD Collection:</span>
-                <span className="font-semibold text-[var(--primary)] tabular-nums">
+                <span className="font-semibold text-(--primary) tabular-nums">
                   {formatTaka(data.courierSummary.totalCod)}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-[var(--border-light)] pt-2">
+            <div className="flex items-center justify-between border-t border-(--border-light) pt-2">
               <button
                 type="button"
-                className="text-xs font-medium text-[var(--primary)] hover:underline"
+                className="text-xs font-medium text-(--primary) hover:underline"
               >
                 Generate Courier Manifest
               </button>
-              <span className="font-mono text-[11px] text-[var(--text-muted)]">
+              <span className="font-mono text-[11px] text-(--text-muted)">
                 {data.courierSummary.manifestId}
               </span>
             </div>

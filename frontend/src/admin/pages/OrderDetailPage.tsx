@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react"
 import { Link, useLocation, useParams } from "react-router"
+import { useQueryClient } from "@tanstack/react-query"
 import DataTable, { type TableColumn } from "react-data-table-component"
 import { ordersApi } from "../api/ordersApi"
 import { ApiError } from "../api/client"
@@ -22,9 +23,12 @@ import {
   Check,
   Clock3,
   MapPin,
+  MessageCircle,
   Package,
+  Phone,
   Printer,
   UserRound,
+  XCircle,
 } from "lucide-react"
 import { ErrorState } from "../components/common/ErrorState"
 import { InlineNotice } from "../components/common/InlineNotice"
@@ -32,7 +36,9 @@ import { LoadingState } from "../components/common/LoadingState"
 import { NotFoundState } from "../components/common/NotFoundState"
 import { StatusBadge } from "../components/common/StatusBadge"
 
-// Load-state reducer
+/* ------------------------------------------------------------------ */
+/*  Load-state reducer                                                 */
+/* ------------------------------------------------------------------ */
 
 type LoadState =
   | { phase: "loading" }
@@ -84,6 +90,10 @@ function getPaymentMethodLabel(method: string): string {
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
+
+/* ------------------------------------------------------------------ */
+/*  Order items table                                                  */
+/* ------------------------------------------------------------------ */
 
 const orderItemColumns: TableColumn<OrderItemDetail>[] = [
   {
@@ -183,6 +193,10 @@ const orderItemTableStyles = {
   },
 }
 
+/* ------------------------------------------------------------------ */
+/*  Small reusable pieces                                              */
+/* ------------------------------------------------------------------ */
+
 function Card({
   title,
   children,
@@ -191,7 +205,7 @@ function Card({
   children: React.ReactNode
 }) {
   return (
-    <section className="admin-dashboard-card overflow-hidden">
+    <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
       <div className="border-b border-(--border-light) px-5 py-4">
         <h2 className="text-sm font-semibold text-(--text-primary)">{title}</h2>
       </div>
@@ -215,36 +229,102 @@ function Row({
   )
 }
 
+/* ------------------------------------------------------------------ */
+/*  Status stepper — visual progress indicator                         */
+/* ------------------------------------------------------------------ */
+
+const STEPPER_STEPS: { key: OrderStatus; label: string }[] = [
+  { key: "pending", label: "Pending" },
+  { key: "confirmed", label: "Confirmed" },
+  { key: "shipped", label: "Shipped" },
+  { key: "delivered", label: "Delivered" },
+]
+
+function OrderStatusStepper({ current }: { current: OrderStatus }) {
+  if (current === "cancelled") {
+    return (
+      <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-700">
+        <XCircle className="size-4" aria-hidden="true" />
+        This order was cancelled
+      </div>
+    )
+  }
+
+  const currentIndex = STEPPER_STEPS.findIndex((s) => s.key === current)
+
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      {STEPPER_STEPS.map((step, index) => {
+        const isComplete = index < currentIndex
+        const isCurrent = index === currentIndex
+        const isUpcoming = index > currentIndex
+
+        return (
+          <div key={step.key} className="flex items-center">
+            <div
+              className={`flex items-center gap-1.5 ${
+                isUpcoming ? "opacity-50" : ""
+              }`}
+            >
+              <div
+                className={`flex size-6 items-center justify-center rounded-full text-[11px] font-semibold ${
+                  isComplete
+                    ? "bg-emerald-500 text-white"
+                    : isCurrent
+                      ? "bg-primary text-white"
+                      : "bg-(--bg-table-header) text-(--text-muted)"
+                }`}
+              >
+                {isComplete ? <Check className="size-3" /> : index + 1}
+              </div>
+              <span
+                className={`text-xs font-medium ${
+                  isCurrent ? "text-(--text-primary)" : "text-(--text-muted)"
+                }`}
+              >
+                {step.label}
+              </span>
+            </div>
+            {index < STEPPER_STEPS.length - 1 && (
+              <div
+                className={`mx-2 h-0.5 w-6 sm:w-10 ${
+                  index < currentIndex
+                    ? "bg-emerald-500"
+                    : "bg-(--border-light)"
+                }`}
+              />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main page                                                          */
+/* ------------------------------------------------------------------ */
+
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
+  const queryClient = useQueryClient()
   const backHref = getBackHref(location.state)
-  // Load state as a reducer — dispatch is stable so the lint rule
-  // (react-hooks/set-state-in-effect) does not flag it inside effects
+
   const [loadState, dispatch] = useReducer(loadReducer, { phase: "loading" })
 
-  // Mutation state
   const [mutating, setMutating] = useState(false)
   const [pendingAction, setPendingAction] = useState<string | null>(null)
   const [mutationError, setMutationError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-  // Inline cancel dialog
   const [confirmCancelOpen, setConfirmCancelOpen] = useState(false)
-
-  // Focus ref for cancel button (restores focus after dialog closes)
   const cancelTriggerRef = useRef<HTMLButtonElement>(null)
 
-  // Retry counter — incrementing this re-runs the load effect
   const [retryCount, setRetryCount] = useState(0)
   const handleRetry = useCallback(() => setRetryCount((c) => c + 1), [])
 
-  // Stale-response guard
   const requestIdRef = useRef(0)
-
-  // Load effect
-  // dispatch() is a stable identity and is not setState, so the ESLint
-  // react-hooks/set-state-in-effect rule does not trigger on it.
 
   useEffect(() => {
     if (!id) return
@@ -255,7 +335,6 @@ export default function OrderDetailPage() {
     ordersApi
       .get(id, controller.signal)
       .then((data) => {
-        console.log(data)
         if (reqId !== requestIdRef.current) return
         dispatch({ type: "READY", order: data })
       })
@@ -274,8 +353,6 @@ export default function OrderDetailPage() {
     }
   }, [id, retryCount])
 
-  // Mutations
-
   async function applyStatus(
     body: { orderStatus?: OrderStatus; paymentStatus?: PaymentStatus },
     actionKey: string
@@ -288,6 +365,10 @@ export default function OrderDetailPage() {
     try {
       const updated = await ordersApi.updateStatus(id, body)
       dispatch({ type: "READY", order: updated })
+
+      // ▼ Sidebar counts + orders list auto-refresh via TanStack Query
+      await queryClient.invalidateQueries({ queryKey: ["admin", "orders"] })
+
       const label = body.orderStatus
         ? ORDER_STATUS_CONFIG[body.orderStatus].label
         : body.paymentStatus === "paid"
@@ -326,7 +407,7 @@ export default function OrderDetailPage() {
     void applyStatus({ paymentStatus: next }, `pay-${next}`)
   }
 
-  // Render: non-ready phases
+  /* ---------------- Non-ready phases ---------------- */
 
   if (loadState.phase === "loading") {
     return (
@@ -369,7 +450,8 @@ export default function OrderDetailPage() {
     )
   }
 
-  // phase === "ready"
+  /* ---------------- Ready phase ---------------- */
+
   const { order } = loadState
   const orderCfg = ORDER_STATUS_CONFIG[order.orderStatus]
   const payCfg = PAYMENT_STATUS_CONFIG[order.paymentStatus]
@@ -380,21 +462,26 @@ export default function OrderDetailPage() {
     0
   )
 
+  // Clean phone number for tel: / wa.me links
+  const phoneDigits = order.customerPhone.replace(/[^0-9]/g, "")
+  const waLink = `https://wa.me/88${phoneDigits}`
+
   return (
-    <div className="admin-dashboard-content min-w-0 space-y-5 p-4 sm:p-6">
+    <div className="min-w-0 space-y-5 bg-(--bg-app) p-4 sm:p-6">
       <Link
         to={backHref}
-        className="inline-flex items-center gap-2 text-sm font-medium text-(--text-muted) transition-colors hover:text-(--primary)"
+        className="inline-flex items-center gap-2 text-sm font-medium text-(--text-muted) transition-colors hover:text-primary"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
         Back to orders
       </Link>
 
+      {/* Header */}
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-bold text-(--text-primary)">
-              Order details
+              {order.orderNumber}
             </h1>
             <StatusBadge
               variant={orderCfg.variant}
@@ -408,13 +495,7 @@ export default function OrderDetailPage() {
             />
           </div>
           <p className="mt-1 text-sm text-(--text-muted)">
-            <span className="font-semibold text-(--text-primary)">
-              {order.orderNumber}
-            </span>
-            <span className="mx-2" aria-hidden="true">
-              ·
-            </span>
-            Placed {formatOrderDate(order.createdAt)}
+            Placed on {formatOrderDate(order.createdAt)}
           </p>
         </div>
         <button
@@ -427,14 +508,23 @@ export default function OrderDetailPage() {
         </button>
       </header>
 
+      {/* Status stepper */}
+      <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+        <p className="mb-3 text-xs font-semibold tracking-wide text-(--text-muted) uppercase">
+          Order progress
+        </p>
+        <OrderStatusStepper current={order.orderStatus} />
+      </div>
+
+      {/* KPI cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <article className="admin-dashboard-card p-4">
+        <article className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
           <p className="text-xs font-medium text-(--text-muted)">Order total</p>
           <p className="mt-1 text-xl font-bold text-(--text-primary) tabular-nums">
             {formatTaka(order.total)}
           </p>
         </article>
-        <article className="admin-dashboard-card p-4">
+        <article className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
           <p className="text-xs font-medium text-(--text-muted)">Items</p>
           <p className="mt-1 text-xl font-bold text-(--text-primary) tabular-nums">
             {itemCount}
@@ -443,7 +533,7 @@ export default function OrderDetailPage() {
             </span>
           </p>
         </article>
-        <article className="admin-dashboard-card p-4">
+        <article className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
           <p className="text-xs font-medium text-(--text-muted)">Payment</p>
           <p className="mt-1 text-xl font-bold text-(--text-primary)">
             {payCfg.label}
@@ -451,21 +541,19 @@ export default function OrderDetailPage() {
         </article>
       </div>
 
-      {/* Success banner */}
+      {/* Success / Error banners */}
       {successMessage && (
         <InlineNotice
-          className="flex items-center justify-between gap-3 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+          className="flex items-center justify-between gap-3 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
           message={successMessage}
           variant="success"
           ariaLive="polite"
           dismissLabel="Dismiss"
           dismissText="✕"
-          dismissClassName="rounded px-2 py-0.5 text-xs font-medium text-green-700 hover:bg-green-100"
+          dismissClassName="rounded px-2 py-0.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100"
           onDismiss={() => setSuccessMessage(null)}
         />
       )}
-
-      {/* Error banner */}
       {mutationError && (
         <InlineNotice
           className="flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
@@ -480,6 +568,7 @@ export default function OrderDetailPage() {
       )}
 
       <div className="grid min-w-0 grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(18rem,1fr)]">
+        {/* Left column */}
         <div className="flex min-w-0 flex-col gap-5">
           <Card title="Order items">
             <DataTable
@@ -497,22 +586,46 @@ export default function OrderDetailPage() {
           </Card>
 
           <Card title="Customer & delivery">
-            <div className="flex items-start gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-(--primary-soft) text-(--primary)">
-                <UserRound className="size-5" aria-hidden="true" />
-              </span>
-              <div className="min-w-0">
-                <p className="font-semibold text-(--text-primary)">
-                  {order.customerName}
-                </p>
+            {/* Customer card with Call / WhatsApp quick actions */}
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-(--primary-soft) text-primary">
+                  <UserRound className="size-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold text-(--text-primary)">
+                    {order.customerName}
+                  </p>
+                  <a
+                    href={`tel:${order.customerPhone}`}
+                    className="mt-0.5 inline-block text-sm text-primary tabular-nums hover:underline"
+                  >
+                    {order.customerPhone}
+                  </a>
+                </div>
+              </div>
+              <div className="flex gap-2">
                 <a
                   href={`tel:${order.customerPhone}`}
-                  className="mt-0.5 inline-block text-sm text-(--primary) hover:underline"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-(--border-light) bg-white px-2.5 py-1.5 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+                  title="Call customer"
                 >
-                  {order.customerPhone}
+                  <Phone className="size-3.5" aria-hidden="true" />
+                  Call
+                </a>
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+                  title="WhatsApp customer"
+                >
+                  <MessageCircle className="size-3.5" aria-hidden="true" />
+                  WhatsApp
                 </a>
               </div>
             </div>
+
             <div className="mt-4 border-t border-(--border-light) pt-3">
               <div className="flex items-start gap-2">
                 <MapPin
@@ -547,6 +660,7 @@ export default function OrderDetailPage() {
           </Card>
         </div>
 
+        {/* Right column */}
         <aside className="flex flex-col gap-5">
           <Card title="Payment summary">
             <dl className="divide-y divide-(--border-light)">
@@ -556,7 +670,7 @@ export default function OrderDetailPage() {
                 <dt className="text-sm font-semibold text-(--text-primary)">
                   Total
                 </dt>
-                <dd className="text-lg font-bold text-(--primary) tabular-nums">
+                <dd className="text-lg font-bold text-primary tabular-nums">
                   {formatTaka(order.total)}
                 </dd>
               </div>
@@ -644,7 +758,7 @@ export default function OrderDetailPage() {
 
           <div className="flex items-start gap-3 rounded-md border border-(--border-light) bg-white p-4">
             <Clock3
-              className="mt-0.5 size-4 shrink-0 text-(--primary)"
+              className="mt-0.5 size-4 shrink-0 text-primary"
               aria-hidden="true"
             />
             <p className="text-xs leading-relaxed text-(--text-muted)">
@@ -655,7 +769,7 @@ export default function OrderDetailPage() {
         </aside>
       </div>
 
-      {/* Cancel confirmation (inline dialog) */}
+      {/* Cancel confirmation dialog */}
       {confirmCancelOpen && (
         <div
           role="dialog"

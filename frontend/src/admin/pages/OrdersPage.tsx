@@ -370,7 +370,7 @@ export default function OrdersPage() {
       <div className="admin-dashboard-card overflow-hidden print:hidden">
         {/* Search & Filters Toolbar */}
         <div className="flex flex-wrap items-center gap-2 border-b border-(--border-light) bg-white px-3 py-3">
-          <label className="relative min-w-[220px] flex-1">
+          <label className="relative min-w-55 flex-1">
             <span className="sr-only">Search orders</span>
             <Search
               className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-(--text-muted)"
@@ -385,7 +385,7 @@ export default function OrdersPage() {
               className="h-9 w-full rounded-md border border-(--border-light) bg-white pr-3 pl-9 text-xs text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
             />
           </label>
-          <div className="flex h-9 min-w-[230px] flex-1 items-center gap-2 rounded-md border border-(--border-light) bg-white px-2.5 text-xs text-(--text-primary) sm:flex-none">
+          <div className="flex h-9 min-w-57.5 flex-1 items-center gap-2 rounded-md border border-(--border-light) bg-white px-2.5 text-xs text-(--text-primary) sm:flex-none">
             <CalendarDays
               className="size-3.5 shrink-0 text-(--text-muted)"
               aria-hidden="true"
@@ -416,7 +416,7 @@ export default function OrdersPage() {
               />
             </label>
           </div>
-          <label className="min-w-[120px] flex-1 sm:flex-none">
+          <label className="min-w-30 flex-1 sm:flex-none">
             <span className="sr-only">Filter by delivery area</span>
             <select
               value={area}
@@ -431,7 +431,7 @@ export default function OrdersPage() {
               ))}
             </select>
           </label>
-          <label className="min-w-[130px] flex-1 sm:flex-none">
+          <label className="min-w-32.5 flex-1 sm:flex-none">
             <span className="sr-only">Filter by payment status</span>
             <select
               value={paymentStatus}
@@ -446,7 +446,7 @@ export default function OrdersPage() {
             </select>
           </label>
           <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-[#eef0ff] px-3 text-xs font-medium text-(--text-primary)">
-            <span className="size-1.5 rounded-full bg-(--primary)" />
+            <span className="size-1.5 rounded-full bg-primary" />
             {total} of {counts.all} shown
           </span>
         </div>
@@ -504,7 +504,7 @@ export default function OrdersPage() {
                 setBulkStatus(event.target.value as OrderStatus | "")
               }
               disabled={selectedOrders.length === 0 || bulkUpdating}
-              className="h-9 min-w-[145px] rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary) disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary) disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Update status</option>
               {STATUS_TABS.filter(({ value }) => value !== "").map(
@@ -521,7 +521,7 @@ export default function OrdersPage() {
             <select
               disabled
               title="Order sources are not configured"
-              className="h-9 min-w-[145px] rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option>Update source</option>
             </select>
@@ -531,7 +531,7 @@ export default function OrdersPage() {
             <select
               disabled
               title="Employee assignment is not configured"
-              className="h-9 min-w-[155px] rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 min-w-38.75 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option>Assign employee</option>
             </select>
@@ -541,7 +541,7 @@ export default function OrdersPage() {
             <select
               disabled
               title="Courier assignment is not configured"
-              className="h-9 min-w-[145px] rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option>Assign courier</option>
             </select>

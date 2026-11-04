@@ -42,7 +42,7 @@ function toFormValues(product: Product): ProductFormInitialValues {
 function ProductEditSkeleton() {
   return (
     <LoadingState
-      className="admin-dashboard-content min-w-0 p-4 md:p-[30px]"
+      className="admin-dashboard-content min-w-0 p-4 md:p-7.5"
       ariaLabel="Loading product"
     >
       <header className="admin-page-title">
@@ -97,7 +97,7 @@ export function ProductEditPage() {
         description="The product may have been removed or the link is incorrect."
         backTo="/admin/products"
         backLabel="Back to products"
-        className="admin-dashboard-content min-w-0 p-4 md:p-[30px]"
+        className="admin-dashboard-content min-w-0 p-4 md:p-7.5"
         titleElement="h1"
         titleContainerClassName="admin-page-title"
         titleClassName="text-xl font-normal text-gray-800"
@@ -115,13 +115,13 @@ export function ProductEditPage() {
             <h1 className="text-xl font-normal text-gray-800">
               Could not load product
             </h1>
-            <p className="pt-[3px] text-base text-gray-500">
+            <p className="pt-0.75 text-base text-gray-500">
               {getErrorMessage(error)}
             </p>
           </header>
         }
         wrapMessage={false}
-        className="admin-dashboard-content min-w-0 p-4 md:p-[30px]"
+        className="admin-dashboard-content min-w-0 p-4 md:p-7.5"
         buttonClassName="admin-template-button admin-template-button--primary"
         onRetry={reload}
       />

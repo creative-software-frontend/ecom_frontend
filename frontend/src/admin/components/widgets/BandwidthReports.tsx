@@ -115,7 +115,7 @@ export function BandwidthReports({ data }: BandwidthReportsProps) {
       className="admin-dashboard-card min-w-0 overflow-hidden bg-white"
       aria-labelledby="bandwidth-reports-title"
     >
-      <header className="flex min-h-[56px] items-center justify-between gap-2 border-b border-gray-200 px-4 sm:px-6">
+      <header className="flex min-h-14 items-center justify-between gap-2 border-b border-gray-200 px-4 sm:px-6">
         <h2
           id="bandwidth-reports-title"
           className="text-sm font-bold tracking-wide text-gray-600 uppercase"

@@ -18,18 +18,6 @@ type ProductCatalogTableProps = {
 
 const productColumns: TableColumn<Product>[] = [
   {
-    name: "",
-    selector: (product) => product.id,
-    width: "40px",
-    cell: (product) => (
-      <input
-        type="checkbox"
-        aria-label={`Select ${product.name}`}
-        className="size-3.5 accent-primary"
-      />
-    ),
-  },
-  {
     name: "Product Info & Slug",
     selector: (product) => product.name,
     minWidth: "230px",
@@ -125,7 +113,7 @@ const productColumns: TableColumn<Product>[] = [
       <StatusBadge
         variant={product.isActive ? "active" : "inactive"}
         label={product.isActive ? "Active" : "Inactive"}
-        className="!rounded-full !px-2 !py-0.5 !text-[10px]"
+        className="rounded-full! px-2! py-0.5! text-[10px]!"
       />
     ),
   },
@@ -169,9 +157,12 @@ export function ProductCatalogTable({
     <>
       <DataTable
         ariaLabel="Product catalog"
+        keyField="id"
         columns={productColumns}
         data={products}
         customStyles={tableCustomStyles}
+        selectableRows
+        selectableRowsHighlight
         responsive
         pagination
         paginationServer

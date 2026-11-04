@@ -1,0 +1,23 @@
+import { useQuery } from "@tanstack/react-query"
+import { ordersApi } from "../api/ordersApi"
+import { productsApi } from "../api/productsApi"
+
+export function useSidebarStats() {
+  // ১. অর্ডারের কাউন্ট (limit: 1 দিলে ডেটা কম আসবে, কিন্তু counts অবজেক্ট পুরোটা পাবো)
+  const { data: orderData, isLoading: ordersLoading } = useQuery({
+    queryKey: ["admin", "orders", "stats"],
+    queryFn: () => ordersApi.list({ limit: 1 }),
+  })
+
+  // ২. প্রোডাক্টের কাউন্ট
+  const { data: productData, isLoading: productsLoading } = useQuery({
+    queryKey: ["admin", "products", "stats"],
+    queryFn: () => productsApi.list(),
+  })
+
+  return {
+    pendingOrders: orderData?.counts?.pending ?? 0,
+    totalProducts: productData?.length ?? 0,
+    isLoading: ordersLoading || productsLoading,
+  }
+}

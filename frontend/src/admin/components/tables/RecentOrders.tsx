@@ -20,7 +20,7 @@ function OrderRow({ order }: { order: RecentOrder }) {
         {order.number}
       </td>
       <td className="px-4 py-3">
-        <div className="flex min-w-[210px] items-center gap-3">
+        <div className="flex min-w-52.5 items-center gap-3">
           <img
             className="h-10 w-10 shrink-0 rounded-full object-cover"
             src={order.avatar}
@@ -69,7 +69,7 @@ export function RecentOrders({ data }: RecentOrdersProps) {
       className="admin-dashboard-card min-w-0 overflow-hidden bg-white"
       aria-labelledby="recent-orders-title"
     >
-      <header className="flex min-h-[56px] items-center justify-between gap-3 border-b border-gray-200 px-4 py-2 sm:px-6">
+      <header className="flex min-h-14 items-center justify-between gap-3 border-b border-gray-200 px-4 py-2 sm:px-6">
         <h2
           id="recent-orders-title"
           className="text-sm font-bold text-gray-700"
@@ -108,7 +108,7 @@ export function RecentOrders({ data }: RecentOrdersProps) {
         </div>
       </header>
       <div className="admin-orders-scroll w-full min-w-0 overflow-x-auto">
-        <table className="w-full min-w-[700px] border-collapse text-left">
+        <table className="w-full min-w-175 border-collapse text-left">
           <thead className="bg-gray-50">
             <tr>
               <th

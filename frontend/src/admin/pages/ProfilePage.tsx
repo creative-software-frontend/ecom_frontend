@@ -198,10 +198,10 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="min-w-0 p-4 admin-dashboard-content md:p-[30px]">
+    <div className="min-w-0 p-4 admin-dashboard-content md:p-7.5">
       <header className="admin-page-title">
         <h1 className="text-xl font-normal text-gray-800">Admin profile</h1>
-        <p className="pt-[3px] text-base text-gray-500">
+        <p className="pt-0.75 text-base text-gray-500">
           Manage your administrator account details, security credentials, and
           active session.
         </p>
