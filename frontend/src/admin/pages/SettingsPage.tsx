@@ -1,6 +1,7 @@
 import { Navigate, useParams } from "react-router"
 import type { SettingsTabId } from "../components/settings/SettingsLayout"
 import StoreTab from "../components/settings/tabs/StoreTab"
+import StorefrontTab from "../components/settings/tabs/StorefrontTab"
 
 const VALID_TABS: SettingsTabId[] = [
   "store",
@@ -27,6 +28,7 @@ export default function SettingsPage() {
     case "store":
       return <StoreTab />
     case "storefront":
+      return <StorefrontTab />
     case "orders":
     case "coupons":
     case "pages":

@@ -1,3 +1,4 @@
+import { Pencil } from "lucide-react"
 import type {
   InputHTMLAttributes,
   ReactNode,
@@ -201,6 +202,111 @@ export function FormRow({
       className={`grid gap-4 ${cols === 2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"}`}
     >
       {children}
+    </div>
+  )
+}
+
+/* ================================================================
+   FormToggle
+   ================================================================ */
+
+export function FormToggle({
+  checked,
+  onChange,
+  disabled = false,
+  "aria-label": ariaLabel,
+}: {
+  checked: boolean
+  onChange: (next: boolean) => void
+  disabled?: boolean
+  "aria-label"?: string
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+        checked ? "bg-primary" : "bg-(--border-hover)"
+      }`}
+    >
+      <span
+        className={`inline-block size-4 rounded-full bg-white shadow-sm transition-transform ${
+          checked ? "translate-x-4.5" : "translate-x-0.5"
+        }`}
+      />
+    </button>
+  )
+}
+
+/* ================================================================
+   FormColorPicker
+   ================================================================ */
+
+export function FormColorPicker({
+  label,
+  hint,
+  value,
+  onChange,
+  onReset,
+  error,
+}: {
+  label: string
+  hint?: string
+  value: string
+  onChange: (hex: string) => void
+  onReset?: () => void
+  error?: string
+}) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between">
+        <label className="text-[12px] font-semibold text-(--text-primary)">
+          {label}
+        </label>
+        {hint && (
+          <span className="text-[11px] text-(--text-muted)">{hint}</span>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <label className="relative cursor-pointer">
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value.toUpperCase())}
+            className="peer absolute inset-0 cursor-pointer opacity-0 ring"
+            aria-label={`${label} color picker`}
+          />
+          <span
+            className="flex size-9 items-center justify-center rounded-md border border-(--border-light) transition-shadow peer-focus-visible:ring-2 peer-focus-visible:ring-(--primary)/40"
+            style={{ backgroundColor: value }}
+            aria-hidden="true"
+          >
+            <Pencil className="size-3 text-white mix-blend-difference" />
+          </span>
+        </label>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value.toUpperCase())}
+          maxLength={7}
+          className="h-9 flex-1 rounded-md border border-transparent bg-(--bg-app) px-3 font-mono text-[13px] text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+          aria-invalid={Boolean(error)}
+        />
+        {onReset && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="h-9 shrink-0 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[12px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+      {error && <FieldError>{error}</FieldError>}
     </div>
   )
 }

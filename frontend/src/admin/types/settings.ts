@@ -50,3 +50,29 @@ export type ChangePasswordInput = {
   currentPassword: string
   newPassword: string
 }
+
+//  store frontend settings
+export type Banner = {
+  id: string
+  image: string | null
+  alt: string
+  link: string
+  active: boolean
+}
+
+export type StorefrontAnnouncement = {
+  enabled: boolean
+  marquee_text: string
+  order_note: string
+}
+
+export type StorefrontBrandColors = {
+  primary: string
+  background: string
+}
+
+export type StorefrontSettings = {
+  announcement: StorefrontAnnouncement
+  banners: Banner[]
+  brand_colors: StorefrontBrandColors
+}

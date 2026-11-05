@@ -195,3 +195,19 @@ button {
   line-height: 16px;
   font-weight: 500;
 }
+
+/* Marquee preview (optional, for a true scrolling preview) */
+@keyframes admin-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.admin-root .admin-marquee {
+  display: inline-flex;
+  animation: admin-marquee 10s linear infinite;
+  white-space: nowrap;
+}
