@@ -18,13 +18,7 @@ export function RequireAdmin() {
   }
 
   if (state.status === "unauthenticated") {
-    return (
-      <Navigate
-        to="/admin/login"
-        replace
-        state={{ from: location }}
-      />
-    )
+    return <Navigate to="/admin/login" replace state={{ from: location }} />
   }
 
   return <Outlet />

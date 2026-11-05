@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router"
 import { Suspense, lazy } from "react"
 import HomePage from "./pages/HomePage"
 import Ultrahot from "./pages/Products/ultrahot/Ultrahot"
@@ -51,7 +51,11 @@ export function App() {
             <Route element={<AdminLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="profile" element={<ProfilePage />} />
-              <Route path="settings" element={<SettingsPage />} />
+              <Route
+                path="settings"
+                element={<Navigate to="/admin/settings/store" replace />}
+              />
+              <Route path="settings/:tab" element={<SettingsPage />} />{" "}
               <Route path="products" element={<ProductsPage />} />
               <Route path="products/new" element={<ProductCreatePage />} />
               <Route path="products/:id/edit" element={<ProductEditPage />} />

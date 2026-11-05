@@ -26,11 +26,7 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div className={className} role={role}>
-      {wrapMessage ? (
-        <p className={messageClassName}>{message}</p>
-      ) : (
-        message
-      )}
+      {wrapMessage ? <p className={messageClassName}>{message}</p> : message}
       <button type="button" onClick={onRetry} className={buttonClassName}>
         {retryLabel}
       </button>

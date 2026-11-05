@@ -155,7 +155,9 @@ export function ProductForm({
         }
         let mappedFieldError = false
         let unmappedFieldError = false
-        for (const [field, message] of Object.entries(error.fieldErrors ?? {})) {
+        for (const [field, message] of Object.entries(
+          error.fieldErrors ?? {}
+        )) {
           const setter = setters[field]
           if (setter) {
             setter(message)
@@ -514,7 +516,7 @@ export function ProductForm({
           </div>
           <div className="space-y-5 p-4 sm:p-6">
             <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-              <div className="sm:mb-0! admin-form-field">
+              <div className="admin-form-field sm:mb-0!">
                 <label className="admin-form-label" htmlFor="product-image-url">
                   Add image by URL or path
                 </label>

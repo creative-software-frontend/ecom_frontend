@@ -10,7 +10,6 @@ import {
   Loader2,
   AlertCircle,
   AlertTriangle,
-  ShieldCheck,
 } from "lucide-react"
 import { ApiError } from "../api/client"
 import { useAuth } from "../auth/AuthProvider"
@@ -172,13 +171,8 @@ export function LoginPage() {
 
         {/* Bottom: Footer */}
         <div className="flex items-center justify-between border-t border-slate-800 pt-6 text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="size-4" />
-            Security Level: Tier 1
-          </div>
           <div className="flex items-center gap-4">
             <span>v2.8.4</span>
-            <span>© Power Zenox</span>
           </div>
         </div>
       </div>

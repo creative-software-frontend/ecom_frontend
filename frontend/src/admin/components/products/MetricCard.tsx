@@ -9,9 +9,9 @@ type MetricCardProps = {
 }
 
 const toneStyles = {
-  teal: "bg-[#c6eee8] text-(--primary)",
-  coral: "bg-[#ffe0d6] text-[#9a3412]",
-  indigo: "bg-[#e2e7ff] text-[#3730a3]",
+  teal: "bg-brand-soft text-primary",
+  coral: "bg-orange-100 text-orange-800",
+  indigo: "bg-indigo-100 text-indigo-800",
 } as const
 
 export function MetricCard({
@@ -22,15 +22,15 @@ export function MetricCard({
   tone,
 }: MetricCardProps) {
   return (
-    <article className="admin-dashboard-card flex min-w-0 items-center justify-between gap-3 p-3.5">
+    <article className="flex min-w-0 items-center justify-between gap-3 rounded-md border border-border bg-card p-3.5">
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold tracking-[0.12em] text-(--text-muted) uppercase">
+        <p className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
           {label}
         </p>
-        <p className="mt-1 truncate text-xl leading-tight font-bold text-(--text-primary) tabular-nums">
+        <p className="mt-1 truncate text-xl leading-tight font-bold text-foreground tabular-nums">
           {value}
         </p>
-        <p className="mt-0.5 truncate text-[11px] text-(--text-muted)">
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
           {detail}
         </p>
       </div>

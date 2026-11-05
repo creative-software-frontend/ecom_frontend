@@ -24,7 +24,7 @@ export class ApiError extends Error {
   constructor(
     status: number,
     message: string,
-    fieldErrors?: Record<string, string>,
+    fieldErrors?: Record<string, string>
   ) {
     super(message)
     this.name = "ApiError"
@@ -71,7 +71,7 @@ function isAbortError(error: unknown): boolean {
 
 export async function apiRequest<T>(
   path: string,
-  options: ApiRequestOptions = {},
+  options: ApiRequestOptions = {}
 ): Promise<T> {
   let response: Response
   try {
@@ -113,7 +113,7 @@ export async function apiRequest<T>(
     throw new ApiError(
       response.status,
       message,
-      getFieldErrors(errorPayload?.errors),
+      getFieldErrors(errorPayload?.errors)
     )
   }
 
@@ -124,7 +124,7 @@ export async function apiRequest<T>(
       typeof errorPayload?.message === "string"
         ? errorPayload.message
         : "Invalid server response",
-      getFieldErrors(errorPayload?.errors),
+      getFieldErrors(errorPayload?.errors)
     )
   }
 

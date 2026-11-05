@@ -81,10 +81,12 @@ export function ProductEditPage() {
     (signal: AbortSignal) => productsApi.get(id, signal),
     [id]
   )
-  const { data: product, error, isLoading, reload } = useApiQuery(
-    fetchProduct,
-    queryDeps
-  )
+  const {
+    data: product,
+    error,
+    isLoading,
+    reload,
+  } = useApiQuery(fetchProduct, queryDeps)
 
   if (isLoading) {
     return <ProductEditSkeleton />
