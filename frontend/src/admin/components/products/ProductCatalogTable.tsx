@@ -25,10 +25,10 @@ const productColumns: TableColumn<Product>[] = [
       <div className="flex min-w-0 items-center gap-2.5 py-2">
         <ProductThumbnail product={product} />
         <div className="min-w-0">
-          <p className="truncate text-xs font-semibold text-(--text-primary)">
+          <p className="truncate text-xs font-semibold text-foreground">
             {product.name}
           </p>
-          <p className="truncate text-[10px] text-(--text-muted)">
+          <p className="truncate text-[10px] text-muted-foreground">
             {product.brandName}
           </p>
           <p className="mt-0.5 truncate font-mono text-[10px] text-primary">
@@ -43,7 +43,7 @@ const productColumns: TableColumn<Product>[] = [
     selector: (product) => product.category,
     minWidth: "130px",
     cell: (product) => (
-      <span className="inline-flex max-w-48 rounded-full bg-[#eef0ff] px-2 py-1 text-[10px] leading-tight text-(--text-primary)">
+      <span className="inline-flex max-w-48 rounded-full bg-muted px-2 py-1 text-[10px] leading-tight text-foreground">
         {product.category}
       </span>
     ),
@@ -56,7 +56,7 @@ const productColumns: TableColumn<Product>[] = [
       const hasDiscount = product.regularPrice > product.currentPrice
       return (
         <div>
-          <p className="text-xs font-semibold whitespace-nowrap text-(--text-primary) tabular-nums">
+          <p className="text-xs font-semibold whitespace-nowrap text-foreground tabular-nums">
             {formatTaka(product.currentPrice)}
             {hasDiscount ? (
               <span className="ml-1 rounded bg-(--status-pending-bg) px-1 py-0.5 text-[9px] font-bold text-(--status-pending-text)">
@@ -65,7 +65,7 @@ const productColumns: TableColumn<Product>[] = [
             ) : null}
           </p>
           {hasDiscount ? (
-            <p className="text-[10px] text-(--text-muted) tabular-nums line-through">
+            <p className="text-[10px] text-muted-foreground tabular-nums line-through">
               {formatTaka(product.regularPrice)}
             </p>
           ) : null}
@@ -81,7 +81,7 @@ const productColumns: TableColumn<Product>[] = [
       const stockStatus = getProductStockStatus(product.stockQuantity)
       return (
         <div>
-          <p className="text-xs font-semibold whitespace-nowrap text-(--text-primary) tabular-nums">
+          <p className="text-xs font-semibold whitespace-nowrap text-foreground tabular-nums">
             {product.stockQuantity} units
           </p>
           <StatusBadge
@@ -126,7 +126,7 @@ function ProductThumbnail({ product }: { product: Product }) {
   if (!imageUrl || failedUrl === imageUrl) {
     return (
       <span
-        className="flex size-10 shrink-0 items-center justify-center rounded-md bg-(--bg-surface-hover) text-(--text-muted)"
+        className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"
         aria-label="Product image unavailable"
       >
         <ImageOff className="size-4" aria-hidden="true" />
@@ -136,7 +136,7 @@ function ProductThumbnail({ product }: { product: Product }) {
 
   return (
     <img
-      className="size-10 shrink-0 rounded-md border border-(--border-light) object-cover"
+      className="size-10 shrink-0 rounded-md border border-border object-cover"
       src={imageUrl}
       alt={`${product.name} product`}
       loading="lazy"
@@ -173,7 +173,7 @@ export function ProductCatalogTable({
         onChangePage={onPageChange}
         onChangeRowsPerPage={(nextPageSize) => onPageSizeChange(nextPageSize)}
         noDataComponent={
-          <div className="px-4 py-10 text-center text-sm text-(--text-muted)">
+          <div className="px-4 py-10 text-center text-sm text-muted-foreground">
             <p className="font-medium">No products found.</p>
             <p className="mt-1 text-xs">Try changing your search or filters.</p>
           </div>

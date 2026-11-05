@@ -1,8 +1,5 @@
 import { Search } from "lucide-react"
-import type {
-  ProductStatusFilter,
-  ProductStockFilter,
-} from "./productCatalog"
+import type { ProductStatusFilter, ProductStockFilter } from "./productCatalog"
 
 type ProductCatalogFiltersProps = {
   query: string
@@ -17,7 +14,7 @@ type ProductCatalogFiltersProps = {
 }
 
 const selectClassName =
-  "h-9 min-w-32 rounded-md border border-(--border-light) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
+  "h-9 min-w-32 rounded-md border border-border bg-card px-3 text-xs text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
 
 export function ProductCatalogFilters({
   query,
@@ -31,11 +28,11 @@ export function ProductCatalogFilters({
   onStatusChange,
 }: ProductCatalogFiltersProps) {
   return (
-    <div className="flex flex-col gap-2.5 border-b border-(--border-light) bg-white px-3 py-2.5 lg:flex-row lg:items-center">
+    <div className="flex flex-col gap-2.5 border-b border-border bg-card px-3 py-2.5 lg:flex-row lg:items-center">
       <label className="relative block min-w-0 flex-1 lg:max-w-md">
         <span className="sr-only">Search products</span>
         <Search
-          className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-(--text-muted)"
+          className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground"
           aria-hidden="true"
         />
         <input
@@ -43,7 +40,7 @@ export function ProductCatalogFilters({
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           placeholder="Search by product name, slug, or category..."
-          className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-3 pl-9 text-xs text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
+          className="h-9 w-full rounded-md border border-border bg-background pr-3 pl-9 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
         />
       </label>
 

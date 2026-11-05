@@ -71,12 +71,12 @@
   --admin-sidebar-submenu-text: var(--text-muted);
   --admin-form-control-border: var(--border-light);
 
-  --font-main: "Inter", "Hind Siliguri", "Noto Sans Bengali", sans-serif;
+  --font-main: "Inter", "Noto Sans Bengali", sans-serif;
 
   background-color: var(--bg-app);
   color: var(--text-primary);
   font-family: var(--font-main);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .admin-root .tabular-nums {
@@ -128,4 +128,70 @@
 .icon-size {
   width: 1rem;
   height: 1rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ==========================================================
+   TYPOGRAPHY SCALE OVERRIDE (Stitch DESIGN.md match)
+   
+   Stitch's tailwind.config defines:
+     - body-sm  = 13px / 18px  ← main body text
+     - label-md = 13px / 18px  ← labels and buttons
+     - tabular-num = 13px / 18px ← money and IDs
+   
+   Tailwind's `text-sm` defaults to 14px / 20px (body-md).
+   We scope an override inside `.admin-root` so admin pages
+   match the Stitch design 1:1 without touching the public site.
+   
+   To migrate to semantic classes later, replace `text-sm`
+   with `admin-text-dense` component-by-component.
+   ========================================================== */
+
+.admin-root .text-sm {
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* Optional: exhaustive semantic scale for future use */
+.admin-root .admin-text-h1 {
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.admin-root .admin-text-h2 {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.admin-root .admin-text-h3 {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.admin-root .admin-text-body {
+  font-size: 14px;
+  line-height: 20px;
+}
+.admin-root .admin-text-dense {
+  font-size: 13px;
+  line-height: 18px;
+}
+.admin-root .admin-text-meta {
+  font-size: 12px;
+  line-height: 16px;
+}
+.admin-root .admin-text-label {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+}
+.admin-root .admin-text-caption {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
 }

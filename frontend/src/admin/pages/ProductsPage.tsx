@@ -8,6 +8,8 @@ import {
   Plus,
   TriangleAlert,
 } from "lucide-react"
+import { cn } from "cn"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ApiError } from "../api/client"
 import { productsApi } from "../api/productsApi"
 import { ErrorState } from "../components/common/ErrorState"
@@ -204,38 +206,40 @@ export default function ProductsPage() {
   )
 
   return (
-    <div className="admin-dashboard-content min-w-0 space-y-3 p-4 md:p-5">
+    <div className="min-w-0 space-y-3 p-4 md:p-5">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-lg font-bold text-(--text-primary)">
-              Products
-            </h1>
+            <h1 className="text-lg font-bold text-foreground">Products</h1>
             <span className="rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-semibold text-primary">
               {metrics.activeProducts} SKUs Active
             </span>
           </div>
-          <p className="mt-0.5 text-xs text-(--text-muted)">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Manage herbal supplement catalog, inventory counts, and pricing
             across regional channels
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => downloadCatalog(products)}
             disabled={loading || products.length === 0}
-            className="admin-template-button admin-template-button--secondary h-8 px-3 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-8 gap-2 rounded-md bg-card px-3 text-xs hover:border-(--border-hover) disabled:pointer-events-auto disabled:cursor-not-allowed"
           >
-            <Download className="icon-size" />
+            <Download className="size-4" />
             Export Catalog
-          </button>
+          </Button>
           <Link
             to="/admin/products/new"
-            className="admin-template-button admin-template-button--primary h-8 px-3 text-[11px]"
+            className={cn(
+              buttonVariants({ variant: "default" }),
+              "h-8 gap-2 rounded-md px-3 text-xs"
+            )}
           >
             <span aria-hidden="true">
-              <Plus className="icon-size" />
+              <Plus className="size-4" />
             </span>
             Add Product
           </Link>
@@ -277,7 +281,7 @@ export default function ProductsPage() {
       </section>
 
       <section
-        className="admin-dashboard-card overflow-hidden"
+        className="overflow-hidden rounded-md border border-border bg-card"
         aria-label="Product catalog"
       >
         <ProductCatalogFilters
@@ -293,7 +297,7 @@ export default function ProductsPage() {
         />
 
         {loading ? (
-          <LoadingState className="flex items-center justify-center py-14 text-sm text-(--text-muted)">
+          <LoadingState className="flex items-center justify-center py-14 text-sm text-muted-foreground">
             Loading product catalog…
           </LoadingState>
         ) : error ? (

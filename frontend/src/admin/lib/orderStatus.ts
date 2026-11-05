@@ -112,4 +112,3 @@ export function formatOrderDate(dateString: string): string {
 export function formatTaka(price: number): string {
   return `৳ ${new Intl.NumberFormat("en-BD").format(price)}`
 }
-

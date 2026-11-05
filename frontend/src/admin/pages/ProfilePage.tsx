@@ -82,7 +82,7 @@ export function ProfilePage() {
   if (state.status !== "authenticated" || !currentUser) {
     return (
       <div
-        className="min-w-0 p-4 admin-dashboard-content md:p-7.5"
+        className="admin-dashboard-content min-w-0 p-4 md:p-7.5"
         role="status"
       >
         Loading profile...
@@ -198,7 +198,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="min-w-0 p-4 admin-dashboard-content md:p-7.5">
+    <div className="admin-dashboard-content min-w-0 p-4 md:p-7.5">
       <header className="admin-page-title">
         <h1 className="text-xl font-normal text-gray-800">Admin profile</h1>
         <p className="pt-0.75 text-base text-gray-500">
@@ -210,7 +210,7 @@ export function ProfilePage() {
       <div className="space-y-6">
         {/* Profile Hero Header Card */}
         <section
-          className="overflow-hidden admin-dashboard-card bg-white"
+          className="admin-dashboard-card overflow-hidden bg-white"
           aria-labelledby="profile-account-heading"
         >
           <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -267,8 +267,8 @@ export function ProfilePage() {
         </section>
 
         {/* Edit Profile Information Form */}
-        <section className="overflow-hidden admin-dashboard-card bg-white">
-          <div className="flex items-center gap-2 admin-form-card-header">
+        <section className="admin-dashboard-card overflow-hidden bg-white">
+          <div className="admin-form-card-header flex items-center gap-2">
             <UserRound className="h-5 w-5 text-[#3f6ad8]" />
             <div>
               <h2 className="text-base font-semibold">Account Information</h2>
@@ -334,7 +334,7 @@ export function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => void handleCopyId()}
-                    className="admin-template-button shrink-0 admin-template-button--secondary"
+                    className="admin-template-button admin-template-button--secondary shrink-0"
                     title="Copy Admin ID"
                     aria-label="Copy Admin ID"
                   >
@@ -374,8 +374,8 @@ export function ProfilePage() {
         </section>
 
         {/* Change Password Card */}
-        <section className="overflow-hidden admin-dashboard-card bg-white">
-          <div className="flex items-center gap-2 admin-form-card-header">
+        <section className="admin-dashboard-card overflow-hidden bg-white">
+          <div className="admin-form-card-header flex items-center gap-2">
             <KeyRound className="h-5 w-5 text-[#3f6ad8]" />
             <div>
               <h2 className="text-base font-semibold">Change Password</h2>
@@ -523,8 +523,8 @@ export function ProfilePage() {
         </section>
 
         {/* Security & System Metadata Overview */}
-        <section className="overflow-hidden admin-dashboard-card bg-white">
-          <div className="flex items-center gap-2 admin-form-card-header">
+        <section className="admin-dashboard-card overflow-hidden bg-white">
+          <div className="admin-form-card-header flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-green-600" />
             <div>
               <h2 className="text-base font-semibold">

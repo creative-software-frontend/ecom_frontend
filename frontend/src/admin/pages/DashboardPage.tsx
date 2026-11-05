@@ -52,7 +52,7 @@ export default function DashboardPage() {
           </button>
           <Link
             to="/admin/orders"
-            className="admin-template-button admin-template-button--primary h-8 px-3 text-xs"
+            className="admin-template-button admin-template-button--primary admin-text-dense h-8 px-3"
           >
             <ClipboardList className="icon-size" />
             View Orders
