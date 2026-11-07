@@ -76,3 +76,27 @@ export type StorefrontSettings = {
   banners: Banner[]
   brand_colors: StorefrontBrandColors
 }
+
+// Order settings form shape (used by OrdersTab)
+export type OrderSettings = {
+  duplicate_block: {
+    enabled: boolean
+    minutes: number
+  }
+  location_fields: {
+    enabled: boolean
+  }
+  delivery_charges: {
+    inside_dhaka: number
+    outside_dhaka: number
+    free_delivery_above: number
+  }
+  // Beta features — always disabled in UI for now
+  mobile_verification: { enabled: boolean }
+  sms_confirmation: { enabled: boolean }
+  vpn_protection: { enabled: boolean }
+  courier_protection: {
+    enabled: boolean
+    min_success_ratio: number
+  }
+}

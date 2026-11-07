@@ -1,19 +1,17 @@
-import { NavLink, useLocation } from "react-router"
+import { NavLink } from "react-router"
 import { adminMenu, type MenuItem } from "../menu"
 import { useSidebarStats } from "../../hooks/useSidebarStats"
 
 export function Sidebar() {
   const { pendingOrders, totalProducts } = useSidebarStats()
-  const location = useLocation()
-  const currentPath = location.pathname
   // ব্যাজ ভ্যালু রিজলভ করার হেল্পার
   // ১. href === "/admin/orders" হলে pendingOrders
   // ২. href === "/admin/products" হলে totalProducts
   // ৩. নাহলে item.badge (স্ট্যাটিক) থাকলে সেটা
   const resolveBadge = (item: MenuItem): string | number | undefined => {
     if (item.type !== "link") return undefined
-    if (item.href === "/admin/orders" && pendingOrders > 0) {
-      return pendingOrders
+    if (item.href === "/admin/orders" && pendingOrders.count > 0) {
+      return pendingOrders.count
     }
     if (item.href === "/admin/products" && totalProducts > 0) {
       return totalProducts
@@ -41,14 +39,6 @@ export function Sidebar() {
           }
 
           if (item.type === "link" && item.href) {
-            let isActive = false
-            if (item.href === "/admin") {
-              isActive = currentPath === "/admin" || currentPath === "/admin/"
-            } else {
-              isActive =
-                currentPath.includes(item.href) ||
-                currentPath.startsWith(item.href)
-            }
             const badge = resolveBadge(item)
             const isAlert = isAlertBadge(item)
 
@@ -56,12 +46,14 @@ export function Sidebar() {
               <li key={item.label}>
                 <NavLink
                   to={item.href}
-                  end
-                  className={`flex items-center justify-between rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-primary font-semibold text-white"
-                      : "text-(--text-primary) hover:bg-(--bg-surface-hover)"
-                  }`}
+                  end={item.href === "/admin"}
+                  className={({ isActive }) =>
+                    `flex items-center justify-between rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary font-semibold text-white"
+                        : "text-(--text-primary) hover:bg-(--bg-surface-hover)"
+                    }`
+                  }
                 >
                   <span>{item.label}</span>
                   {badge !== undefined && badge !== 0 && (

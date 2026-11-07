@@ -310,3 +310,82 @@ export function FormColorPicker({
     </div>
   )
 }
+
+/* ================================================================
+   FormUnitField — number input with prefix/suffix (৳ / min / %)
+   Used by delivery charges and future coupon discount fields.
+   ================================================================ */
+
+type FormUnitFieldSlot = string | number | ReactNode | null
+
+type FormUnitFieldProps = InputHTMLAttributes<HTMLInputElement> & {
+  label: string
+  error?: string
+  help?: string
+  hint?: string
+  badge?: ReactNode
+  leadingSlot?: FormUnitFieldSlot
+  trailingSlot?: FormUnitFieldSlot
+}
+
+export const FormUnitField = forwardRef<HTMLInputElement, FormUnitFieldProps>(
+  function FormUnitField(
+    {
+      label,
+      error,
+      help,
+      hint,
+      badge,
+      leadingSlot,
+      trailingSlot,
+      id,
+      className,
+      ...rest
+    },
+    ref
+  ) {
+    const inputId = id ?? `field-${rest.name ?? label}`
+    const hasError = Boolean(error)
+
+    return (
+      <div>
+        <div className="mb-1.5 flex items-center justify-between gap-2">
+          <label
+            htmlFor={inputId}
+            className="text-xs font-semibold text-(--text-primary)"
+          >
+            {label}
+          </label>
+          {(hint || badge) && (
+            <span className="shrink-0 text-[11px] text-(--text-muted)">
+              {badge ?? hint}
+            </span>
+          )}
+        </div>
+        <div className="relative">
+          {leadingSlot && (
+            <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-medium text-(--text-muted)">
+              {leadingSlot}
+            </span>
+          )}
+          <input
+            ref={ref}
+            id={inputId}
+            className={`${fieldBase} ${hasError ? fieldErrorStyle : ""} h-9 text-right tabular-nums ${
+              leadingSlot ? "pl-8" : "pl-3"
+            } ${trailingSlot ? "pr-10" : "pr-3"} ${className ?? ""}`}
+            aria-invalid={hasError}
+            {...rest}
+          />
+          {trailingSlot && (
+            <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-(--text-muted)">
+              {trailingSlot}
+            </span>
+          )}
+        </div>
+        {hasError && <FieldError>{error}</FieldError>}
+        {help && !hasError && <FieldHelp>{help}</FieldHelp>}
+      </div>
+    )
+  }
+)

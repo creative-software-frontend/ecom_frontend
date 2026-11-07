@@ -16,7 +16,7 @@ export function useSidebarStats() {
   })
 
   return {
-    pendingOrders: orderData?.counts?.pending ?? 0,
+    pendingOrders: orderData?.counts?.pending ?? { count: 0, total: 0 },
     totalProducts: productData?.length ?? 0,
     isLoading: ordersLoading || productsLoading,
   }
