@@ -4,12 +4,12 @@ export type OrderStatus =
 export type PaymentStatus = "unpaid" | "paid"
 
 export type OrderCounts = {
-  all: number
-  pending: number
-  confirmed: number
-  shipped: number
-  delivered: number
-  cancelled: number
+  all: { count: number; totalPrice: number }
+  pending: { count: number; totalPrice: number }
+  confirmed: { count: number; totalPrice: number }
+  shipped: { count: number; totalPrice: number }
+  delivered: { count: number; totalPrice: number }
+  cancelled: { count: number; totalPrice: number }
 }
 
 export type OrderListItem = {

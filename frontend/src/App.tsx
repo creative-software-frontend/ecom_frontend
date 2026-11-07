@@ -55,7 +55,7 @@ export function App() {
                 path="settings"
                 element={<Navigate to="/admin/settings/store" replace />}
               />
-              <Route path="settings/:tab" element={<SettingsPage />} />{" "}
+              <Route path="settings/:tab" element={<SettingsPage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="products/new" element={<ProductCreatePage />} />
               <Route path="products/:id/edit" element={<ProductEditPage />} />

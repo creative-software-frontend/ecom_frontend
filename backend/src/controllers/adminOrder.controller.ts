@@ -160,6 +160,9 @@ export async function listOrders(req: Request, res: Response) {
           _count: {
             _all: true,
           },
+          _sum: {
+            total: true,
+          },
         }),
         prisma.order.findMany({
           distinct: ["deliveryArea"],
@@ -168,22 +171,25 @@ export async function listOrders(req: Request, res: Response) {
         }),
       ],
     );
-    const counts: Record<OrderStatus | "all", number> = {
-      all: 0,
-      pending: 0,
-      confirmed: 0,
-      shipped: 0,
-      delivered: 0,
-      cancelled: 0,
+    const counts: Record<
+      OrderStatus | "all",
+      { count: number; totalPrice: number }
+    > = {
+      all: { count: 0, totalPrice: 0 },
+      pending: { count: 0, totalPrice: 0 },
+      confirmed: { count: 0, totalPrice: 0 },
+      shipped: { count: 0, totalPrice: 0 },
+      delivered: { count: 0, totalPrice: 0 },
+      cancelled: { count: 0, totalPrice: 0 },
     };
-
     for (const group of statusGroups) {
       const count = group._count._all;
       const statusKey = group.status as OrderStatus;
       if (statusKey in counts) {
-        counts[statusKey] = count;
+        counts[statusKey] = { count, totalPrice: group._sum.total || 0 };
       }
-      counts.all += count;
+      counts.all.count += count;
+      counts.all.totalPrice += group._sum.total || 0;
     }
 
     const items = orders.map((o) => ({
@@ -201,7 +207,6 @@ export async function listOrders(req: Request, res: Response) {
       createdAt: o.createdAt,
       itemCount: o._count.items,
     }));
-
     return res.status(200).json({
       success: true,
       data: {

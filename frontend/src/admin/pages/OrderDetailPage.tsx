@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { Link, useLocation, useParams } from "react-router"
-import { useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import DataTable, { type TableColumn } from "react-data-table-component"
-import { ordersApi } from "../api/ordersApi"
+import { orderQueryKeys, ordersApi } from "../api/ordersApi"
 import { ApiError } from "../api/client"
 import type {
-  OrderDetail,
   OrderItemDetail,
   OrderStatus,
   PaymentStatus,
@@ -35,35 +34,6 @@ import { InlineNotice } from "../components/common/InlineNotice"
 import { LoadingState } from "../components/common/LoadingState"
 import { NotFoundState } from "../components/common/NotFoundState"
 import { StatusBadge } from "../components/common/StatusBadge"
-
-/* ------------------------------------------------------------------ */
-/*  Load-state reducer                                                 */
-/* ------------------------------------------------------------------ */
-
-type LoadState =
-  | { phase: "loading" }
-  | { phase: "notfound" }
-  | { phase: "error"; message: string }
-  | { phase: "ready"; order: OrderDetail }
-
-type LoadAction =
-  | { type: "LOADING" }
-  | { type: "READY"; order: OrderDetail }
-  | { type: "NOTFOUND" }
-  | { type: "ERROR"; message: string }
-
-function loadReducer(_state: LoadState, action: LoadAction): LoadState {
-  switch (action.type) {
-    case "LOADING":
-      return { phase: "loading" }
-    case "READY":
-      return { phase: "ready", order: action.order }
-    case "NOTFOUND":
-      return { phase: "notfound" }
-    case "ERROR":
-      return { phase: "error", message: action.message }
-  }
-}
 
 function getBackHref(locationState: unknown): string {
   if (
@@ -180,7 +150,7 @@ const orderItemTableStyles = {
     style: {
       minHeight: "60px",
       backgroundColor: "var(--bg-surface)",
-      borderBottom: "1px solid var(--border-light)",
+      // borderBottom: "1px solid var(--border-light)",
     },
   },
   cells: {
@@ -260,40 +230,43 @@ function OrderStatusStepper({ current }: { current: OrderStatus }) {
         const isUpcoming = index > currentIndex
 
         return (
-          <div key={step.key} className="flex items-center">
-            <div
-              className={`flex items-center gap-1.5 ${
-                isUpcoming ? "opacity-50" : ""
-              }`}
-            >
+          <div
+            key={step.key}
+            className="relative flex flex-1 flex-col items-center last:flex-none"
+          >
+            <div className="mb-3 flex h-4 items-center justify-center">
+              <span
+                className={`text-xs font-medium whitespace-nowrap ${
+                  isCurrent ? "text-(--text-primary)" : "text-(--text-muted)"
+                } ${isUpcoming ? "opacity-50" : ""}`}
+              >
+                {step.label}
+              </span>
+            </div>
+
+            <div className="flex w-full items-center justify-center">
               <div
-                className={`flex size-6 items-center justify-center rounded-full text-[11px] font-semibold ${
+                className={`z-10 flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                   isComplete
                     ? "bg-emerald-500 text-white"
                     : isCurrent
                       ? "bg-primary text-white"
                       : "bg-(--bg-table-header) text-(--text-muted)"
-                }`}
+                } ${isUpcoming ? "opacity-50" : ""}`}
               >
                 {isComplete ? <Check className="size-3" /> : index + 1}
               </div>
-              <span
-                className={`text-xs font-medium ${
-                  isCurrent ? "text-(--text-primary)" : "text-(--text-muted)"
-                }`}
-              >
-                {step.label}
-              </span>
+
+              {index < STEPPER_STEPS.length - 1 && (
+                <div
+                  className={`-mx-3 h-0.5 w-full min-w-6 sm:min-w-10 ${
+                    index < currentIndex
+                      ? "bg-emerald-500"
+                      : "bg-(--border-light)"
+                  }`}
+                />
+              )}
             </div>
-            {index < STEPPER_STEPS.length - 1 && (
-              <div
-                className={`mx-2 h-0.5 w-6 sm:w-10 ${
-                  index < currentIndex
-                    ? "bg-emerald-500"
-                    : "bg-(--border-light)"
-                }`}
-              />
-            )}
           </div>
         )
       })}
@@ -311,9 +284,6 @@ export default function OrderDetailPage() {
   const queryClient = useQueryClient()
   const backHref = getBackHref(location.state)
 
-  const [loadState, dispatch] = useReducer(loadReducer, { phase: "loading" })
-
-  const [mutating, setMutating] = useState(false)
   const [pendingAction, setPendingAction] = useState<string | null>(null)
   const [mutationError, setMutationError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -321,53 +291,50 @@ export default function OrderDetailPage() {
   const [confirmCancelOpen, setConfirmCancelOpen] = useState(false)
   const cancelTriggerRef = useRef<HTMLButtonElement>(null)
 
-  const [retryCount, setRetryCount] = useState(0)
-  const handleRetry = useCallback(() => setRetryCount((c) => c + 1), [])
+  const orderQuery = useQuery({
+    queryKey: orderQueryKeys.detail(id ?? ""),
+    enabled: Boolean(id),
+    queryFn: ({ signal }) => {
+      if (!id) throw new Error("Order ID is required.")
+      return ordersApi.get(id, signal)
+    },
+    staleTime: 15 * 1000,
+    refetchOnWindowFocus: true,
+    retry: (failureCount, error) =>
+      !(error instanceof ApiError && error.status >= 400) && failureCount < 2,
+  })
 
-  const requestIdRef = useRef(0)
-
-  useEffect(() => {
-    if (!id) return
-    const controller = new AbortController()
-    const reqId = ++requestIdRef.current
-    dispatch({ type: "LOADING" })
-
-    ordersApi
-      .get(id, controller.signal)
-      .then((data) => {
-        if (reqId !== requestIdRef.current) return
-        dispatch({ type: "READY", order: data })
-      })
-      .catch((err: unknown) => {
-        if (err instanceof DOMException && err.name === "AbortError") return
-        if (reqId !== requestIdRef.current) return
-        if (err instanceof ApiError && err.status === 404) {
-          dispatch({ type: "NOTFOUND" })
-        } else {
-          dispatch({ type: "ERROR", message: getErrorMessage(err) })
-        }
-      })
-
-    return () => {
-      controller.abort()
-    }
-  }, [id, retryCount])
+  const updateStatusMutation = useMutation({
+    mutationFn: ({
+      orderId,
+      body,
+    }: {
+      orderId: string
+      body: { orderStatus?: OrderStatus; paymentStatus?: PaymentStatus }
+    }) => ordersApi.updateStatus(orderId, body),
+    onSuccess: async (updated, { orderId }) => {
+      queryClient.setQueryData(orderQueryKeys.detail(orderId), updated)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: orderQueryKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: orderQueryKeys.stats() }),
+      ])
+    },
+  })
+  const mutating = updateStatusMutation.isPending
 
   async function applyStatus(
     body: { orderStatus?: OrderStatus; paymentStatus?: PaymentStatus },
     actionKey: string
   ) {
     if (!id || mutating) return
-    setMutating(true)
     setPendingAction(actionKey)
     setMutationError(null)
     setSuccessMessage(null)
     try {
-      const updated = await ordersApi.updateStatus(id, body)
-      dispatch({ type: "READY", order: updated })
-
-      // ▼ Sidebar counts + orders list auto-refresh via TanStack Query
-      await queryClient.invalidateQueries({ queryKey: ["admin", "orders"] })
+      const updated = await updateStatusMutation.mutateAsync({
+        orderId: id,
+        body,
+      })
 
       const label = body.orderStatus
         ? ORDER_STATUS_CONFIG[body.orderStatus].label
@@ -379,12 +346,14 @@ export default function OrderDetailPage() {
       )
     } catch (err: unknown) {
       if (err instanceof ApiError && err.status === 404) {
-        dispatch({ type: "NOTFOUND" })
+        await queryClient.invalidateQueries({
+          queryKey: orderQueryKeys.detail(id),
+          exact: true,
+        })
       } else {
         setMutationError(getErrorMessage(err))
       }
     } finally {
-      setMutating(false)
       setPendingAction(null)
     }
   }
@@ -409,18 +378,7 @@ export default function OrderDetailPage() {
 
   /* ---------------- Non-ready phases ---------------- */
 
-  if (loadState.phase === "loading") {
-    return (
-      <LoadingState
-        className="flex min-h-80 items-center justify-center p-6 text-sm text-(--text-muted)"
-        aria-live="polite"
-      >
-        Loading order…
-      </LoadingState>
-    )
-  }
-
-  if (loadState.phase === "notfound") {
+  if (!id) {
     return (
       <NotFoundState
         title="Order not found."
@@ -433,11 +391,39 @@ export default function OrderDetailPage() {
     )
   }
 
-  if (loadState.phase === "error") {
+  if (orderQuery.isPending) {
+    return (
+      <LoadingState
+        className="flex min-h-80 items-center justify-center p-6 text-sm text-(--text-muted)"
+        aria-live="polite"
+      >
+        Loading order…
+      </LoadingState>
+    )
+  }
+
+  if (
+    orderQuery.isError &&
+    orderQuery.error instanceof ApiError &&
+    orderQuery.error.status === 404
+  ) {
+    return (
+      <NotFoundState
+        title="Order not found."
+        backTo="/admin/orders"
+        backLabel="Back to orders"
+        className="flex min-h-80 flex-col items-center justify-center gap-4 p-6 text-center"
+        titleClassName="text-lg font-semibold text-(--text-primary)"
+        linkClassName="text-sm font-medium text-(--primary) hover:underline"
+      />
+    )
+  }
+
+  if (orderQuery.isError) {
     return (
       <ErrorState
-        message={loadState.message}
-        onRetry={handleRetry}
+        message={getErrorMessage(orderQuery.error)}
+        onRetry={() => void orderQuery.refetch()}
         className="flex min-h-80 flex-col items-center justify-center gap-3 p-6 text-center"
         messageClassName="text-sm font-medium text-red-600"
         buttonClassName="admin-template-button admin-template-button--primary"
@@ -452,7 +438,23 @@ export default function OrderDetailPage() {
 
   /* ---------------- Ready phase ---------------- */
 
-  const { order } = loadState
+  const order = orderQuery.data
+  if (!order) {
+    return (
+      <ErrorState
+        message="Order data is unavailable."
+        onRetry={() =>
+          void queryClient.invalidateQueries({
+            queryKey: orderQueryKeys.detail(id),
+            exact: true,
+          })
+        }
+        className="flex min-h-80 flex-col items-center justify-center gap-3 p-6 text-center"
+        messageClassName="text-sm font-medium text-red-600"
+        buttonClassName="admin-template-button admin-template-button--primary"
+      />
+    )
+  }
   const orderCfg = ORDER_STATUS_CONFIG[order.orderStatus]
   const payCfg = PAYMENT_STATUS_CONFIG[order.paymentStatus]
   const nextStatuses = ORDER_STATUS_TRANSITIONS[order.orderStatus]
@@ -570,21 +572,6 @@ export default function OrderDetailPage() {
       <div className="grid min-w-0 grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(18rem,1fr)]">
         {/* Left column */}
         <div className="flex min-w-0 flex-col gap-5">
-          <Card title="Order items">
-            <DataTable
-              ariaLabel="Order items"
-              columns={orderItemColumns}
-              data={order.items}
-              customStyles={orderItemTableStyles}
-              responsive
-              noDataComponent={
-                <p className="py-8 text-center text-sm text-(--text-muted)">
-                  No items were recorded for this order.
-                </p>
-              }
-            />
-          </Card>
-
           <Card title="Customer & delivery">
             {/* Customer card with Call / WhatsApp quick actions */}
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -657,6 +644,21 @@ export default function OrderDetailPage() {
                 </p>
               </div>
             </div>
+          </Card>
+
+          <Card title="Order items">
+            <DataTable
+              ariaLabel="Order items"
+              columns={orderItemColumns}
+              data={order.items}
+              customStyles={orderItemTableStyles}
+              responsive
+              noDataComponent={
+                <p className="py-8 text-center text-sm text-(--text-muted)">
+                  No items were recorded for this order.
+                </p>
+              }
+            />
           </Card>
         </div>
 

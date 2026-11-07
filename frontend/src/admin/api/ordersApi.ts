@@ -38,3 +38,12 @@ export const ordersApi = {
     )
   },
 }
+
+export const orderQueryKeys = {
+  all: ["admin", "orders"] as const,
+  lists: () => [...orderQueryKeys.all, "list"] as const,
+  list: (params: OrderListParams) =>
+    [...orderQueryKeys.lists(), params] as const,
+  stats: () => [...orderQueryKeys.all, "stats"] as const,
+  detail: (id: string) => [...orderQueryKeys.all, "detail", id] as const,
+}
