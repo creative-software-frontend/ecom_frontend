@@ -12,11 +12,11 @@ import {
   Play,
   Trash2,
   Tag,
-  X,
 } from "lucide-react"
 import { SettingsLayout } from "../SettingsLayout"
 import { MetricCard } from "../MetricCard"
 import type { Coupon, CouponStatus } from "../../../types/coupon"
+import { CreateCouponModal } from "../modals/CreateCouponModal"
 
 /* ================================================================
    Mock data — replace with API later
@@ -218,7 +218,7 @@ function CouponsEmptyState({ onAdd }: { onAdd: () => void }) {
 export default function CouponsTab() {
   const [searchQuery, setSearchQuery] = useState("")
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
-  const [showCreatePlaceholder, setShowCreatePlaceholder] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   // Close the row actions menu when clicking anywhere outside it
   useEffect(() => {
@@ -255,8 +255,7 @@ export default function CouponsTab() {
   }
 
   function handleOpenCreate() {
-    // TODO: replace with real Create-coupon modal (Frame 2, coming next)
-    setShowCreatePlaceholder(true)
+    setShowCreateModal(true)
   }
 
   return (
@@ -460,49 +459,15 @@ export default function CouponsTab() {
         </section>
       )}
 
-      {/* ---------- Create-coupon placeholder (real modal coming next) ---------- */}
-      {showCreatePlaceholder && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="create-coupon-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-        >
-          <div className="w-full max-w-md rounded-lg border border-(--border-light) bg-(--bg-surface) p-6 shadow-xl">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2
-                  id="create-coupon-title"
-                  className="text-base font-semibold text-(--text-primary)"
-                >
-                  Create coupon
-                </h2>
-                <p className="mt-1 text-sm text-(--text-muted)">
-                  The full create form is being designed next. For now, this is
-                  a placeholder.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowCreatePlaceholder(false)}
-                className="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--text-primary)"
-                aria-label="Close"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            <div className="mt-5 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowCreatePlaceholder(false)}
-                className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Create-coupon modal */}
+      <CreateCouponModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={(coupon) => {
+          // TODO: refresh list from API — e.g. queryClient.invalidateQueries
+          console.log("Coupon created:", coupon.code)
+        }}
+      />
     </SettingsLayout>
   )
 }

@@ -389,3 +389,63 @@ export const FormUnitField = forwardRef<HTMLInputElement, FormUnitFieldProps>(
     )
   }
 )
+
+/* ================================================================
+   FormSegmentedControl — 2/3-way pill switch
+   Used by coupon discount type, and future Marketing/Pixel toggles.
+   ================================================================ */
+
+type SegmentOption<T extends string> = {
+  value: T
+  label: string
+  icon?: ReactNode
+}
+
+type FormSegmentedControlProps<T extends string> = {
+  options: readonly SegmentOption<T>[]
+  value: T
+  onChange: (next: T) => void
+  disabled?: boolean
+  "aria-label"?: string
+}
+
+export function FormSegmentedControl<T extends string>({
+  options,
+  value,
+  onChange,
+  disabled = false,
+  "aria-label": ariaLabel,
+}: FormSegmentedControlProps<T>) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label={ariaLabel}
+      className="grid gap-1 rounded-md bg-(--bg-surface-hover) p-1"
+      style={{
+        gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
+      }}
+    >
+      {options.map((opt) => {
+        const isActive = opt.value === value
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={isActive}
+            disabled={disabled}
+            onClick={() => onChange(opt.value)}
+            className={`flex h-8 items-center justify-center gap-1.5 rounded-md text-[13px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+              isActive
+                ? "bg-(--bg-surface) text-(--text-primary) shadow-sm"
+                : "text-(--text-muted) hover:text-(--text-primary)"
+            }`}
+          >
+            {opt.icon}
+            <span className="truncate">{opt.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
