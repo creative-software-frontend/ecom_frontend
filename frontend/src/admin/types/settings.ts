@@ -100,3 +100,18 @@ export type OrderSettings = {
     min_success_ratio: number
   }
 }
+
+// Marketing settings — token values are never returned by the API.
+// The backend only sends `token_saved` and `token_updated_at`.
+export type MarketingIntegration = {
+  enabled: boolean
+  pixel_id: string
+  test_event_code?: string // FB only
+  token_saved: boolean
+  token_updated_at: string | null
+}
+
+export type MarketingSettings = {
+  facebook: MarketingIntegration
+  tiktok: MarketingIntegration
+}
