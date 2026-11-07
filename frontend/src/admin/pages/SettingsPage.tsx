@@ -5,6 +5,7 @@ import StorefrontTab from "../components/settings/tabs/StorefrontTab"
 import OrdersTab from "../components/settings/tabs/OrdersTab"
 import CouponsTab from "../components/settings/tabs/CouponsTab"
 import MarketingTab from "../components/settings/tabs/MarketingTab"
+import PagesTab from "../components/settings/tabs/PagesTab"
 
 const VALID_TABS: SettingsTabId[] = [
   "store",
@@ -37,6 +38,7 @@ export default function SettingsPage() {
     case "coupons":
       return <CouponsTab />
     case "pages":
+      return <PagesTab />
     case "marketing":
       return <MarketingTab />
 
