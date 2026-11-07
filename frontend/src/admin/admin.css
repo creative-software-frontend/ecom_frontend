@@ -211,3 +211,7 @@ button {
   animation: admin-marquee 10s linear infinite;
   white-space: nowrap;
 }
+
+.admin-root .rounded-md {
+  border-radius: 6px;
+}

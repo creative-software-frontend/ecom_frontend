@@ -123,6 +123,7 @@ export function SettingsLayout({
   isSaving = false,
   onDiscard,
   onSave,
+  badges,
 }: {
   activeTab: SettingsTabId
   children: ReactNode
@@ -130,6 +131,7 @@ export function SettingsLayout({
   isSaving?: boolean
   onDiscard?: () => void
   onSave?: () => void
+  badges?: Partial<Record<SettingsTabId, number>>
 }) {
   const navigate = useNavigate()
 
@@ -164,6 +166,7 @@ export function SettingsLayout({
         <div className="flex min-w-max gap-0">
           {TABS.map(({ id, label, icon: Icon }) => {
             const isActive = id === activeTab
+            const badgeCount = badges?.[id] ?? 0
             return (
               <button
                 key={id}
@@ -178,6 +181,11 @@ export function SettingsLayout({
               >
                 <Icon className="size-4" />
                 {label}
+                {badgeCount !== undefined && badgeCount > 0 && (
+                  <span className="ml-0.5 rounded-full bg-(--bg-table-header) px-1.5 py-0.5 text-[10px] font-semibold text-(--text-muted) tabular-nums">
+                    {badgeCount}
+                  </span>
+                )}
               </button>
             )
           })}
