@@ -260,7 +260,11 @@ export default function StorefrontTab() {
             items={fields}
             onReorder={(oldIndex, newIndex) => move(oldIndex, newIndex)}
           >
-            {(field, index, { attributes, listeners, setActivatorNodeRef }) => {
+            {(
+              _field,
+              index,
+              { attributes, listeners, setActivatorNodeRef }
+            ) => {
               const bannerValue = watch(`banners.${index}`)
               const linkError = errors.banners?.[index]?.link?.message
 

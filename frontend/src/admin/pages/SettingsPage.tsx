@@ -2,6 +2,10 @@ import { Navigate, useParams } from "react-router"
 import type { SettingsTabId } from "../components/settings/SettingsLayout"
 import StoreTab from "../components/settings/tabs/StoreTab"
 import StorefrontTab from "../components/settings/tabs/StorefrontTab"
+import OrdersTab from "../components/settings/tabs/OrdersTab"
+import CouponsTab from "../components/settings/tabs/CouponsTab"
+import MarketingTab from "../components/settings/tabs/MarketingTab"
+import PagesTab from "../components/settings/tabs/PagesTab"
 
 const VALID_TABS: SettingsTabId[] = [
   "store",
@@ -30,14 +34,19 @@ export default function SettingsPage() {
     case "storefront":
       return <StorefrontTab />
     case "orders":
+      return <OrdersTab />
     case "coupons":
+      return <CouponsTab />
     case "pages":
+      return <PagesTab />
     case "marketing":
-      return (
-        <div className="flex items-center justify-center p-12 text-sm text-(--text-muted)">
-          This settings tab is coming soon.
-        </div>
-      )
+      return <MarketingTab />
+
+    // return (
+    //   <div className="flex items-center justify-center p-12 text-sm text-(--text-muted)">
+    //     This settings tab is coming soon.
+    //   </div>
+    // )
     default:
       return <Navigate to="/admin/settings/store" replace />
   }

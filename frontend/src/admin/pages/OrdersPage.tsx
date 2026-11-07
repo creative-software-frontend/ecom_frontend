@@ -1,21 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Link, useSearchParams } from "react-router"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import DataTable, {
   useTableExport,
   type TableColumn,
 } from "react-data-table-component"
-import { ordersApi } from "../api/ordersApi"
+import { orderQueryKeys, ordersApi } from "../api/ordersApi"
 import { ApiError } from "../api/client"
 import { EmptyState } from "../components/common/EmptyState"
 import { ErrorState } from "../components/common/ErrorState"
 import { LoadingState } from "../components/common/LoadingState"
 import { StatusBadge } from "../components/common/StatusBadge"
 import { useDebouncedValue } from "../hooks/useDebouncedValue"
-import type {
-  OrderStatus,
-  OrdersListResponse,
-  OrderListItem,
-} from "../types/order"
+import type { OrderStatus, OrderListItem } from "../types/order"
 import {
   ORDER_STATUS_CONFIG,
   PAYMENT_STATUS_CONFIG,
@@ -61,62 +58,58 @@ export default function OrdersPage() {
   const debouncedSearch = useDebouncedValue(searchValue, 300)
   const searchScheduledRef = useRef(false)
 
-  const [hasLoaded, setHasLoaded] = useState(false)
-  const [data, setData] = useState<OrdersListResponse | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const requestIdRef = useRef(0)
+  const queryClient = useQueryClient()
   const [selectedOrders, setSelectedOrders] = useState<OrderListItem[]>([])
   const [clearSelectedRows, setClearSelectedRows] = useState(false)
   const [bulkStatus, setBulkStatus] = useState<OrderStatus | "">("")
-  const [bulkUpdating, setBulkUpdating] = useState(false)
   const [bulkMessage, setBulkMessage] = useState<string | null>(null)
-  const [refreshSequence, setRefreshSequence] = useState(0)
+  const params = useMemo(() => {
+    const next: Parameters<typeof ordersApi.list>[0] = {
+      page,
+      limit: PAGE_LIMIT,
+    }
+    if (status) next.status = status
+    if (paymentStatus === "paid" || paymentStatus === "unpaid") {
+      next.paymentStatus = paymentStatus
+    }
+    if (area) next.area = area
+    if (dateFrom) next.dateFrom = dateFrom
+    if (dateTo) next.dateTo = dateTo
+    if (q.trim()) next.q = q.trim()
+    return next
+  }, [page, status, paymentStatus, area, dateFrom, dateTo, q])
 
-  const doFetch = useCallback(
-    (signal: AbortSignal, id: number) => {
-      setLoading(true)
-      setError(null)
-      const params: Parameters<typeof ordersApi.list>[0] = {
-        page,
-        limit: PAGE_LIMIT,
-      }
-      if (status) params.status = status as OrderStatus
-      if (paymentStatus === "paid" || paymentStatus === "unpaid") {
-        params.paymentStatus = paymentStatus
-      }
-      if (area) params.area = area
-      if (dateFrom) params.dateFrom = dateFrom
-      if (dateTo) params.dateTo = dateTo
-      if (q.trim()) params.q = q.trim()
+  const {
+    data,
+    isPending: loading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: orderQueryKeys.list(params),
+    queryFn: ({ signal }) => ordersApi.list(params, signal),
+    staleTime: 15 * 1000,
+    refetchOnWindowFocus: true,
+    retry: (failureCount, queryError) =>
+      !(queryError instanceof ApiError && queryError.status >= 400) &&
+      failureCount < 2,
+  })
 
-      ordersApi
-        .list(params, signal)
-        .then((result) => {
-          if (id !== requestIdRef.current) return
-          setData(result)
-          setHasLoaded(true)
-          setLoading(false)
-        })
-        .catch((err: unknown) => {
-          if (err instanceof DOMException && err.name === "AbortError") return
-          if (id !== requestIdRef.current) return
-          setHasLoaded(true)
-          setLoading(false)
-          setError(
-            err instanceof ApiError ? err.message : "Failed to load orders."
-          )
-        })
-    },
-    [page, status, paymentStatus, area, dateFrom, dateTo, q]
-  )
-
-  useEffect(() => {
-    const controller = new AbortController()
-    const id = ++requestIdRef.current
-    doFetch(controller.signal, id)
-    return () => controller.abort()
-  }, [doFetch, refreshSequence])
+  const bulkStatusMutation = useMutation({
+    mutationFn: ({
+      orderIds,
+      orderStatus,
+    }: {
+      orderIds: string[]
+      orderStatus: OrderStatus
+    }) =>
+      Promise.allSettled(
+        orderIds.map((id) => ordersApi.updateStatus(id, { orderStatus }))
+      ),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: orderQueryKeys.all }),
+  })
+  const bulkUpdating = bulkStatusMutation.isPending
 
   function resetSelectedOrders() {
     setSelectedOrders([])
@@ -181,42 +174,44 @@ export default function OrdersPage() {
   async function handleBulkStatusUpdate() {
     if (!bulkStatus || selectedOrders.length === 0 || bulkUpdating) return
 
-    setBulkUpdating(true)
     setBulkMessage(null)
-    const results = await Promise.allSettled(
-      selectedOrders.map((order) =>
-        ordersApi.updateStatus(order.id, { orderStatus: bulkStatus })
-      )
-    )
-    const failedCount = results.filter(
-      (result) => result.status === "rejected"
-    ).length
+    try {
+      const results = await bulkStatusMutation.mutateAsync({
+        orderIds: selectedOrders.map((order) => order.id),
+        orderStatus: bulkStatus,
+      })
+      const failedCount = results.filter(
+        (result) => result.status === "rejected"
+      ).length
 
-    setBulkUpdating(false)
-    setBulkStatus("")
-    resetSelectedOrders()
-    setRefreshSequence((sequence) => sequence + 1)
+      setBulkStatus("")
+      resetSelectedOrders()
 
-    if (failedCount > 0) {
+      if (failedCount > 0) {
+        setBulkMessage(
+          `${results.length - failedCount} order(s) updated; ${failedCount} could not be updated. Check that the selected status transitions are allowed.`
+        )
+        return
+      }
+
+      setBulkMessage(`${results.length} order(s) updated successfully.`)
+    } catch (mutationError) {
       setBulkMessage(
-        `${results.length - failedCount} order(s) updated; ${failedCount} could not be updated. Check that the selected status transitions are allowed.`
+        mutationError instanceof Error
+          ? mutationError.message
+          : "Failed to update selected orders."
       )
-      return
     }
-
-    setBulkMessage(`${results.length} order(s) updated successfully.`)
   }
-
   const total = data?.total ?? 0
   const counts = data?.counts ?? {
-    all: 0,
-    pending: 0,
-    confirmed: 0,
-    shipped: 0,
-    delivered: 0,
-    cancelled: 0,
+    all: { count: 0, totalPrice: 0 },
+    pending: { count: 0, totalPrice: 0 },
+    confirmed: { count: 0, totalPrice: 0 },
+    shipped: { count: 0, totalPrice: 0 },
+    delivered: { count: 0, totalPrice: 0 },
+    cancelled: { count: 0, totalPrice: 0 },
   }
-
   // React Data Table Column Definitions
   const columns: TableColumn<OrderListItem>[] = useMemo(
     () => [
@@ -445,17 +440,23 @@ export default function OrdersPage() {
               <option value="unpaid">Unpaid</option>
             </select>
           </label>
-          <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-[#eef0ff] px-3 text-xs font-medium text-(--text-primary)">
+          <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-(--bg-app) px-3 text-xs font-medium text-(--text-primary)">
             <span className="size-1.5 rounded-full bg-primary" />
-            {total} of {counts.all} shown
+            {total} of {counts.all?.count} shown
           </span>
         </div>
 
         {/* Status Filter Tabs */}
-        <div className="flex flex-wrap gap-1 border-b border-(--border-light) bg-(--bg-table-header) px-4 pt-3">
+        <div className="flex scrollbar-none gap-1 overflow-x-auto border-b border-(--border-light) bg-(--bg-table-header) px-4 pt-3 whitespace-nowrap">
           {STATUS_TABS.map(({ value, label }) => {
             const count =
-              value === "" ? counts.all : counts[value as keyof typeof counts]
+              value === ""
+                ? counts.all.count
+                : counts[value as keyof typeof counts].count
+            const totalPrice =
+              value === ""
+                ? counts.all.totalPrice
+                : counts[value as keyof typeof counts].totalPrice
             const isActive = status === value
             return (
               <button
@@ -470,6 +471,7 @@ export default function OrdersPage() {
                 }`}
               >
                 {label} <span className="ml-1 opacity-75">({count})</span>
+                <span> • ৳{totalPrice}</span>
               </button>
             )
           })}
@@ -477,7 +479,7 @@ export default function OrdersPage() {
 
         {/* Bulk Actions Toolbar */}
         <div className="flex flex-wrap items-center gap-2 border-b border-(--border-light) bg-white px-3 py-2.5">
-          <span className="inline-flex h-9 shrink-0 items-center rounded-full bg-[#fce8e8] px-3 text-xs font-semibold text-[#9b1c1c]">
+          <span className="inline-flex h-9 shrink-0 items-center rounded-full bg-rose-100 px-3 text-xs font-semibold text-red-800">
             Selected ({selectedOrders.length})
           </span>
           <button
@@ -568,16 +570,18 @@ export default function OrdersPage() {
         ) : null}
 
         {/* Content Table / Loading / Error states */}
-        {loading && !hasLoaded ? (
+        {loading ? (
           <LoadingState className="flex items-center justify-center py-16 text-sm text-(--text-muted)">
             Loading orders…
           </LoadingState>
-        ) : error ? (
+        ) : isError ? (
           <ErrorState
-            message={error}
-            onRetry={() =>
-              doFetch(new AbortController().signal, ++requestIdRef.current)
+            message={
+              error instanceof ApiError
+                ? error.message
+                : "Failed to load orders."
             }
+            onRetry={() => void refetch()}
             className="flex flex-col items-center gap-3 py-16 text-center"
           />
         ) : (

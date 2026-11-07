@@ -211,3 +211,64 @@ button {
   animation: admin-marquee 10s linear infinite;
   white-space: nowrap;
 }
+
+.admin-root .rounded-md {
+  border-radius: 6px;
+}
+
+/* ==========================================================
+   Rich Text Editor — contentEditable typography
+   Applies to the Pages editor. Scoped under .admin-rte so
+   public pages are unaffected.
+   ========================================================== */
+
+.admin-root .admin-rte h2 {
+  margin: 12px 0 6px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin-root .admin-rte h3 {
+  margin: 12px 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin-root .admin-rte p {
+  margin: 4px 0;
+  line-height: 1.6;
+}
+
+.admin-root .admin-rte blockquote {
+  margin: 12px 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--primary);
+  background: var(--primary-soft);
+  border-radius: 6px;
+}
+
+.admin-root .admin-rte blockquote p {
+  margin: 2px 0;
+}
+
+.admin-root .admin-rte ul,
+.admin-root .admin-rte ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.admin-root .admin-rte li {
+  margin: 2px 0;
+}
+
+.admin-root .admin-rte a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.admin-root .admin-rte:empty::before {
+  content: "Start writing your page content…";
+  color: var(--text-muted);
+}

@@ -4,15 +4,14 @@ import { useSidebarStats } from "../../hooks/useSidebarStats"
 
 export function Sidebar() {
   const { pendingOrders, totalProducts } = useSidebarStats()
-
   // ব্যাজ ভ্যালু রিজলভ করার হেল্পার
   // ১. href === "/admin/orders" হলে pendingOrders
   // ২. href === "/admin/products" হলে totalProducts
   // ৩. নাহলে item.badge (স্ট্যাটিক) থাকলে সেটা
   const resolveBadge = (item: MenuItem): string | number | undefined => {
     if (item.type !== "link") return undefined
-    if (item.href === "/admin/orders" && pendingOrders > 0) {
-      return pendingOrders
+    if (item.href === "/admin/orders" && pendingOrders.count > 0) {
+      return pendingOrders.count
     }
     if (item.href === "/admin/products" && totalProducts > 0) {
       return totalProducts
@@ -47,7 +46,7 @@ export function Sidebar() {
               <li key={item.label}>
                 <NavLink
                   to={item.href}
-                  end
+                  end={item.href === "/admin"}
                   className={({ isActive }) =>
                     `flex items-center justify-between rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
                       isActive

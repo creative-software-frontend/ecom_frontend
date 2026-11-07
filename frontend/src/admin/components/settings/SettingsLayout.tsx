@@ -74,20 +74,38 @@ function SaveBar({
   isSaving,
   onDiscard,
   onSave,
+  description,
 }: {
   isDirty: boolean
   isSaving: boolean
   onDiscard: () => void
   onSave: () => void
+  description?: string
 }) {
   if (!isDirty) return null
 
   return (
     <div className="sticky bottom-0 z-10 -mx-6 border-t border-(--border-light) bg-(--bg-surface) px-6 py-3 shadow-[0_-4px_12px_-4px_rgba(15,23,42,0.06)]">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-[12px] font-medium text-(--text-primary)">
-          <AlertCircle className="size-4 text-amber-500" />
-          You have unsaved changes
+        <div className="flex items-center gap-2.5">
+          {/* Warning variant (orange filled) when description is present */}
+          {description ? (
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-orange-500">
+              <AlertCircle className="size-3.5 text-white" />
+            </span>
+          ) : (
+            <AlertCircle className="size-4 shrink-0 text-amber-500" />
+          )}
+          <div className="flex flex-col">
+            <span className="text-[12px] font-medium text-(--text-primary)">
+              You have unsaved changes
+            </span>
+            {description && (
+              <span className="text-[11px] text-(--text-muted)">
+                {description}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -111,7 +129,6 @@ function SaveBar({
     </div>
   )
 }
-
 /* ================================================================
    SettingsLayout — wraps every settings tab
    ================================================================ */
@@ -123,6 +140,8 @@ export function SettingsLayout({
   isSaving = false,
   onDiscard,
   onSave,
+  badges,
+  saveBarDescription,
 }: {
   activeTab: SettingsTabId
   children: ReactNode
@@ -130,6 +149,8 @@ export function SettingsLayout({
   isSaving?: boolean
   onDiscard?: () => void
   onSave?: () => void
+  badges?: Partial<Record<SettingsTabId, number>>
+  saveBarDescription?: string
 }) {
   const navigate = useNavigate()
 
@@ -164,6 +185,7 @@ export function SettingsLayout({
         <div className="flex min-w-max gap-0">
           {TABS.map(({ id, label, icon: Icon }) => {
             const isActive = id === activeTab
+            const badgeCount = badges?.[id] ?? 0
             return (
               <button
                 key={id}
@@ -178,6 +200,11 @@ export function SettingsLayout({
               >
                 <Icon className="size-4" />
                 {label}
+                {badgeCount !== undefined && badgeCount > 0 && (
+                  <span className="ml-0.5 rounded-full bg-(--bg-table-header) px-1.5 py-0.5 text-[10px] font-semibold text-(--text-muted) tabular-nums">
+                    {badgeCount}
+                  </span>
+                )}
               </button>
             )
           })}
@@ -194,6 +221,7 @@ export function SettingsLayout({
           isSaving={isSaving}
           onDiscard={onDiscard}
           onSave={onSave}
+          description={saveBarDescription}
         />
       )}
     </div>
