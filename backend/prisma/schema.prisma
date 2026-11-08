@@ -247,3 +247,22 @@ model PageRevision {
   @@index([pageId, editedAt])
   @@map("page_revisions")
 }
+
+// ==================================================================
+// Courier settings — singleton (id=1)
+// Zones are hardcoded in frontend (3 fixed tiers for Bangladesh).
+// Only fee amounts + toggles are stored server-side.
+// ==================================================================
+
+model CourierSettings {
+  id                Int      @id @default(1)
+  enabled           Boolean  @default(true)
+  flatFeeEnabled    Boolean  @default(true) @map("flat_fee_enabled")
+  insideDhakaFee    Int      @default(60) @map("inside_dhaka_fee")
+  subDhakaFee       Int      @default(100) @map("sub_dhaka_fee")
+  outsideDhakaFee   Int      @default(130) @map("outside_dhaka_fee")
+  freeDeliveryAbove Int      @default(2000) @map("free_delivery_above")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("courier_settings")
+}
