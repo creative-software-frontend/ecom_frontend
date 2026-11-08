@@ -1,18 +1,19 @@
 import { Router } from "express";
 import {
-  changePassword,
-  getSettings,
+  getStoreSettings,
   updateStoreSettings,
-} from "../controllers/adminSettings.controller.js";
+} from "../controllers/adminStoreSettings.controller.js";
+import { changePassword } from "../controllers/adminSettings.controller.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = Router();
-
 router.use(requireAdmin);
 
-router.get("/", getSettings);
-router.put("/", updateStoreSettings);
+// Store settings — DB-backed (Phase 1)
+router.get("/store", getStoreSettings);
+router.put("/store", updateStoreSettings);
+
+// Password change — legacy but still in use
 router.put("/password", changePassword);
 
 export default router;
-

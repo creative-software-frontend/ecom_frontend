@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 
 import { CORS_ORIGINS } from "./config/env.js";
 import productRoutes from "./routes/product.routes.js";
-import storeRoutes from "./routes/store.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import adminProductRoutes from "./routes/adminProduct.routes.js";
@@ -26,7 +25,6 @@ app.use(express.json());
 
 // API Routes
 app.use("/api/products", productRoutes);
-app.use("/api/store", storeRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/products", adminProductRoutes);

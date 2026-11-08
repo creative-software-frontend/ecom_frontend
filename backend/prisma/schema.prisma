@@ -88,3 +88,162 @@ model Admin {
 
   @@map("admins")
 }
+
+// ==================================================================
+// Settings — four singleton rows (one per section)
+// Pattern: id is always 1. Upsert on `where: { id: 1 }`.
+// Not enforced by DB constraint, but code always uses id=1.
+// ==================================================================
+
+model StoreSettings {
+  id          Int     @id @default(1)
+  name        String
+  tagline     String
+  description String  @db.Text
+  logo        String?
+
+  phone         String
+  phone2        String? @map("phone_2")
+  whatsapp      String
+  whatsapp2     String? @map("whatsapp_2")
+  email         String
+  address       String  @db.Text
+  googleMapsUrl String? @map("google_maps_url") @db.Text
+
+  facebook  String?
+  instagram String?
+  youtube   String?
+  tiktok    String?
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("store_settings")
+}
+
+model StorefrontSettings {
+  id                  Int      @id @default(1)
+  announcementEnabled Boolean  @default(false) @map("announcement_enabled")
+  announcementText    String?  @map("announcement_text") @db.Text
+  orderNote           String?  @map("order_note") @db.Text
+  primaryColor        String   @default("#0D9488") @map("primary_color")
+  backgroundColor     String   @default("#FAF8FF") @map("background_color")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@map("storefront_settings")
+}
+
+model OrderSettings {
+  id                    Int     @id @default(1)
+  duplicateBlockEnabled Boolean @default(true) @map("duplicate_block_enabled")
+  duplicateBlockMinutes Int     @default(15) @map("duplicate_block_minutes")
+  locationFieldsEnabled Boolean @default(true) @map("location_fields_enabled")
+  deliveryInsideDhaka   Int     @default(70) @map("delivery_inside_dhaka")
+  deliveryOutsideDhaka  Int     @default(120) @map("delivery_outside_dhaka")
+  freeDeliveryAbove     Int     @default(2000) @map("free_delivery_above")
+
+  // Beta flags — always false in UI, but stored so toggling is one-line change later
+  mobileVerificationEnabled Boolean @default(false) @map("mobile_verification_enabled")
+  smsConfirmationEnabled    Boolean @default(false) @map("sms_confirmation_enabled")
+  vpnProtectionEnabled      Boolean @default(false) @map("vpn_protection_enabled")
+  courierProtectionEnabled  Boolean @default(false) @map("courier_protection_enabled")
+  courierMinSuccessRatio    Int     @default(65) @map("courier_min_success_ratio")
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("order_settings")
+}
+
+model MarketingSettings {
+  id                     Int       @id @default(1)
+  facebookEnabled        Boolean   @default(false) @map("facebook_enabled")
+  facebookPixelId        String?   @map("facebook_pixel_id")
+  facebookTestEventCode  String?   @map("facebook_test_event_code")
+  // Encrypted with AES-256-GCM before storage. Never returned to client.
+  facebookTokenEncrypted String?   @map("facebook_token_encrypted") @db.Text
+  facebookTokenUpdatedAt DateTime? @map("facebook_token_updated_at")
+
+  tiktokEnabled        Boolean   @default(false) @map("tiktok_enabled")
+  tiktokPixelId        String?   @map("tiktok_pixel_id")
+  tiktokTokenEncrypted String?   @map("tiktok_token_encrypted") @db.Text
+  tiktokTokenUpdatedAt DateTime? @map("tiktok_token_updated_at")
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("marketing_settings")
+}
+
+// ==================================================================
+// Banners — standalone table (public storefront carousel)
+// ==================================================================
+
+model Banner {
+  id        String   @id @default(uuid())
+  imageUrl  String   @map("image_url") @db.Text
+  altText   String?  @map("alt_text")
+  linkUrl   String?  @map("link_url") @db.Text
+  isActive  Boolean  @default(true) @map("is_active")
+  position  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, position])
+  @@map("banners")
+}
+
+// ==================================================================
+// Coupons — real entities
+// ==================================================================
+
+model Coupon {
+  id               String    @id @default(uuid())
+  code             String    @unique
+  discountType     String    @map("discount_type") // "percentage" | "amount"
+  discountValue    Int       @map("discount_value")
+  note             String?
+  used             Int       @default(0)
+  usageLimit       Int?      @map("usage_limit") // null = unlimited
+  maxDiscountValue Int?      @map("max_discount_value")
+  minPurchaseValue Int?      @map("min_purchase_value")
+  expiresAt        DateTime? @map("expires_at")
+  status           String    @default("active") // "active" | "paused" | "expired"
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([expiresAt])
+  @@map("coupons")
+}
+
+// ==================================================================
+// Pages — CMS entries + revision history
+// ==================================================================
+
+model Page {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  contentHtml   String   @map("content_html") @db.LongText
+  status        String   @default("draft") // "published" | "draft"
+  language      String   @default("EN")
+  lastEditedBy  String   @map("last_edited_by")
+  revisionCount Int      @default(1) @map("revision_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  revisions PageRevision[]
+
+  @@map("pages")
+}
+
+model PageRevision {
+  id          String   @id @default(uuid())
+  pageId      String   @map("page_id")
+  title       String
+  contentHtml String   @map("content_html") @db.LongText
+  editedBy    String   @map("edited_by")
+  editedAt    DateTime @default(now()) @map("edited_at")
+  page        Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, editedAt])
+  @@map("page_revisions")
+}

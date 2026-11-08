@@ -3,11 +3,11 @@ import type { ChangePasswordInput, StoreSettings } from "../types/settings"
 
 export const settingsApi = {
   get(signal?: AbortSignal): Promise<StoreSettings> {
-    return apiRequest<StoreSettings>("/admin/settings", { signal })
+    return apiRequest<StoreSettings>("/admin/settings/store", { signal })
   },
 
   updateStore(data: StoreSettings): Promise<StoreSettings> {
-    return apiRequest<StoreSettings>("/admin/settings", {
+    return apiRequest<StoreSettings>("/admin/settings/store", {
       method: "PUT",
       body: data,
     })
