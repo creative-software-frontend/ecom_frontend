@@ -8,6 +8,7 @@ import {
   FileText,
   Megaphone,
   AlertCircle,
+  Truck,
 } from "lucide-react"
 
 /* ================================================================
@@ -15,7 +16,13 @@ import {
    ================================================================ */
 
 export type SettingsTabId =
-  "store" | "storefront" | "orders" | "coupons" | "pages" | "marketing"
+  | "store"
+  | "storefront"
+  | "orders"
+  | "coupons"
+  | "pages"
+  | "marketing"
+  | "courier"
 
 const TABS: {
   id: SettingsTabId
@@ -28,6 +35,7 @@ const TABS: {
   { id: "coupons", label: "Coupons", icon: Ticket },
   { id: "pages", label: "Pages", icon: FileText },
   { id: "marketing", label: "Marketing", icon: Megaphone },
+  { id: "courier", label: "Courier", icon: Truck },
 ]
 
 /* ================================================================
@@ -49,13 +57,11 @@ export function SettingsCard({
     <section className="rounded-lg border border-(--border-light) bg-(--bg-surface)">
       <header className="flex items-start justify-between gap-3 border-b border-(--border-light) px-5 py-4">
         <div className="min-w-0">
-          <h2 className="text-[14px] font-semibold text-(--text-primary)">
+          <h2 className="text-sm font-semibold text-(--text-primary)">
             {title}
           </h2>
           {description && (
-            <p className="mt-0.5 text-[12px] text-(--text-muted)">
-              {description}
-            </p>
+            <p className="mt-0.5 text-xs text-(--text-muted)">{description}</p>
           )}
         </div>
         {badge}
@@ -75,12 +81,14 @@ function SaveBar({
   onDiscard,
   onSave,
   description,
+  title,
 }: {
   isDirty: boolean
   isSaving: boolean
   onDiscard: () => void
   onSave: () => void
   description?: string
+  title?: string
 }) {
   if (!isDirty) return null
 
@@ -97,13 +105,11 @@ function SaveBar({
             <AlertCircle className="size-4 shrink-0 text-amber-500" />
           )}
           <div className="flex flex-col">
-            <span className="text-[12px] font-medium text-(--text-primary)">
-              You have unsaved changes
+            <span className="text-xs font-medium text-(--text-primary)">
+              {title ?? "You have unsaved changes"}
             </span>
             {description && (
-              <span className="text-[11px] text-(--text-muted)">
-                {description}
-              </span>
+              <span className="text-xs text-(--text-muted)">{description}</span>
             )}
           </div>
         </div>
@@ -112,7 +118,7 @@ function SaveBar({
             type="button"
             onClick={onDiscard}
             disabled={isSaving}
-            className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+            className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
           >
             Discard
           </button>
@@ -120,7 +126,7 @@ function SaveBar({
             type="button"
             onClick={onSave}
             disabled={isSaving}
-            className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-[13px] font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+            className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
           >
             {isSaving ? "Saving..." : "Save changes"}
           </button>
@@ -142,6 +148,10 @@ export function SettingsLayout({
   onSave,
   badges,
   saveBarDescription,
+  headerRight,
+  saveBarTitle,
+  // pageTitle,
+  // pageSubtitle,
 }: {
   activeTab: SettingsTabId
   children: ReactNode
@@ -151,6 +161,10 @@ export function SettingsLayout({
   onSave?: () => void
   badges?: Partial<Record<SettingsTabId, number>>
   saveBarDescription?: string
+  headerRight?: ReactNode
+  saveBarTitle?: string
+  pageTitle?: string
+  pageSubtitle?: string
 }) {
   const navigate = useNavigate()
 
@@ -159,20 +173,22 @@ export function SettingsLayout({
       {/* Page header */}
       <header>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-[11px] text-(--text-muted)">
+          <div className="flex items-center gap-2 text-xs text-(--text-muted)">
             <span>Configuration</span>
             <span>›</span>
             <span>Store Settings</span>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
-            <span className="size-1.5 rounded-full bg-emerald-500" />
-            Production Environment
-          </span>
+          {headerRight ?? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+              <span className="size-1.5 rounded-full bg-emerald-500" />
+              Production Environment
+            </span>
+          )}
         </div>
-        <h1 className="mt-2 text-[20px] font-semibold text-(--text-primary)">
+        <h1 className="mt-2 text-xl font-semibold text-(--text-primary)">
           Settings
         </h1>
-        <p className="mt-0.5 text-[13px] text-(--text-muted)">
+        <p className="mt-0.5 text-sm text-(--text-muted)">
           Manage your store, orders and customer-facing operational channels
         </p>
       </header>
@@ -192,7 +208,7 @@ export function SettingsLayout({
                 type="button"
                 onClick={() => navigate(`/admin/settings/${id}`)}
                 aria-current={isActive ? "page" : undefined}
-                className={`relative flex items-center gap-2 border-b-2 px-4 py-3 text-[13px] font-medium whitespace-nowrap transition-colors ${
+                className={`relative flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive
                     ? "border-primary text-primary"
                     : "border-transparent text-(--text-muted) hover:text-(--text-primary)"
@@ -222,6 +238,7 @@ export function SettingsLayout({
           onDiscard={onDiscard}
           onSave={onSave}
           description={saveBarDescription}
+          title={saveBarTitle}
         />
       )}
     </div>

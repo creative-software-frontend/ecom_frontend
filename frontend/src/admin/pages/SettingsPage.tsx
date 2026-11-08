@@ -6,6 +6,7 @@ import OrdersTab from "../components/settings/tabs/OrdersTab"
 import CouponsTab from "../components/settings/tabs/CouponsTab"
 import MarketingTab from "../components/settings/tabs/MarketingTab"
 import PagesTab from "../components/settings/tabs/PagesTab"
+import CourierTab from "../components/settings/tabs/CourierTab"
 
 const VALID_TABS: SettingsTabId[] = [
   "store",
@@ -14,6 +15,7 @@ const VALID_TABS: SettingsTabId[] = [
   "coupons",
   "pages",
   "marketing",
+  "courier",
 ]
 
 function isTabId(value: string | undefined): value is SettingsTabId {
@@ -28,6 +30,7 @@ export default function SettingsPage() {
   }
 
   // Add new tabs here as they're built
+  console.log(tab)
   switch (tab) {
     case "store":
       return <StoreTab />
@@ -41,6 +44,8 @@ export default function SettingsPage() {
       return <PagesTab />
     case "marketing":
       return <MarketingTab />
+    case "courier":
+      return <CourierTab />
 
     // return (
     //   <div className="flex items-center justify-center p-12 text-sm text-(--text-muted)">
