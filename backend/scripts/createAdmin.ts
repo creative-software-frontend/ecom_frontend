@@ -3,10 +3,16 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../src/lib/prisma.js";
 
 const MIN_PASSWORD_LENGTH = 8;
+const runtimeProcess = (globalThis as typeof globalThis & {
+  process: {
+    env: Record<string, string | undefined>;
+    exitCode?: number;
+  };
+}).process;
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD;
+  const email = runtimeProcess.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = runtimeProcess.env.ADMIN_PASSWORD;
 
   if (!email) {
     throw new Error("ADMIN_EMAIL is required");
@@ -39,7 +45,7 @@ main()
       "Failed to create admin:",
       error instanceof Error ? error.message : "Unknown error",
     );
-    process.exitCode = 1;
+    runtimeProcess.exitCode = 1;
   })
   .finally(async () => {
     await prisma.$disconnect();
