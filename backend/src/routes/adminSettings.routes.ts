@@ -12,14 +12,14 @@ import {
   updateOrderSettings,
 } from "../controllers/adminOrderSettings.controller.js";
 import { changePassword } from "../controllers/adminSettings.controller.js";
-import { requireAdmin } from "../middleware/requireAdmin.js";
 import {
   getCourierSettings,
   updateCourierSettings,
 } from "../controllers/adminCourierSettings.controller.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
-router.use(requireAdmin);
+router.use(requireAuth);
 
 // Store
 router.get("/store", getStoreSettings);

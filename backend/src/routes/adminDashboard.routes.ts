@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { getDashboard } from "../controllers/adminDashboard.controller.js";
-import { requireAdmin } from "../middleware/requireAdmin.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
-router.use(requireAdmin);
+router.use(requireAuth);
 router.get("/", getDashboard);
 
 export default router;
