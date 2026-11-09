@@ -79,14 +79,25 @@ model Review {
   @@map("reviews")
 }
 
-model Admin {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  name            String    @default("Admin")
+  mobile          String?
+  roleId          String    @map("role_id")
+  shopId          String?   @map("shop_id")
+  status          String    @default("active")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  lastLoginAt     DateTime? @map("last_login_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  @@map("admins")
+  role      Role       @relation(fields: [roleId], references: [id])
+  shop      Shop?      @relation(fields: [shopId], references: [id])
+  auditLogs AuditLog[]
+
+  @@map("users")
 }
 
 // ==================================================================
@@ -265,4 +276,60 @@ model CourierSettings {
   updatedAt         DateTime @updatedAt @map("updated_at")
 
   @@map("courier_settings")
+}
+
+model Shop {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  status      String    @default("active")
+  trialEndsAt DateTime? @map("trial_ends_at")
+  expiryDate  DateTime? @map("expiry_date")
+  mobile      String?
+  address     String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  users     User[]
+  auditLogs AuditLog[]
+
+  @@map("shops")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  displayName String   @map("display_name")
+  scope       String
+  permissions Json     @default("{}")
+  isSystem    Boolean  @default(false) @map("is_system")
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  users User[]
+
+  @@map("roles")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  shopId     String?  @map("shop_id")
+  action     String
+  entityType String?  @map("entity_type")
+  entityId   String?  @map("entity_id")
+  metadata   Json?
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent") @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User  @relation(fields: [userId], references: [id])
+  shop Shop? @relation(fields: [shopId], references: [id])
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([shopId])
+  @@index([action])
+  @@map("audit_logs")
 }
