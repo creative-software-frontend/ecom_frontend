@@ -7,7 +7,6 @@ import {
   createRoleSchema,
   updateRoleSchema,
 } from "../schemas/adminRole.schema.js";
-import type { IdParams } from "../types/reuseable.type.js";
 
 function toApiShape(
   r: {
@@ -105,7 +104,7 @@ export async function createRole(req: Request, res: Response) {
   }
 }
 
-export async function updateRole(req: Request<IdParams>, res: Response) {
+export async function updateRole(req: Request, res: Response) {
   const id = parseId(req.params.id);
   if (id === null) {
     return res.status(400).json({ success: false, message: "Invalid role ID" });
@@ -171,7 +170,7 @@ export async function updateRole(req: Request<IdParams>, res: Response) {
   }
 }
 
-export async function deleteRole(req: Request<IdParams>, res: Response) {
+export async function deleteRole(req: Request, res: Response) {
   const id = parseId(req.params.id);
   if (id === null) {
     return res.status(400).json({ success: false, message: "Invalid role ID" });

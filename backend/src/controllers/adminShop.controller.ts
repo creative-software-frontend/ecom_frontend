@@ -7,7 +7,6 @@ import {
   createShopSchema,
   updateShopSchema,
 } from "../schemas/adminShop.schema.js";
-import type { IdParams } from "../types/reuseable.type.js";
 
 function toApiShape(
   s: {
@@ -107,7 +106,7 @@ export async function createShop(req: Request, res: Response) {
   }
 }
 
-export async function updateShop(req: Request<IdParams>, res: Response) {
+export async function updateShop(req: Request, res: Response) {
   const id = parseId(req.params.id);
   if (id === null) {
     return res.status(400).json({ success: false, message: "Invalid shop ID" });

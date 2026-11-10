@@ -11,7 +11,6 @@ import {
   getOrderSettings,
   updateOrderSettings,
 } from "../controllers/adminOrderSettings.controller.js";
-import { changePassword } from "../controllers/adminSettings.controller.js";
 import {
   getCourierSettings,
   updateCourierSettings,
@@ -21,11 +20,11 @@ import { requireAuth } from "../middleware/requireAuth.js";
 const router = Router();
 router.use(requireAuth);
 
-// Store
+// Store settings
 router.get("/store", getStoreSettings);
 router.put("/store", updateStoreSettings);
 
-// Storefront
+// Storefront settings
 router.get("/storefront", getStorefrontSettings);
 router.put("/storefront", updateStorefrontSettings);
 
@@ -33,11 +32,8 @@ router.put("/storefront", updateStorefrontSettings);
 router.get("/orders", getOrderSettings);
 router.put("/orders", updateOrderSettings);
 
-// Courier (Phase 2.5)
+// Courier settings
 router.get("/courier", getCourierSettings);
 router.put("/courier", updateCourierSettings);
-
-// Password — endpoint stays even without current UI (Phase 6 will re-add UI)
-router.put("/password", changePassword);
 
 export default router;

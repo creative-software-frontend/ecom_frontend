@@ -27,12 +27,16 @@ app.use(express.json());
 // API Routes
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/admin/auth", adminAuthRoutes);
+// Auth — shared by all roles (super admin + shop users)
+app.use("/api/auth", adminAuthRoutes);
+
+// Platform super admin — platform scope
 app.use("/api/admin/super", adminSuperRoutes);
-app.use("/api/admin/products", adminProductRoutes);
-app.use("/api/admin/settings", adminSettingsRoutes);
-app.use("/api/admin/orders", adminOrderRoutes);
-app.use("/api/admin/dashboard", adminDashboardRoutes);
+// Shop operations — shop admin scope
+app.use("/api/shop/products", adminProductRoutes);
+app.use("/api/shop/settings", adminSettingsRoutes);
+app.use("/api/shop/orders", adminOrderRoutes);
+app.use("/api/shop/dashboard", adminDashboardRoutes);
 
 // // Health check route
 // app.get("/", (req, res) => {
