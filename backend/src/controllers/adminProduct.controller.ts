@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { parseId } from "../lib/parseId.js";
 import { sendPrismaError } from "../lib/prismaError.js";
 import { prisma } from "../lib/prisma.js";
 import {
@@ -41,9 +42,9 @@ export async function listProducts(_req: Request, res: Response) {
 }
 
 export async function getProductById(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = parseId(req.params.id);
 
-  if (!id || typeof id !== "string") {
+  if (id === null) {
     return res
       .status(404)
       .json({ success: false, message: "Product not found" });
@@ -96,9 +97,9 @@ export async function createProduct(req: Request, res: Response) {
 }
 
 export async function updateProduct(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = parseId(req.params.id);
 
-  if (!id || typeof id !== "string") {
+  if (id === null) {
     return res
       .status(404)
       .json({ success: false, message: "Product not found" });
@@ -133,9 +134,9 @@ export async function updateProduct(req: Request, res: Response) {
 }
 
 export async function deleteProduct(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = parseId(req.params.id);
 
-  if (!id || typeof id !== "string") {
+  if (id === null) {
     return res
       .status(404)
       .json({ success: false, message: "Product not found" });

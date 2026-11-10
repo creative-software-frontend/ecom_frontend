@@ -6,7 +6,7 @@ export const productsApi = {
     return apiRequest<Product[]>("/admin/products", { signal })
   },
 
-  get(id: string, signal?: AbortSignal): Promise<Product> {
+  get(id: number | string, signal?: AbortSignal): Promise<Product> {
     return apiRequest<Product>(`/admin/products/${encodeURIComponent(id)}`, {
       signal,
     })
@@ -19,14 +19,14 @@ export const productsApi = {
     })
   },
 
-  update(id: string, input: ProductWriteInput): Promise<Product> {
+  update(id: number | string, input: ProductWriteInput): Promise<Product> {
     return apiRequest<Product>(`/admin/products/${encodeURIComponent(id)}`, {
       method: "PUT",
       body: input,
     })
   },
 
-  remove(id: string): Promise<void> {
+  remove(id: number | string): Promise<void> {
     return apiRequest<void>(`/admin/products/${encodeURIComponent(id)}`, {
       method: "DELETE",
     })

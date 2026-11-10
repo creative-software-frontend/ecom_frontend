@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
+import { parseId } from "../lib/parseId.js";
 
 interface OrderItemInput {
-  productId: string;
+  productId: number | string;
   quantity: number;
   unitPrice: number;
 }
@@ -58,16 +59,24 @@ export async function createOrder(req: Request, res: Response) {
 
     // সাবটোটাল এবং মোট হিসাব করা
     let subtotal = 0;
-    const orderItemsData = items.map((item) => {
+    const orderItemsData = [];
+    for (const item of items) {
+      const productId = parseId(item.productId);
+      if (productId === null) {
+        return res.status(400).json({
+          success: false,
+          message: "Each item must have a valid product ID",
+        });
+      }
       const lineTotal = item.unitPrice * item.quantity;
       subtotal += lineTotal;
-      return {
-        productId: item.productId,
+      orderItemsData.push({
+        productId,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         lineTotal: lineTotal,
-      };
-    });
+      });
+    }
 
     const total = subtotal + (deliveryCharge || 0);
     const orderNumber = `PZ-${Math.floor(100000 + Math.random() * 900000)}`;

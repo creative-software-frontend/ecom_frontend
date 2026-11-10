@@ -11,8 +11,8 @@ export const createUserSchema = z.object({
     .refine((v) => !v || bdPhoneRegex.test(v), "Enter a valid mobile number")
     .optional(),
   password: z.string().min(12, "Password must be at least 12 characters"),
-  roleId: z.string().uuid("Select a valid role"),
-  shopId: z.string().uuid().nullable(),
+  roleId: z.coerce.number().int().positive("Select a valid role"),
+  shopId: z.coerce.number().int().positive().nullable(),
   status: z.enum(["active", "inactive"]).default("active"),
 });
 
@@ -23,8 +23,8 @@ export const updateUserSchema = z.object({
     .trim()
     .refine((v) => !v || bdPhoneRegex.test(v), "Enter a valid mobile number")
     .optional(),
-  roleId: z.string().uuid().optional(),
-  shopId: z.string().uuid().nullable().optional(),
+  roleId: z.coerce.number().int().positive().optional(),
+  shopId: z.coerce.number().int().positive().nullable().optional(),
   status: z.enum(["active", "inactive"]).optional(),
 });
 

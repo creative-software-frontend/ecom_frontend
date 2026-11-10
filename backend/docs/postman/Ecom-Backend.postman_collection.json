@@ -116,7 +116,7 @@
                   "host": ["{{baseUrl}}"],
                   "path": ["api", "orders"]
                 },
-                "description": "Place an order. productId must be a real product UUID (run List Products first and copy an id, or run Create Product). Prices and quantities must be whole numbers."
+                "description": "Place an order. productId must be a real numeric product ID (run List Products first and copy an id, or run Create Product). Prices and quantities must be whole numbers."
               },
               "response": []
             }
@@ -271,7 +271,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "admin", "products", "{{productId}}"]
             },
-            "description": "Returns one product by UUID. 404 if not found."
+            "description": "Returns one product by its numeric ID. 404 if not found."
           },
           "response": []
         },

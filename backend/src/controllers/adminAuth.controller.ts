@@ -26,8 +26,8 @@ const cookieOptions = {
 type UserWithRelations = NonNullable<
   Awaited<ReturnType<typeof prisma.user.findUnique>>
 > & {
-  role: { id: string; name: string; displayName: string; permissions: unknown };
-  shop: { id: string; name: string; slug: string; status: string } | null;
+  role: { id: number; name: string; displayName: string; permissions: unknown };
+  shop: { id: number; name: string; slug: string; status: string } | null;
 };
 
 function toAuthResponse(user: UserWithRelations) {
@@ -150,7 +150,9 @@ export function logout(req: Request, res: Response) {
         typeof payload === "object" &&
         payload !== null &&
         "id" in payload &&
-        typeof payload.id === "string"
+        typeof payload.id === "number" &&
+        Number.isSafeInteger(payload.id) &&
+        payload.id > 0
       ) {
         void logAudit({
           req,

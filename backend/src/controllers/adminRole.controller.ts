@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
+import { parseId } from "../lib/parseId.js";
 import { logAudit } from "../lib/auditLog.js";
 import {
   createRoleSchema,
@@ -10,7 +11,7 @@ import type { IdParams } from "../types/reuseable.type.js";
 
 function toApiShape(
   r: {
-    id: string;
+    id: number;
     name: string;
     displayName: string;
     scope: string;
@@ -105,7 +106,10 @@ export async function createRole(req: Request, res: Response) {
 }
 
 export async function updateRole(req: Request<IdParams>, res: Response) {
-  const { id } = req.params;
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ success: false, message: "Invalid role ID" });
+  }
   const parsed = updateRoleSchema.safeParse(req.body);
   if (!parsed.success) {
     const errors: Record<string, string> = {};
@@ -168,7 +172,10 @@ export async function updateRole(req: Request<IdParams>, res: Response) {
 }
 
 export async function deleteRole(req: Request<IdParams>, res: Response) {
-  const { id } = req.params;
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ success: false, message: "Invalid role ID" });
+  }
   try {
     const role = await prisma.role.findUnique({
       where: { id },

@@ -17,9 +17,8 @@ const urlOptional = z
 
 // Individual banner — reused by the save-all payload.
 const bannerInputSchema = z.object({
-  // `id` is optional: new banners have a temp id (e.g. "b1730...")
-  // or null; existing banners have their real UUID from a prior save.
-  id: z.string().optional(),
+  // New banners have a temporary string ID; saved banners have a numeric ID.
+  id: z.union([z.number().int().positive(), z.string()]).optional(),
   image_url: z.string().trim().max(500).default(""),
   alt_text: z.string().trim().max(200).optional(),
   link_url: urlOptional,

@@ -5,6 +5,7 @@ import {
   type OrderStatus,
 } from "../constants/order.js";
 import { prisma } from "../lib/prisma.js";
+import { parseId } from "../lib/parseId.js";
 import {
   formatOrderValidationErrors,
   orderListQuerySchema,
@@ -227,8 +228,8 @@ export async function listOrders(req: Request, res: Response) {
 }
 
 export async function getOrderById(req: Request, res: Response) {
-  const id = parseInt(req.params.id as string);
-  if (!id || typeof id !== "number") {
+  const id = parseId(req.params.id);
+  if (id === null) {
     return res.status(404).json({ success: false, message: "Order not found" });
   }
 
@@ -250,10 +251,8 @@ export async function getOrderById(req: Request, res: Response) {
 }
 
 export async function updateOrderStatus(req: Request, res: Response) {
-  const idString = req.params.id;
-  const id = parseInt(idString as string);
-
-  if (!id || typeof id !== "number") {
+  const id = parseId(req.params.id);
+  if (id === null) {
     return res.status(404).json({ success: false, message: "Order not found" });
   }
 

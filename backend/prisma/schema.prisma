@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Product {
-  id              String      @id @default(uuid())
+  id              Int         @id @default(autoincrement())
   slug            String      @unique
   name            String
   brandName       String      @map("brand_name")
@@ -53,9 +53,9 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
+  id        Int     @id @default(autoincrement())
   orderId   Int     @map("order_id")
-  productId String  @map("product_id")
+  productId Int     @map("product_id")
   quantity  Int
   unitPrice Int     @map("unit_price")
   lineTotal Int     @map("line_total")
@@ -66,8 +66,8 @@ model OrderItem {
 }
 
 model Review {
-  id        String   @id @default(uuid())
-  productId String   @map("product_id")
+  id        Int      @id @default(autoincrement())
+  productId Int      @map("product_id")
   name      String
   location  String?
   rating    Int
@@ -80,13 +80,13 @@ model Review {
 }
 
 model User {
-  id              String    @id @default(uuid())
+  id              Int       @id @default(autoincrement())
   email           String    @unique
   passwordHash    String    @map("password_hash")
   name            String    @default("Admin")
   mobile          String?
-  roleId          String    @map("role_id")
-  shopId          String?   @map("shop_id")
+  roleId          Int       @map("role_id")
+  shopId          Int?      @map("shop_id")
   status          String    @default("active")
   emailVerifiedAt DateTime? @map("email_verified_at")
   lastLoginAt     DateTime? @map("last_login_at")
@@ -188,7 +188,7 @@ model MarketingSettings {
 // ==================================================================
 
 model Banner {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   imageUrl  String   @map("image_url") @db.Text
   altText   String?  @map("alt_text")
   linkUrl   String?  @map("link_url") @db.Text
@@ -206,7 +206,7 @@ model Banner {
 // ==================================================================
 
 model Coupon {
-  id               String    @id @default(uuid())
+  id               Int       @id @default(autoincrement())
   code             String    @unique
   discountType     String    @map("discount_type") // "percentage" | "amount"
   discountValue    Int       @map("discount_value")
@@ -230,7 +230,7 @@ model Coupon {
 // ==================================================================
 
 model Page {
-  id            String   @id @default(uuid())
+  id            Int      @id @default(autoincrement())
   title         String
   slug          String   @unique
   contentHtml   String   @map("content_html") @db.LongText
@@ -247,8 +247,8 @@ model Page {
 }
 
 model PageRevision {
-  id          String   @id @default(uuid())
-  pageId      String   @map("page_id")
+  id          Int      @id @default(autoincrement())
+  pageId      Int      @map("page_id")
   title       String
   contentHtml String   @map("content_html") @db.LongText
   editedBy    String   @map("edited_by")
@@ -279,7 +279,7 @@ model CourierSettings {
 }
 
 model Shop {
-  id          String    @id @default(uuid())
+  id          Int       @id @default(autoincrement())
   name        String
   slug        String    @unique
   status      String    @default("active")
@@ -297,7 +297,7 @@ model Shop {
 }
 
 model Role {
-  id          String   @id @default(uuid())
+  id          Int      @id @default(autoincrement())
   name        String   @unique
   displayName String   @map("display_name")
   scope       String
@@ -313,9 +313,9 @@ model Role {
 }
 
 model AuditLog {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  shopId     String?  @map("shop_id")
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  shopId     Int?     @map("shop_id")
   action     String
   entityType String?  @map("entity_type")
   entityId   String?  @map("entity_id")

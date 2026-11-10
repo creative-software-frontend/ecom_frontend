@@ -100,7 +100,7 @@ export default function OrdersPage() {
       orderIds,
       orderStatus,
     }: {
-      orderIds: string[]
+      orderIds: number[]
       orderStatus: OrderStatus
     }) =>
       Promise.allSettled(

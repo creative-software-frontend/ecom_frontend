@@ -95,7 +95,7 @@ export function ProfilePage() {
 
   async function handleCopyId() {
     try {
-      await navigator.clipboard.writeText(user.id)
+      await navigator.clipboard.writeText(String(user.id))
       setCopiedId(true)
       setTimeout(() => setCopiedId(false), 2000)
     } catch {

@@ -31,11 +31,11 @@ export async function logAudit(params: {
   req: Request;
   action: AuditAction;
   entityType?: string;
-  entityId?: string;
+  entityId?: number;
   metadata?: Record<string, unknown>;
-  targetShopId?: string | null;
+  targetShopId?: number | null;
   /** Explicit actor — required when req.user is not populated (e.g., login). */
-  userId?: string;
+  userId?: number;
 }): Promise<void> {
   const finalUserId = params.userId ?? params.req.user?.id;
   if (!finalUserId) return;
@@ -55,7 +55,8 @@ export async function logAudit(params: {
         shopId: params.targetShopId ?? params.req.user?.shopId ?? null,
         action: params.action,
         entityType: params.entityType ?? null,
-        entityId: params.entityId ?? null,
+        entityId:
+          params.entityId === undefined ? null : String(params.entityId),
         ipAddress: ip,
         userAgent: ua,
         ...(params.metadata !== undefined && {

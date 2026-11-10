@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { Prisma } from "../../generated/prisma/client.js";
+import { parseId } from "../lib/parseId.js";
 import { prisma } from "../lib/prisma.js";
 import { logAudit } from "../lib/auditLog.js";
 import {
@@ -34,7 +35,7 @@ function toApiShape(u: UserWithRelations) {
 }
 
 // Count active super_admin users — used to protect the last one.
-async function countActiveSuperAdmins(excludeUserId?: string): Promise<number> {
+async function countActiveSuperAdmins(excludeUserId?: number): Promise<number> {
   return prisma.user.count({
     where: {
       status: "active",
@@ -51,7 +52,7 @@ export async function listUsers(req: Request, res: Response) {
     Math.max(1, parseInt(String(req.query.limit ?? "50"), 10) || 50),
   );
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
-  const roleId =
+  const roleIdInput =
     typeof req.query.roleId === "string" ? req.query.roleId : undefined;
   const shopFilter = req.query.shopId;
   const status =
@@ -65,11 +66,29 @@ export async function listUsers(req: Request, res: Response) {
       { mobile: { contains: q } },
     ];
   }
-  if (roleId) where.roleId = roleId;
+  if (roleIdInput) {
+    const roleId = parseId(roleIdInput);
+    if (roleId === null) {
+      return res.status(422).json({
+        success: false,
+        message: "Invalid role ID",
+      });
+    }
+    where.roleId = roleId;
+  }
   if (status) where.status = status;
   // Special value "null" filters platform users (no shop).
   if (shopFilter === "null") where.shopId = null;
-  else if (typeof shopFilter === "string") where.shopId = shopFilter;
+  else if (typeof shopFilter === "string") {
+    const shopId = parseId(shopFilter);
+    if (shopId === null) {
+      return res.status(422).json({
+        success: false,
+        message: "Invalid shop ID",
+      });
+    }
+    where.shopId = shopId;
+  }
 
   try {
     const [items, total] = await Promise.all([
@@ -177,7 +196,7 @@ export async function createUser(req: Request, res: Response) {
 }
 
 export async function updateUser(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = parseId(req.params.id);
   const actor = req.user!;
   const parsed = updateUserSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -192,7 +211,7 @@ export async function updateUser(req: Request, res: Response) {
   }
   const data = parsed.data;
 
-  if (typeof id !== "string" || !id) {
+  if (id === null) {
     return res.status(400).json({
       success: false,
       message: "Invalid user ID",
@@ -302,7 +321,7 @@ export async function updateUser(req: Request, res: Response) {
 }
 
 export async function resetUserPassword(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = parseId(req.params.id);
   const parsed = resetUserPasswordSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(422).json({
@@ -313,7 +332,7 @@ export async function resetUserPassword(req: Request, res: Response) {
       },
     });
   }
-  if (typeof id !== "string" || !id) {
+  if (id === null) {
     return res.status(400).json({
       success: false,
       message: "Invalid user ID",
@@ -353,19 +372,19 @@ export async function resetUserPassword(req: Request, res: Response) {
 }
 
 export async function deleteUser(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = parseId(req.params.id);
   const actor = req.user!;
 
+  if (id === null) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid user ID",
+    });
+  }
   if (id === actor.id) {
     return res.status(403).json({
       success: false,
       message: "You cannot delete your own account",
-    });
-  }
-  if (typeof id !== "string" || !id) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid user ID",
     });
   }
   try {

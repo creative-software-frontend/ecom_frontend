@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
+import { parseId } from "../lib/parseId.js";
 import { logAudit } from "../lib/auditLog.js";
 import {
   createShopSchema,
@@ -10,7 +11,7 @@ import type { IdParams } from "../types/reuseable.type.js";
 
 function toApiShape(
   s: {
-    id: string;
+    id: number;
     name: string;
     slug: string;
     status: string;
@@ -107,7 +108,10 @@ export async function createShop(req: Request, res: Response) {
 }
 
 export async function updateShop(req: Request<IdParams>, res: Response) {
-  const { id } = req.params;
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ success: false, message: "Invalid shop ID" });
+  }
   const parsed = updateShopSchema.safeParse(req.body);
   if (!parsed.success) {
     const errors: Record<string, string> = {};

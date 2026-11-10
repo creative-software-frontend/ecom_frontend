@@ -13,7 +13,7 @@ export type OrderCounts = {
 }
 
 export type OrderListItem = {
-  id: string
+  id: number
   orderNumber: string
   customerName: string
   customerPhone: string
@@ -48,8 +48,8 @@ export type OrderListParams = {
 }
 
 export type OrderItemDetail = {
-  id: string
-  productId: string
+  id: number
+  productId: number
   quantity: number
   unitPrice: number
   lineTotal: number
@@ -61,7 +61,7 @@ export type OrderItemDetail = {
 }
 
 export type OrderDetail = {
-  id: string
+  id: number
   orderNumber: string
   customerName: string
   customerPhone: string

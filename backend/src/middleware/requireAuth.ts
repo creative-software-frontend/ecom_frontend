@@ -5,11 +5,13 @@ import { prisma } from "../lib/prisma.js";
 
 function isUserPayload(
   payload: string | JwtPayload,
-): payload is JwtPayload & { id: string } {
+): payload is JwtPayload & { id: number } {
   return (
     typeof payload === "object" &&
     payload !== null &&
-    typeof payload.id === "string"
+    typeof payload.id === "number" &&
+    Number.isSafeInteger(payload.id) &&
+    payload.id > 0
   );
 }
 

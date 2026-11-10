@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
+import { parseId } from "../lib/parseId.js";
 
 export async function listAuditLogs(req: Request, res: Response) {
   const page = Math.max(1, parseInt(String(req.query.page ?? "1"), 10) || 1);
@@ -10,8 +11,26 @@ export async function listAuditLogs(req: Request, res: Response) {
   );
 
   const where: Prisma.AuditLogWhereInput = {};
-  if (typeof req.query.userId === "string") where.userId = req.query.userId;
-  if (typeof req.query.shopId === "string") where.shopId = req.query.shopId;
+  if (typeof req.query.userId === "string") {
+    const userId = parseId(req.query.userId);
+    if (userId === null) {
+      return res.status(422).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+    where.userId = userId;
+  }
+  if (typeof req.query.shopId === "string") {
+    const shopId = parseId(req.query.shopId);
+    if (shopId === null) {
+      return res.status(422).json({
+        success: false,
+        message: "Invalid shop ID",
+      });
+    }
+    where.shopId = shopId;
+  }
   if (typeof req.query.action === "string") where.action = req.query.action;
   if (typeof req.query.dateFrom === "string") {
     where.createdAt = {

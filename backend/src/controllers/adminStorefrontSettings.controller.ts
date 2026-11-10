@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { parseId } from "../lib/parseId.js";
 import { prisma } from "../lib/prisma.js";
 import { storefrontSaveSchema } from "../schemas/storefrontSettings.schema.js";
 
@@ -68,7 +69,7 @@ export async function getStorefrontSettings(_req: Request, res: Response) {
    Single transactional save:
      1. Upsert announcement + brand colors (singleton row id=1)
      2. Reconcile banners — new / updated / deleted, positions by array index
-     3. Return the freshest full state so the client gets real UUIDs back
+     3. Return the freshest full state so the client gets the saved IDs back
    ================================================================ */
 
 export async function updateStorefrontSettings(req: Request, res: Response) {
@@ -113,7 +114,8 @@ export async function updateStorefrontSettings(req: Request, res: Response) {
       const currentIds = new Set(currentRows.map((r) => r.id));
       const incomingIds = banners
         .map((b) => b.id)
-        .filter((v): v is string => !!v && currentIds.has(v));
+        .map(parseId)
+        .filter((id): id is number => id !== null && currentIds.has(id));
 
       // Delete banners no longer in the payload (or all, if payload is empty)
       if (incomingIds.length === 0) {
@@ -126,7 +128,11 @@ export async function updateStorefrontSettings(req: Request, res: Response) {
 
       // Upsert each banner; position follows array index
       for (const [i, b] of banners.entries()) {
-        const existingId = b.id && currentIds.has(b.id) ? b.id : undefined;
+        const candidateId = parseId(b.id);
+        const existingId =
+          candidateId !== null && currentIds.has(candidateId)
+            ? candidateId
+            : undefined;
         const data = {
           imageUrl: b.image_url,
           altText: b.alt_text ?? null,

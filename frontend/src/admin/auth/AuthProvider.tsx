@@ -10,7 +10,7 @@ import {
 import { apiRequest, ApiError, registerOnUnauthorized } from "../api/client"
 
 export type AdminUser = {
-  id: string
+  id: number
   email: string
   createdAt?: string
   updatedAt?: string

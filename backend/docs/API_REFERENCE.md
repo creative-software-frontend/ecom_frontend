@@ -3,6 +3,7 @@
 Base URL (local dev): `http://localhost:5000`
 
 All requests and responses use JSON (`Content-Type: application/json`).
+Database record IDs and foreign-key IDs are numeric auto-increment values.
 
 Start the server first:
 
@@ -123,7 +124,7 @@ Returns all products where `isActive = true`, newest first.
   "success": true,
   "data": [
     {
-      "id": "0b1c2d3e-...",
+      "id": 1,
       "slug": "ultrahot",
       "name": "Ultra Hot Capsules",
       "brandName": "ULTRAHOT",
@@ -153,14 +154,14 @@ Returns a single active product and its `reviews`.
 {
   "success": true,
   "data": {
-    "id": "0b1c2d3e-...",
+    "id": 1,
     "slug": "ultrahot",
     "name": "Ultra Hot Capsules",
     "images": ["/images/products/ultrahot/1.webp"],
     "reviews": [
       {
-        "id": "r-1",
-        "productId": "0b1c2d3e-...",
+        "id": 1,
+        "productId": 1,
         "name": "Rahim",
         "location": "Dhaka",
         "rating": 5,
@@ -223,7 +224,7 @@ Returns the contents of `src/data/store.json`.
   "deliveryCharge": 60,
   "items": [
     {
-      "productId": "0b1c2d3e-...",
+      "productId": 1,
       "quantity": 2,
       "unitPrice": 1600
     }
@@ -237,7 +238,7 @@ Returns the contents of `src/data/store.json`.
 | `customerPhone` | Yes | Non-empty string |
 | `customerAddress` | Yes | Non-empty string |
 | `items` | Yes | At least one item |
-| `items[].productId` | Yes | Real product UUID from `GET /api/products` |
+| `items[].productId` | Yes | Real numeric product ID from `GET /api/products` |
 | `items[].quantity` | Yes | Whole number |
 | `items[].unitPrice` | Yes | Whole number |
 | `notes` | No | String |
@@ -276,9 +277,9 @@ Returns the contents of `src/data/store.json`.
     "createdAt": "2026-11-04T10:00:00.000Z",
     "items": [
       {
-        "id": "item-uuid",
+        "id": 1,
         "orderId": 42,
-        "productId": "0b1c2d3e-...",
+        "productId": 1,
         "quantity": 2,
         "unitPrice": 1600,
         "lineTotal": 3200
@@ -314,7 +315,7 @@ Returns the contents of `src/data/store.json`.
 {
   "success": true,
   "data": {
-    "id": "admin-uuid",
+    "id": 1,
     "email": "admin@gmail.com",
     "createdAt": "2026-10-27T12:00:00.000Z",
     "updatedAt": "2026-10-27T12:00:00.000Z"
@@ -343,7 +344,7 @@ Returns the currently authenticated admin. Requires the `admin_token` cookie.
 {
   "success": true,
   "data": {
-    "id": "admin-uuid",
+    "id": 1,
     "email": "admin@gmail.com",
     "createdAt": "2026-10-27T12:00:00.000Z",
     "updatedAt": "2026-10-27T12:00:00.000Z"
@@ -366,7 +367,7 @@ Returns the currently authenticated admin. Requires the `admin_token` cookie.
   "success": true,
   "message": "Profile updated successfully",
   "data": {
-    "id": "admin-uuid",
+    "id": 1,
     "email": "new-admin@example.com",
     "createdAt": "2026-10-27T12:00:00.000Z",
     "updatedAt": "2026-11-04T10:00:00.000Z"
@@ -392,7 +393,7 @@ Returns **all** products (active and inactive), newest first.
 
 ## GET `/api/admin/products/:id`
 
-Get a product by its UUID. `404` if not found.
+Get a product by its numeric ID. `404` if not found.
 
 ## POST `/api/admin/products`
 
@@ -541,8 +542,8 @@ Returns full order details including product info per line item.
     "createdAt": "2026-11-04T10:00:00.000Z",
     "items": [
       {
-        "id": "item-uuid",
-        "productId": "0b1c2d3e-...",
+        "id": 1,
+        "productId": 1,
         "quantity": 2,
         "unitPrice": 1600,
         "lineTotal": 3200,

@@ -25,13 +25,13 @@ export const ordersApi = {
     return apiRequest<OrdersListResponse>(path, { signal })
   },
 
-  get(id: string, signal?: AbortSignal): Promise<OrderDetail> {
+  get(id: number | string, signal?: AbortSignal): Promise<OrderDetail> {
     return apiRequest<OrderDetail>(`/admin/orders/${encodeURIComponent(id)}`, {
       signal,
     })
   },
 
-  updateStatus(id: string, body: UpdateStatusBody): Promise<OrderDetail> {
+  updateStatus(id: number | string, body: UpdateStatusBody): Promise<OrderDetail> {
     return apiRequest<OrderDetail>(
       `/admin/orders/${encodeURIComponent(id)}/status`,
       { method: "PATCH", body }
@@ -45,5 +45,5 @@ export const orderQueryKeys = {
   list: (params: OrderListParams) =>
     [...orderQueryKeys.lists(), params] as const,
   stats: () => [...orderQueryKeys.all, "stats"] as const,
-  detail: (id: string) => [...orderQueryKeys.all, "detail", id] as const,
+  detail: (id: number | string) => [...orderQueryKeys.all, "detail", id] as const,
 }
