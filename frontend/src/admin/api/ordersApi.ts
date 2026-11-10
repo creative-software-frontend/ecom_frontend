@@ -21,19 +21,25 @@ export const ordersApi = {
     if (params.dateTo) query.set("dateTo", params.dateTo)
     if (params.q) query.set("q", params.q.trim())
     const qs = query.toString()
-    const path = `/admin/orders${qs ? `?${qs}` : ""}`
+    const path = `/shop/orders${qs ? `?${qs}` : ""}`
     return apiRequest<OrdersListResponse>(path, { signal })
   },
 
   get(id: number | string, signal?: AbortSignal): Promise<OrderDetail> {
-    return apiRequest<OrderDetail>(`/admin/orders/${encodeURIComponent(id)}`, {
-      signal,
-    })
+    return apiRequest<OrderDetail>(
+      `/shop/orders/${encodeURIComponent(String(id))}`,
+      {
+        signal,
+      }
+    )
   },
 
-  updateStatus(id: number | string, body: UpdateStatusBody): Promise<OrderDetail> {
+  updateStatus(
+    id: number | string,
+    body: UpdateStatusBody
+  ): Promise<OrderDetail> {
     return apiRequest<OrderDetail>(
-      `/admin/orders/${encodeURIComponent(id)}/status`,
+      `/shop/orders/${encodeURIComponent(String(id))}/status`,
       { method: "PATCH", body }
     )
   },
@@ -45,5 +51,6 @@ export const orderQueryKeys = {
   list: (params: OrderListParams) =>
     [...orderQueryKeys.lists(), params] as const,
   stats: () => [...orderQueryKeys.all, "stats"] as const,
-  detail: (id: number | string) => [...orderQueryKeys.all, "detail", id] as const,
+  detail: (id: number | string) =>
+    [...orderQueryKeys.all, "detail", id] as const,
 }

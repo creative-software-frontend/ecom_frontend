@@ -45,7 +45,7 @@ export function registerOnUnauthorized(callback: () => void): () => void {
 }
 
 function isAuthEndpoint(path: string): boolean {
-  return /^\/admin\/auth\/(?:login|logout|me)$/.test(path)
+  return /^\/auth\/(?:login|logout|me)$/.test(path)
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

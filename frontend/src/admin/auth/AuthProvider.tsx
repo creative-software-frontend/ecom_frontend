@@ -9,9 +9,26 @@ import {
 } from "react"
 import { apiRequest, ApiError, registerOnUnauthorized } from "../api/client"
 
+/* ================================================================
+   Auth user shape — matches backend /api/auth/login response.
+   id is now number (UUID→Int migration). role/permissions/shop
+   come from backend so the UI can gate features without extra calls.
+   ================================================================ */
+
 export type AdminUser = {
   id: number
   email: string
+  name: string
+  role: string
+  roleDisplayName: string
+  permissions: Record<string, string[]>
+  shopId: number | null
+  shop: {
+    id: number
+    name: string
+    slug: string
+    status: string
+  } | null
   createdAt?: string
   updatedAt?: string
 }
@@ -40,9 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (active) setState({ status: "unauthenticated" })
     })
 
-    void apiRequest<AdminUser>("/admin/auth/me", {
-      signal: controller.signal,
-    })
+    void apiRequest<AdminUser>("/auth/me", { signal: controller.signal })
       .then((user) => {
         if (active) setState({ status: "authenticated", user })
       })
@@ -62,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {
-    const user = await apiRequest<AdminUser>("/admin/auth/login", {
+    const user = await apiRequest<AdminUser>("/auth/login", {
       method: "POST",
       body: { email, password },
     })
@@ -71,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     setState({ status: "unauthenticated" })
-    await apiRequest<void>("/admin/auth/logout", { method: "POST" })
+    await apiRequest<void>("/auth/logout", { method: "POST" })
   }, [])
 
   const updateUser = useCallback((user: AdminUser) => {

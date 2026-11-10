@@ -3,7 +3,7 @@ import type { AdminUser } from "../auth/AuthProvider"
 
 export const profileApi = {
   updateProfile(data: { email: string }): Promise<AdminUser> {
-    return apiRequest<AdminUser>("/admin/auth/profile", {
+    return apiRequest<AdminUser>("/auth/profile", {
       method: "PUT",
       body: data,
     })

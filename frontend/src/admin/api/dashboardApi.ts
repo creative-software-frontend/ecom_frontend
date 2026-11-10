@@ -3,6 +3,6 @@ import type { DashboardData } from "../types/dashboard"
 
 export const dashboardApi = {
   get(signal?: AbortSignal): Promise<DashboardData> {
-    return apiRequest<DashboardData>("/admin/dashboard", { signal })
+    return apiRequest<DashboardData>("/shop/dashboard", { signal })
   },
 }

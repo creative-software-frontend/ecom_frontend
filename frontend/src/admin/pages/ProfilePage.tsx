@@ -327,7 +327,7 @@ export function ProfilePage() {
                   <input
                     id="admin-id"
                     type="text"
-                    value={user.id}
+                    value={String(user.id)}
                     readOnly
                     className="admin-form-control--readonly admin-form-control font-mono text-xs"
                   />
