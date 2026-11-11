@@ -7,6 +7,8 @@ import type {
   SuperAdminShop,
   CreateUserInput,
   UpdateUserInput,
+  UpdateRoleInput,
+  CreateRoleInput,
 } from "../types/superAdmin"
 
 const BASE = "/admin/super"
@@ -57,6 +59,21 @@ export const superAdminApi = {
   roles: {
     list(signal?: AbortSignal): Promise<SuperAdminRole[]> {
       return apiRequest<SuperAdminRole[]>(`${BASE}/roles`, { signal })
+    },
+    create(data: CreateRoleInput): Promise<SuperAdminRole> {
+      return apiRequest<SuperAdminRole>(`${BASE}/roles`, {
+        method: "POST",
+        body: data,
+      })
+    },
+    update(id: number, data: UpdateRoleInput): Promise<SuperAdminRole> {
+      return apiRequest<SuperAdminRole>(`${BASE}/roles/${id}`, {
+        method: "PATCH",
+        body: data,
+      })
+    },
+    remove(id: number): Promise<void> {
+      return apiRequest<void>(`${BASE}/roles/${id}`, { method: "DELETE" })
     },
   },
   shops: {

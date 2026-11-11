@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import {
   Plus,
   Search,
@@ -17,6 +17,7 @@ import { SettingsLayout } from "../SettingsLayout"
 import { MetricCard } from "../MetricCard"
 import type { Coupon, CouponStatus } from "../../../types/coupon"
 import { CreateCouponModal } from "../modals/CreateCouponModal"
+import { PortalActionMenu } from "../../common/PortalActionMenu"
 
 /* ================================================================
    Mock data — replace with API later
@@ -217,16 +218,7 @@ function CouponsEmptyState({ onAdd }: { onAdd: () => void }) {
 
 export default function CouponsTab() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
-
-  // Close the row actions menu when clicking anywhere outside it
-  useEffect(() => {
-    if (!openMenuId) return
-    const handler = () => setOpenMenuId(null)
-    document.addEventListener("click", handler)
-    return () => document.removeEventListener("click", handler)
-  }, [openMenuId])
 
   // Client-side filter by code — swap to server-side search once API is ready
   const filteredCoupons = useMemo(() => {
@@ -247,9 +239,10 @@ export default function CouponsTab() {
 
   function handleMenuAction(
     coupon: Coupon,
-    action: "edit" | "toggle" | "delete"
+    action: "edit" | "toggle" | "delete",
+    closeMenu: () => void
   ) {
-    setOpenMenuId(null)
+    closeMenu()
     // TODO: wire these to real mutations once API is available
     console.log(`[${action}] coupon ${coupon.code}`)
   }
@@ -385,62 +378,56 @@ export default function CouponsTab() {
                       <td className="px-4 py-2.5">
                         <CouponStatusChip status={coupon.status} />
                       </td>
-                      <td className="relative px-4 py-2.5 text-right">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setOpenMenuId(
-                              openMenuId === coupon.id ? null : coupon.id
-                            )
-                          }}
-                          className="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--text-primary)"
-                          aria-label={`Actions for coupon ${coupon.code}`}
-                          aria-haspopup="menu"
-                          aria-expanded={openMenuId === coupon.id}
+                      <td className="px-4 py-2.5 text-right">
+                        <PortalActionMenu
+                          label={`Actions for coupon ${coupon.code}`}
+                          trigger={<MoreVertical className="size-4" />}
+                          triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--text-primary)"
+                          menuClassName="w-32"
                         >
-                          <MoreVertical className="size-4" />
-                        </button>
-                        {openMenuId === coupon.id && (
-                          <div
-                            role="menu"
-                            className="absolute top-full right-4 z-50 mt-1 w-32 rounded-md border border-(--border-light) bg-(--bg-surface) p-1 shadow-lg"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              type="button"
-                              role="menuitem"
-                              onClick={() => handleMenuAction(coupon, "edit")}
-                              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
-                            >
-                              <Pencil className="size-3.5" /> Edit
-                            </button>
-                            <button
-                              type="button"
-                              role="menuitem"
-                              onClick={() => handleMenuAction(coupon, "toggle")}
-                              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
-                            >
-                              {coupon.status === "active" ? (
-                                <>
-                                  <Pause className="size-3.5" /> Pause
-                                </>
-                              ) : (
-                                <>
-                                  <Play className="size-3.5" /> Activate
-                                </>
-                              )}
-                            </button>
-                            <button
-                              type="button"
-                              role="menuitem"
-                              onClick={() => handleMenuAction(coupon, "delete")}
-                              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
-                            >
-                              <Trash2 className="size-3.5" /> Delete
-                            </button>
-                          </div>
-                        )}
+                          {(closeMenu) => (
+                            <>
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() =>
+                                  handleMenuAction(coupon, "edit", closeMenu)
+                                }
+                                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
+                              >
+                                <Pencil className="size-3.5" /> Edit
+                              </button>
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() =>
+                                  handleMenuAction(coupon, "toggle", closeMenu)
+                                }
+                                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
+                              >
+                                {coupon.status === "active" ? (
+                                  <>
+                                    <Pause className="size-3.5" /> Pause
+                                  </>
+                                ) : (
+                                  <>
+                                    <Play className="size-3.5" /> Activate
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() =>
+                                  handleMenuAction(coupon, "delete", closeMenu)
+                                }
+                                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
+                              >
+                                <Trash2 className="size-3.5" /> Delete
+                              </button>
+                            </>
+                          )}
+                        </PortalActionMenu>
                       </td>
                     </tr>
                   ))

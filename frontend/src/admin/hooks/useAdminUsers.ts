@@ -6,6 +6,7 @@ import type { CreateUserInput, UpdateUserInput } from "../types/superAdmin"
 export const ADMIN_USERS_QUERY_KEY = ["admin", "super", "users"] as const
 export const ADMIN_ROLES_QUERY_KEY = ["admin", "super", "roles"] as const
 export const ADMIN_SHOPS_QUERY_KEY = ["admin", "super", "shops"] as const
+import type { CreateRoleInput, UpdateRoleInput } from "../types/superAdmin"
 
 export function useAdminUsersList(params: UserListParams) {
   return useQuery({
@@ -61,6 +62,37 @@ export function useResetAdminUserPasswordMutation() {
       superAdminApi.users.resetPassword(id, password),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ADMIN_USERS_QUERY_KEY })
+    },
+  })
+}
+
+export function useCreateRoleMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: CreateRoleInput) => superAdminApi.roles.create(data),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ADMIN_ROLES_QUERY_KEY })
+    },
+  })
+}
+
+export function useUpdateRoleMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateRoleInput }) =>
+      superAdminApi.roles.update(id, data),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ADMIN_ROLES_QUERY_KEY })
+    },
+  })
+}
+
+export function useDeleteRoleMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => superAdminApi.roles.remove(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ADMIN_ROLES_QUERY_KEY })
     },
   })
 }

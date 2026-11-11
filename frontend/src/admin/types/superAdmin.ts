@@ -74,3 +74,17 @@ export type UpdateUserInput = {
   shopId?: number | null
   status?: "active" | "inactive"
 }
+
+export type CreateRoleInput = {
+  name: string
+  displayName: string
+  scope: "platform" | "shop"
+  permissions: Record<string, string[]>
+  description?: string
+}
+
+export type UpdateRoleInput = {
+  displayName?: string
+  permissions?: Record<string, string[]>
+  description?: string
+}
