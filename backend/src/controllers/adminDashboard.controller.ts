@@ -3,15 +3,15 @@ import { prisma } from "../lib/prisma.js";
 
 const LOW_STOCK_THRESHOLD = 5;
 
-// function formatRelativeTime(date: Date, now: Date): string {
-//   const ms = now.getTime() - date.getTime();
-//   const mins = Math.floor(ms / 60000);
-//   if (mins < 1) return "just now";
-//   if (mins < 60) return `${mins}m ago`;
-//   const hours = Math.floor(mins / 60);
-//   if (hours < 24) return `${hours}h ${mins % 60}m ago`;
-//   return `${Math.floor(hours / 24)}d ago`;
-// }
+function formatRelativeTime(date: Date, now: Date): string {
+  const ms = now.getTime() - date.getTime();
+  const mins = Math.floor(ms / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ${mins % 60}m ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
 
 function formatDateRange(start: Date, end: Date): string {
   const fmt = new Intl.DateTimeFormat("en-GB", {
@@ -122,7 +122,7 @@ export async function getDashboard(_req: Request, res: Response) {
     // সবচেয়ে পুরনো pending
     let oldestTime = "No pending orders";
     if (oldestPending) {
-      oldestTime = relativeTime(oldestPending.createdAt);
+      oldestTime = formatRelativeTime(oldestPending.createdAt, new Date());
     }
 
     // সাপ্তাহিক চার্ট
