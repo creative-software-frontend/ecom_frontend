@@ -1,44 +1,25 @@
-export type MenuItem = {
-  label: string
-  type: "section" | "link" | "disabled"
-  href?: string
-  badge?: number | string
-  items?: MenuItem[]
-}
+export type MenuItem =
+  | { type: "section"; label: string }
+  | {
+      type: "link"
+      label: string
+      href: string
+      badge?: string | number
+      disabled?: boolean
+    }
+  | {
+      type: "group"
+      label: string
+      items: MenuItem[]
+      disabled?: boolean
+    }
 
-export const adminMenu: MenuItem[] = [
-  {
-    label: "FULFILLMENT",
-    type: "section",
-  },
-  {
-    label: "Dashboard",
-    type: "link",
-    href: "/admin",
-  },
-  {
-    label: "Orders",
-    type: "link",
-    href: "/admin/orders",
-    badge: 12,
-  },
-  {
-    label: "Products",
-    type: "link",
-    href: "/admin/products",
-  },
-  {
-    label: "Reviews",
-    type: "link",
-    href: "/admin/reviews",
-  },
-  {
-    label: "CONFIGURATION",
-    type: "section",
-  },
-  {
-    label: "Settings",
-    type: "link",
-    href: "/admin/settings",
-  },
+/** Shop-admin sidebar menu. Super admin uses `superAdminMenu` instead. */
+export const shopMenu: MenuItem[] = [
+  { type: "section", label: "Fulfillment" },
+  { type: "link", label: "Dashboard", href: "/shop/dashboard" },
+  { type: "link", label: "Orders", href: "/shop/orders" },
+  { type: "link", label: "Products", href: "/shop/products" },
+  { type: "section", label: "Configuration" },
+  { type: "link", label: "Settings", href: "/shop/settings" },
 ]

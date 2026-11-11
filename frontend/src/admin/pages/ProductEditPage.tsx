@@ -97,7 +97,7 @@ export function ProductEditPage() {
       <NotFoundState
         title="Product not found"
         description="The product may have been removed or the link is incorrect."
-        backTo="/admin/products"
+        backTo="/shop/products"
         backLabel="Back to products"
         className="admin-dashboard-content min-w-0 p-4 md:p-7.5"
         titleElement="h1"
@@ -144,7 +144,7 @@ export function ProductEditPage() {
       images: values.images.map((image) => image.src),
       isActive: values.isActive,
     })
-    navigate("/admin/products", {
+    navigate("/shop/products", {
       state: { productStatus: `${values.name} was updated` },
     })
   }
@@ -155,7 +155,7 @@ export function ProductEditPage() {
       mode="edit"
       submitLabel="Save changes"
       onSubmit={submitProduct}
-      onCancel={() => navigate("/admin/products")}
+      onCancel={() => navigate("/shop/products")}
     />
   )
 }

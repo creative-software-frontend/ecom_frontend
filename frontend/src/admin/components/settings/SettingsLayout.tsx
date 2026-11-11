@@ -206,7 +206,7 @@ export function SettingsLayout({
               <button
                 key={id}
                 type="button"
-                onClick={() => navigate(`/admin/settings/${id}`)}
+                onClick={() => navigate(`/shop/settings/${id}`)}
                 aria-current={isActive ? "page" : undefined}
                 className={`relative flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive

@@ -187,13 +187,14 @@ export function ProfilePage() {
   }
 
   async function handleLogout() {
+    const isSuperAdmin = user.role === "super_admin"
     setIsLoggingOut(true)
     try {
       await logout()
     } catch (error: unknown) {
       console.error("Admin logout failed", error)
     } finally {
-      navigate("/admin/login", { replace: true })
+      navigate(isSuperAdmin ? "/admin/login" : "/login", { replace: true })
     }
   }
 

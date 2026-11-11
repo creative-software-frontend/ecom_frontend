@@ -45,9 +45,11 @@ export function LoginPage() {
     defaultValues: { email: "", password: "" },
     mode: "onSubmit",
   })
-
   if (state.status === "authenticated") {
-    return <Navigate to="/admin" replace />
+    if (state.user.role === "super_admin") {
+      return <Navigate to="/admin/dashboard" replace />
+    }
+    return <Navigate to="/shop/dashboard" replace />
   }
 
   if (state.status === "loading") {
@@ -69,10 +71,18 @@ export function LoginPage() {
     try {
       await login(values.email, values.password)
       const from = (location.state as LoginNavigationState | null)?.from
+      // Only honor `from` if it points into /shop/*. A stale /admin/*
+      // path from a previous session would redirect into the super admin
+      // area — and then bounce to /shop/dashboard on a second redirect.
+      const safeFrom = from?.pathname?.startsWith("/shop/") ? from : null
       navigate(
-        from?.pathname
-          ? { pathname: from.pathname, search: from.search, hash: from.hash }
-          : "/admin",
+        safeFrom
+          ? {
+              pathname: safeFrom.pathname,
+              search: safeFrom.search,
+              hash: safeFrom.hash,
+            }
+          : "/shop/dashboard",
         { replace: true }
       )
     } catch (error: unknown) {
@@ -283,7 +293,7 @@ export function LoginPage() {
                     type="button"
                     onClick={() => setPasswordVisible(!passwordVisible)}
                     disabled={isSubmitting || isRateLimited}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-(--text-muted) hover:text-(--text-primary) disabled:opacity-50"
+                    className="absolute inset-y-0 right-0 mr-3 flex items-center text-(--text-muted) hover:text-(--text-primary) disabled:opacity-50"
                     aria-label={
                       passwordVisible ? "Hide password" : "Show password"
                     }

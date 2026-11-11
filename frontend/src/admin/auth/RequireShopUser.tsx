@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router"
 import { useAuth } from "./AuthProvider"
 
-export function RequireAdmin() {
+export function RequireShopUser() {
   const { state } = useAuth()
   const location = useLocation()
 
@@ -12,16 +12,21 @@ export function RequireAdmin() {
         role="status"
         aria-live="polite"
       >
-        Loading admin…
+        Loading…
       </div>
     )
   }
 
   if (state.status === "unauthenticated") {
-    return <Navigate to="/admin/login" replace state={{ from: location }} />
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  // Super admin (no shop) shouldn't access shop routes — send to admin home
+  if (state.user.shopId === null) {
+    return <Navigate to="/admin/dashboard" replace />
   }
 
   return <Outlet />
 }
 
-export default RequireAdmin
+export default RequireShopUser

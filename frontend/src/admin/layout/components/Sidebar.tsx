@@ -1,33 +1,11 @@
 import { NavLink } from "react-router"
-import { adminMenu, type MenuItem } from "../menu"
-import { useSidebarStats } from "../../hooks/useSidebarStats"
+import type { MenuItem } from "../menu"
 
-export function Sidebar() {
-  const { pendingOrders, totalProducts } = useSidebarStats()
-  // ব্যাজ ভ্যালু রিজলভ করার হেল্পার
-  // ১. href === "/admin/orders" হলে pendingOrders
-  // ২. href === "/admin/products" হলে totalProducts
-  // ৩. নাহলে item.badge (স্ট্যাটিক) থাকলে সেটা
-  const resolveBadge = (item: MenuItem): string | number | undefined => {
-    if (item.type !== "link") return undefined
-    if (item.href === "/admin/orders" && pendingOrders.count > 0) {
-      return pendingOrders.count
-    }
-    if (item.href === "/admin/products" && totalProducts > 0) {
-      return totalProducts
-    }
-    return item.badge
-  }
-
-  // ব্যাজের স্টাইল — Orders হলে alert (amber), বাকিরা neutral
-  const isAlertBadge = (item: MenuItem): boolean => {
-    return item.type === "link" && item.href === "/admin/orders"
-  }
-
+export function Sidebar({ menu }: { menu: MenuItem[] }) {
   return (
-    <nav className="h-dvh overflow-y-auto bg-(--bg-surface) px-2 py-2">
+    <nav className="h-full overflow-y-auto bg-(--bg-surface) px-2 py-2">
       <ul className="space-y-1">
-        {adminMenu.map((item: MenuItem, index: number) => {
+        {menu.map((item: MenuItem, index: number) => {
           if (item.type === "section") {
             return (
               <li key={`section-${index}`} className="px-3 pt-4 pb-2">
@@ -39,14 +17,21 @@ export function Sidebar() {
           }
 
           if (item.type === "link" && item.href) {
-            const badge = resolveBadge(item)
-            const isAlert = isAlertBadge(item)
-
+            if (item.disabled) {
+              return (
+                <li key={item.label}>
+                  <div className="cursor-not-allowed rounded-sm px-3 py-2 text-sm font-medium text-(--text-muted) opacity-50">
+                    {item.label}
+                  </div>
+                </li>
+              )
+            }
             return (
               <li key={item.label}>
                 <NavLink
                   to={item.href}
-                  end={item.href === "/admin"}
+                  // end={item.href === "/shop"}
+                  end={false}
                   className={({ isActive }) =>
                     `flex items-center justify-between rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
                       isActive
@@ -56,15 +41,9 @@ export function Sidebar() {
                   }
                 >
                   <span>{item.label}</span>
-                  {badge !== undefined && badge !== 0 && (
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
-                        isAlert
-                          ? "bg-(--status-pending-bg) text-(--status-pending-text)"
-                          : "bg-(--bg-table-header) text-(--text-muted)"
-                      }`}
-                    >
-                      {badge}
+                  {item.badge !== undefined && (
+                    <span className="rounded-full bg-(--status-pending-bg) px-2 py-0.5 text-xs font-semibold text-(--status-pending-text)">
+                      {item.badge}
                     </span>
                   )}
                 </NavLink>
@@ -78,4 +57,5 @@ export function Sidebar() {
     </nav>
   )
 }
+
 export default Sidebar

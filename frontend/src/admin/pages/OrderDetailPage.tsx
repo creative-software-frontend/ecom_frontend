@@ -43,9 +43,9 @@ function getBackHref(locationState: unknown): string {
     typeof (locationState as Record<string, unknown>).q === "string"
   ) {
     const qs = (locationState as Record<string, string>).q
-    return qs ? `/admin/orders?${qs}` : "/admin/orders"
+    return qs ? `/shop/orders?${qs}` : "/shop/orders"
   }
-  return "/admin/orders"
+  return "/shop/orders"
 }
 
 function getErrorMessage(err: unknown): string {
@@ -382,7 +382,7 @@ export default function OrderDetailPage() {
     return (
       <NotFoundState
         title="Order not found."
-        backTo="/admin/orders"
+        backTo="/shop/orders"
         backLabel="Back to orders"
         className="flex min-h-80 flex-col items-center justify-center gap-4 p-6 text-center"
         titleClassName="text-lg font-semibold text-(--text-primary)"
@@ -410,7 +410,7 @@ export default function OrderDetailPage() {
     return (
       <NotFoundState
         title="Order not found."
-        backTo="/admin/orders"
+        backTo="/shop/orders"
         backLabel="Back to orders"
         className="flex min-h-80 flex-col items-center justify-center gap-4 p-6 text-center"
         titleClassName="text-lg font-semibold text-(--text-primary)"

@@ -51,7 +51,7 @@ export default function DashboardPage() {
             {isFetching ? "Refreshing..." : "Refresh"}
           </button>
           <Link
-            to="/admin/orders"
+            to="/shop/orders"
             className="admin-template-button admin-template-button--primary admin-text-dense h-8 px-3"
           >
             <ClipboardList className="icon-size" />

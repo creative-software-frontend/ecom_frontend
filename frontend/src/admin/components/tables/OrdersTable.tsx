@@ -88,7 +88,7 @@ export function OrdersTable({
               >
                 <td className="px-4 py-3 whitespace-nowrap">
                   <Link
-                    to={`/admin/orders/${order.id}`}
+                    to={`/shop/orders/${order.id}`}
                     state={{ q: searchParamsString }}
                     className="font-semibold text-primary tabular-nums hover:underline"
                   >
@@ -150,7 +150,7 @@ export function OrdersTable({
                       <MessageCircle size={16} />
                     </a>
                     <Link
-                      to={`/admin/orders/${order.id}`}
+                      to={`/shop/orders/${order.id}`}
                       state={{ q: searchParamsString }}
                       className="rounded p-1.5 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--text-primary)"
                       title="View"

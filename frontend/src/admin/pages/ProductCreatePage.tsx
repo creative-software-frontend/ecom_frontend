@@ -18,7 +18,7 @@ export function ProductCreatePage() {
       images: values.images.map((image) => image.src),
       isActive: values.isActive,
     })
-    navigate("/admin/products", {
+    navigate("/shop/products", {
       state: { productStatus: `${values.name} was created` },
     })
   }
@@ -28,7 +28,7 @@ export function ProductCreatePage() {
       mode="create"
       submitLabel="Add product"
       onSubmit={submitProduct}
-      onCancel={() => navigate("/admin/products")}
+      onCancel={() => navigate("/shop/products")}
     />
   )
 }

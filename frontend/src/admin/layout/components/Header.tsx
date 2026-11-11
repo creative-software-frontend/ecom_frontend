@@ -1,84 +1,60 @@
 import { useState } from "react"
-import {
-  Bell,
-  ExternalLink,
-  Leaf,
-  Menu,
-  Search,
-  UserRound,
-  X,
-} from "lucide-react"
+import { Bell, Menu, X } from "lucide-react"
 import { useNavigate } from "react-router"
 import { useAuth } from "../../auth/AuthProvider"
 import { Sidebar } from "./Sidebar"
+import type { MenuItem } from "../menu"
 
 export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const [userOpen, setUserOpen] = useState(false)
   const { state, logout } = useAuth()
   const navigate = useNavigate()
 
+  const isSuperAdmin =
+    state.status === "authenticated" && state.user.role === "super_admin"
+  const profilePath = isSuperAdmin ? "/admin/profile" : "/shop/profile"
+
   async function handleLogout() {
     setUserOpen(false)
     try {
       await logout()
     } catch (error: unknown) {
-      console.error("Admin logout failed", error)
+      console.error("Logout failed", error)
     } finally {
-      navigate("/admin/login", { replace: true })
+      // Redirect to the correct login page based on role
+      navigate(isSuperAdmin ? "/admin/login" : "/login", { replace: true })
     }
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b border-(--border-light) bg-white px-3">
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm">
+      <div className="flex items-center gap-2">
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-(--text-muted) hover:bg-(--bg-surface-hover) lg:hidden"
+          className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
           onClick={onToggleSidebar}
           aria-label="Toggle sidebar"
         >
-          <Menu className="size-5" />
+          <Menu className="h-5 w-5" />
         </button>
-        <label className="relative hidden w-full max-w-md md:block">
-          <span className="sr-only">Search admin workspace</span>
-          <Search
-            className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-(--text-muted)"
-            aria-hidden="true"
-          />
-          <input
-            type="search"
-            placeholder="Search orders, customers, products..."
-            className="h-8 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-3 pl-9 text-[11px] text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-primary"
-          />
-        </label>
+        <input
+          type="search"
+          placeholder="Search..."
+          className="hidden rounded border border-gray-300 px-3 py-1.5 text-sm md:block"
+        />
       </div>
-
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        <span className="hidden items-center gap-1.5 rounded-full bg-brand-soft px-2 py-1 text-[9px] font-medium text-primary sm:inline-flex">
-          <span className="size-1.5 rounded-full bg-primary" />
-          Live Store (BD)
-        </span>
-        <a
-          href="/"
-          target="_blank"
-          rel="noreferrer"
-          className="hidden items-center gap-1 text-[10px] text-(--text-primary) hover:text-primary sm:inline-flex"
-        >
-          <ExternalLink className="size-3" aria-hidden="true" />
-          Storefront
-        </a>
+      <div className="flex items-center gap-3">
         <button
           type="button"
-          className="relative inline-flex items-center justify-center rounded-md p-1.5 text-(--text-muted) hover:bg-(--bg-surface-hover)"
+          className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100"
           aria-label="Notifications"
         >
-          <Bell className="size-4" />
-          <span className="absolute top-1 right-1 size-1.5 rounded-full bg-[#e07047]" />
+          <Bell className="h-5 w-5" />
         </button>
         <div className="relative">
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-md p-1.5 text-primary hover:bg-(--bg-surface-hover)"
+            className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-gray-100"
             onClick={() => setUserOpen((v) => !v)}
             onKeyDown={(e) => {
               if (e.key === "Escape") setUserOpen(false)
@@ -86,42 +62,33 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
             aria-expanded={userOpen}
             aria-haspopup="menu"
           >
-            <UserRound className="size-4" />
-            <span className="sr-only">
-              {state.status === "authenticated" ? state.user.email : "Admin"}
-            </span>
+            <div className="h-8 w-8 rounded-full bg-gray-200" />
+            <div className="hidden text-left sm:block">
+              <div className="text-sm font-medium">
+                {state.status === "authenticated" ? state.user.email : ""}
+              </div>
+            </div>
           </button>
           {userOpen ? (
             <div
-              className="absolute right-0 z-30 mt-2 w-48 rounded-md border border-(--border-light) bg-white py-1 shadow-lg"
+              className="absolute right-0 mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg"
               role="menu"
               onMouseLeave={() => setUserOpen(false)}
             >
               <button
                 type="button"
-                className="block w-full px-3 py-2 text-left text-xs hover:bg-(--bg-surface-hover)"
+                className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
                 role="menuitem"
                 onClick={() => {
                   setUserOpen(false)
-                  navigate("/admin/profile")
+                  navigate(profilePath)
                 }}
               >
                 Profile
               </button>
               <button
                 type="button"
-                className="block w-full px-3 py-2 text-left text-xs hover:bg-(--bg-surface-hover)"
-                role="menuitem"
-                onClick={() => {
-                  setUserOpen(false)
-                  navigate("/admin/settings")
-                }}
-              >
-                Settings
-              </button>
-              <button
-                type="button"
-                className="block w-full px-3 py-2 text-left text-xs hover:bg-(--bg-surface-hover)"
+                className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
                 role="menuitem"
                 onClick={() => void handleLogout()}
               >
@@ -138,31 +105,26 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
 export function MobileSidebar({
   open,
   onClose,
+  menu,
+  brandLabel,
 }: {
   open: boolean
   onClose: () => void
+  menu: MenuItem[]
+  brandLabel: string
 }) {
   if (!open) return null
   return (
     <div className="fixed inset-0 z-30 lg:hidden">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="admin-sidebar-shell absolute top-0 left-0 flex h-full w-64 flex-col">
-        <div className="admin-sidebar-brand flex h-14 shrink-0 items-center justify-between border-b border-(--border-light) px-4">
-          <div className="flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-white">
-              <Leaf className="size-4" aria-hidden="true" />
-            </span>
-            <span className="text-xs font-semibold text-(--text-primary)">
-              Power Zenox
-            </span>
-          </div>
+      <div className="admin-sidebar-shell absolute top-0 left-0 h-full">
+        <div className="admin-sidebar-brand flex h-14 items-center justify-between px-4">
+          <div className="text-lg font-semibold">{brandLabel}</div>
           <button type="button" onClick={onClose} aria-label="Close sidebar">
-            <X className="size-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="min-h-0 flex-1">
-          <Sidebar />
-        </div>
+        <Sidebar menu={menu} />
       </div>
     </div>
   )

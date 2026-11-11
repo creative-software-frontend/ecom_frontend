@@ -232,7 +232,7 @@ export default function ProductsPage() {
             Export Catalog
           </Button>
           <Link
-            to="/admin/products/new"
+            to="/shop/products/new"
             className={cn(
               buttonVariants({ variant: "default" }),
               "h-8 gap-2 rounded-md px-3 text-xs"

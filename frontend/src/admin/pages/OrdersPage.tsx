@@ -221,7 +221,7 @@ export default function OrdersPage() {
         sortable: true,
         cell: (row) => (
           <Link
-            to={`/admin/orders/${row.id}`}
+            to={`/shop/orders/${row.id}`}
             className="font-medium text-primary hover:underline"
           >
             {row.orderNumber}
@@ -353,7 +353,7 @@ export default function OrdersPage() {
             <Download className="icon-size" /> Export CSV
           </button>
           <Link
-            to="/admin/orders/new"
+            to="/shop/orders/new"
             className="admin-template-button admin-template-button--primary h-8 px-3 text-xs"
           >
             <Plus className="icon-size" /> Create Order
