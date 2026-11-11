@@ -34,6 +34,7 @@ import { InlineNotice } from "../components/common/InlineNotice"
 import { LoadingState } from "../components/common/LoadingState"
 import { NotFoundState } from "../components/common/NotFoundState"
 import { StatusBadge } from "../components/common/StatusBadge"
+import React from "react"
 
 function getBackHref(locationState: unknown): string {
   if (
@@ -223,28 +224,28 @@ function OrderStatusStepper({ current }: { current: OrderStatus }) {
   const currentIndex = STEPPER_STEPS.findIndex((s) => s.key === current)
 
   return (
-    <div className="flex flex-wrap items-center gap-1">
+    <div className="flex w-full items-end justify-between">
       {STEPPER_STEPS.map((step, index) => {
         const isComplete = index < currentIndex
         const isCurrent = index === currentIndex
         const isUpcoming = index > currentIndex
 
         return (
-          <div
-            key={step.key}
-            className="relative flex flex-1 flex-col items-center last:flex-none"
-          >
-            <div className="mb-3 flex h-4 items-center justify-center">
-              <span
-                className={`text-xs font-medium whitespace-nowrap ${
-                  isCurrent ? "text-(--text-primary)" : "text-(--text-muted)"
-                } ${isUpcoming ? "opacity-50" : ""}`}
-              >
-                {step.label}
-              </span>
-            </div>
+          <React.Fragment key={step.key}>
+            {/* প্রতিটি স্টেপ: লেবেল উপরে এবং সার্কেল তার ঠিক নিচে */}
+            <div className="flex flex-col items-center">
+              {/* লেবেল */}
+              <div className="mb-2 flex h-5 items-center justify-center">
+                <span
+                  className={`text-center text-xs font-medium whitespace-nowrap ${
+                    isCurrent ? "text-(--text-primary)" : "text-(--text-muted)"
+                  } ${isUpcoming ? "opacity-50" : ""}`}
+                >
+                  {step.label}
+                </span>
+              </div>
 
-            <div className="flex w-full items-center justify-center">
+              {/* সার্কেল */}
               <div
                 className={`z-10 flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                   isComplete
@@ -256,18 +257,19 @@ function OrderStatusStepper({ current }: { current: OrderStatus }) {
               >
                 {isComplete ? <Check className="size-3" /> : index + 1}
               </div>
-
-              {index < STEPPER_STEPS.length - 1 && (
-                <div
-                  className={`-mx-3 h-0.5 w-full min-w-6 sm:min-w-10 ${
-                    index < currentIndex
-                      ? "bg-emerald-500"
-                      : "bg-(--border-light)"
-                  }`}
-                />
-              )}
             </div>
-          </div>
+
+            {/* কানেক্টিং লাইন (শেষ স্টেপ বাদে) */}
+            {index < STEPPER_STEPS.length - 1 && (
+              <div
+                className={`-mx-3.5 mb-2.5 h-0.5 flex-1 sm:-mx-6.5 ${
+                  index < currentIndex
+                    ? "bg-emerald-500"
+                    : "bg-(--border-light)"
+                }`}
+              />
+            )}
+          </React.Fragment>
         )
       })}
     </div>
@@ -648,6 +650,7 @@ export default function OrderDetailPage() {
 
           <Card title="Order items">
             <DataTable
+              className="admin-data-table"
               ariaLabel="Order items"
               columns={orderItemColumns}
               data={order.items}

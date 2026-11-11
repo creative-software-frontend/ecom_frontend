@@ -20,12 +20,16 @@ import {
 import { listAuditLogs } from "../controllers/adminAudit.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { requireSuperAdmin } from "../middleware/requireSuperAdmin.js";
+import { getSuperAdminDashboard } from "../controllers/adminSuperDashboard.controller.js";
 
 const router = Router();
 
 // Everything under /api/admin/super requires both auth AND super_admin role.
 router.use(requireAuth);
 router.use(requireSuperAdmin);
+
+// Dashboard
+router.get("/dashboard", getSuperAdminDashboard);
 
 // Users
 router.get("/users", listUsers);

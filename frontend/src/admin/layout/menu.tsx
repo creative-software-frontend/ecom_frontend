@@ -18,8 +18,8 @@ export type MenuItem =
 export const shopMenu: MenuItem[] = [
   { type: "section", label: "Fulfillment" },
   { type: "link", label: "Dashboard", href: "/shop/dashboard" },
-  { type: "link", label: "Orders", href: "/shop/orders" },
-  { type: "link", label: "Products", href: "/shop/products" },
+  { type: "link", label: "Orders", href: "/shop/orders", badge: 0 },
+  { type: "link", label: "Products", href: "/shop/products", badge: 0 },
   { type: "section", label: "Configuration" },
   { type: "link", label: "Settings", href: "/shop/settings" },
 ]

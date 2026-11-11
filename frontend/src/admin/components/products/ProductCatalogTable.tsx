@@ -5,7 +5,7 @@ import { StatusBadge } from "../common/StatusBadge"
 import { formatTaka } from "../../lib/orderStatus"
 import type { Product } from "../../types/product"
 import { getProductStockStatus } from "./productCatalog"
-import { tableCustomStyles } from "@/admin/lib/dataTableStyles"
+import { adminDataTableStyles } from "@/admin/lib/dataTableStyles"
 
 type ProductCatalogTableProps = {
   products: Product[]
@@ -156,11 +156,12 @@ export function ProductCatalogTable({
   return (
     <>
       <DataTable
+        className="admin-data-table"
         ariaLabel="Product catalog"
         keyField="id"
         columns={productColumns}
         data={products}
-        customStyles={tableCustomStyles}
+        customStyles={adminDataTableStyles}
         selectableRows
         selectableRowsHighlight
         responsive

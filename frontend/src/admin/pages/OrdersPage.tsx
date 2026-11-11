@@ -27,7 +27,7 @@ import {
   Printer,
   Search,
 } from "lucide-react"
-import { tableCustomStyles } from "../lib/dataTableStyles"
+import { adminDataTableStyles } from "../lib/dataTableStyles"
 
 const PAGE_LIMIT = 10
 const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
@@ -586,10 +586,11 @@ export default function OrdersPage() {
           />
         ) : (
           <DataTable
+            className="admin-data-table"
             keyField="id"
             columns={columns}
             data={data?.items ?? []}
-            customStyles={tableCustomStyles}
+            customStyles={adminDataTableStyles}
             selectableRows
             selectableRowsHighlight
             clearSelectedRows={clearSelectedRows}

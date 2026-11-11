@@ -1,4 +1,12 @@
-export const tableCustomStyles = {
+import type { TableStyles } from "react-data-table-component"
+
+/* ================================================================
+   Shared react-data-table-component styling — every value uses a
+   CSS variable so theme changes in admin.css propagate here.
+   Reused across Users / Roles / Shops / Audit tables.
+   ================================================================ */
+
+export const adminDataTableStyles: TableStyles = {
   table: {
     style: {
       backgroundColor: "var(--bg-surface)",
@@ -15,22 +23,19 @@ export const tableCustomStyles = {
   headCells: {
     style: {
       color: "var(--text-muted)",
-      fontSize: "10px",
-      fontWeight: "600",
+      fontSize: "11px",
+      fontWeight: 600,
       textTransform: "uppercase" as const,
+      letterSpacing: "0.05em",
       paddingLeft: "12px",
       paddingRight: "12px",
     },
   },
   rows: {
     style: {
-      minHeight: "68px",
+      minHeight: "52px",
       backgroundColor: "var(--bg-surface)",
       borderBottom: "1px solid var(--border-light)",
-      "&:hover": {
-        backgroundColor: "var(--bg-surface-hover)",
-        transition: "background-color 0.15s ease",
-      },
     },
   },
   cells: {
@@ -38,25 +43,30 @@ export const tableCustomStyles = {
       paddingLeft: "12px",
       paddingRight: "12px",
       color: "var(--text-primary)",
-      fontSize: "12px",
+      fontSize: "13px",
     },
   },
   pagination: {
     style: {
-      minHeight: "44px",
+      minHeight: "48px",
       borderTop: "1px solid var(--border-light)",
       backgroundColor: "var(--bg-surface)",
       color: "var(--text-muted)",
-      fontSize: "10px",
+      fontSize: "12px",
     },
     pageButtonsStyle: {
       fill: "var(--text-muted)",
-      "&:disabled": {
-        fill: "var(--border-hover)",
-      },
-      "&:hover:not(:disabled)": {
-        backgroundColor: "var(--bg-surface-hover)",
-      },
+    },
+  },
+  progress: {
+    style: {
+      backgroundColor: "var(--bg-surface)",
+    },
+  },
+  noData: {
+    style: {
+      backgroundColor: "var(--bg-surface)",
+      color: "var(--text-muted)",
     },
   },
 }

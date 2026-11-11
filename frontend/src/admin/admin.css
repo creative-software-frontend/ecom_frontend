@@ -272,3 +272,21 @@ button {
   content: "Start writing your page content…";
   color: var(--text-muted);
 }
+
+.admin-data-table .rdt_TableRow:hover {
+  background-color: var(--bg-surface-hover);
+  transition: background-color 0.15s ease;
+}
+
+.user-actions-menu {
+  position: fixed;
+  z-index: 1000;
+}
+
+.admin-data-table .rdt_Pagination button:disabled {
+  fill: var(--border-hover);
+}
+
+.admin-data-table .rdt_Pagination button:not(:disabled):hover {
+  background-color: var(--bg-surface-hover);
+}
