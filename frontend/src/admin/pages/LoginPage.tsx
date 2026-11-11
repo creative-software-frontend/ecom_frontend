@@ -3,16 +3,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Navigate, useLocation, useNavigate, type Location } from "react-router"
 import { z } from "zod"
-import {
-  Eye,
-  EyeOff,
-  Layers,
-  Loader2,
-  AlertCircle,
-  AlertTriangle,
-} from "lucide-react"
+import { Layers, Loader2, AlertCircle, AlertTriangle } from "lucide-react"
 import { ApiError } from "../api/client"
 import { useAuth } from "../auth/AuthProvider"
+import { PasswordShowHide } from "../components/PasswordShowHide"
 
 const loginSchema = z.object({
   email: z.string().trim().email({ message: "Enter a valid email address." }),
@@ -30,7 +24,7 @@ export function LoginPage() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const [passwordVisible, setPasswordVisible] = useState(false)
+  const [passwordVisible, setPasswordVisible] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [isRateLimited, setIsRateLimited] = useState(false)
 
@@ -289,7 +283,11 @@ export function LoginPage() {
                     disabled={isSubmitting || isRateLimited}
                     className={`block w-full rounded-md border bg-(--bg-surface) px-3 py-2 pr-10 text-sm text-(--text-primary) shadow-sm transition-all outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70 ${inputErrorClass}`}
                   />
-                  <button
+                  <PasswordShowHide
+                    setPasswordVisible={setPasswordVisible}
+                    passwordVisible={passwordVisible}
+                  />
+                  {/* <button
                     type="button"
                     onClick={() => setPasswordVisible(!passwordVisible)}
                     disabled={isSubmitting || isRateLimited}
@@ -303,7 +301,7 @@ export function LoginPage() {
                     ) : (
                       <Eye className="size-4" />
                     )}
-                  </button>
+                  </button> */}
                 </div>
                 {errors.password?.message && (
                   <p className="mt-1.5 text-xs text-red-600" role="alert">
