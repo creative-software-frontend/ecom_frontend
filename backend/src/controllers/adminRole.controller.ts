@@ -93,8 +93,11 @@ export async function createRole(req: Request, res: Response) {
     ) {
       return res.status(409).json({
         success: false,
-        message: "Role name already in use",
-        errors: { name: "This role name is taken" },
+        message: "A role with a similar display name already exists",
+        errors: {
+          displayName:
+            "This display name produces an internal name that is already in use",
+        },
       });
     }
     console.error("createRole failed:", error);
