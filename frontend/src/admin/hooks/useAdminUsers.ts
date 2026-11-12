@@ -3,9 +3,6 @@ import { superAdminApi } from "../api/superAdminApi"
 import type { UserListParams } from "../types/superAdmin"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { CreateUserInput, UpdateUserInput } from "../types/superAdmin"
-export const ADMIN_USERS_QUERY_KEY = ["admin", "super", "users"] as const
-export const ADMIN_ROLES_QUERY_KEY = ["admin", "super", "roles"] as const
-export const ADMIN_SHOPS_QUERY_KEY = ["admin", "super", "shops"] as const
 import type { CreateRoleInput, UpdateRoleInput } from "../types/superAdmin"
 
 export function useAdminUsersList(params: UserListParams) {
@@ -96,3 +93,19 @@ export function useDeleteRoleMutation() {
     },
   })
 }
+
+export function useSuperAdminDashboardQuery() {
+  return useQuery({
+    queryKey: ADMIN_DASHBOARD_QUERY_KEY,
+    queryFn: ({ signal }) => superAdminApi.dashboard.get(signal),
+    staleTime: 30 * 1000,
+  })
+}
+export const ADMIN_USERS_QUERY_KEY = ["admin", "super", "users"] as const
+export const ADMIN_ROLES_QUERY_KEY = ["admin", "super", "roles"] as const
+export const ADMIN_SHOPS_QUERY_KEY = ["admin", "super", "shops"] as const
+export const ADMIN_DASHBOARD_QUERY_KEY = [
+  "admin",
+  "super",
+  "dashboard",
+] as const

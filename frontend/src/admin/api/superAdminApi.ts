@@ -9,6 +9,7 @@ import type {
   UpdateUserInput,
   UpdateRoleInput,
   CreateRoleInput,
+  SuperAdminDashboardData,
 } from "../types/superAdmin"
 
 const BASE = "/admin/super"
@@ -79,6 +80,14 @@ export const superAdminApi = {
   shops: {
     list(signal?: AbortSignal): Promise<SuperAdminShop[]> {
       return apiRequest<SuperAdminShop[]>(`${BASE}/shops`, { signal })
+    },
+  },
+
+  dashboard: {
+    get(signal?: AbortSignal): Promise<SuperAdminDashboardData> {
+      return apiRequest<SuperAdminDashboardData>(`${BASE}/dashboard`, {
+        signal,
+      })
     },
   },
 }

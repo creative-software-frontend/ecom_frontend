@@ -10,7 +10,15 @@ import { ApiError } from "../../api/client"
 import type { SuperAdminRole } from "../../types/superAdmin"
 
 const editSchema = z.object({
-  displayName: z.string().trim().min(1, "Display name is required").max(80),
+  displayName: z
+    .string()
+    .trim()
+    .min(1, "Display name is required")
+    .max(80)
+    .regex(
+      /^[\x20-\x7E]+$/,
+      "Use English letters and standard ASCII characters only"
+    ),
   description: z.string().trim().max(500),
   permissions: z.record(z.string(), z.array(z.string())),
 })
@@ -207,6 +215,7 @@ export function EditRoleDrawer({
                 <PermissionMatrix
                   value={field.value}
                   onChange={field.onChange}
+                  scope={role.scope}
                   disabled={isSuperAdminRole}
                 />
               )}

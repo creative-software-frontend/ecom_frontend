@@ -1,14 +1,15 @@
 import { Link } from "react-router"
-import { Calendar, ClipboardList, RefreshCw } from "lucide-react"
-import { useDashboardQuery } from "../hooks/useDashboardQuery"
-import { MetricsCards } from "../components/dashboard/MetricsCards"
-import { PendingVerificationCard } from "../components/dashboard/PendingVerificationCard"
-import { WeeklyChartCard } from "../components/dashboard/WeeklyChartCard"
-import { CourierCard } from "../components/dashboard/CourierCard"
-import { ErrorState } from "../components/common/ErrorState"
+import { Calendar, RefreshCw, Store } from "lucide-react"
+import { SuperAdminMetricsCards } from "../../components/super-admin/SuperAdminMetricsCards"
+import { RecentAuditsTable } from "../../components/super-admin/RecentAuditsTable"
+import { UsersByRoleCard } from "../../components/super-admin/UsersByRoleCard"
+import { ShopsByStatusCard } from "../../components/super-admin/ShopsByStatusCard"
+import { useSuperAdminDashboardQuery } from "../../hooks/useAdminUsers"
+import { ErrorState } from "../../components/common/ErrorState"
 
-export default function DashboardPage() {
-  const { data, isLoading, isFetching, error, refetch } = useDashboardQuery()
+export default function SuperAdminDashboardPage() {
+  const { data, isLoading, isFetching, error, refetch } =
+    useSuperAdminDashboardQuery()
 
   const today = new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
@@ -18,20 +19,19 @@ export default function DashboardPage() {
 
   return (
     <div className="min-w-0 space-y-6 bg-(--bg-app) p-4 sm:p-6">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold text-(--text-primary)">
-              Dashboard
+            <h1 className="text-xl font-bold text-(--text-primary)">
+              Platform Dashboard
             </h1>
             <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs text-emerald-800">
               <span className="size-1.5 animate-pulse rounded-full bg-emerald-600" />
-              Live operations
+              Live
             </span>
           </div>
-          <p className="mt-0.5 text-xs text-(--text-muted)">
-            Real-time orders, verification queue, and fulfillment overview
+          <p className="mt-0.5 text-sm text-(--text-muted)">
+            Platform-wide overview of shops, users, and recent activity
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -51,23 +51,21 @@ export default function DashboardPage() {
             {isFetching ? "Refreshing..." : "Refresh"}
           </button>
           <Link
-            to="/admin/orders"
-            className="admin-template-button admin-template-button--primary admin-text-dense h-8 px-3"
+            to="/admin/shops"
+            className="admin-template-button admin-template-button--primary h-8 px-3 text-xs"
           >
-            <ClipboardList className="icon-size" />
-            View Orders
+            <Store className="icon-size" />
+            Manage Shops
           </Link>
         </div>
       </div>
 
-      {/* Loading */}
       {isLoading && (
         <div className="flex min-h-100 items-center justify-center text-sm text-(--text-muted)">
           Loading dashboard…
         </div>
       )}
 
-      {/* Error */}
       {!isLoading && error && (
         <ErrorState
           message={
@@ -80,21 +78,19 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Content */}
       {!isLoading && !error && data && (
         <>
-          <MetricsCards metrics={data.metrics} />
-
+          <SuperAdminMetricsCards metrics={data.metrics} />
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="lg:col-span-8">
-              <PendingVerificationCard
-                orders={data.pendingVerificationOrders}
-                totalPending={data.metrics.waitingConfirmation.count}
-              />
+              <RecentAuditsTable audits={data.recentAudits} />
             </div>
             <div className="space-y-6 lg:col-span-4">
-              <WeeklyChartCard chart={data.weeklyChart} />
-              <CourierCard courier={data.courierSummary} />
+              <UsersByRoleCard usersByRole={data.usersByRole} />
+              <ShopsByStatusCard
+                shopsByStatus={data.shopsByStatus}
+                trialExpiringSoon={data.trialExpiringSoon}
+              />
             </div>
           </div>
         </>

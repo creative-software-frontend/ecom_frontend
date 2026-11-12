@@ -141,17 +141,21 @@ export function UsersTable({
         >
           {(closeMenu) => (
             <>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  closeMenu()
-                  onEdit(row)
-                }}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
-              >
-                <Pencil className="size-3.5" /> Edit
-              </button>
+              {/* edit button */}
+              {row.role !== "super_admin" && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    closeMenu()
+                    onEdit(row)
+                  }}
+                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
+                >
+                  <Pencil className="size-3.5" /> Edit
+                </button>
+              )}
+              {/* reset password button */}
               <button
                 type="button"
                 role="menuitem"
@@ -163,27 +167,30 @@ export function UsersTable({
               >
                 <KeyRound className="size-3.5" /> Reset password
               </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  closeMenu()
-                  onToggleStatus(row)
-                }}
-                className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover) ${
-                  row.status === "active" ? "text-red-600" : "text-(--primary)"
-                }`}
-              >
-                {row.status === "active" ? (
-                  <>
-                    <PowerOff className="size-3.5" /> Deactivate
-                  </>
-                ) : (
-                  <>
-                    <Power className="size-3.5" /> Activate
-                  </>
-                )}
-              </button>
+              {/* toggle status button */}
+              {row.role !== "super_admin" && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    closeMenu()
+                    onToggleStatus(row)
+                  }}
+                  className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover) ${
+                    row.status === "active" ? "text-red-600" : "text-primary"
+                  }`}
+                >
+                  {row.status === "active" ? (
+                    <>
+                      <PowerOff className="size-3.5" /> Deactivate
+                    </>
+                  ) : (
+                    <>
+                      <Power className="size-3.5" /> Activate
+                    </>
+                  )}
+                </button>
+              )}
             </>
           )}
         </PortalActionMenu>

@@ -31,14 +31,18 @@ type ActionKey = (typeof ACTIONS)[number]["key"]
 type PermissionMatrixProps = {
   value: Record<string, string[]>
   onChange: (next: Record<string, string[]>) => void
+  scope: "platform" | "shop"
   disabled?: boolean
 }
 
 export function PermissionMatrix({
   value,
   onChange,
+  scope,
   disabled = false,
 }: PermissionMatrixProps) {
+  const accent = scope === "platform" ? "platform" : "shop"
+
   function has(module: string, action: ActionKey): boolean {
     return (value[module] ?? []).includes(action)
   }
@@ -94,19 +98,21 @@ export function PermissionMatrix({
     <div className="rounded-md border border-(--border-light) bg-(--bg-app)">
       <div className="flex items-center justify-between gap-2 border-b border-(--border-light) px-3 py-2">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="size-4 text-primary" />
-          <span className="text-[12px] font-semibold text-(--text-primary)">
+          <ShieldCheck
+            className={`size-4 ${accent === "platform" ? "text-(--platform-primary)" : "text-primary"}`}
+          />
+          <span className="text-xs font-semibold text-(--text-primary)">
             Permissions
           </span>
         </div>
-        <span className="text-[11px] text-(--text-muted) tabular-nums">
+        <span className="text-xs text-(--text-muted) tabular-nums">
           {totalGrants} {totalGrants === 1 ? "grant" : "grants"} across{" "}
           {moduleCount} {moduleCount === 1 ? "module" : "modules"}
         </span>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-[12px]">
+        <table className="w-full border-collapse text-xs transition-all duration-200">
           <thead>
             <tr className="bg-(--bg-surface-hover)">
               <th className="border-b border-(--border-light) px-3 py-2 text-left font-semibold text-(--text-primary)">
@@ -150,8 +156,12 @@ export function PermissionMatrix({
                         onClick={() => toggleCell(m.key, a.key)}
                         className={`inline-flex size-5 items-center justify-center rounded border align-middle transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                           has(m.key, a.key)
-                            ? "border-primary bg-primary text-white"
-                            : "border-(--border-hover) bg-(--bg-surface) hover:border-primary"
+                            ? accent === "platform"
+                              ? "border-(--platform-primary) bg-(--platform-primary) text-white hover:bg-(--platform-primary-hover)"
+                              : "border-primary bg-primary text-white"
+                            : accent === "platform"
+                              ? "border-(--border-hover) bg-(--bg-surface) hover:border-(--platform-primary)"
+                              : "border-(--border-hover) bg-(--bg-surface) hover:border-primary"
                         }`}
                       >
                         {has(m.key, a.key) && <Check className="size-3" />}
@@ -166,10 +176,14 @@ export function PermissionMatrix({
                       aria-label={`${m.label} all actions`}
                       disabled={disabled}
                       onClick={() => toggleModuleAll(m.key, !allChecked)}
-                      className={`inline-flex h-5 items-center rounded border px-1.5 text-[10px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                      className={`min-w-11.50 inline-flex h-5 items-center rounded border px-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                         allChecked
-                          ? "border-primary bg-(--primary-soft) text-primary"
-                          : "border-(--border-hover) bg-(--bg-surface) text-(--text-muted) hover:border-primary hover:text-(--text-primary)"
+                          ? accent === "platform"
+                            ? "border-(--platform-primary) bg-(--platform-primary-soft) text-(--platform-primary)"
+                            : "border-primary bg-(--primary-soft) text-primary"
+                          : accent === "platform"
+                            ? "border-(--border-hover) bg-(--bg-surface) text-(--text-muted) hover:border-(--platform-primary) hover:text-(--platform-primary)"
+                            : "border-(--border-hover) bg-(--bg-surface) text-(--text-muted) hover:border-primary hover:text-(--text-primary)"
                       }`}
                     >
                       {allChecked ? "Clear" : "All"}
@@ -180,7 +194,7 @@ export function PermissionMatrix({
             })}
             {/* Column "all" row */}
             <tr className="bg-(--bg-surface-hover)">
-              <td className="px-3 py-1.5 text-[11px] font-semibold text-(--text-muted) uppercase">
+              <td className="px-3 py-1.5 text-xs font-semibold text-(--text-muted) uppercase">
                 All modules
               </td>
               {ACTIONS.map((a) => {
@@ -193,10 +207,14 @@ export function PermissionMatrix({
                       type="button"
                       disabled={disabled}
                       onClick={() => toggleActionAll(a.key, !allModulesChecked)}
-                      className={`text-[10px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                      className={`text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                         allModulesChecked
-                          ? "text-primary"
-                          : "text-(--text-muted) hover:text-(--text-primary)"
+                          ? accent === "platform"
+                            ? "text-(--platform-primary)"
+                            : "text-primary"
+                          : accent === "platform"
+                            ? "text-(--text-muted) hover:text-(--platform-primary)"
+                            : "text-(--text-muted) hover:text-(--text-primary)"
                       }`}
                     >
                       {allModulesChecked ? "Clear" : "All"}

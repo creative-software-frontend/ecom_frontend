@@ -18,9 +18,8 @@ const SuperAdminLoginPage = lazy(
 )
 const LoginPage = lazy(() => import("./admin/pages/LoginPage"))
 
-// Super admin pages (placeholders for A5)
 const SuperAdminDashboardPage = lazy(
-  () => import("./admin/pages/super-admin/PlaceholderPage")
+  () => import("./admin/pages/super-admin/DashboardPage")
 )
 const SuperAdminUsersPage = lazy(
   () => import("./admin/pages/super-admin/UsersPage")
@@ -89,10 +88,7 @@ export function App() {
           <Route path="/admin" element={<RequireSuperAdmin />}>
             <Route element={<AdminLayout />}>
               <Route index element={<Navigate to="dashboard" replace />} />
-              <Route
-                path="dashboard"
-                element={<SuperAdminDashboardPage title="Platform Dashboard" />}
-              />
+              <Route path="dashboard" element={<SuperAdminDashboardPage />} />
               <Route path="users" element={<SuperAdminUsersPage />} />
               <Route path="roles" element={<SuperAdminRolesPage />} />
               <Route

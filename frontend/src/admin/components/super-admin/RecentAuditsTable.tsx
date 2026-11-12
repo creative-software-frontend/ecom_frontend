@@ -1,0 +1,102 @@
+import { Link } from "react-router"
+import DataTable, { type TableColumn } from "react-data-table-component"
+import { adminDataTableStyles } from "../../lib/dataTableStyles"
+import type { SuperAdminDashboardData } from "../../types/superAdmin"
+
+type AuditRow = SuperAdminDashboardData["recentAudits"][number]
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  return `${days}d ago`
+}
+
+function humanizeAction(action: string): string {
+  return action
+    .split(".")
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" · ")
+}
+
+const columns: TableColumn<AuditRow>[] = [
+  {
+    name: "Action",
+    cell: (row) => (
+      <span className="text-[12px] font-medium text-(--text-primary)">
+        {humanizeAction(row.action)}
+      </span>
+    ),
+    minWidth: "160px",
+  },
+  {
+    name: "User",
+    cell: (row) => (
+      <div className="min-w-0">
+        <p className="truncate text-[12px] text-(--text-primary)">
+          {row.user.name}
+        </p>
+        <p className="truncate text-[11px] text-(--text-muted)">
+          {row.user.email}
+        </p>
+      </div>
+    ),
+    minWidth: "180px",
+    grow: 1,
+  },
+  {
+    name: "Shop",
+    cell: (row) =>
+      row.shop ? (
+        <span className="text-[12px] text-(--text-primary)">
+          {row.shop.name}
+        </span>
+      ) : (
+        <span className="text-[12px] text-(--text-muted) italic">Platform</span>
+      ),
+    width: "150px",
+  },
+  {
+    name: "When",
+    cell: (row) => (
+      <span className="text-[12px] text-(--text-muted) tabular-nums">
+        {relativeTime(row.createdAt)}
+      </span>
+    ),
+    width: "100px",
+    right: true,
+  },
+]
+
+export function RecentAuditsTable({ audits }: { audits: AuditRow[] }) {
+  return (
+    <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+      <header className="flex items-center justify-between border-b border-(--border-light) bg-(--bg-table-header) px-4 py-3">
+        <h2 className="text-sm font-semibold text-(--text-primary)">
+          Recent activity
+        </h2>
+        <Link
+          to="/admin/audit"
+          className="text-xs font-medium text-primary hover:underline"
+        >
+          View all →
+        </Link>
+      </header>
+      <DataTable
+        columns={columns}
+        data={audits}
+        customStyles={adminDataTableStyles}
+        pagination={false}
+        noDataComponent={
+          <p className="py-10 text-center text-sm text-(--text-muted)">
+            No recent activity.
+          </p>
+        }
+      />
+    </section>
+  )
+}

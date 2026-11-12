@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useForm, Controller } from "react-hook-form"
+import { useForm, Controller, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Shield, Store, X, Plus } from "lucide-react"
@@ -9,25 +9,48 @@ import { PermissionMatrix } from "./PermissionMatrix"
 import { useCreateRoleMutation } from "../../hooks/useAdminUsers"
 import { ApiError } from "../../api/client"
 
-const createRoleSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3, "Minimum 3 characters")
-    .max(50)
-    .regex(/^[a-z0-9_]+$/, "Lowercase letters, numbers and underscore only"),
-  displayName: z.string().trim().min(1, "Display name is required").max(80),
-  scope: z.enum(["platform", "shop"]),
-  description: z.string().trim().max(500),
-  permissions: z
-    .record(z.string(), z.array(z.string()))
-    .refine((p) => Object.keys(p).length > 0, "Grant at least one permission"),
-})
+function toRoleName(displayName: string) {
+  return displayName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+}
+
+const createRoleSchema = z
+  .object({
+    displayName: z
+      .string()
+      .trim()
+      .min(1, "Display name is required")
+      .max(80)
+      .regex(
+        /^[\x20-\x7E]+$/,
+        "Use English letters and standard ASCII characters only"
+      ),
+    scope: z.enum(["platform", "shop"]),
+    description: z.string().trim().max(500),
+    permissions: z
+      .record(z.string(), z.array(z.string()))
+      .refine(
+        (p) => Object.keys(p).length > 0,
+        "Grant at least one permission"
+      ),
+  })
+  .superRefine(({ displayName }, ctx) => {
+    const name = toRoleName(displayName)
+    if (name.length < 3 || name.length > 50) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["displayName"],
+        message:
+          "Display name must produce an internal name between 3 and 50 characters",
+      })
+    }
+  })
 
 type CreateRoleFormValues = z.infer<typeof createRoleSchema>
 
 const EMPTY: CreateRoleFormValues = {
-  name: "",
   displayName: "",
   scope: "shop",
   description: "",
@@ -57,7 +80,7 @@ export function CreateRoleModal({
     resolver: zodResolver(createRoleSchema),
     defaultValues: EMPTY,
   })
-
+  const scope = useWatch({ name: "scope", control })
   useEffect(() => {
     if (open) reset(EMPTY)
   }, [open, reset])
@@ -76,7 +99,6 @@ export function CreateRoleModal({
   async function onSubmit(values: CreateRoleFormValues) {
     try {
       await mutation.mutateAsync({
-        name: values.name,
         displayName: values.displayName,
         scope: values.scope,
         description: values.description || undefined,
@@ -86,24 +108,14 @@ export function CreateRoleModal({
       onClose()
     } catch (err) {
       if (err instanceof ApiError && err.fieldErrors) {
-        let mapped = false
-        for (const [field, msg] of Object.entries(err.fieldErrors)) {
-          if (field === "name") {
-            setError("name", { type: "server", message: msg })
-            mapped = true
-          } else if (field === "displayName") {
-            setError("displayName", { type: "server", message: msg })
-            mapped = true
-          }
-        }
-        if (!mapped) {
-          setError("name", {
-            type: "server",
-            message: err.message || "Failed to create role",
-          })
-        }
+        const message =
+          err.fieldErrors.displayName ??
+          err.fieldErrors.name ??
+          err.message ??
+          "Failed to create role"
+        setError("displayName", { type: "server", message })
       } else {
-        setError("name", {
+        setError("displayName", {
           type: "server",
           message:
             err instanceof ApiError ? err.message : "Failed to create role",
@@ -152,41 +164,26 @@ export function CreateRoleModal({
           className="flex min-h-0 flex-1 flex-col"
         >
           <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
-                  Internal name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. customer_support"
-                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 font-mono text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
-                  {...register("name")}
-                />
-                <p className="mt-1 text-[10px] text-(--text-muted)">
-                  Lowercase letters, numbers, underscore only. Cannot be changed
-                  after creation.
-                </p>
-                {errors.name && <FieldError>{errors.name.message}</FieldError>}
-              </div>
-              <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
-                  Display name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Customer Support"
-                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
-                  {...register("displayName")}
-                />
-                {errors.displayName && (
-                  <FieldError>{errors.displayName.message}</FieldError>
-                )}
-              </div>
-            </div>
-
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+                Display name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Customer Support"
+                className="text-xm block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+                {...register("displayName")}
+              />
+              <p className="mt-1 text-xs text-(--text-muted)">
+                Use English characters. The internal role name is generated
+                automatically and cannot be changed.
+              </p>
+              {errors.displayName && (
+                <FieldError>{errors.displayName.message}</FieldError>
+              )}
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Scope <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -212,27 +209,26 @@ export function CreateRoleModal({
                   />
                 )}
               />
-              <p className="mt-1 text-[10px] text-(--text-muted)">
-                Shop roles must be assigned to a shop. Platform roles operate
-                across all shops.
+              <p className="mt-1 text-xs text-(--text-muted)">
+                {scope === "platform"
+                  ? "Platform roles operate globally across all shops and system settings."
+                  : "Shop roles must be assigned to a shop. Platform roles operate across all shops."}
               </p>
             </div>
-
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Description
               </label>
               <textarea
                 rows={2}
                 placeholder="What can this role do?"
-                className="block w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+                className="text-xm block w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2 transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                 {...register("description")}
               />
               {errors.description && (
                 <FieldError>{errors.description.message}</FieldError>
               )}
             </div>
-
             <Controller
               control={control}
               name="permissions"
@@ -240,6 +236,7 @@ export function CreateRoleModal({
                 <PermissionMatrix
                   value={field.value}
                   onChange={field.onChange}
+                  scope={scope}
                 />
               )}
             />
@@ -255,14 +252,14 @@ export function CreateRoleModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+              className="text-xm inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-[13px] font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+              className="text-xm inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
             >
               <Plus className="size-3.5" />
               {isSubmitting ? "Creating..." : "Create role"}

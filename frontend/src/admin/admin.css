@@ -14,6 +14,11 @@
   --primary-active: #005049;
   --primary-soft: #f4fffc;
 
+  /* Platform role accent */
+  --platform-primary: #4f46e5;
+  --platform-primary-hover: #4338ca;
+  --platform-primary-soft: #eef2ff;
+
   /* Status Semantic Tints */
   --status-pending-bg: #fef3c7;
   --status-pending-text: #92400e;

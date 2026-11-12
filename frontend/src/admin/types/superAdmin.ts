@@ -76,7 +76,6 @@ export type UpdateUserInput = {
 }
 
 export type CreateRoleInput = {
-  name: string
   displayName: string
   scope: "platform" | "shop"
   permissions: Record<string, string[]>
@@ -87,4 +86,35 @@ export type UpdateRoleInput = {
   displayName?: string
   permissions?: Record<string, string[]>
   description?: string
+}
+
+export type SuperAdminDashboardData = {
+  metrics: {
+    totalShops: number
+    activeShops: number
+    totalUsers: number
+    activeUsers: number
+  }
+  shopsByStatus: { status: string; count: number }[]
+  usersByRole: {
+    roleId: number
+    roleName: string
+    roleDisplayName: string
+    count: number
+  }[]
+  recentAudits: {
+    id: string
+    action: string
+    entityType: string | null
+    entityId: string | null
+    createdAt: string
+    user: { id: number; name: string; email: string }
+    shop: { id: number; name: string; slug: string } | null
+  }[]
+  trialExpiringSoon: {
+    id: number
+    name: string
+    slug: string
+    trialEndsAt: string | null
+  }[]
 }
