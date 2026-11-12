@@ -11,7 +11,7 @@ import { forwardRef } from "react"
    ================================================================ */
 
 const fieldBase =
-  "block w-full rounded-md bg-[var(--bg-app)] px-3 text-[13px] text-[var(--text-primary)] " +
+  "block w-full rounded-md bg-[var(--bg-app)] px-3 text-sm text-[var(--text-primary)] " +
   "border border-transparent outline-none transition-all placeholder:text-[var(--text-muted)] " +
   "hover:border-[var(--border-hover)] " +
   "focus:border-[var(--primary)] focus:bg-[var(--bg-surface)] focus:ring-2 focus:ring-[var(--primary)]/20 " +
@@ -40,7 +40,7 @@ export function FieldLabel({
     <div className="mb-1.5 flex items-center justify-between">
       <label
         htmlFor={htmlFor}
-        className="text-[12px] font-semibold text-(--text-primary)"
+        className="text-xs font-semibold text-(--text-primary)"
       >
         {children}
         {required && <span className="ml-1 text-red-500">*</span>}
@@ -56,7 +56,7 @@ export function FieldLabel({
 
 export function FieldHelp({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-1 text-[11px] leading-relaxed text-(--text-muted)">
+    <p className="mt-1 text-xs leading-relaxed text-(--text-muted)">
       {children}
     </p>
   )
@@ -64,7 +64,7 @@ export function FieldHelp({ children }: { children: ReactNode }) {
 
 export function FieldError({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-red-600">
+    <p className="mt-1 flex items-center gap-1 text-xs font-medium text-red-600">
       <span className="inline-block size-1.5 rounded-full bg-red-500" />
       {children}
     </p>
@@ -160,7 +160,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
           required={required}
           rightSlot={
             showCounter && maxLength ? (
-              <span className="text-[11px] text-(--text-muted) tabular-nums">
+              <span className="text-xs text-(--text-muted) tabular-nums">
                 {length}/{maxLength}
               </span>
             ) : undefined
@@ -264,11 +264,11 @@ export function FormColorPicker({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <label className="text-[12px] font-semibold text-(--text-primary)">
+        <label className="text-xs font-semibold text-(--text-primary)">
           {label}
         </label>
         {hint && (
-          <span className="text-[11px] text-(--text-muted)">{hint}</span>
+          <span className="text-xs text-(--text-muted)">{hint}</span>
         )}
       </div>
       <div className="flex items-center gap-2">
@@ -293,14 +293,14 @@ export function FormColorPicker({
           value={value}
           onChange={(e) => onChange(e.target.value.toUpperCase())}
           maxLength={7}
-          className="h-9 flex-1 rounded-md border border-transparent bg-(--bg-app) px-3 font-mono text-[13px] text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+          className="h-9 flex-1 rounded-md border border-transparent bg-(--bg-app) px-3 font-mono text-sm text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
           aria-invalid={Boolean(error)}
         />
         {onReset && (
           <button
             type="button"
             onClick={onReset}
-            className="h-9 shrink-0 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[12px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+            className="h-9 shrink-0 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
           >
             Reset
           </button>
@@ -357,7 +357,7 @@ export const FormUnitField = forwardRef<HTMLInputElement, FormUnitFieldProps>(
             {label}
           </label>
           {(hint || badge) && (
-            <span className="shrink-0 text-[11px] text-(--text-muted)">
+            <span className="shrink-0 text-xs text-(--text-muted)">
               {badge ?? hint}
             </span>
           )}
@@ -435,7 +435,7 @@ export function FormSegmentedControl<T extends string>({
             aria-checked={isActive}
             disabled={disabled}
             onClick={() => onChange(opt.value)}
-            className={`flex h-8 items-center justify-center gap-1.5 rounded-md text-[13px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`flex h-8 items-center justify-center gap-1.5 rounded-md text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
               isActive
                 ? "bg-(--bg-surface) text-(--text-primary) shadow-sm"
                 : "text-(--text-muted) hover:text-(--text-primary)"

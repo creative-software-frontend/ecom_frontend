@@ -17,7 +17,7 @@ export function CourierCard({
             Courier — Ready for pickup
           </span>
         </div>
-        <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
+        <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
           Shipped
         </span>
       </div>

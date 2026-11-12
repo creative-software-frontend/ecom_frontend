@@ -16,12 +16,12 @@ export function StoreDensityCard() {
             <h3 className="text-sm font-semibold text-(--text-primary)">
               Store Density by Region
             </h3>
-            <p className="mt-0.5 text-[11px] text-(--text-muted)">
+            <p className="mt-0.5 text-xs text-(--text-muted)">
               Active supplement hubs distribution across administrative
               divisions
             </p>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
             <MapPin className="size-3" /> 8 Divisions
           </span>
         </div>
@@ -29,7 +29,7 @@ export function StoreDensityCard() {
         <div className="mt-6 space-y-4">
           {densityData.map((item) => (
             <div key={item.name}>
-              <div className="mb-1 flex items-center justify-between text-[12px]">
+              <div className="mb-1 flex items-center justify-between text-xs">
                 <span className="font-medium text-(--text-primary)">
                   {item.name}
                 </span>
@@ -48,7 +48,7 @@ export function StoreDensityCard() {
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-between border-t border-(--border-light) pt-3 text-[11px] text-(--text-muted)">
+      <div className="mt-6 flex items-center justify-between border-t border-(--border-light) pt-3 text-xs text-(--text-muted)">
         <span className="flex items-center gap-1.5">
           <RefreshCcw className="size-3" /> Sync interval: 5m automated
         </span>

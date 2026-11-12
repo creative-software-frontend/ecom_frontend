@@ -34,7 +34,7 @@ export function WeeklyChartCard({
               className="group flex h-full flex-1 flex-col items-center justify-end gap-1"
               title={`${item.day}: ${item.count} orders`}
             >
-              <span className="text-[10px] text-(--text-muted) tabular-nums opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="text-xs text-(--text-muted) tabular-nums opacity-0 transition-opacity group-hover:opacity-100">
                 {item.count}
               </span>
               <div
@@ -45,7 +45,7 @@ export function WeeklyChartCard({
                     : "bg-(--border-light) hover:bg-(--primary-hover)"
                 }`}
               />
-              <span className="text-[11px] font-medium text-(--text-muted)">
+              <span className="text-xs font-medium text-(--text-muted)">
                 {item.day}
               </span>
             </div>

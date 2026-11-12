@@ -133,7 +133,7 @@ export function EditRoleDrawer({
               >
                 {isSuperAdminRole ? "View role" : "Edit role"}
               </h2>
-              <p className="font-mono text-[11px] text-(--text-muted)">
+              <p className="font-mono text-xs text-(--text-muted)">
                 {role.name} · {role.scope}
               </p>
             </div>
@@ -162,7 +162,7 @@ export function EditRoleDrawer({
             )}
 
             {isSuperAdminRole && (
-              <div className="flex items-start gap-2 rounded-md border border-(--status-pending-bg) bg-(--status-pending-bg)/50 p-2.5 text-[11px] text-(--status-pending-text)">
+              <div className="flex items-start gap-2 rounded-md border border-(--status-pending-bg) bg-(--status-pending-bg)/50 p-2.5 text-xs text-(--status-pending-text)">
                 <Lock className="mt-0.5 size-3.5 shrink-0" />
                 <span>
                   The super admin role has unrestricted access to everything.
@@ -172,7 +172,7 @@ export function EditRoleDrawer({
             )}
 
             {role.isSystem && !isSuperAdminRole && (
-              <div className="flex items-start gap-2 rounded-md border border-(--status-confirmed-bg) bg-(--status-confirmed-bg)/50 p-2.5 text-[11px] text-(--status-confirmed-text)">
+              <div className="flex items-start gap-2 rounded-md border border-(--status-confirmed-bg) bg-(--status-confirmed-bg)/50 p-2.5 text-xs text-(--status-confirmed-text)">
                 <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
                 <span>
                   This is a system role. Changes to permissions will affect all
@@ -182,13 +182,13 @@ export function EditRoleDrawer({
             )}
 
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Display name
               </label>
               <input
                 type="text"
                 disabled={isSuperAdminRole}
-                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20 disabled:cursor-not-allowed disabled:opacity-50"
+                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20 disabled:cursor-not-allowed disabled:opacity-50"
                 {...register("displayName")}
               />
               {errors.displayName && (
@@ -197,13 +197,13 @@ export function EditRoleDrawer({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Description
               </label>
               <textarea
                 rows={2}
                 disabled={isSuperAdminRole}
-                className="block w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20 disabled:cursor-not-allowed disabled:opacity-50"
+                className="block w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2 text-sm transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20 disabled:cursor-not-allowed disabled:opacity-50"
                 {...register("description")}
               />
             </div>
@@ -227,7 +227,7 @@ export function EditRoleDrawer({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
             >
               {isSuperAdminRole ? "Close" : "Cancel"}
             </button>
@@ -235,7 +235,7 @@ export function EditRoleDrawer({
               <button
                 type="submit"
                 disabled={isSubmitting || !isDirty}
-                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-[13px] font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
               >
                 <Save className="size-3.5" />
                 {isSubmitting ? "Saving..." : "Save changes"}

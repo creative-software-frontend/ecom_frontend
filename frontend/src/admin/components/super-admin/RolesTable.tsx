@@ -48,14 +48,14 @@ export function RolesTable({
             </span>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[13px] font-semibold text-(--text-primary)">
+                <span className="text-sm font-semibold text-(--text-primary)">
                   {row.displayName}
                 </span>
-                <span className="rounded border border-(--border-light) bg-(--bg-surface-hover) px-1.5 py-0.5 font-mono text-[10px] text-(--text-muted)">
+                <span className="rounded border border-(--border-light) bg-(--bg-surface-hover) px-1.5 py-0.5 font-mono text-xs text-(--text-muted)">
                   {row.name}
                 </span>
               </div>
-              <p className="mt-0.5 truncate text-[11px] text-(--text-muted)">
+              <p className="mt-0.5 truncate text-xs text-(--text-muted)">
                 {row.description || "No description provided."}
               </p>
             </div>
@@ -68,7 +68,7 @@ export function RolesTable({
       width: "130px",
       cell: (row) => (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium ${
+          className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ${
             row.scope === "platform"
               ? "bg-blue-50 text-blue-700"
               : "bg-emerald-50 text-emerald-700"
@@ -97,7 +97,7 @@ export function RolesTable({
 
         return (
           <div className="w-full pr-4">
-            <div className="mb-1 flex items-center justify-between text-[11px]">
+            <div className="mb-1 flex items-center justify-between text-xs">
               <div className="mr-3 flex-1">
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-(--bg-surface-hover)">
                   <div
@@ -122,7 +122,7 @@ export function RolesTable({
       cell: (row) => {
         if (row.userCount === 0) {
           return (
-            <span className="text-[11px] text-(--text-muted)">0 users</span>
+            <span className="text-xs text-(--text-muted)">0 users</span>
           )
         }
 
@@ -145,7 +145,7 @@ export function RolesTable({
                 </span>
               )}
             </div>
-            <span className="ml-3 text-[11px] font-medium text-(--text-muted)">
+            <span className="ml-3 text-xs font-medium text-(--text-muted)">
               {row.userCount} users
             </span>
           </div>
@@ -157,7 +157,7 @@ export function RolesTable({
       width: "110px",
       cell: (row) => (
         <span
-          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium ${
+          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${
             row.isSystem
               ? "bg-(--bg-table-header) text-(--text-muted)"
               : "bg-amber-50 text-amber-700"
@@ -185,7 +185,7 @@ export function RolesTable({
             {/* ডিজাইন অনুযায়ী ডানপাশে Edit Permissions টেক্সট বাটন */}
             <button
               onClick={() => onEdit(row)}
-              className="text-[11px] font-medium whitespace-nowrap text-primary hover:underline"
+              className="text-xs font-medium whitespace-nowrap text-primary hover:underline"
             >
               {isSuperAdmin ? "View Matrix" : "Edit Permissions"}
             </button>

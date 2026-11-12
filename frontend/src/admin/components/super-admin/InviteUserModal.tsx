@@ -181,13 +181,13 @@ export function InviteUserModal({
           <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+                <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
                   placeholder="user@powerzenox.com"
-                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                   {...register("email")}
                 />
                 {errors.email && (
@@ -195,13 +195,13 @@ export function InviteUserModal({
                 )}
               </div>
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+                <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                   Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   placeholder="Full name"
-                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                   {...register("name")}
                 />
                 {errors.name && <FieldError>{errors.name.message}</FieldError>}
@@ -209,16 +209,16 @@ export function InviteUserModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Mobile{" "}
-                <span className="text-[11px] font-normal text-(--text-muted)">
+                <span className="text-xs font-normal text-(--text-muted)">
                   (optional)
                 </span>
               </label>
               <input
                 type="tel"
                 placeholder="01XXXXXXXXX"
-                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                 {...register("mobile")}
               />
               {errors.mobile && (
@@ -227,7 +227,7 @@ export function InviteUserModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -235,7 +235,7 @@ export function InviteUserModal({
                   type={passwordVisible ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="At least 12 characters"
-                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                   {...register("password")}
                 />
                 <PasswordShowHide
@@ -250,11 +250,11 @@ export function InviteUserModal({
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+                <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                   Role <span className="text-red-500">*</span>
                 </label>
                 <select
-                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-2 text-[13px] outline-none focus:border-primary"
+                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-2 text-sm outline-none focus:border-primary"
                   {...register("roleId", { valueAsNumber: true })}
                 >
                   <option value={0} disabled>
@@ -271,11 +271,11 @@ export function InviteUserModal({
                 )}
               </div>
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+                <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                   Shop {requiresShop && <span className="text-red-500">*</span>}
                 </label>
                 <select
-                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-2 text-[13px] outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-2 text-sm outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={isPlatformRole}
                   {...register("shopId", {
                     setValueAs: (v) =>
@@ -303,10 +303,10 @@ export function InviteUserModal({
               render={({ field }) => (
                 <div className="flex items-center justify-between rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2">
                   <div>
-                    <p className="text-[12px] font-semibold text-(--text-primary)">
+                    <p className="text-xs font-semibold text-(--text-primary)">
                       Active account
                     </p>
-                    <p className="text-[10px] text-(--text-muted)">
+                    <p className="text-xs text-(--text-muted)">
                       If off, user cannot log in until activated
                     </p>
                   </div>
@@ -325,14 +325,14 @@ export function InviteUserModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-[13px] font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
             >
               <UserPlus className="size-3.5" />
               {isSubmitting ? "Creating..." : "Create user"}

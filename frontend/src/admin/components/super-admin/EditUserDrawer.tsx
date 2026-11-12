@@ -167,7 +167,7 @@ export function EditUserDrawer({
               >
                 Edit user
               </h2>
-              <p className="text-[11px] text-(--text-muted)">{user.email}</p>
+              <p className="text-xs text-(--text-muted)">{user.email}</p>
             </div>
           </div>
           <button
@@ -194,31 +194,31 @@ export function EditUserDrawer({
             )}
 
             {isSelf && (
-              <div className="rounded-md border border-(--status-pending-bg) bg-(--status-pending-bg)/50 p-2.5 text-[11px] text-(--status-pending-text)">
+              <div className="rounded-md border border-(--status-pending-bg) bg-(--status-pending-bg)/50 p-2.5 text-xs text-(--status-pending-text)">
                 You are editing your own account. Role and status changes are
                 disabled.
               </div>
             )}
 
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Name
               </label>
               <input
                 type="text"
-                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                 {...register("name")}
               />
               {errors.name && <FieldError>{errors.name.message}</FieldError>}
             </div>
 
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Mobile
               </label>
               <input
                 type="tel"
-                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-[13px] transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                 {...register("mobile")}
               />
               {errors.mobile && (
@@ -227,12 +227,12 @@ export function EditUserDrawer({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Role
               </label>
               <select
                 disabled={isSelf}
-                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-2 text-[13px] outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-2 text-sm outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 {...register("roleId", { valueAsNumber: true })}
               >
                 {roles.map((r) => (
@@ -247,12 +247,12 @@ export function EditUserDrawer({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
                 Shop
               </label>
               <select
                 disabled={isPlatformRole || isSelf}
-                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-2 text-[13px] outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-2 text-sm outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 {...register("shopId", {
                   setValueAs: (v) =>
                     v === "" || v === null ? null : Number(v),
@@ -271,7 +271,7 @@ export function EditUserDrawer({
                 <FieldError>{errors.shopId.message}</FieldError>
               )}
               {requiresShop && !shopId && (
-                <p className="mt-1 text-[11px] text-red-600">
+                <p className="mt-1 text-xs text-red-600">
                   This role requires a shop.
                 </p>
               )}
@@ -283,10 +283,10 @@ export function EditUserDrawer({
               render={({ field }) => (
                 <div className="flex items-center justify-between rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2">
                   <div>
-                    <p className="text-[12px] font-semibold text-(--text-primary)">
+                    <p className="text-xs font-semibold text-(--text-primary)">
                       Account status
                     </p>
-                    <p className="text-[10px] text-(--text-muted)">
+                    <p className="text-xs text-(--text-muted)">
                       {field.value === "active"
                         ? "User can log in"
                         : "User is blocked from logging in"}
@@ -303,7 +303,7 @@ export function EditUserDrawer({
             />
 
             {isLastSuperAdmin && (
-              <p className="text-[11px] text-(--status-pending-text)">
+              <p className="text-xs text-(--status-pending-text)">
                 ⚠️ This is the only active super admin. Deactivating will be
                 blocked by the server.
               </p>
@@ -315,14 +315,14 @@ export function EditUserDrawer({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !isDirty}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-[13px] font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
             >
               <Save className="size-3.5" />
               {isSubmitting ? "Saving..." : "Save changes"}

@@ -80,7 +80,7 @@ export default function UsersPage() {
         <h1 className="text-[20px] font-semibold text-(--text-primary)">
           Admin Users
         </h1>
-        <p className="mt-0.5 text-[13px] text-(--text-muted)">
+        <p className="mt-0.5 text-sm text-(--text-muted)">
           Manage panel access, roles, and account statuses across the platform.
         </p>
       </header>
@@ -88,7 +88,7 @@ export default function UsersPage() {
       {successMessage && (
         <div
           role="status"
-          className="flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-[13px] text-(--status-delivered-text)"
+          className="flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-sm text-(--status-delivered-text)"
         >
           <span className="flex items-center gap-2">
             <CheckCircle2 className="size-4 shrink-0" />

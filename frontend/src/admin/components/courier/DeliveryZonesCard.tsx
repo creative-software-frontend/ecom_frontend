@@ -28,13 +28,13 @@ export function DeliveryZonesCard({
         title="Delivery zones"
         subtitle="Preconfigured standard shipping zones across Bangladesh. Rates apply during storefront checkout."
         badge={
-          <span className="rounded bg-(--bg-surface-hover) px-2 py-0.5 text-[10px] font-medium text-(--text-muted)">
+          <span className="rounded bg-(--bg-surface-hover) px-2 py-0.5 text-xs font-medium text-(--text-muted)">
             3 Predefined Zones
           </span>
         }
         right={
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-(--text-muted)">
+            <span className="text-xs text-(--text-muted)">
               Enable courier delivery
             </span>
             <FormToggle
@@ -56,7 +56,7 @@ export function DeliveryZonesCard({
               </span>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-[13px] font-semibold text-(--text-primary)">
+                  <p className="text-sm font-semibold text-(--text-primary)">
                     Flat Delivery Fee{" "}
                     <span className="font-normal text-(--text-muted)">
                       (প্রতি অঞ্চলে নির্দিষ্ট ফি)
@@ -68,7 +68,7 @@ export function DeliveryZonesCard({
                     </span>
                   )}
                 </div>
-                <p className="mt-0.5 text-[11px] text-(--text-muted)">
+                <p className="mt-0.5 text-xs text-(--text-muted)">
                   Enforces fixed flat rates per zone regardless of weight or
                   parcel dimensions.
                 </p>
@@ -82,7 +82,7 @@ export function DeliveryZonesCard({
               aria-label="Enable flat delivery fee"
             />
           </div>
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded bg-(--bg-surface) px-2 py-1.5 text-[11px]">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded bg-(--bg-surface) px-2 py-1.5 text-xs">
             <span className="text-(--text-muted)">
               When ON: Fixed flat rates apply strictly per zone. (Inside ৳60,
               Sub-Dhaka ৳100, Outside ৳130).
@@ -94,7 +94,7 @@ export function DeliveryZonesCard({
         </div>
 
         {/* Table header */}
-        <div className="grid grid-cols-[auto_minmax(0,1.6fr)_auto_minmax(0,2.2fr)_auto] items-center gap-2 px-2 text-[10px] font-semibold tracking-wider text-(--text-muted) uppercase">
+        <div className="grid grid-cols-[auto_minmax(0,1.6fr)_auto_minmax(0,2.2fr)_auto] items-center gap-2 px-2 text-xs font-semibold tracking-wider text-(--text-muted) uppercase">
           <div />
           <div>Zone name</div>
           <div>Fee</div>
@@ -124,26 +124,26 @@ export function DeliveryZonesCard({
 
               {/* Zone name */}
               <div className="min-w-0">
-                <p className="truncate text-[12px] font-semibold text-(--text-primary)">
+                <p className="truncate text-xs font-semibold text-(--text-primary)">
                   {zone.nameEn}{" "}
                   <span className="font-normal text-(--text-muted)">
                     ({zone.nameBn})
                   </span>
                 </p>
-                <p className="text-[10px] text-(--text-muted) tabular-nums">
+                <p className="text-xs text-(--text-muted) tabular-nums">
                   Zone ID: {zone.zoneId}
                 </p>
               </div>
 
               {/* Fee */}
               <div className="relative">
-                <span className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-[11px] text-(--text-muted)">
+                <span className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-xs text-(--text-muted)">
                   ৳
                 </span>
                 <input
                   type="number"
                   min={0}
-                  className="h-8 w-20 rounded border border-(--border-light) bg-(--bg-surface) pr-2 pl-5 text-right text-[12px] text-(--text-primary) tabular-nums outline-none focus:border-primary"
+                  className="h-8 w-20 rounded border border-(--border-light) bg-(--bg-surface) pr-2 pl-5 text-right text-xs text-(--text-primary) tabular-nums outline-none focus:border-primary"
                   aria-invalid={Boolean(feeError)}
                   {...register(zone.feeKey, { valueAsNumber: true })}
                 />
@@ -154,7 +154,7 @@ export function DeliveryZonesCard({
                 {zone.districts.map((d) => (
                   <span
                     key={d}
-                    className="inline-flex items-center rounded bg-(--bg-surface) px-1.5 py-0.5 text-[10px] font-medium text-(--text-primary)"
+                    className="inline-flex items-center rounded bg-(--bg-surface) px-1.5 py-0.5 text-xs font-medium text-(--text-primary)"
                   >
                     {d}
                   </span>
@@ -170,7 +170,7 @@ export function DeliveryZonesCard({
               </span>
 
               {feeError && (
-                <div className="col-span-5 flex items-center gap-1 text-[11px] font-medium text-red-600">
+                <div className="col-span-5 flex items-center gap-1 text-xs font-medium text-red-600">
                   <AlertTriangle className="size-3" />
                   {feeError}
                 </div>
@@ -180,7 +180,7 @@ export function DeliveryZonesCard({
         })}
 
         {/* Footer note */}
-        <p className="text-[10px] text-(--text-muted)">
+        <p className="text-xs text-(--text-muted)">
           Zones are fixed and strictly predefined for Bangladesh e-commerce
           standard logistics.
           <span className="ml-2">Auto-matched on checkout.</span>
@@ -190,29 +190,29 @@ export function DeliveryZonesCard({
         <div className="rounded-md border border-(--border-light) bg-(--bg-app) p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="text-[12px] font-semibold text-(--text-primary)">
+              <p className="text-xs font-semibold text-(--text-primary)">
                 Free delivery above
               </p>
-              <p className="text-[10px] text-(--text-muted)">
+              <p className="text-xs text-(--text-muted)">
                 Orders qualifying above this cart total receive zero delivery
                 fee.
               </p>
             </div>
             <div className="relative">
-              <span className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-[11px] text-(--text-muted)">
+              <span className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-xs text-(--text-muted)">
                 ৳
               </span>
               <input
                 type="number"
                 min={0}
-                className="h-8 w-32 rounded border border-(--border-light) bg-(--bg-surface) pr-2 pl-6 text-right text-[12px] text-(--text-primary) tabular-nums outline-none focus:border-primary"
+                className="h-8 w-32 rounded border border-(--border-light) bg-(--bg-surface) pr-2 pl-6 text-right text-xs text-(--text-primary) tabular-nums outline-none focus:border-primary"
                 aria-invalid={Boolean(errors.free_delivery_above)}
                 {...register("free_delivery_above", { valueAsNumber: true })}
               />
             </div>
           </div>
           {errors.free_delivery_above && (
-            <p className="mt-1 flex items-center gap-1 text-[11px] text-red-600">
+            <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
               <AlertTriangle className="size-3" />
               {errors.free_delivery_above.message}
             </p>

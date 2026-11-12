@@ -17,7 +17,7 @@ export function LogisticsRulesCard() {
         {RULES.map((rule) => (
           <li
             key={rule}
-            className="flex items-start gap-1.5 text-[11px] leading-relaxed text-(--text-muted)"
+            className="flex items-start gap-1.5 text-xs leading-relaxed text-(--text-muted)"
           >
             <Check className="mt-0.5 size-3 shrink-0 text-emerald-600" />
             {rule}

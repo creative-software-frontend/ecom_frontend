@@ -54,7 +54,7 @@ export function StatusBadge({
 }: StatusBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center justify-center gap-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium ${variantStyles[variant] ?? variantStyles.warning} ${className ?? ""}`}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${variantStyles[variant] ?? variantStyles.warning} ${className ?? ""}`}
       aria-live={ariaLive}
     >
       {dotStyles[variant] && (

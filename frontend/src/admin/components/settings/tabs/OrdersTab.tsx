@@ -59,11 +59,11 @@ function ComingSoonCard({
           <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-(--bg-table-header) text-(--text-muted)">
             {icon}
           </span>
-          <h3 className="truncate text-[13px] font-semibold text-(--text-primary)">
+          <h3 className="truncate text-sm font-semibold text-(--text-primary)">
             {title}
           </h3>
         </div>
-        <span className="shrink-0 rounded-full bg-(--bg-table-header) px-2 py-0.5 text-[10px] font-medium text-(--text-muted)">
+        <span className="shrink-0 rounded-full bg-(--bg-table-header) px-2 py-0.5 text-xs font-medium text-(--text-muted)">
           Coming soon
         </span>
       </div>
@@ -147,7 +147,7 @@ export default function OrdersTab() {
                   valueAsNumber: true,
                 })}
               />
-              <p className="mt-2 flex items-start gap-1.5 text-[11px] text-(--text-muted)">
+              <p className="mt-2 flex items-start gap-1.5 text-xs text-(--text-muted)">
                 <Info className="mt-0.5 size-3 shrink-0" />
                 Repeated checkout with identical phone within this window will
                 be flagged as spam.
@@ -182,17 +182,17 @@ export default function OrdersTab() {
                 Active Administrative Hierarchy
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                <span className="rounded bg-(--bg-table-header) px-2 py-0.5 text-[11px] font-medium text-(--text-primary)">
+                <span className="rounded bg-(--bg-table-header) px-2 py-0.5 text-xs font-medium text-(--text-primary)">
                   Division (বিভাগ)
                 </span>
-                <span className="rounded bg-(--bg-table-header) px-2 py-0.5 text-[11px] font-medium text-(--text-primary)">
+                <span className="rounded bg-(--bg-table-header) px-2 py-0.5 text-xs font-medium text-(--text-primary)">
                   Zila (জেলা)
                 </span>
-                <span className="rounded bg-(--bg-table-header) px-2 py-0.5 text-[11px] font-medium text-(--text-primary)">
+                <span className="rounded bg-(--bg-table-header) px-2 py-0.5 text-xs font-medium text-(--text-primary)">
                   Thana (থানা)
                 </span>
               </div>
-              <p className="mt-2 text-[11px] text-(--text-muted)">
+              <p className="mt-2 text-xs text-(--text-muted)">
                 Division, Zila, and Thana dropdowns enabled in checkout form.
               </p>
             </div>
@@ -205,7 +205,7 @@ export default function OrdersTab() {
         title="Delivery charges"
         description="Default shipping rates applied to customer cart based on courier delivery zones."
         badge={
-          <span className="rounded-full bg-(--status-delivered-bg) px-2.5 py-1 text-[11px] font-medium whitespace-nowrap text-(--status-delivered-text)">
+          <span className="rounded-full bg-(--status-delivered-bg) px-2.5 py-1 text-xs font-medium whitespace-nowrap text-(--status-delivered-text)">
             Automated COD Rate
           </span>
         }
@@ -236,7 +236,7 @@ export default function OrdersTab() {
             type="number"
             leadingSlot="৳"
             badge={
-              <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 text-[10px] font-medium text-(--text-muted)">
+              <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 text-xs font-medium text-(--text-muted)">
                 Promo rule
               </span>
             }
@@ -253,14 +253,14 @@ export default function OrdersTab() {
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <h2 className="text-[14px] font-semibold text-(--text-primary)">
+            <h2 className="text-sm font-semibold text-(--text-primary)">
               Fraud & Verification Shields
             </h2>
-            <span className="rounded bg-(--bg-table-header) px-2 py-0.5 text-[10px] font-semibold tracking-wider text-(--text-muted)">
+            <span className="rounded bg-(--bg-table-header) px-2 py-0.5 text-xs font-semibold tracking-wider text-(--text-muted)">
               BETA ROADMAP
             </span>
           </div>
-          <span className="text-[11px] text-(--text-muted)">
+          <span className="text-xs text-(--text-muted)">
             Upcoming automated courier safeguards
           </span>
         </div>
@@ -273,7 +273,7 @@ export default function OrdersTab() {
             description="Send 4-digit OTP via SMS before order confirmation to verify phone authenticity."
           >
             <div className="flex items-end justify-between gap-2">
-              <span className="text-[11px] text-(--text-muted)">
+              <span className="text-xs text-(--text-muted)">
                 OTP Provider: Greenweb / Banglalink
               </span>
               <FormToggle
@@ -292,7 +292,7 @@ export default function OrdersTab() {
             description="Automatically dispatch branded confirmation SMS to customer with tracking link upon dispatch."
           >
             <div className="flex items-end justify-between gap-2">
-              <span className="text-[11px] text-(--text-muted)">
+              <span className="text-xs text-(--text-muted)">
                 Sender ID: POWERZENOX
               </span>
               <FormToggle
@@ -311,7 +311,7 @@ export default function OrdersTab() {
             description="Block checkout requests originating from non-Bangladesh IP addresses and data center VPNs."
           >
             <div className="flex items-end justify-between gap-2">
-              <span className="text-[11px] text-(--text-muted)">
+              <span className="text-xs text-(--text-muted)">
                 Geo-fence: Bangladesh (.bd) ASN
               </span>
               <FormToggle
@@ -331,7 +331,7 @@ export default function OrdersTab() {
           >
             {/* Preset to 65 but read-only until feature ships */}
             <div>
-              <label className="mb-1.5 block text-[11px] font-medium text-(--text-primary)">
+              <label className="mb-1.5 block text-xs font-medium text-(--text-primary)">
                 Minimum success ratio (%)
               </label>
               <div className="relative">
@@ -340,7 +340,7 @@ export default function OrdersTab() {
                   value={65}
                   readOnly
                   disabled
-                  className="block h-9 w-full cursor-not-allowed rounded-md border border-transparent bg-(--bg-app) pr-8 pl-3 text-right text-[13px] text-(--text-muted) tabular-nums"
+                  className="block h-9 w-full cursor-not-allowed rounded-md border border-transparent bg-(--bg-app) pr-8 pl-3 text-right text-sm text-(--text-muted) tabular-nums"
                 />
                 <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-(--text-muted)">
                   %

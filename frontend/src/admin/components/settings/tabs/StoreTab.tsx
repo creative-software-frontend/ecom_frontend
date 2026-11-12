@@ -102,33 +102,33 @@ export default function StoreTab() {
       >
         {/* Logo */}
         <div>
-          <p className="mb-1.5 text-[12px] font-semibold text-(--text-primary)">
+          <p className="mb-1.5 text-xs font-semibold text-(--text-primary)">
             Store logo
           </p>
           <div className="flex items-center gap-4">
             <div className="flex size-20 shrink-0 items-center justify-center rounded-lg border border-(--border-light) bg-(--bg-app)">
-              <span className="text-[10px] font-medium text-(--text-muted)">
+              <span className="text-xs font-medium text-(--text-muted)">
                 Power Zenox
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[12px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
               >
                 <Upload className="size-3.5" />
                 Upload new
               </button>
               <button
                 type="button"
-                className="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[12px] font-medium text-red-600 transition-colors hover:bg-red-50"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
               >
                 <Trash2 className="size-3.5" />
                 Remove
               </button>
             </div>
           </div>
-          <p className="mt-2 text-[11px] text-(--text-muted)">
+          <p className="mt-2 text-xs text-(--text-muted)">
             PNG, JPG or WebP, square aspect ratio, maximum file size 2 MB.
           </p>
         </div>
@@ -169,7 +169,7 @@ export default function StoreTab() {
         description="Customer support lines, physical warehouse address, and Google Maps embed location."
         badge={
           Object.keys(errors.contact ?? {}).length > 0 ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-1 text-[11px] font-medium text-red-700">
+            <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700">
               <span className="size-1.5 rounded-full bg-red-500" />
               {Object.keys(errors.contact ?? {}).length} Validation{" "}
               {Object.keys(errors.contact ?? {}).length === 1

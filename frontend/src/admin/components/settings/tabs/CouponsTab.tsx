@@ -259,7 +259,7 @@ export default function CouponsTab() {
       selector: (coupon) => coupon.code,
       minWidth: "130px",
       cell: (coupon) => (
-        <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 font-mono text-[12px] font-medium text-(--text-primary)">
+        <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 font-mono text-xs font-medium text-(--text-primary)">
           {coupon.code}
         </span>
       ),
@@ -390,7 +390,7 @@ export default function CouponsTab() {
               <h2 className="text-sm font-semibold text-(--text-primary)">
                 All coupons
               </h2>
-              <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 text-[10px] font-medium text-(--text-muted) tabular-nums">
+              <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 text-xs font-medium text-(--text-muted) tabular-nums">
                 {counts.total} total
               </span>
             </div>

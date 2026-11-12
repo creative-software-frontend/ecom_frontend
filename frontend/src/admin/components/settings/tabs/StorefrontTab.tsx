@@ -68,7 +68,7 @@ function BannerThumb({ src, alt }: { src: string | null; alt: string }) {
           loading="lazy"
         />
       ) : (
-        <div className="flex size-full items-center justify-center text-[10px] font-medium text-(--text-muted)">
+        <div className="flex size-full items-center justify-center text-xs font-medium text-(--text-muted)">
           No image
         </div>
       )}
@@ -162,7 +162,7 @@ export default function StorefrontTab() {
             rows={2}
             maxLength={200}
             placeholder="Write a short announcement…"
-            className="block w-full resize-y rounded-md border border-transparent bg-(--bg-app) px-3 py-2 text-[13px] text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+            className="block w-full resize-y rounded-md border border-transparent bg-(--bg-app) px-3 py-2 text-sm text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
             aria-invalid={Boolean(errors.announcement?.marquee_text)}
             {...register("announcement.marquee_text")}
           />
@@ -206,7 +206,7 @@ export default function StorefrontTab() {
                 </span>
               </span>
             </div>
-            <span className="ml-auto shrink-0 rounded bg-white/20 px-2 py-0.5 text-[10px] font-bold">
+            <span className="ml-auto shrink-0 rounded bg-white/20 px-2 py-0.5 text-xs font-bold">
               BD COD
             </span>
           </div>
@@ -229,7 +229,7 @@ export default function StorefrontTab() {
               type="text"
               maxLength={160}
               placeholder="Shown above the checkout order form"
-              className="block h-9 w-full rounded-md border border-transparent bg-(--bg-app) pr-3 pl-9 text-[13px] text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+              className="block h-9 w-full rounded-md border border-transparent bg-(--bg-app) pr-3 pl-9 text-sm text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
               {...register("announcement.order_note")}
             />
           </div>
@@ -294,7 +294,7 @@ export default function StorefrontTab() {
                   <div className="min-w-0 flex-1 space-y-2">
                     {/* Title + remove */}
                     <div className="flex items-start gap-2">
-                      <span className="flex-1 truncate text-[13px] font-semibold text-(--text-primary)">
+                      <span className="flex-1 truncate text-sm font-semibold text-(--text-primary)">
                         Banner #{index + 1}
                         {bannerValue?.alt ? ` • ${bannerValue.alt}` : ""}
                       </span>
@@ -319,7 +319,7 @@ export default function StorefrontTab() {
                           <input
                             type="url"
                             placeholder="https://example.com"
-                            className="block h-9 w-full rounded-md border border-transparent bg-(--bg-app) pr-3 pl-9 text-[13px] text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+                            className="block h-9 w-full rounded-md border border-transparent bg-(--bg-app) pr-3 pl-9 text-sm text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                             aria-invalid={Boolean(linkError)}
                             aria-label={`Banner ${index + 1} link`}
                             {...register(`banners.${index}.link`)}
@@ -368,7 +368,7 @@ export default function StorefrontTab() {
           <span className="flex size-8 items-center justify-center rounded-full bg-(--bg-table-header) text-primary">
             <ImagePlus className="size-4" />
           </span>
-          <span className="text-[13px] font-medium text-(--text-primary)">
+          <span className="text-sm font-medium text-(--text-primary)">
             Upload new banner
           </span>
           <span className="text-xs text-(--text-muted)">
@@ -420,7 +420,7 @@ export default function StorefrontTab() {
               <span className="text-xs font-semibold tracking-wider text-(--text-muted) uppercase">
                 Button & checkout preview
               </span>
-              <span className="rounded bg-primary px-2 py-0.5 text-[10px] font-bold text-white">
+              <span className="rounded bg-primary px-2 py-0.5 text-xs font-bold text-white">
                 Active palette
               </span>
             </div>
@@ -440,7 +440,7 @@ export default function StorefrontTab() {
                     Power Zenox Gold
                   </span>
                 </div>
-                <span className="text-[14px] font-bold text-(--text-primary) tabular-nums">
+                <span className="text-sm font-bold text-(--text-primary) tabular-nums">
                   ৳1,450
                 </span>
               </div>

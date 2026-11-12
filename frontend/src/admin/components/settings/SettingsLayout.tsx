@@ -217,7 +217,7 @@ export function SettingsLayout({
                 <Icon className="size-4" />
                 {label}
                 {badgeCount !== undefined && badgeCount > 0 && (
-                  <span className="ml-0.5 rounded-full bg-(--bg-table-header) px-1.5 py-0.5 text-[10px] font-semibold text-(--text-muted) tabular-nums">
+                  <span className="ml-0.5 rounded-full bg-(--bg-table-header) px-1.5 py-0.5 text-xs font-semibold text-(--text-muted) tabular-nums">
                     {badgeCount}
                   </span>
                 )}

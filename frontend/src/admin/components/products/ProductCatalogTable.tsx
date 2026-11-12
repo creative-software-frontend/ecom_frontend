@@ -28,10 +28,10 @@ const productColumns: TableColumn<Product>[] = [
           <p className="truncate text-xs font-semibold text-foreground">
             {product.name}
           </p>
-          <p className="truncate text-[10px] text-muted-foreground">
+          <p className="truncate text-xs text-muted-foreground">
             {product.brandName}
           </p>
-          <p className="mt-0.5 truncate font-mono text-[10px] text-primary">
+          <p className="mt-0.5 truncate font-mono text-xs text-primary">
             {product.slug}
           </p>
         </div>
@@ -43,7 +43,7 @@ const productColumns: TableColumn<Product>[] = [
     selector: (product) => product.category,
     minWidth: "130px",
     cell: (product) => (
-      <span className="inline-flex max-w-48 rounded-full bg-muted px-2 py-1 text-[10px] leading-tight text-foreground">
+      <span className="inline-flex max-w-48 rounded-full bg-muted px-2 py-1 text-xs leading-tight text-foreground">
         {product.category}
       </span>
     ),
@@ -65,7 +65,7 @@ const productColumns: TableColumn<Product>[] = [
             ) : null}
           </p>
           {hasDiscount ? (
-            <p className="text-[10px] text-muted-foreground tabular-nums line-through">
+            <p className="text-xs text-muted-foreground tabular-nums line-through">
               {formatTaka(product.regularPrice)}
             </p>
           ) : null}
@@ -99,7 +99,7 @@ const productColumns: TableColumn<Product>[] = [
                   ? "Low stock"
                   : "Out of stock"
             }
-            className="mt-0.5 justify-start! px-1.5! py-0! text-[10px]!"
+            className="mt-0.5 justify-start! px-1.5! py-0! text-xs!"
           />
         </div>
       )
@@ -113,7 +113,7 @@ const productColumns: TableColumn<Product>[] = [
       <StatusBadge
         variant={product.isActive ? "active" : "inactive"}
         label={product.isActive ? "Active" : "Inactive"}
-        className="rounded-full! px-2! py-0.5! text-[10px]!"
+        className="rounded-full! px-2! py-0.5! text-xs!"
       />
     ),
   },

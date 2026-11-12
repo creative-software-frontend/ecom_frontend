@@ -28,10 +28,10 @@ export default function ShopsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
+          <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
             <Download className="size-4" /> Export CSV
           </button>
-          <button className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-[13px] font-medium text-white hover:bg-(--primary-hover)">
+          <button className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-white hover:bg-(--primary-hover)">
             <Plus className="size-4" /> Add Shop
           </button>
         </div>

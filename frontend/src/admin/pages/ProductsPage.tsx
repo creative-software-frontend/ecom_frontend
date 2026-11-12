@@ -211,7 +211,7 @@ export default function ProductsPage() {
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-lg font-bold text-foreground">Products</h1>
-            <span className="rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-semibold text-primary">
+            <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-semibold text-primary">
               {metrics.activeProducts} SKUs Active
             </span>
           </div>

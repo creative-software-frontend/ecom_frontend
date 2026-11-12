@@ -53,14 +53,14 @@ export function UsersTable({
       name: "Name",
       cell: (row) => (
         <div className="flex items-center gap-2.5 py-1">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-(--bg-table-header) text-[11px] font-semibold text-(--text-primary)">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-(--bg-table-header) text-xs font-semibold text-(--text-primary)">
             {initials(row.name)}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-medium text-(--text-primary)">
+            <p className="truncate text-sm font-medium text-(--text-primary)">
               {row.name}
             </p>
-            <p className="truncate text-[11px] text-(--text-muted)">
+            <p className="truncate text-xs text-(--text-muted)">
               {row.email}
             </p>
           </div>
@@ -77,7 +77,7 @@ export function UsersTable({
           "bg-(--bg-table-header) text-(--text-muted)"
         return (
           <span
-            className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${cls}`}
+            className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${cls}`}
           >
             {row.roleDisplayName}
           </span>
@@ -89,11 +89,11 @@ export function UsersTable({
       name: "Shop",
       cell: (row) =>
         row.shop ? (
-          <span className="text-[12px] text-(--text-primary)">
+          <span className="text-xs text-(--text-primary)">
             {row.shop.name}
           </span>
         ) : (
-          <span className="text-[12px] text-(--text-muted) italic">
+          <span className="text-xs text-(--text-muted) italic">
             Platform
           </span>
         ),
@@ -103,7 +103,7 @@ export function UsersTable({
       name: "Status",
       cell: (row) => (
         <span
-          className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium ${
+          className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${
             row.status === "active"
               ? "bg-(--status-delivered-bg) text-(--status-delivered-text)"
               : "bg-(--bg-table-header) text-(--text-muted)"
@@ -124,7 +124,7 @@ export function UsersTable({
     {
       name: "Last login",
       cell: (row) => (
-        <span className="text-[12px] text-(--text-muted) tabular-nums">
+        <span className="text-xs text-(--text-muted) tabular-nums">
           {relativeTime(row.lastLoginAt)}
         </span>
       ),

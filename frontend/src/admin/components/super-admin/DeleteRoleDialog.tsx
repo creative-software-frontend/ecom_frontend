@@ -63,7 +63,7 @@ export function DeleteRoleDialog({
           </p>
 
           {userCount > 0 && (
-            <div className="rounded-md border border-(--status-pending-bg) bg-(--status-pending-bg)/50 p-2.5 text-[11px] text-(--status-pending-text)">
+            <div className="rounded-md border border-(--status-pending-bg) bg-(--status-pending-bg)/50 p-2.5 text-xs text-(--status-pending-text)">
               {userCount} user{userCount === 1 ? "" : "s"} currently have this
               role. Reassign them to another role before deleting.
             </div>
@@ -82,7 +82,7 @@ export function DeleteRoleDialog({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+            className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
           >
             Cancel
           </button>
@@ -90,7 +90,7 @@ export function DeleteRoleDialog({
             type="button"
             onClick={onConfirm}
             disabled={isPending || userCount > 0}
-            className="inline-flex h-8 items-center rounded-md bg-red-600 px-3 text-[13px] font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-8 items-center rounded-md bg-red-600 px-3 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "Deleting..." : "Delete role"}
           </button>

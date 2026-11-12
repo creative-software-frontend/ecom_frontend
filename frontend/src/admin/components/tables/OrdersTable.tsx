@@ -25,7 +25,7 @@ export function OrdersTable({
 }: OrdersTableProps) {
   if (items.length === 0) {
     return (
-      <div className="py-12 text-center text-[13px] text-(--text-muted)">
+      <div className="py-12 text-center text-sm text-(--text-muted)">
         {hasFilters ? (
           <EmptyState
             className="flex flex-col items-center gap-3"
@@ -54,7 +54,7 @@ export function OrdersTable({
 
   return (
     <div className="w-full overflow-x-auto">
-      <table className="w-full min-w-225 border-collapse text-left text-[13px]">
+      <table className="w-full min-w-225 border-collapse text-left text-sm">
         <thead className="bg-(--bg-table-header)">
           <tr>
             {[
@@ -70,7 +70,7 @@ export function OrdersTable({
             ].map((header, i) => (
               <th
                 key={header}
-                className={`border-b border-(--border-light) px-4 py-3 text-[12px] font-medium text-(--text-muted) ${i > 3 && i < 8 ? "text-center" : i === 5 ? "text-right" : ""}`}
+                className={`border-b border-(--border-light) px-4 py-3 text-xs font-medium text-(--text-muted) ${i > 3 && i < 8 ? "text-center" : i === 5 ? "text-right" : ""}`}
               >
                 {header}
               </th>
@@ -99,7 +99,7 @@ export function OrdersTable({
                   <div className="font-medium text-(--text-primary)">
                     {formatOrderDate(order.createdAt).split(",")[0]}
                   </div>
-                  <div className="text-[11px]">
+                  <div className="text-xs">
                     {formatOrderDate(order.createdAt).split(",")[1]}
                   </div>
                 </td>
@@ -107,12 +107,12 @@ export function OrdersTable({
                   <div className="font-semibold text-(--text-primary)">
                     {order.customerName}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-(--text-muted)">
+                  <div className="mt-0.5 text-xs text-(--text-muted)">
                     {order.customerPhone}
                   </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className="inline-flex items-center rounded bg-(--bg-table-header) px-2 py-1 text-[11px] font-medium text-(--text-primary)">
+                  <span className="inline-flex items-center rounded bg-(--bg-table-header) px-2 py-1 text-xs font-medium text-(--text-primary)">
                     {order.deliveryArea}
                   </span>
                 </td>

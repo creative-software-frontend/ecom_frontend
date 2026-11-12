@@ -75,7 +75,7 @@ export function RichTextToolbar({
         <select
           onChange={(e) => onCommand("formatBlock", e.target.value)}
           defaultValue=""
-          className="h-7 cursor-pointer appearance-none rounded border-0 bg-transparent pr-6 pl-2 text-[12px] font-medium text-(--text-primary) outline-none hover:bg-(--bg-surface)"
+          className="h-7 cursor-pointer appearance-none rounded border-0 bg-transparent pr-6 pl-2 text-xs font-medium text-(--text-primary) outline-none hover:bg-(--bg-surface)"
         >
           <option value="" disabled>
             Paragraph

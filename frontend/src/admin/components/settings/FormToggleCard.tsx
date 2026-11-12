@@ -54,7 +54,7 @@ export function FormToggleCard({
             </span>
           )}
           <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-(--text-primary)">
+            <p className="text-sm font-semibold text-(--text-primary)">
               {title}
             </p>
             {description && (

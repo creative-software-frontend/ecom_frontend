@@ -299,7 +299,7 @@ export default function OrdersPage() {
             <StatusBadge
               variant={payCfg.variant}
               label={payCfg.label}
-              className="text-[10px]!"
+              className="text-xs!"
             />
           )
         },
@@ -315,7 +315,7 @@ export default function OrdersPage() {
             <StatusBadge
               variant={orderCfg.variant}
               label={orderCfg.label}
-              className="text-[10px]!"
+              className="text-xs!"
             />
           )
         },

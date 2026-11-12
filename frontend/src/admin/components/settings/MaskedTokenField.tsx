@@ -59,12 +59,12 @@ export function MaskedTokenField({
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <label
           htmlFor={id}
-          className="text-[11px] font-semibold tracking-wider text-(--text-muted) uppercase"
+          className="text-xs font-semibold tracking-wider text-(--text-muted) uppercase"
         >
           {label}
         </label>
         {savedAt && (
-          <span className="shrink-0 text-[11px] text-(--text-muted)">
+          <span className="shrink-0 text-xs text-(--text-muted)">
             {formatSavedAt(savedAt)}
           </span>
         )}
@@ -79,7 +79,7 @@ export function MaskedTokenField({
           // Masked display — no real token value is ever rendered.
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <Key className="size-3.5 shrink-0 text-(--text-muted)" />
-            <span className="truncate font-mono text-[13px] tracking-widest text-(--text-muted)">
+            <span className="truncate font-mono text-sm tracking-widest text-(--text-muted)">
               ••••••••••••••••••••••••••••••••••••••••••••
             </span>
           </div>
@@ -90,14 +90,14 @@ export function MaskedTokenField({
             autoComplete="off"
             spellCheck={false}
             placeholder={saved ? "Paste the new token…" : "Paste the token…"}
-            className="h-full min-w-0 flex-1 bg-transparent text-[13px] text-(--text-primary) outline-none placeholder:text-(--text-muted)"
+            className="h-full min-w-0 flex-1 bg-transparent text-sm text-(--text-primary) outline-none placeholder:text-(--text-muted)"
             {...register}
           />
         )}
 
         <div className="flex shrink-0 items-center gap-1.5">
           {showMasked && (
-            <span className="inline-flex items-center gap-1 rounded-md bg-(--status-delivered-bg) px-2 py-0.5 text-[11px] font-medium text-(--status-delivered-text)">
+            <span className="inline-flex items-center gap-1 rounded-md bg-(--status-delivered-bg) px-2 py-0.5 text-xs font-medium text-(--status-delivered-text)">
               <Check className="size-3" />
               Token saved
             </span>
@@ -106,7 +106,7 @@ export function MaskedTokenField({
             <button
               type="button"
               onClick={onReplace}
-              className="inline-flex h-7 items-center rounded border border-(--border-light) bg-(--bg-surface) px-2 text-[11px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+              className="inline-flex h-7 items-center rounded border border-(--border-light) bg-(--bg-surface) px-2 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
             >
               Replace
             </button>
@@ -114,7 +114,7 @@ export function MaskedTokenField({
             <button
               type="button"
               onClick={onCancel}
-              className="inline-flex h-7 items-center rounded border border-(--border-light) bg-(--bg-surface) px-2 text-[11px] font-medium text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
+              className="inline-flex h-7 items-center rounded border border-(--border-light) bg-(--bg-surface) px-2 text-xs font-medium text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
             >
               Cancel
             </button>
@@ -124,7 +124,7 @@ export function MaskedTokenField({
 
       {error && <FieldError>{error}</FieldError>}
       {!error && help && (
-        <p className="mt-1 text-[11px] text-(--text-muted)">{help}</p>
+        <p className="mt-1 text-xs text-(--text-muted)">{help}</p>
       )}
     </div>
   )

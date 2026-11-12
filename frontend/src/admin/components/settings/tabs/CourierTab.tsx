@@ -47,7 +47,7 @@ export default function CourierTab() {
       //   pageTitle="Courier Settings"
       //   pageSubtitle="Configure delivery fees, zones, and courier API integrations in one unified hub"
       headerRight={
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-(--status-delivered-bg) px-2.5 py-1 text-[11px] font-medium text-(--status-delivered-text)">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-(--status-delivered-bg) px-2.5 py-1 text-xs font-medium text-(--status-delivered-text)">
           <span className="size-1.5 rounded-full bg-(--status-delivered-text)" />
           Automated Dispatch Active
         </span>

@@ -37,14 +37,14 @@ export function UsersByRoleCard({
               className="flex items-center justify-between gap-2"
             >
               <span
-                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${
+                className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${
                   roleBadgeClass[r.roleName] ??
                   "bg-(--bg-table-header) text-(--text-muted)"
                 }`}
               >
                 {r.roleDisplayName}
               </span>
-              <span className="text-[13px] font-semibold text-(--text-primary) tabular-nums">
+              <span className="text-sm font-semibold text-(--text-primary) tabular-nums">
                 {r.count}
               </span>
             </li>

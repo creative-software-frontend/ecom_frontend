@@ -27,11 +27,11 @@ export function PageListItem({
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-[13px] font-semibold text-(--text-primary)">
+        <span className="truncate text-sm font-semibold text-(--text-primary)">
           {page.title}
         </span>
         <span
-          className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
+          className={`shrink-0 rounded-md px-1.5 py-0.5 text-xs font-medium ${
             isPublished
               ? "bg-(--status-delivered-bg) text-(--status-delivered-text)"
               : "bg-(--bg-table-header) text-(--text-muted)"
@@ -41,10 +41,10 @@ export function PageListItem({
         </span>
       </div>
       <div className="mt-0.5 flex items-center justify-between gap-2">
-        <span className="truncate text-[11px] text-(--text-muted)">
+        <span className="truncate text-xs text-(--text-muted)">
           /{page.slug}
         </span>
-        <span className="shrink-0 text-[10px] text-(--text-muted)">
+        <span className="shrink-0 text-xs text-(--text-muted)">
           {page.edited_at}
         </span>
       </div>

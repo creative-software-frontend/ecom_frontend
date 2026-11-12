@@ -23,7 +23,7 @@ export function MetricsCards({
         subTextClassName="truncate"
         variant="warning"
         badge={
-          <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold whitespace-nowrap text-amber-800 uppercase">
+          <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-bold whitespace-nowrap text-amber-800 uppercase">
             Action needed
           </span>
         }
@@ -42,7 +42,7 @@ export function MetricsCards({
         variant="danger"
         badge={
           metrics.lowStockProducts.count > 0 ? (
-            <span className="rounded bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-800 uppercase">
+            <span className="rounded bg-red-100 px-2 py-0.5 text-xs font-bold text-red-800 uppercase">
               {metrics.lowStockProducts.count} SKU
             </span>
           ) : null

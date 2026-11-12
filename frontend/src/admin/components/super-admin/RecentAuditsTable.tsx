@@ -27,7 +27,7 @@ const columns: TableColumn<AuditRow>[] = [
   {
     name: "Action",
     cell: (row) => (
-      <span className="text-[12px] font-medium text-(--text-primary)">
+      <span className="text-xs font-medium text-(--text-primary)">
         {humanizeAction(row.action)}
       </span>
     ),
@@ -37,10 +37,10 @@ const columns: TableColumn<AuditRow>[] = [
     name: "User",
     cell: (row) => (
       <div className="min-w-0">
-        <p className="truncate text-[12px] text-(--text-primary)">
+        <p className="truncate text-xs text-(--text-primary)">
           {row.user.name}
         </p>
-        <p className="truncate text-[11px] text-(--text-muted)">
+        <p className="truncate text-xs text-(--text-muted)">
           {row.user.email}
         </p>
       </div>
@@ -52,18 +52,18 @@ const columns: TableColumn<AuditRow>[] = [
     name: "Shop",
     cell: (row) =>
       row.shop ? (
-        <span className="text-[12px] text-(--text-primary)">
+        <span className="text-xs text-(--text-primary)">
           {row.shop.name}
         </span>
       ) : (
-        <span className="text-[12px] text-(--text-muted) italic">Platform</span>
+        <span className="text-xs text-(--text-muted) italic">Platform</span>
       ),
     width: "150px",
   },
   {
     name: "When",
     cell: (row) => (
-      <span className="text-[12px] text-(--text-muted) tabular-nums">
+      <span className="text-xs text-(--text-muted) tabular-nums">
         {relativeTime(row.createdAt)}
       </span>
     ),

@@ -93,7 +93,7 @@ export function ConfirmToggleStatusDialog({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+            className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
           >
             Cancel
           </button>
@@ -101,7 +101,7 @@ export function ConfirmToggleStatusDialog({
             type="button"
             onClick={onConfirm}
             disabled={isPending}
-            className={`inline-flex h-8 items-center rounded-md px-3 text-[13px] font-medium text-white transition-colors disabled:opacity-50 ${
+            className={`inline-flex h-8 items-center rounded-md px-3 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
               isDeactivate
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-primary hover:bg-(--primary-hover)"

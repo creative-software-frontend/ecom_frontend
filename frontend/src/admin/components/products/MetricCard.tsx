@@ -24,7 +24,7 @@ export function MetricCard({
   return (
     <article className="flex min-w-0 items-center justify-between gap-3 rounded-md border border-border bg-card p-3.5">
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+        <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
           {label}
         </p>
         <p className="mt-1 truncate text-xl leading-tight font-bold text-foreground tabular-nums">

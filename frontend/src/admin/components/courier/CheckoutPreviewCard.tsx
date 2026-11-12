@@ -23,17 +23,17 @@ export function CheckoutPreviewCard({ values }: { values: CourierFormValues }) {
             Checkout preview
           </h3>
         </div>
-        <span className="rounded bg-(--status-delivered-bg) px-2 py-0.5 text-[10px] font-semibold text-(--status-delivered-text) uppercase">
+        <span className="rounded bg-(--status-delivered-bg) px-2 py-0.5 text-xs font-semibold text-(--status-delivered-text) uppercase">
           Storefront Live
         </span>
       </div>
-      <p className="text-[11px] leading-relaxed text-(--text-muted)">
+      <p className="text-xs leading-relaxed text-(--text-muted)">
         This is how your 3 predefined delivery options appear to customers
         during storefront checkout:
       </p>
 
       <div>
-        <div className="flex items-center justify-between text-[11px] text-(--text-muted)">
+        <div className="flex items-center justify-between text-xs text-(--text-muted)">
           <span className="font-semibold text-(--text-primary)">
             Delivery Method
           </span>
@@ -52,19 +52,19 @@ export function CheckoutPreviewCard({ values }: { values: CourierFormValues }) {
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-1 text-[12px] font-medium text-(--text-primary)">
+                  <span className="flex items-center gap-1 text-xs font-medium text-(--text-primary)">
                     {isSelected && <Radio className="size-3 text-primary" />}
                     {zone.nameEn} (৳{fees[zone.id]})
                   </span>
                   <span
-                    className={`text-[12px] font-semibold tabular-nums ${
+                    className={`text-xs font-semibold tabular-nums ${
                       isSelected ? "text-primary" : "text-(--text-muted)"
                     }`}
                   >
                     ৳{fees[zone.id]}
                   </span>
                 </div>
-                <p className="mt-0.5 text-[10px] text-(--text-muted)">
+                <p className="mt-0.5 text-xs text-(--text-muted)">
                   {idx === 0 && "1–2 Days Delivery • Core City"}
                   {idx === 1 && "2–3 Days Delivery"}
                   {idx === 2 && "3–5 Days Delivery • All 61 Districts"}
@@ -75,7 +75,7 @@ export function CheckoutPreviewCard({ values }: { values: CourierFormValues }) {
         </div>
       </div>
 
-      <div className="border-t border-(--border-light) pt-2 text-[12px]">
+      <div className="border-t border-(--border-light) pt-2 text-xs">
         <div className="flex justify-between py-0.5">
           <span className="text-(--text-muted)">Cart Subtotal</span>
           <span className="font-semibold text-(--text-primary) tabular-nums">
@@ -98,13 +98,13 @@ export function CheckoutPreviewCard({ values }: { values: CourierFormValues }) {
         </div>
       </div>
 
-      <p className="flex items-start gap-1.5 text-[10px] leading-relaxed text-(--text-muted)">
+      <p className="flex items-start gap-1.5 text-xs leading-relaxed text-(--text-muted)">
         <Eye className="mt-0.5 size-3 shrink-0" />
         Estimated delivery updates automatically upon phone lookup.
       </p>
 
       {values.free_delivery_above > 0 && (
-        <div className="flex items-start gap-1.5 rounded-md border border-(--status-delivered-bg) bg-(--primary-soft) p-2 text-[11px] leading-relaxed text-(--text-primary)">
+        <div className="flex items-start gap-1.5 rounded-md border border-(--status-delivered-bg) bg-(--primary-soft) p-2 text-xs leading-relaxed text-(--text-primary)">
           <MapPin className="mt-0.5 size-3 shrink-0 text-primary" />
           <span>
             Offer free shipping on orders above{" "}

@@ -24,7 +24,7 @@ export function ProductReplenishmentNotice({
           <p className="truncate text-xs font-semibold text-foreground">
             Replenishment Notice: {product.name} ({product.slug})
           </p>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Only {product.stockQuantity} units remain in stock. Review this
             product before it sells out.
           </p>
@@ -40,14 +40,14 @@ export function ProductReplenishmentNotice({
           type="button"
           variant="secondary"
           onClick={onDismiss}
-          className="h-auto rounded-md px-3 py-1.5 text-[10px]"
+          className="h-auto rounded-md px-3 py-1.5 text-xs"
         >
           Dismiss
         </Button>
         <Button
           type="button"
           onClick={onViewLowStock}
-          className="h-auto rounded-md px-3 py-1.5 text-[10px] hover:bg-(--primary-hover)"
+          className="h-auto rounded-md px-3 py-1.5 text-xs hover:bg-(--primary-hover)"
         >
           View low stock
         </Button>

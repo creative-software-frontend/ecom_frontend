@@ -36,11 +36,11 @@ export function CopyableField({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <label className="text-[11px] font-semibold tracking-wider text-(--text-muted) uppercase">
+        <label className="text-xs font-semibold tracking-wider text-(--text-muted) uppercase">
           {label}
         </label>
         {hint && (
-          <span className="shrink-0 text-[11px] text-(--text-muted)">
+          <span className="shrink-0 text-xs text-(--text-muted)">
             {hint}
           </span>
         )}
@@ -53,12 +53,12 @@ export function CopyableField({
           type="text"
           value={value}
           readOnly
-          className="h-full min-w-0 flex-1 bg-transparent font-mono text-[13px] tracking-wide text-(--text-primary) outline-none"
+          className="h-full min-w-0 flex-1 bg-transparent font-mono text-sm tracking-wide text-(--text-primary) outline-none"
         />
         <button
           type="button"
           onClick={handleCopy}
-          className="inline-flex h-7 shrink-0 items-center gap-1 rounded px-2 text-[11px] font-medium text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
+          className="inline-flex h-7 shrink-0 items-center gap-1 rounded px-2 text-xs font-medium text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
           aria-label={`Copy ${label}`}
         >
           {copied ? (

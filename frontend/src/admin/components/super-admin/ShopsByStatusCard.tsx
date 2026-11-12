@@ -54,11 +54,11 @@ export function ShopsByStatusCard({
                 className="flex items-center justify-between gap-2"
               >
                 <span
-                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${cfg.badgeClass}`}
+                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${cfg.badgeClass}`}
                 >
                   {cfg.label}
                 </span>
-                <span className="text-[13px] font-semibold text-(--text-primary) tabular-nums">
+                <span className="text-sm font-semibold text-(--text-primary) tabular-nums">
                   {s.count}
                 </span>
               </li>
@@ -68,7 +68,7 @@ export function ShopsByStatusCard({
       )}
       {trialExpiringSoon.length > 0 && (
         <div className="rounded-md border border-(--status-pending-bg) bg-(--status-pending-bg)/50 p-2">
-          <p className="text-[11px] font-medium text-(--status-pending-text)">
+          <p className="text-xs font-medium text-(--status-pending-text)">
             ⚠️ {trialExpiringSoon.length} trial
             {trialExpiringSoon.length === 1 ? "" : "s"} expiring within 7 days
           </p>

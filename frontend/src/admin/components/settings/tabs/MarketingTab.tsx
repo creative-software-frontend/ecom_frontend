@@ -51,14 +51,14 @@ const mockServerState: MarketingSettings = {
 function StatusChip({ active, note }: { active: boolean; note?: string }) {
   if (!active) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-(--bg-table-header) px-2 py-0.5 text-[11px] font-medium text-(--text-muted)">
+      <span className="inline-flex items-center gap-1 rounded-full bg-(--bg-table-header) px-2 py-0.5 text-xs font-medium text-(--text-muted)">
         <span className="size-1.5 rounded-full bg-(--text-muted)" />
         Inactive
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-(--status-delivered-bg) px-2 py-0.5 text-[11px] font-medium text-(--status-delivered-text)">
+    <span className="inline-flex items-center gap-1 rounded-full bg-(--status-delivered-bg) px-2 py-0.5 text-xs font-medium text-(--status-delivered-text)">
       <span className="size-1.5 rounded-full bg-(--status-delivered-text)" />
       Active{note ? ` (${note})` : ""}
     </span>
@@ -186,7 +186,7 @@ export default function MarketingTab() {
               <h2 className="text-sm font-semibold text-(--text-primary)">
                 Restricted Access &amp; Script Injection Notice
               </h2>
-              <span className="rounded-full bg-(--bg-surface) px-2 py-0.5 text-[11px] font-medium text-(--text-muted)">
+              <span className="rounded-full bg-(--bg-surface) px-2 py-0.5 text-xs font-medium text-(--text-muted)">
                 Admin Clearance Only
               </span>
             </div>
@@ -239,14 +239,14 @@ export default function MarketingTab() {
               <div className="mb-1.5 flex items-center justify-between gap-2">
                 <label
                   htmlFor="fb-test-event"
-                  className="text-[11px] font-semibold tracking-wider text-(--text-muted) uppercase"
+                  className="text-xs font-semibold tracking-wider text-(--text-muted) uppercase"
                 >
                   Test event code{" "}
                   <span className="font-normal text-(--text-muted)">
                     (optional)
                   </span>
                 </label>
-                <span className="shrink-0 text-[11px] font-medium text-amber-600">
+                <span className="shrink-0 text-xs font-medium text-amber-600">
                   Clear before live campaigns
                 </span>
               </div>
@@ -256,7 +256,7 @@ export default function MarketingTab() {
                   id="fb-test-event"
                   type="text"
                   placeholder="TEST84920"
-                  className="h-full min-w-0 flex-1 bg-transparent text-[13px] text-(--text-primary) outline-none"
+                  className="h-full min-w-0 flex-1 bg-transparent text-sm text-(--text-primary) outline-none"
                   {...register("facebook.test_event_code")}
                 />
               </div>
@@ -339,7 +339,7 @@ export default function MarketingTab() {
             never shown again in plain text.
           </span>
         </div>
-        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-(--text-muted)">
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-(--text-muted)">
           <BadgeCheck className="size-3.5" />
           TLS 1.3 Strict
         </span>

@@ -41,16 +41,16 @@ export function ShopsTable({
       minWidth: "220px",
       cell: (row) => (
         <div className="flex items-center gap-3 py-2">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary text-[13px] font-bold text-white">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-bold text-white">
             {row.name.substring(0, 2).toUpperCase()}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold text-(--text-primary)">
+            <p className="truncate text-sm font-semibold text-(--text-primary)">
               {row.name}
             </p>
             <a
               href={`#`}
-              className="flex items-center gap-1 text-[11px] text-(--text-muted) hover:text-primary"
+              className="flex items-center gap-1 text-xs text-(--text-muted) hover:text-primary"
             >
               {row.slug}.powerzenox.com <ExternalLink className="size-3" />
             </a>
@@ -63,10 +63,10 @@ export function ShopsTable({
       minWidth: "180px",
       cell: (row) => (
         <div className="min-w-0">
-          <p className="truncate text-[13px] font-medium text-(--text-primary)">
+          <p className="truncate text-sm font-medium text-(--text-primary)">
             {row.ownerName}
           </p>
-          <p className="truncate text-[11px] text-(--text-muted)">
+          <p className="truncate text-xs text-(--text-muted)">
             {row.ownerMobile}
           </p>
         </div>
@@ -79,7 +79,7 @@ export function ShopsTable({
         const cfg = statusConfig[row.status] || statusConfig.inactive
         return (
           <span
-            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium ${cfg.className}`}
+            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${cfg.className}`}
           >
             <span className={`size-1.5 rounded-full bg-current`} />
             {cfg.label} {row.status === "trial" && "• 2 days left"}
@@ -92,8 +92,8 @@ export function ShopsTable({
       minWidth: "200px",
       cell: (row) => (
         <div>
-          <p className="text-[13px] text-(--text-primary)">{row.planName}</p>
-          <p className="text-[11px] text-(--text-muted)">
+          <p className="text-sm text-(--text-primary)">{row.planName}</p>
+          <p className="text-xs text-(--text-muted)">
             {row.expiresAt
               ? `Expires ${formatDate(row.expiresAt)}`
               : "No expiry"}
@@ -105,7 +105,7 @@ export function ShopsTable({
       name: "Users",
       width: "100px",
       cell: (row) => (
-        <span className="text-[12px] font-medium text-(--text-primary) tabular-nums">
+        <span className="text-xs font-medium text-(--text-primary) tabular-nums">
           {row.userCount} users
         </span>
       ),

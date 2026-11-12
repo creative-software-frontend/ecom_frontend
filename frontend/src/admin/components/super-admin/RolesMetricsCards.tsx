@@ -40,7 +40,7 @@ export function RolesMetricsCards({ roles }: { roles: SuperAdminRole[] }) {
         subText="Root & platform governance roles"
         icon={<Fingerprint className="icon-size! text-rose-500" />}
         badge={
-          <span className="rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-rose-600 uppercase">
+          <span className="rounded bg-rose-50 px-1.5 py-0.5 text-xs font-bold tracking-wider text-rose-600 uppercase">
             High Security
           </span>
         }

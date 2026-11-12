@@ -15,7 +15,7 @@ export function TopVerticalsCard() {
             <h3 className="text-sm font-semibold text-(--text-primary)">
               Top Herbal Verticals
             </h3>
-            <p className="mt-0.5 text-[11px] text-(--text-muted)">
+            <p className="mt-0.5 text-xs text-(--text-muted)">
               Dominant product types across tenant catalogs
             </p>
           </div>
@@ -32,7 +32,7 @@ export function TopVerticalsCard() {
             }}
           >
             <div className="flex size-16 flex-col items-center justify-center rounded-full bg-(--bg-surface)">
-              <span className="text-[14px] font-bold text-(--text-primary) tabular-nums">
+              <span className="text-sm font-bold text-(--text-primary) tabular-nums">
                 1,840
               </span>
               <span className="text-[9px] font-medium text-(--text-muted) uppercase">
@@ -46,7 +46,7 @@ export function TopVerticalsCard() {
             {verticals.map((v) => (
               <div
                 key={v.name}
-                className="flex items-center justify-between text-[11px]"
+                className="flex items-center justify-between text-xs"
               >
                 <div className="flex items-center gap-2">
                   <span
@@ -69,14 +69,14 @@ export function TopVerticalsCard() {
         <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-emerald-500" />
         <div className="flex flex-1 items-start justify-between gap-2">
           <div>
-            <p className="text-[10px] text-(--text-muted)">
+            <p className="text-xs text-(--text-muted)">
               National Courier Gateways:
             </p>
-            <p className="text-[11px] font-medium text-(--text-primary)">
+            <p className="text-xs font-medium text-(--text-primary)">
               RedX, Steadfast, Pathao
             </p>
           </div>
-          <span className="text-[11px] font-bold text-emerald-600">
+          <span className="text-xs font-bold text-emerald-600">
             99.8% Online
           </span>
         </div>

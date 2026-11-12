@@ -170,11 +170,11 @@ export function CreateCouponModal({
               <div className="mb-1.5 flex items-center justify-between gap-2">
                 <label
                   htmlFor="coupon-code"
-                  className="text-[13px] font-semibold text-(--text-primary)"
+                  className="text-sm font-semibold text-(--text-primary)"
                 >
                   Coupon code
                 </label>
-                <span className="text-[11px] text-(--text-muted)">
+                <span className="text-xs text-(--text-muted)">
                   Customers enter this at checkout
                 </span>
               </div>
@@ -185,13 +185,13 @@ export function CreateCouponModal({
                   placeholder="SUMMER25"
                   maxLength={20}
                   autoComplete="off"
-                  className="h-9 min-w-0 flex-1 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 font-mono text-[13px] tracking-wide text-(--text-primary) uppercase transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
+                  className="h-9 min-w-0 flex-1 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 font-mono text-sm tracking-wide text-(--text-primary) uppercase transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                   {...register("code")}
                 />
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
                 >
                   <RefreshCw className="size-3.5" />
                   Generate
@@ -202,7 +202,7 @@ export function CreateCouponModal({
 
             {/* Discount type */}
             <div>
-              <label className="mb-1.5 block text-[13px] font-semibold text-(--text-primary)">
+              <label className="mb-1.5 block text-sm font-semibold text-(--text-primary)">
                 Discount type
               </label>
               <Controller
@@ -234,13 +234,13 @@ export function CreateCouponModal({
             <div>
               <label
                 htmlFor="discount-value"
-                className="mb-1.5 block text-[13px] font-semibold text-(--text-primary)"
+                className="mb-1.5 block text-sm font-semibold text-(--text-primary)"
               >
                 Discount value
               </label>
               <div className="relative">
                 {discountType === "amount" && (
-                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[13px] text-(--text-muted)">
+                  <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-(--text-muted)">
                     ৳
                   </span>
                 )}
@@ -249,14 +249,14 @@ export function CreateCouponModal({
                   type="number"
                   min={1}
                   max={discountType === "percentage" ? 100 : undefined}
-                  className={`h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) pr-8 text-right text-[13px] text-(--text-primary) tabular-nums transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20 ${
+                  className={`h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) pr-8 text-right text-sm text-(--text-primary) tabular-nums transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20 ${
                     discountType === "amount" ? "pl-8" : "pl-3"
                   }`}
                   {...register("discount_value", {
                     setValueAs: toNumberOrZero,
                   })}
                 />
-                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[13px] text-(--text-muted)">
+                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-(--text-muted)">
                   {discountType === "percentage" ? "%" : "৳"}
                 </span>
               </div>
@@ -284,7 +284,7 @@ export function CreateCouponModal({
                       Maximum discount amount (৳)
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[13px] text-(--text-muted)">
+                      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-(--text-muted)">
                         ৳
                       </span>
                       <input
@@ -292,7 +292,7 @@ export function CreateCouponModal({
                         type="number"
                         min={1}
                         placeholder="500"
-                        className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) pr-3 pl-8 text-right text-[13px] text-(--text-primary) tabular-nums transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
+                        className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) pr-3 pl-8 text-right text-sm text-(--text-primary) tabular-nums transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                         {...register("max_discount.value", {
                           setValueAs: toNumberOrZero,
                         })}
@@ -327,7 +327,7 @@ export function CreateCouponModal({
                       Minimum order subtotal (৳)
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[13px] text-(--text-muted)">
+                      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-(--text-muted)">
                         ৳
                       </span>
                       <input
@@ -335,7 +335,7 @@ export function CreateCouponModal({
                         type="number"
                         min={1}
                         placeholder="1,500"
-                        className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) pr-3 pl-8 text-right text-[13px] text-(--text-primary) tabular-nums transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
+                        className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) pr-3 pl-8 text-right text-sm text-(--text-primary) tabular-nums transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                         {...register("min_purchase.value", {
                           setValueAs: toNumberOrZero,
                         })}
@@ -356,7 +356,7 @@ export function CreateCouponModal({
               <div>
                 <label
                   htmlFor="usage-limit"
-                  className="mb-1.5 block text-[13px] font-semibold text-(--text-primary)"
+                  className="mb-1.5 block text-sm font-semibold text-(--text-primary)"
                 >
                   Total usage limit
                 </label>
@@ -365,7 +365,7 @@ export function CreateCouponModal({
                   type="number"
                   min={1}
                   placeholder="Leave empty for unlimited"
-                  className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] text-(--text-primary) tabular-nums transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
+                  className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm text-(--text-primary) tabular-nums transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                   {...register("usage_limit", {
                     setValueAs: toNumberOrNull,
                   })}
@@ -377,7 +377,7 @@ export function CreateCouponModal({
               <div>
                 <label
                   htmlFor="expires-at"
-                  className="mb-1.5 block text-[13px] font-semibold text-(--text-primary)"
+                  className="mb-1.5 block text-sm font-semibold text-(--text-primary)"
                 >
                   Expiry date &amp; time
                 </label>
@@ -386,7 +386,7 @@ export function CreateCouponModal({
                     id="expires-at"
                     type="datetime-local"
                     onClick={(e) => e.currentTarget.showPicker()}
-                    className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 pr-9 text-[13px] text-(--text-primary) scheme-light transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20 [&::-webkit-calendar-picker-indicator]:hidden"
+                    className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 pr-9 text-sm text-(--text-primary) scheme-light transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20 [&::-webkit-calendar-picker-indicator]:hidden"
                     {...register("expires_at", {
                       setValueAs: toDateOrNull,
                     })}
@@ -429,14 +429,14 @@ export function CreateCouponModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-4 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-4 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-4 text-[13px] font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Check className="size-3.5" />
               {isSubmitting ? "Creating..." : "Create coupon"}

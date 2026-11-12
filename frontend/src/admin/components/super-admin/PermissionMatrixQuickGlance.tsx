@@ -21,13 +21,13 @@ export function PermissionMatrixQuickGlance() {
             <h3 className="text-sm font-semibold text-(--text-primary)">
               Module Permission Matrix Quick Glance
             </h3>
-            <p className="text-[11px] text-(--text-muted)">
+            <p className="text-xs text-(--text-muted)">
               Core security pillars governing Bangladesh herbal logistics &
               billing gateways
             </p>
           </div>
         </div>
-        <button className="flex items-center gap-1 text-[12px] font-medium text-primary hover:underline">
+        <button className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
           Open Granular Matrix Editor <ArrowRight className="size-3" />
         </button>
       </div>
@@ -38,14 +38,14 @@ export function PermissionMatrixQuickGlance() {
             key={mod.name}
             className="rounded-md border border-(--border-light) bg-(--bg-app) p-3"
           >
-            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-(--text-primary)">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-(--text-primary)">
               <span className="size-1.5 rounded-full bg-emerald-500" />
               {mod.name}
             </div>
-            <p className="mt-1 text-[11px] text-(--text-muted)">
+            <p className="mt-1 text-xs text-(--text-muted)">
               {mod.rules} rules defined
             </p>
-            <div className="mt-3 inline-block rounded border border-(--border-light) bg-(--bg-surface) px-1.5 py-0.5 text-[10px] font-medium text-(--text-muted)">
+            <div className="mt-3 inline-block rounded border border-(--border-light) bg-(--bg-surface) px-1.5 py-0.5 text-xs font-medium text-(--text-muted)">
               {mod.scope}
             </div>
           </div>

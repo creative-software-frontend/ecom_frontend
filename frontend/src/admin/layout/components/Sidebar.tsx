@@ -9,7 +9,7 @@ export function Sidebar({ menu }: { menu: MenuItem[] }) {
           if (item.type === "section") {
             return (
               <li key={`section-${index}`} className="px-3 pt-4 pb-2">
-                <span className="text-[11px] font-bold tracking-wider text-(--text-muted) uppercase">
+                <span className="text-xs font-bold tracking-wider text-(--text-muted) uppercase">
                   {item.label}
                 </span>
               </li>

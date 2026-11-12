@@ -204,10 +204,10 @@ export default function PagesTab() {
         {/* ============ LEFT: page list ============ */}
         <aside className="flex flex-col overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
           <div className="flex items-center justify-between gap-2 border-b border-(--border-light) px-3 py-2.5">
-            <span className="text-[11px] font-semibold tracking-wider text-(--text-muted) uppercase">
+            <span className="text-xs font-semibold tracking-wider text-(--text-muted) uppercase">
               Store content
             </span>
-            <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 text-[10px] font-medium text-(--text-muted) tabular-nums">
+            <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 text-xs font-medium text-(--text-muted) tabular-nums">
               {pages.length} items
             </span>
           </div>
@@ -225,7 +225,7 @@ export default function PagesTab() {
           <button
             type="button"
             onClick={() => alert("Coming soon")}
-            className="flex items-center justify-center gap-1.5 border-t border-(--border-light) px-3 py-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+            className="flex items-center justify-center gap-1.5 border-t border-(--border-light) px-3 py-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
           >
             <Plus className="size-3.5" />
             Add custom page
@@ -243,7 +243,7 @@ export default function PagesTab() {
                     Edit Page: {selectedPage.title}
                   </h2>
                   <span
-                    className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium ${
+                    className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-medium ${
                       selectedPage.status === "published"
                         ? "bg-(--status-delivered-bg) text-(--status-delivered-text)"
                         : "bg-(--bg-table-header) text-(--text-muted)"
@@ -252,7 +252,7 @@ export default function PagesTab() {
                     {selectedPage.status === "published" ? "Live" : "Draft"}
                   </span>
                 </div>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-(--text-muted)">
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-(--text-muted)">
                   <span>Public Link:</span>
                   <code className="rounded bg-(--bg-table-header) px-1.5 py-0.5 font-mono">
                     powerzenox.com/{selectedPage.slug}
@@ -280,7 +280,7 @@ export default function PagesTab() {
                       "_blank"
                     )
                   }
-                  className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
                 >
                   <Eye className="size-3.5" /> Preview
                 </button>
@@ -288,7 +288,7 @@ export default function PagesTab() {
                   type="button"
                   onClick={handleSubmit(onSubmit)}
                   disabled={isSubmitting}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-[13px] font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
                 >
                   <Save className="size-3.5" />
                   {isSubmitting ? "Saving..." : "Save page"}
@@ -304,14 +304,14 @@ export default function PagesTab() {
               <div>
                 <label
                   htmlFor="page-title"
-                  className="mb-1.5 block text-[11px] font-semibold text-(--text-muted) uppercase"
+                  className="mb-1.5 block text-xs font-semibold text-(--text-muted) uppercase"
                 >
                   Page title
                 </label>
                 <input
                   id="page-title"
                   type="text"
-                  className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-[13px] text-(--text-primary) outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
+                  className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm text-(--text-primary) outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                   {...register("title")}
                 />
                 {errors.title && (
@@ -321,19 +321,19 @@ export default function PagesTab() {
               <div className="md:w-64">
                 <label
                   htmlFor="page-slug"
-                  className="mb-1.5 block text-[11px] font-semibold text-(--text-muted) uppercase"
+                  className="mb-1.5 block text-xs font-semibold text-(--text-muted) uppercase"
                 >
                   URL slug
                 </label>
                 <div className="flex h-9 items-center rounded-md border border-(--border-light) bg-(--bg-surface-hover) px-3">
-                  <span className="text-[13px] text-(--text-muted)">/</span>
+                  <span className="text-sm text-(--text-muted)">/</span>
                   <input
                     id="page-slug"
                     type="text"
                     readOnly
                     // Slug is derived from title server-side. Locked here
                     // because changing it after publish breaks inbound links.
-                    className="h-full min-w-0 flex-1 bg-transparent text-[13px] text-(--text-primary) outline-none"
+                    className="h-full min-w-0 flex-1 bg-transparent text-sm text-(--text-primary) outline-none"
                     {...register("slug")}
                   />
                   <Lock
@@ -356,11 +356,11 @@ export default function PagesTab() {
               aria-multiline="true"
               aria-label="Page content"
               onInput={(e) => setContent(e.currentTarget.innerHTML)}
-              className="admin-rte min-h-80 rounded-md border border-(--border-light) bg-(--bg-surface) px-4 py-3 text-[13px] leading-relaxed text-(--text-primary) outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
+              className="admin-rte min-h-80 rounded-md border border-(--border-light) bg-(--bg-surface) px-4 py-3 text-sm leading-relaxed text-(--text-primary) outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
             />
 
             {/* Editor footer meta */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-(--border-light) pt-2 text-[11px] text-(--text-muted)">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-(--border-light) pt-2 text-xs text-(--text-muted)">
               <div className="flex flex-wrap items-center gap-3">
                 <span>
                   Words:{" "}
@@ -396,17 +396,17 @@ export default function PagesTab() {
                   <Search className="size-3.5" />
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-[12px] font-semibold text-(--text-primary)">
+                  <h3 className="text-xs font-semibold text-(--text-primary)">
                     Search Engine Listing
                   </h3>
-                  <p className="mt-0.5 text-[11px] leading-relaxed text-(--text-muted)">
+                  <p className="mt-0.5 text-xs leading-relaxed text-(--text-muted)">
                     Customize how this legal page appears on Google search
                     indexing. Clean slugs help with local search
                     trustworthiness.
                   </p>
                   <button
                     type="button"
-                    className="mt-2 text-[11px] font-medium text-primary hover:underline"
+                    className="mt-2 text-xs font-medium text-primary hover:underline"
                   >
                     Edit SEO Meta →
                   </button>
@@ -419,17 +419,17 @@ export default function PagesTab() {
                   <History className="size-3.5" />
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-[12px] font-semibold text-(--text-primary)">
+                  <h3 className="text-xs font-semibold text-(--text-primary)">
                     Revision History
                   </h3>
-                  <p className="mt-0.5 text-[11px] leading-relaxed text-(--text-muted)">
+                  <p className="mt-0.5 text-xs leading-relaxed text-(--text-muted)">
                     Last updated by {selectedPage.last_edited_by} on{" "}
                     {selectedPage.last_edited_at}. {selectedPage.revision_count}{" "}
                     historic revisions available.
                   </p>
                   <button
                     type="button"
-                    className="mt-2 text-[11px] font-medium text-primary hover:underline"
+                    className="mt-2 text-xs font-medium text-primary hover:underline"
                   >
                     Restore Previous Version
                   </button>
