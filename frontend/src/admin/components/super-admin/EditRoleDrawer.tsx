@@ -51,14 +51,18 @@ export function EditRoleDrawer({
     formState: { errors, isSubmitting, isDirty },
   } = useForm<EditFormValues>({
     resolver: zodResolver(editSchema),
+    defaultValues: {
+      displayName: "",
+      description: "",
+      permissions: {},
+    },
   })
-
   useEffect(() => {
     if (open && role) {
       reset({
         displayName: role.displayName,
         description: role.description,
-        permissions: role.permissions,
+        permissions: role.permissions ?? {},
       })
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDrawerError(null)
@@ -213,7 +217,7 @@ export function EditRoleDrawer({
               name="permissions"
               render={({ field }) => (
                 <PermissionMatrix
-                  value={field.value}
+                  value={field.value ?? {}}
                   onChange={field.onChange}
                   scope={role.scope}
                   disabled={isSuperAdminRole}

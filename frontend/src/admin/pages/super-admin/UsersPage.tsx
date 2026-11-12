@@ -166,7 +166,6 @@ export default function UsersPage() {
         open={resetPwUser !== null}
         user={resetPwUser}
         onClose={() => setResetPwUser(null)}
-        onSuccess={(msg) => setSuccessMessage(msg)}
       />
       <ConfirmToggleStatusDialog
         open={toggleTarget !== null}

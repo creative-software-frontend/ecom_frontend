@@ -121,9 +121,7 @@ export function RolesTable({
       minWidth: "160px",
       cell: (row) => {
         if (row.userCount === 0) {
-          return (
-            <span className="text-xs text-(--text-muted)">0 users</span>
-          )
+          return <span className="text-xs text-(--text-muted)">0 users</span>
         }
 
         const { avatars, remaining } = getDummyAvatars(row.userCount)
@@ -182,14 +180,6 @@ export function RolesTable({
 
         return (
           <div className="flex items-center justify-end gap-3">
-            {/* ডিজাইন অনুযায়ী ডানপাশে Edit Permissions টেক্সট বাটন */}
-            <button
-              onClick={() => onEdit(row)}
-              className="text-xs font-medium whitespace-nowrap text-primary hover:underline"
-            >
-              {isSuperAdmin ? "View Matrix" : "Edit Permissions"}
-            </button>
-
             <PortalActionMenu
               label={`Actions for ${row.displayName}`}
               trigger={<MoreVertical className="size-4" />}
