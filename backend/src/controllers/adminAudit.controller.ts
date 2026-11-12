@@ -11,6 +11,20 @@ export async function listAuditLogs(req: Request, res: Response) {
   );
 
   const where: Prisma.AuditLogWhereInput = {};
+  const search =
+    typeof req.query.q === "string" ? req.query.q.trim() : "";
+  if (search) {
+    where.OR = [
+      { action: { contains: search } },
+      { entityType: { contains: search } },
+      { entityId: { contains: search } },
+      { ipAddress: { contains: search } },
+      { user: { is: { name: { contains: search } } } },
+      { user: { is: { email: { contains: search } } } },
+      { shop: { is: { name: { contains: search } } } },
+      { shop: { is: { slug: { contains: search } } } },
+    ];
+  }
   if (typeof req.query.userId === "string") {
     const userId = parseId(req.query.userId);
     if (userId === null) {
