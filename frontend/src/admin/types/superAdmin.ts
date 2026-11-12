@@ -118,3 +118,53 @@ export type SuperAdminDashboardData = {
     trialEndsAt: string | null
   }[]
 }
+
+export type SuperAdminShopListItem = {
+  id: number
+  name: string
+  slug: string
+  ownerName: string
+  ownerMobile: string
+  status: "active" | "trial" | "inactive"
+  planName: string
+  expiresAt: string | null
+  userCount: number
+}
+
+export type ShopsListResponse = {
+  items: SuperAdminShopListItem[]
+  page: number
+  limit: number
+  total: number
+  counts: {
+    total: number
+    active: number
+    trial: number
+    inactive: number
+  }
+}
+// audit logs
+export type AuditLogListItem = {
+  id: string
+  action: string
+  entityType: string | null
+  entityId: string | null
+  createdAt: string
+  user: { id: number; name: string; email: string }
+  shop: { id: number; name: string; slug: string } | null
+}
+
+export type AuditLogResponse = {
+  items: AuditLogListItem[]
+  page: number
+  limit: number
+  total: number
+}
+
+export type AuditLogQueryParams = {
+  page: number
+  limit: number
+  q?: string
+  action?: string
+  shopId?: number
+}

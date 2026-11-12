@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react"
-import { CheckCircle2, X } from "lucide-react"
+import { CheckCircle2, X, Download } from "lucide-react"
 import { RolesToolbar } from "../../components/super-admin/RolesToolbar"
 import { RolesTable } from "../../components/super-admin/RolesTable"
+import { RolesMetricsCards } from "../../components/super-admin/RolesMetricsCards"
+import { PermissionMatrixQuickGlance } from "../../components/super-admin/PermissionMatrixQuickGlance"
 import { CreateRoleModal } from "../../components/super-admin/CreateRoleModal"
 import { EditRoleDrawer } from "../../components/super-admin/EditRoleDrawer"
 import { DeleteRoleDialog } from "../../components/super-admin/DeleteRoleDialog"
@@ -17,15 +19,13 @@ export default function RolesPage() {
   const { data: roles = [], isLoading } = useAdminRolesList()
   const deleteMutation = useDeleteRoleMutation()
 
-  // Client-side filter — role list is small and not paginated by backend.
   const filteredRoles = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return roles
     return roles.filter(
       (r) =>
         r.displayName.toLowerCase().includes(q) ||
-        r.name.toLowerCase().includes(q) ||
-        r.description.toLowerCase().includes(q)
+        r.name.toLowerCase().includes(q)
     )
   }, [roles, search])
 
@@ -53,36 +53,54 @@ export default function RolesPage() {
 
   return (
     <div className="min-w-0 space-y-4 bg-(--bg-app) p-4 sm:p-6">
-      <header>
-        <h1 className="text-[20px] font-semibold text-(--text-primary)">
-          Roles & Permissions
-        </h1>
-        <p className="mt-0.5 text-[13px] text-(--text-muted)">
-          Define what each role can do across every module. Changes take effect
-          immediately for all users with that role.
-        </p>
-      </header>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-(--text-primary)">
+              Roles & Permissions
+            </h1>
+            {!isLoading && (
+              <span className="rounded bg-(--bg-table-header) px-2 py-0.5 text-xs font-medium text-(--text-muted)">
+                {roles.length} Configured
+              </span>
+            )}
+          </div>
+          <p className="mt-0.5 text-sm text-(--text-muted)">
+            Define what each role can do across every module.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
+            <Download className="size-4" /> Export CSV
+          </button>
+          {/* <button
+            onClick={() => setCreateOpen(true)}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-white hover:bg-(--primary-hover)"
+          >
+            + Create Role
+          </button> */}
+        </div>
+      </div>
 
       {successMessage && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-[13px] text-(--status-delivered-text)"
-        >
+        <div className="flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-sm text-(--status-delivered-text)">
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="size-4 shrink-0" />
-            {successMessage}
+            <CheckCircle2 className="size-4 shrink-0" /> {successMessage}
           </span>
           <button
-            type="button"
             onClick={() => setSuccessMessage(null)}
             className="rounded p-1 hover:bg-(--status-delivered-bg)"
-            aria-label="Dismiss"
           >
             <X className="size-3.5" />
           </button>
         </div>
       )}
 
+      {/* Metrics */}
+      {!isLoading && <RolesMetricsCards roles={roles} />}
+
+      {/* Table Area */}
       <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
         <RolesToolbar
           search={search}
@@ -100,6 +118,10 @@ export default function RolesPage() {
         />
       </section>
 
+      {/* Quick Glance Section */}
+      {!isLoading && <PermissionMatrixQuickGlance />}
+
+      {/* Modals */}
       <CreateRoleModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
@@ -117,10 +139,7 @@ export default function RolesPage() {
         userCount={deleteTarget?.userCount ?? 0}
         isPending={deleteMutation.isPending}
         errorMessage={deleteError}
-        onCancel={() => {
-          setDeleteTarget(null)
-          setDeleteError(null)
-        }}
+        onCancel={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
       />
     </div>

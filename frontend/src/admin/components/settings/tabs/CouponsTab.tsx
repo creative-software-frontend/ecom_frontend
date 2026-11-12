@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import DataTable, { type TableColumn } from "react-data-table-component"
 import {
   Plus,
   Search,
@@ -18,6 +19,7 @@ import { MetricCard } from "../MetricCard"
 import type { Coupon, CouponStatus } from "../../../types/coupon"
 import { CreateCouponModal } from "../modals/CreateCouponModal"
 import { PortalActionMenu } from "../../common/PortalActionMenu"
+import { adminDataTableStyles } from "../../../lib/dataTableStyles"
 
 /* ================================================================
    Mock data — replace with API later
@@ -251,6 +253,95 @@ export default function CouponsTab() {
     setShowCreateModal(true)
   }
 
+  const columns: TableColumn<Coupon>[] = [
+    {
+      name: "Code",
+      selector: (coupon) => coupon.code,
+      minWidth: "130px",
+      cell: (coupon) => (
+        <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 font-mono text-[12px] font-medium text-(--text-primary)">
+          {coupon.code}
+        </span>
+      ),
+    },
+    {
+      name: "Discount",
+      selector: (coupon) => coupon.discount_value,
+      minWidth: "180px",
+      cell: (coupon) => (
+        <span className="text-(--text-primary)">{formatDiscount(coupon)}</span>
+      ),
+    },
+    {
+      name: "Used",
+      selector: (coupon) => coupon.used,
+      minWidth: "150px",
+      cell: (coupon) => <UsedCell coupon={coupon} />,
+    },
+    {
+      name: "Expires",
+      selector: (coupon) => coupon.expires_at ?? "",
+      minWidth: "170px",
+      cell: (coupon) => <ExpiryCell coupon={coupon} />,
+    },
+    {
+      name: "Status",
+      selector: (coupon) => coupon.status,
+      width: "120px",
+      cell: (coupon) => <CouponStatusChip status={coupon.status} />,
+    },
+    {
+      name: "Actions",
+      cell: (coupon) => (
+        <PortalActionMenu
+          label={`Actions for coupon ${coupon.code}`}
+          trigger={<MoreVertical className="size-4" />}
+          triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--text-primary)"
+          menuClassName="w-32"
+        >
+          {(closeMenu) => (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => handleMenuAction(coupon, "edit", closeMenu)}
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
+              >
+                <Pencil className="size-3.5" /> Edit
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => handleMenuAction(coupon, "toggle", closeMenu)}
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
+              >
+                {coupon.status === "active" ? (
+                  <>
+                    <Pause className="size-3.5" /> Pause
+                  </>
+                ) : (
+                  <>
+                    <Play className="size-3.5" /> Activate
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => handleMenuAction(coupon, "delete", closeMenu)}
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
+              >
+                <Trash2 className="size-3.5" /> Delete
+              </button>
+            </>
+          )}
+        </PortalActionMenu>
+      ),
+      width: "90px",
+      right: true,
+    },
+  ]
+
   return (
     <SettingsLayout activeTab="coupons" badges={{ coupons: counts.total }}>
       {/* ---------- Metric cards ---------- */}
@@ -326,115 +417,20 @@ export default function CouponsTab() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-175 text-left text-[13px]">
-              <thead className="bg-(--bg-table-header)">
-                <tr>
-                  {["Code", "Discount", "Used", "Expires", "Status"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="px-4 py-2.5 text-[12px] font-medium text-(--text-muted)"
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
-                  <th className="px-4 py-2.5 text-right text-[12px] font-medium text-(--text-muted)">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-(--border-light)">
-                {filteredCoupons.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-10 text-center text-xs text-(--text-muted)"
-                    >
-                      No coupons match "{searchQuery}".
-                    </td>
-                  </tr>
-                ) : (
-                  filteredCoupons.map((coupon) => (
-                    <tr
-                      key={coupon.id}
-                      className="transition-colors hover:bg-(--bg-surface-hover)"
-                    >
-                      <td className="px-4 py-2.5">
-                        <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 font-mono text-[12px] font-medium text-(--text-primary)">
-                          {coupon.code}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2.5 text-(--text-primary)">
-                        {formatDiscount(coupon)}
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <UsedCell coupon={coupon} />
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <ExpiryCell coupon={coupon} />
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <CouponStatusChip status={coupon.status} />
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <PortalActionMenu
-                          label={`Actions for coupon ${coupon.code}`}
-                          trigger={<MoreVertical className="size-4" />}
-                          triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--text-primary)"
-                          menuClassName="w-32"
-                        >
-                          {(closeMenu) => (
-                            <>
-                              <button
-                                type="button"
-                                role="menuitem"
-                                onClick={() =>
-                                  handleMenuAction(coupon, "edit", closeMenu)
-                                }
-                                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
-                              >
-                                <Pencil className="size-3.5" /> Edit
-                              </button>
-                              <button
-                                type="button"
-                                role="menuitem"
-                                onClick={() =>
-                                  handleMenuAction(coupon, "toggle", closeMenu)
-                                }
-                                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
-                              >
-                                {coupon.status === "active" ? (
-                                  <>
-                                    <Pause className="size-3.5" /> Pause
-                                  </>
-                                ) : (
-                                  <>
-                                    <Play className="size-3.5" /> Activate
-                                  </>
-                                )}
-                              </button>
-                              <button
-                                type="button"
-                                role="menuitem"
-                                onClick={() =>
-                                  handleMenuAction(coupon, "delete", closeMenu)
-                                }
-                                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
-                              >
-                                <Trash2 className="size-3.5" /> Delete
-                              </button>
-                            </>
-                          )}
-                        </PortalActionMenu>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            className="admin-data-table"
+            keyField="id"
+            columns={columns}
+            data={filteredCoupons}
+            customStyles={adminDataTableStyles}
+            pagination={false}
+            responsive
+            noDataComponent={
+              <p className="px-4 py-10 text-center text-xs text-(--text-muted)">
+                No coupons match "{searchQuery}".
+              </p>
+            }
+          />
 
           {/* Footer */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-(--border-light) px-4 py-2.5 text-xs text-(--text-muted)">

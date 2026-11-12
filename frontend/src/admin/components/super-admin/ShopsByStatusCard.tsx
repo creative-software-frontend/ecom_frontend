@@ -30,7 +30,7 @@ export function ShopsByStatusCard({
   return (
     <section className="space-y-3 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
       <header className="flex items-center gap-2 border-b border-(--border-light) pb-2">
-        <span className="flex size-6 items-center justify-center rounded bg-(--primary-soft) text-(--primary)">
+        <span className="flex size-6 items-center justify-center rounded bg-(--primary-soft) text-primary">
           <Store className="size-3.5" />
         </span>
         <h3 className="text-sm font-semibold text-(--text-primary)">

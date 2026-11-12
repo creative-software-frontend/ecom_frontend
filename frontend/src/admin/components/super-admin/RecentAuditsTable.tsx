@@ -87,6 +87,7 @@ export function RecentAuditsTable({ audits }: { audits: AuditRow[] }) {
         </Link>
       </header>
       <DataTable
+        className="admin-data-table"
         columns={columns}
         data={audits}
         customStyles={adminDataTableStyles}

@@ -1,6 +1,69 @@
 import { Link } from "react-router"
+import DataTable, { type TableColumn } from "react-data-table-component"
 import { ArrowRight } from "lucide-react"
 import type { PendingOrderItem } from "../../types/dashboard"
+import { adminDataTableStyles } from "../../lib/dataTableStyles"
+
+const pendingOrderColumns: TableColumn<PendingOrderItem>[] = [
+  {
+    name: "Order #",
+    selector: (order) => order.orderNumber,
+    minWidth: "120px",
+    cell: (order) => (
+      <Link
+        to={`/admin/orders/${order.id}`}
+        className="font-medium text-primary hover:underline"
+      >
+        {order.orderNumber}
+      </Link>
+    ),
+  },
+  {
+    name: "Placed",
+    selector: (order) => order.placedTime,
+    minWidth: "100px",
+    cell: (order) => (
+      <span className="text-xs text-(--text-muted) tabular-nums">
+        {order.placedTime}
+      </span>
+    ),
+  },
+  {
+    name: "Customer / Phone",
+    selector: (order) => order.customerName,
+    minWidth: "180px",
+    cell: (order) => (
+      <div>
+        <div className="font-medium text-(--text-primary)">
+          {order.customerName}
+        </div>
+        <div className="text-xs text-(--text-muted) tabular-nums">
+          {order.customerPhone}
+        </div>
+      </div>
+    ),
+  },
+  {
+    name: "Area",
+    selector: (order) => order.deliveryArea,
+    minWidth: "120px",
+    cell: (order) => (
+      <span className="inline-flex rounded bg-(--bg-table-header) px-2 py-1 text-xs font-medium text-(--text-primary)">
+        {order.deliveryArea}
+      </span>
+    ),
+  },
+  {
+    name: "Items",
+    selector: (order) => order.itemSummary,
+    minWidth: "180px",
+    cell: (order) => (
+      <span className="font-medium text-(--text-primary)">
+        {order.itemSummary}
+      </span>
+    ),
+  },
+]
 
 export function PendingVerificationCard({
   orders,
@@ -35,55 +98,15 @@ export function PendingVerificationCard({
           🎉 No pending orders — all caught up!
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-sm">
-            <thead className="border-b border-(--border-light) bg-(--bg-table-header) text-xs font-semibold text-(--text-muted) uppercase">
-              <tr>
-                <th className="px-4 py-3">Order #</th>
-                <th className="px-4 py-3">Placed</th>
-                <th className="px-4 py-3">Customer / Phone</th>
-                <th className="px-4 py-3">Area</th>
-                <th className="px-4 py-3">Items</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-(--border-light)">
-              {orders.map((order) => (
-                <tr
-                  key={order.id}
-                  className="transition-colors hover:bg-(--bg-surface-hover)"
-                >
-                  <td className="px-4 py-3 font-medium text-primary">
-                    <Link
-                      to={`/admin/orders/${order.id}`}
-                      className="hover:underline"
-                    >
-                      {order.orderNumber}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-(--text-muted) tabular-nums">
-                    {order.placedTime}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-(--text-primary)">
-                      {order.customerName}
-                    </div>
-                    <div className="text-xs text-(--text-muted) tabular-nums">
-                      {order.customerPhone}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex rounded bg-(--bg-table-header) px-2 py-1 text-xs font-medium text-(--text-primary)">
-                      {order.deliveryArea}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-medium text-(--text-primary)">
-                    {order.itemSummary}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          className="admin-data-table"
+          keyField="id"
+          columns={pendingOrderColumns}
+          data={orders}
+          customStyles={adminDataTableStyles}
+          pagination={false}
+          responsive
+        />
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-(--border-light) bg-(--bg-table-header) px-4 py-3 text-xs text-(--text-muted)">

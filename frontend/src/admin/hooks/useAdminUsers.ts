@@ -4,6 +4,7 @@ import type { UserListParams } from "../types/superAdmin"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { CreateUserInput, UpdateUserInput } from "../types/superAdmin"
 import type { CreateRoleInput, UpdateRoleInput } from "../types/superAdmin"
+import type { AuditLogQueryParams } from "../types/superAdmin"
 
 export function useAdminUsersList(params: UserListParams) {
   return useQuery({
@@ -109,3 +110,30 @@ export const ADMIN_DASHBOARD_QUERY_KEY = [
   "super",
   "dashboard",
 ] as const
+
+export const ADMIN_SHOPS_LIST_QUERY_KEY = [
+  "admin",
+  "super",
+  "shops",
+  "list",
+] as const
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useAdminShopsPaginated(params: any = {}) {
+  return useQuery({
+    queryKey: [...ADMIN_SHOPS_LIST_QUERY_KEY, params],
+    queryFn: ({ signal }) => superAdminApi.shops.getPaginated(params, signal),
+    staleTime: 30 * 1000,
+  })
+}
+
+export const ADMIN_AUDIT_QUERY_KEY = ["admin", "super", "audit"] as const
+
+export function useAdminAuditLogs(params: AuditLogQueryParams) {
+  return useQuery({
+    queryKey: [...ADMIN_AUDIT_QUERY_KEY, params],
+    queryFn: ({ signal }) => superAdminApi.audit.list(params, signal),
+    // ফ্লিকার বন্ধ করার জন্য keepPreviousData (placeholderData) ব্যবহার করা হলো
+    placeholderData: (prev) => prev,
+  })
+}

@@ -1,7 +1,10 @@
 import { useRef, useState } from "react"
 import { Link, useLocation, useParams } from "react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import DataTable, { type TableColumn } from "react-data-table-component"
+import DataTable, {
+  type TableColumn,
+  type TableStyles,
+} from "react-data-table-component"
 import { orderQueryKeys, ordersApi } from "../api/ordersApi"
 import { ApiError } from "../api/client"
 import type {
@@ -17,6 +20,7 @@ import {
   formatOrderDate,
   formatTaka,
 } from "../lib/orderStatus"
+import { adminDataTableStyles } from "../lib/dataTableStyles"
 import {
   ArrowLeft,
   Check,
@@ -123,43 +127,19 @@ const orderItemColumns: TableColumn<OrderItemDetail>[] = [
   },
 ]
 
-const orderItemTableStyles = {
-  table: {
-    style: {
-      backgroundColor: "var(--bg-surface)",
-      color: "var(--text-primary)",
-    },
-  },
+const orderItemTableStyles: TableStyles = {
+  ...adminDataTableStyles,
   headRow: {
     style: {
+      ...adminDataTableStyles.headRow?.style,
       minHeight: "40px",
-      backgroundColor: "var(--bg-table-header)",
-      borderBottom: "1px solid var(--border-light)",
-    },
-  },
-  headCells: {
-    style: {
-      color: "var(--text-muted)",
-      fontSize: "11px",
-      fontWeight: "600",
-      textTransform: "uppercase" as const,
-      paddingLeft: "12px",
-      paddingRight: "12px",
     },
   },
   rows: {
     style: {
+      ...adminDataTableStyles.rows?.style,
       minHeight: "60px",
-      backgroundColor: "var(--bg-surface)",
-      // borderBottom: "1px solid var(--border-light)",
-    },
-  },
-  cells: {
-    style: {
-      paddingLeft: "12px",
-      paddingRight: "12px",
-      color: "var(--text-primary)",
-      fontSize: "13px",
+      borderBottom: "none",
     },
   },
 }
