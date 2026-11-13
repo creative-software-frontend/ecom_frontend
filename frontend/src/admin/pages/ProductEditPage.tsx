@@ -7,6 +7,7 @@ import { NotFoundState } from "../components/common/NotFoundState"
 import { useApiQuery } from "../hooks/useApiQuery"
 import { ApiError } from "../api/client"
 import { productsApi } from "../api/productsApi"
+import { getErrorMessage } from "../lib/errors"
 import type { Product } from "../types/product"
 import type {
   ProductFormInitialValues,
@@ -15,11 +16,6 @@ import type {
 
 function isNotFoundError(error: unknown): boolean {
   return error instanceof ApiError && error.status === 404
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message
-  return "Could not load this product. Please try again."
 }
 
 function toFormValues(product: Product): ProductFormInitialValues {
@@ -118,7 +114,10 @@ export function ProductEditPage() {
               Could not load product
             </h1>
             <p className="pt-0.75 text-base text-gray-500">
-              {getErrorMessage(error)}
+              {getErrorMessage(
+                error,
+                "Could not load this product. Please try again."
+              )}
             </p>
           </header>
         }

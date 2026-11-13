@@ -6,16 +6,14 @@ import { UsersByRoleCard } from "../../components/super-admin/UsersByRoleCard"
 import { ShopsByStatusCard } from "../../components/super-admin/ShopsByStatusCard"
 import { useSuperAdminDashboardQuery } from "../../hooks/useAdminUsers"
 import { ErrorState } from "../../components/common/ErrorState"
+import { formatDate } from "../../lib/formatTime"
+import { getErrorMessage } from "../../lib/errors"
 
 export default function SuperAdminDashboardPage() {
   const { data, isLoading, isFetching, error, refetch } =
     useSuperAdminDashboardQuery()
 
-  const today = new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date())
+  const today = formatDate(new Date())
 
   return (
     <div className="min-w-0 space-y-6 bg-(--bg-app) p-4 sm:p-6">
@@ -68,9 +66,7 @@ export default function SuperAdminDashboardPage() {
 
       {!isLoading && error && (
         <ErrorState
-          message={
-            error instanceof Error ? error.message : "Failed to load dashboard"
-          }
+          message={getErrorMessage(error, "Failed to load dashboard")}
           onRetry={() => refetch()}
           className="flex flex-col items-center gap-3 rounded-lg border border-red-200 bg-red-50 py-16 text-center"
           messageClassName="text-sm font-medium text-red-600"

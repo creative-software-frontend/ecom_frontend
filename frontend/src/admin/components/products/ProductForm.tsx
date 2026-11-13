@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react"
 import { ApiError } from "../../api/client"
 import { StatusBadge } from "../common/StatusBadge"
+import { formatDate } from "../../lib/formatTime"
+import { getErrorMessage } from "../../lib/errors"
 import {
   productSchema,
   type ProductFormInitialValues,
@@ -173,9 +175,10 @@ export function ProductForm({
       }
 
       setSubmitError(
-        error instanceof Error
-          ? error.message
-          : "Could not save this product. Please try again."
+        getErrorMessage(
+          error,
+          "Could not save this product. Please try again."
+        )
       )
     }
   }
@@ -222,21 +225,13 @@ export function ProductForm({
             {initialValues.createdAt ? (
               <div>
                 <dt className="font-medium text-gray-700">Created</dt>
-                <dd>
-                  {new Intl.DateTimeFormat("en-BD", {
-                    dateStyle: "medium",
-                  }).format(new Date(initialValues.createdAt))}
-                </dd>
+                <dd>{formatDate(initialValues.createdAt)}</dd>
               </div>
             ) : null}
             {initialValues.updatedAt ? (
               <div>
                 <dt className="font-medium text-gray-700">Updated</dt>
-                <dd>
-                  {new Intl.DateTimeFormat("en-BD", {
-                    dateStyle: "medium",
-                  }).format(new Date(initialValues.updatedAt))}
-                </dd>
+                <dd>{formatDate(initialValues.updatedAt)}</dd>
               </div>
             ) : null}
           </dl>

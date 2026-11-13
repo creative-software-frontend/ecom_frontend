@@ -1,6 +1,7 @@
 import DataTable, { type TableColumn } from "react-data-table-component"
 import { MoreVertical, ExternalLink } from "lucide-react"
 import { adminDataTableStyles } from "../../lib/dataTableStyles"
+import { formatDate } from "../../lib/formatTime"
 import type { SuperAdminShopListItem } from "../../types/superAdmin"
 import { PortalActionMenu } from "../common/PortalActionMenu"
 
@@ -17,15 +18,6 @@ const statusConfig = {
     label: "Suspended",
     className: "bg-(--status-cancelled-bg) text-(--status-cancelled-text)",
   },
-}
-
-function formatDate(dateStr: string | null) {
-  if (!dateStr) return "N/A"
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(dateStr))
 }
 
 export function ShopsTable({

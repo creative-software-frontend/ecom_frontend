@@ -3,16 +3,8 @@ import { MoreVertical, Pencil, KeyRound, Power, PowerOff } from "lucide-react"
 import { adminDataTableStyles } from "../../lib/dataTableStyles"
 import type { SuperAdminUser } from "../../types/superAdmin"
 import { relativeTime } from "@/admin/lib/formatTime"
+import { getInitials } from "../../lib/initials"
 import { PortalActionMenu } from "../common/PortalActionMenu"
-
-function initials(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((s) => s[0]?.toUpperCase())
-    .join("")
-}
 
 const roleBadgeClass: Record<string, string> = {
   super_admin: "bg-(--primary-soft) text-(--primary)",
@@ -54,7 +46,7 @@ export function UsersTable({
       cell: (row) => (
         <div className="flex items-center gap-2.5 py-1">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-(--bg-table-header) text-xs font-semibold text-(--text-primary)">
-            {initials(row.name)}
+            {getInitials(row.name)}
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-(--text-primary)">

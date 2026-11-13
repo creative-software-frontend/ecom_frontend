@@ -12,6 +12,7 @@ import {
 import { FieldError } from "../settings/SettingsField"
 import type { SuperAdminUser } from "../../types/superAdmin"
 import { PasswordShowHide } from "../PasswordShowHide"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
 
 const resetPasswordSchema = z.object({
   password: z.string().min(12, "Password must be at least 12 characters"),
@@ -61,14 +62,7 @@ export function ResetPasswordModal({
   }, [open, user?.id, reset])
 
   // Escape closes
-  useEffect(() => {
-    if (!open) return
-    const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) onClose()
-    }
-    document.addEventListener("keydown", h)
-    return () => document.removeEventListener("keydown", h)
-  }, [open, isSubmitting, onClose])
+  useEscapeKey(onClose, open && !isSubmitting)
 
   if (!open || !user) return null
 

@@ -1,10 +1,11 @@
 import { motion } from "motion/react"
 import { ArrowRight, Check, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { scrollToOrderSection } from "@/lib/orderActions"
 import LionImage from "@/assets/images/lion.jpeg"
 const LingLongPromoBanner = () => {
   const goToOrder = () => {
-    document.getElementById("order")?.scrollIntoView({ behavior: "smooth" })
+    scrollToOrderSection()
   }
 
   return (

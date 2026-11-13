@@ -2,6 +2,7 @@ import { motion } from "framer-motion"
 import type { Product, ProductTheme } from "@/types/product"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { formatBdt } from "@/lib/formatPrice"
 import {
   Select,
   SelectContent,
@@ -38,8 +39,8 @@ const OrderForm = (props: OrderFormProps) => {
   const accentBg = props.theme?.primaryBgColor ?? "bg-[#d4af37]"
   const accentText = props.theme?.primaryTextColor ?? "text-[#d4af37]"
   const fieldLabelClass = isLightTheme ? "text-[#292929]" : "text-white/85"
-  const productPrice = props.product.price.current.toLocaleString("bn-BD")
-  const totalPrice = (props.product.price.current + 70).toLocaleString("bn-BD")
+  const productPrice = formatBdt(props.product.price.current)
+  const totalPrice = formatBdt(props.product.price.current + 70)
   const trustBadges = [
     {
       icon: <ShieldCheck size={20} />,
@@ -89,7 +90,7 @@ const OrderForm = (props: OrderFormProps) => {
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <span className="text-lg font-black">পণ্যের মূল্য:</span>
             <strong className={`text-2xl font-bold ${accentText}`}>
-              ৳ {productPrice}
+              {productPrice}
             </strong>
           </div>
           <div className="flex items-center justify-between gap-3 px-4 py-3">
@@ -203,7 +204,7 @@ const OrderForm = (props: OrderFormProps) => {
               className={`flex justify-between gap-4 py-3 text-base ${isLightTheme ? "text-gray-600" : "text-white/65"}`}
             >
               <span>পণ্যের মূল্য</span>
-              <span>৳ {productPrice}</span>
+              <span>{productPrice}</span>
             </div>
             <div
               className={`flex justify-between gap-4 ${props.styles?.formBorderColor} border-b-2 py-3 text-base ${isLightTheme ? "text-gray-600" : "text-white/65"}`}
@@ -215,7 +216,7 @@ const OrderForm = (props: OrderFormProps) => {
               className={`flex justify-between gap-4 py-3 text-xl font-bold ${isLightTheme ? "text-[#171717]" : "text-white"}`}
             >
               <span>মোট মূল্য</span>
-              <span className={accentText}>৳ {totalPrice}</span>
+              <span className={accentText}>{totalPrice}</span>
             </div>
           </div>
 

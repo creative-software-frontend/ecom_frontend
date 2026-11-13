@@ -7,6 +7,8 @@ import { FieldError } from "../settings/SettingsField"
 import { FormSegmentedControl } from "../settings/SettingsField"
 import { PermissionMatrix } from "./PermissionMatrix"
 import { useCreateRoleMutation } from "../../hooks/useAdminUsers"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { getErrorMessage } from "../../lib/errors"
 import { ApiError } from "../../api/client"
 
 function toRoleName(displayName: string) {
@@ -85,14 +87,7 @@ export function CreateRoleModal({
     if (open) reset(EMPTY)
   }, [open, reset])
 
-  useEffect(() => {
-    if (!open) return
-    const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) onClose()
-    }
-    document.addEventListener("keydown", h)
-    return () => document.removeEventListener("keydown", h)
-  }, [open, isSubmitting, onClose])
+  useEscapeKey(onClose, open && !isSubmitting)
 
   if (!open) return null
 
@@ -117,8 +112,7 @@ export function CreateRoleModal({
       } else {
         setError("displayName", {
           type: "server",
-          message:
-            err instanceof ApiError ? err.message : "Failed to create role",
+          message: getErrorMessage(err, "Failed to create role"),
         })
       }
     }

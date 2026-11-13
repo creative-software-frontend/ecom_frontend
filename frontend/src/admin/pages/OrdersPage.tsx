@@ -7,6 +7,7 @@ import DataTable, {
 } from "react-data-table-component"
 import { orderQueryKeys, ordersApi } from "../api/ordersApi"
 import { ApiError } from "../api/client"
+import { getErrorMessage } from "../lib/errors"
 import { EmptyState } from "../components/common/EmptyState"
 import { ErrorState } from "../components/common/ErrorState"
 import { LoadingState } from "../components/common/LoadingState"
@@ -197,9 +198,10 @@ export default function OrdersPage() {
       setBulkMessage(`${results.length} order(s) updated successfully.`)
     } catch (mutationError) {
       setBulkMessage(
-        mutationError instanceof Error
-          ? mutationError.message
-          : "Failed to update selected orders."
+        getErrorMessage(
+          mutationError,
+          "Failed to update selected orders."
+        )
       )
     }
   }
@@ -576,11 +578,7 @@ export default function OrdersPage() {
           </LoadingState>
         ) : isError ? (
           <ErrorState
-            message={
-              error instanceof ApiError
-                ? error.message
-                : "Failed to load orders."
-            }
+            message={getErrorMessage(error, "Failed to load orders.")}
             onRetry={() => void refetch()}
             className="flex flex-col items-center gap-3 py-16 text-center"
           />

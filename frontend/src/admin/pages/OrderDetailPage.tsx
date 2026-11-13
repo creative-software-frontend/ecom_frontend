@@ -38,6 +38,7 @@ import { InlineNotice } from "../components/common/InlineNotice"
 import { LoadingState } from "../components/common/LoadingState"
 import { NotFoundState } from "../components/common/NotFoundState"
 import { StatusBadge } from "../components/common/StatusBadge"
+import { getErrorMessage } from "../lib/errors"
 import React from "react"
 
 function getBackHref(locationState: unknown): string {
@@ -51,12 +52,6 @@ function getBackHref(locationState: unknown): string {
     return qs ? `/shop/orders?${qs}` : "/shop/orders"
   }
   return "/shop/orders"
-}
-
-function getErrorMessage(err: unknown): string {
-  if (err instanceof ApiError) return err.message
-  if (err instanceof Error) return err.message
-  return "An unexpected error occurred."
 }
 
 function getPaymentMethodLabel(method: string): string {

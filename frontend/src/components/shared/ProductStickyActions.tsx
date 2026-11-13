@@ -1,5 +1,6 @@
 import { MessageCircle, Phone, ShoppingCart } from "lucide-react"
 import type { Product, ProductTheme } from "@/types/product"
+import { goToOrder } from "@/lib/orderActions"
 import BackToTop from "./BackToTop"
 
 type ProductStickyActionsProps = {
@@ -20,20 +21,7 @@ const ProductStickyActions = ({
   const accentBg = theme.primaryBgColor ?? "bg-yellow-500"
   const actionText = isLightTheme ? "text-white" : "text-slate-950"
 
-  const scrollToOrder = () => {
-    const orderSection = document.getElementById("order")
-    if (orderSection) {
-      orderSection.scrollIntoView({ behavior: "smooth" })
-      return
-    }
-
-    const orderUrl = new URL(whatsappUrl)
-    orderUrl.searchParams.set(
-      "text",
-      `আমি ${product.brand_name} অর্ডার করতে চাই। মূল্য: ৳ ${product.price.current.toLocaleString("bn-BD")}`
-    )
-    window.open(orderUrl.toString(), "_blank", "noopener,noreferrer")
-  }
+  const scrollToOrder = () => goToOrder(product)
 
   return (
     <>

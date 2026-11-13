@@ -25,19 +25,18 @@ import {
    Helpers — safe DOM value -> typed state conversion
    ================================================================ */
 
-// Empty DOM string -> 0 so the number schema can validate cleanly.
-const toNumberOrZero = (v: unknown): number => {
-  if (v === "" || v === null || v === undefined) return 0
-  const n = Number(v)
-  return Number.isNaN(n) ? 0 : n
-}
-
-// Empty DOM string -> null for nullable numeric fields (usage limit).
-const toNumberOrNull = (v: unknown): number | null => {
+// Empty DOM value -> null; otherwise a number, or null when invalid.
+const parseNumber = (v: unknown): number | null => {
   if (v === "" || v === null || v === undefined) return null
   const n = Number(v)
   return Number.isNaN(n) ? null : n
 }
+
+// Empty DOM string -> 0 so the number schema can validate cleanly.
+const toNumberOrZero = (v: unknown): number => parseNumber(v) ?? 0
+
+// Empty DOM string -> null for nullable numeric fields (usage limit).
+const toNumberOrNull = (v: unknown): number | null => parseNumber(v)
 
 // Empty DOM string -> null for nullable date string.
 const toDateOrNull = (v: unknown): string | null => {

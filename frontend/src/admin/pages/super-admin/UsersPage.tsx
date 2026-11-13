@@ -14,7 +14,7 @@ import {
   useUpdateAdminUserMutation,
 } from "../../hooks/useAdminUsers"
 import { useAuth } from "../../auth/AuthProvider"
-import { ApiError } from "../../api/client"
+import { getErrorMessage } from "../../lib/errors"
 import type { SuperAdminUser } from "../../types/superAdmin"
 
 const DEFAULT_LIMIT = 20
@@ -66,9 +66,7 @@ export default function UsersPage() {
           setToggleTarget(null)
         },
         onError: (err) => {
-          setToggleError(
-            err instanceof ApiError ? err.message : "Failed to update status"
-          )
+          setToggleError(getErrorMessage(err, "Failed to update status"))
         },
       }
     )

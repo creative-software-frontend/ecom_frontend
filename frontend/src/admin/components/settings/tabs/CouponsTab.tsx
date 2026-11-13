@@ -18,6 +18,7 @@ import { SettingsLayout } from "../SettingsLayout"
 import { MetricCard } from "../MetricCard"
 import type { Coupon, CouponStatus } from "../../../types/coupon"
 import { CreateCouponModal } from "../modals/CreateCouponModal"
+import { formatDate } from "../../../lib/formatTime"
 import { PortalActionMenu } from "../../common/PortalActionMenu"
 import { adminDataTableStyles } from "../../../lib/dataTableStyles"
 
@@ -79,14 +80,6 @@ function formatDiscount(coupon: Coupon): string {
       ? `${coupon.discount_value}% off`
       : `৳${coupon.discount_value.toLocaleString()} off`
   return coupon.note ? `${base} (${coupon.note})` : base
-}
-
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(iso))
 }
 
 /* ================================================================

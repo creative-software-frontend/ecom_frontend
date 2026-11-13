@@ -15,6 +15,7 @@ import {
   defaultCourierValues,
   type CourierFormValues,
 } from "../../../schemas/courierSchema"
+import { getErrorMessage } from "../../../lib/errors"
 
 export default function CourierTab() {
   const { data, isLoading, error } = useCourierQuery()
@@ -68,7 +69,7 @@ export default function CourierTab() {
       {error && !isLoading && (
         <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           Failed to load courier settings:{" "}
-          {error instanceof Error ? error.message : "Unknown error"}
+          {getErrorMessage(error, "Unknown error")}
         </div>
       )}
 

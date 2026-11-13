@@ -11,7 +11,7 @@ import {
   useAdminRolesList,
   useDeleteRoleMutation,
 } from "../../hooks/useAdminUsers"
-import { ApiError } from "../../api/client"
+import { getErrorMessage } from "../../lib/errors"
 import type { SuperAdminRole } from "../../types/superAdmin"
 
 export default function RolesPage() {
@@ -44,9 +44,7 @@ export default function RolesPage() {
         setDeleteTarget(null)
       },
       onError: (err) => {
-        setDeleteError(
-          err instanceof ApiError ? err.message : "Failed to delete role"
-        )
+        setDeleteError(getErrorMessage(err, "Failed to delete role"))
       },
     })
   }

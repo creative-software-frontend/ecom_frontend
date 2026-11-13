@@ -1,5 +1,7 @@
 import DataTable, { type TableColumn } from "react-data-table-component"
 import { adminDataTableStyles } from "../../lib/dataTableStyles"
+import { formatTimestamp, relativeTime } from "../../lib/formatTime"
+import { getInitials } from "../../lib/initials"
 import type { AuditLogListItem } from "../../types/superAdmin"
 
 // ১. অ্যাকশন অনুযায়ী চিপের কালার নির্ধারণ
@@ -24,12 +26,7 @@ function getActionStyle(action: string) {
 
 // ২. ইউজারের নামের প্রথম অক্ষর দিয়ে ডামি অ্যাভাটার
 function getAvatar(name: string) {
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase()
+  const initials = getInitials(name)
   const colors = [
     "bg-emerald-600",
     "bg-slate-600",
@@ -39,27 +36,6 @@ function getAvatar(name: string) {
   ]
   const color = colors[name.length % colors.length]
   return { initials, color }
-}
-
-function formatTime(iso: string) {
-  const d = new Date(iso)
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  })
-    .format(d)
-    .replace(",", ",")
-}
-
-function formatRelativeTime(iso: string) {
-  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  return `${Math.floor(hrs / 24)}d ago`
 }
 
 export function AuditTable({
@@ -86,10 +62,10 @@ export function AuditTable({
       cell: (row) => (
         <div className="py-2">
           <p className="text-sm font-medium text-(--text-primary)">
-            {formatTime(row.createdAt)}
+            {formatTimestamp(row.createdAt)}
           </p>
           <p className="text-xs text-(--text-muted)">
-            {formatRelativeTime(row.createdAt)}
+            {relativeTime(row.createdAt)}
           </p>
         </div>
       ),

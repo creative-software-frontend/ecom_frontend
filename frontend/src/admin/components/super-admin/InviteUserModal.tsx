@@ -6,6 +6,8 @@ import { UserPlus, X } from "lucide-react"
 import { FieldError } from "../settings/SettingsField"
 import { FormToggle } from "../settings/SettingsField"
 import { useCreateAdminUserMutation } from "../../hooks/useAdminUsers"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { getErrorMessage } from "../../lib/errors"
 import { ApiError } from "../../api/client"
 import type { SuperAdminRole, SuperAdminShop } from "../../types/superAdmin"
 import { PasswordShowHide } from "../PasswordShowHide"
@@ -86,14 +88,7 @@ export function InviteUserModal({
     if (open) reset(EMPTY)
   }, [open, reset])
 
-  useEffect(() => {
-    if (!open) return
-    const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) onClose()
-    }
-    document.addEventListener("keydown", h)
-    return () => document.removeEventListener("keydown", h)
-  }, [open, isSubmitting, onClose])
+  useEscapeKey(onClose, open && !isSubmitting)
 
   if (!open) return null
 
@@ -132,8 +127,7 @@ export function InviteUserModal({
       } else {
         setError("roleId", {
           type: "server",
-          message:
-            err instanceof ApiError ? err.message : "Failed to create user",
+          message: getErrorMessage(err, "Failed to create user"),
         })
       }
     }

@@ -6,6 +6,8 @@ import { Shield, Store, X, Save, AlertCircle, Lock } from "lucide-react"
 import { FieldError } from "../settings/SettingsField"
 import { PermissionMatrix } from "./PermissionMatrix"
 import { useUpdateRoleMutation } from "../../hooks/useAdminUsers"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { getErrorMessage } from "../../lib/errors"
 import { ApiError } from "../../api/client"
 import type { SuperAdminRole } from "../../types/superAdmin"
 
@@ -69,14 +71,7 @@ export function EditRoleDrawer({
     }
   }, [open, role, reset])
 
-  useEffect(() => {
-    if (!open) return
-    const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) onClose()
-    }
-    document.addEventListener("keydown", h)
-    return () => document.removeEventListener("keydown", h)
-  }, [open, isSubmitting, onClose])
+  useEscapeKey(onClose, open && !isSubmitting)
 
   if (!open || !role) return null
 
@@ -102,9 +97,7 @@ export function EditRoleDrawer({
         }
         setDrawerError(err.message)
       } else {
-        setDrawerError(
-          err instanceof ApiError ? err.message : "Failed to update role"
-        )
+        setDrawerError(getErrorMessage(err, "Failed to update role"))
       }
     }
   }

@@ -1,4 +1,5 @@
 import type { OrderStatus, PaymentStatus } from "../types/order"
+import { formatBdt } from "@/lib/formatPrice"
 
 export type BadgeVariant = "warning" | "info" | "primary" | "success" | "danger"
 
@@ -110,5 +111,5 @@ export function formatOrderDate(dateString: string): string {
 }
 
 export function formatTaka(price: number): string {
-  return `৳ ${new Intl.NumberFormat("en-BD").format(price)}`
+  return formatBdt(price, "en-BD")
 }

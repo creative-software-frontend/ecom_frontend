@@ -11,6 +11,8 @@ import {
 import type { ProductPreviewSectionProps } from "./shared/ProductDetails"
 import { Button } from "./ui/button"
 import { useState } from "react"
+import { formatBdt } from "@/lib/formatPrice"
+import { goToOrder } from "@/lib/orderActions"
 
 const ProductPreviewSection = ({
   product,
@@ -22,20 +24,7 @@ const ProductPreviewSection = ({
   const isLightTheme = styles?.appearance === "light"
 
   const handleOrderClick = () => {
-    const orderSection = document.getElementById("order")
-    if (orderSection) {
-      orderSection.scrollIntoView({ behavior: "smooth" })
-      return
-    }
-
-    if (typeof product?.cta.whatsapp_url !== "string") return
-
-    const orderUrl = new URL(product.cta.whatsapp_url)
-    orderUrl.searchParams.set(
-      "text",
-      `আমি ${product.brand_name} অর্ডার করতে চাই। মূল্য: ৳ ${product.price.current.toLocaleString("bn-BD")}`
-    )
-    window.open(orderUrl.toString(), "_blank", "noopener,noreferrer")
+    if (product) goToOrder(product)
   }
 
   // select image by click
@@ -159,12 +148,12 @@ const ProductPreviewSection = ({
                 <span
                   className={`text-3xl font-black sm:text-4xl ${styles?.primaryTextColor || "text-yellow-400"}`}
                 >
-                  ৳ {product?.price.current.toLocaleString("bn-BD")}
+                  {product ? formatBdt(product.price.current) : null}
                 </span>
                 <span
                   className={`text-lg line-through ${isLightTheme ? "text-gray-400" : "text-white/60"}`}
                 >
-                  ৳ {product?.price.regular.toLocaleString("bn-BD")}
+                  {product ? formatBdt(product.price.regular) : null}
                 </span>
               </div>
               <p

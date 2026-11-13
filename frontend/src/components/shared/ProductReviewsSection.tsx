@@ -3,6 +3,7 @@ import { ArrowRight, ShoppingCart, Star } from "lucide-react"
 import { Button } from "../ui/button"
 import { Carousel, CarouselContent, CarouselItem } from "../ui/carousel"
 import { containerVariants, itemVariants } from "@/lib/motionVariants"
+import { scrollToOrderSection } from "@/lib/orderActions"
 
 const sampleReviews = [
   {
@@ -28,7 +29,7 @@ const sampleReviews = [
 ]
 
 const goToOrder = () => {
-  document.getElementById("order")?.scrollIntoView({ behavior: "smooth" })
+  scrollToOrderSection()
 }
 
 const ProductReviewsSection = () => (

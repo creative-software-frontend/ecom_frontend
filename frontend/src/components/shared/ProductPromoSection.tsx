@@ -3,25 +3,14 @@ import { motion } from "motion/react"
 import { ArrowRight, ShoppingCart, Timer, Zap } from "lucide-react"
 import type { Product } from "@/types/product"
 import { Button } from "@/components/ui/button"
+import { formatBdt } from "@/lib/formatPrice"
+import { goToOrder } from "@/lib/orderActions"
 
 const ProductPromoSection = ({ product }: { product: Product }) => {
   const promo = product.promo
   if (!promo) return null
 
-  const orderNow = () => {
-    const orderSection = document.getElementById("order")
-    if (orderSection) {
-      orderSection.scrollIntoView({ behavior: "smooth" })
-      return
-    }
-
-    const orderUrl = new URL(product.cta.whatsapp_url)
-    orderUrl.searchParams.set(
-      "text",
-      `আমি ${product.brand_name} অর্ডার করতে চাই। মূল্য: ৳ ${product.price.current.toLocaleString("bn-BD")}`
-    )
-    window.open(orderUrl.toString(), "_blank", "noopener,noreferrer")
-  }
+  const orderNow = () => goToOrder(product)
 
   return (
     <section className="bg-[#100b08] px-4 py-12 text-white sm:py-14">
@@ -37,13 +26,13 @@ const ProductPromoSection = ({ product }: { product: Product }) => {
           <div>
             <p className="text-sm text-white/55">{promo.regular_price_label}</p>
             <p className="mt-1 text-lg font-semibold text-white/45 line-through md:text-xl">
-              ৳ {product.price.regular.toLocaleString("bn-BD")}
+              {formatBdt(product.price.regular)}
             </p>
           </div>
           <div>
             <p className="text-sm text-white/65">{promo.offer_price_label}</p>
             <p className="mt-1 text-2xl font-black text-[#d9b45f] sm:text-3xl md:text-4xl">
-              ৳ {promo.offer_price.toLocaleString("bn-BD")}
+              {formatBdt(promo.offer_price)}
             </p>
           </div>
         </div>

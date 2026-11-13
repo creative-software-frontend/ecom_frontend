@@ -6,6 +6,8 @@ import { X, Save, AlertCircle, UserCog } from "lucide-react"
 import { FieldError } from "../settings/SettingsField"
 import { FormToggle } from "../settings/SettingsField"
 import { useUpdateAdminUserMutation } from "../../hooks/useAdminUsers"
+import { useEscapeKey } from "../../hooks/useEscapeKey"
+import { getErrorMessage } from "../../lib/errors"
 import { ApiError } from "../../api/client"
 import type {
   SuperAdminRole,
@@ -96,14 +98,7 @@ export function EditUserDrawer({
   }, [isPlatformRole, setValue, shopId])
 
   // Escape closes
-  useEffect(() => {
-    if (!open) return
-    const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) onClose()
-    }
-    document.addEventListener("keydown", h)
-    return () => document.removeEventListener("keydown", h)
-  }, [open, isSubmitting, onClose])
+  useEscapeKey(onClose, open && !isSubmitting)
 
   if (!open || !user) return null
 
@@ -136,9 +131,7 @@ export function EditUserDrawer({
         }
         if (!mapped) setDrawerError(err.message)
       } else {
-        setDrawerError(
-          err instanceof ApiError ? err.message : "Failed to update user"
-        )
+        setDrawerError(getErrorMessage(err, "Failed to update user"))
       }
     }
   }

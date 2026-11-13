@@ -1,20 +1,10 @@
 import { Link } from "react-router"
 import DataTable, { type TableColumn } from "react-data-table-component"
 import { adminDataTableStyles } from "../../lib/dataTableStyles"
+import { relativeTime } from "../../lib/formatTime"
 import type { SuperAdminDashboardData } from "../../types/superAdmin"
 
 type AuditRow = SuperAdminDashboardData["recentAudits"][number]
-
-function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return "just now"
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  const days = Math.floor(hrs / 24)
-  return `${days}d ago`
-}
 
 function humanizeAction(action: string): string {
   return action

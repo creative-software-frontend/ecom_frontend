@@ -22,21 +22,7 @@ import { profileApi } from "../api/profileApi"
 import { settingsApi } from "../api/settingsApi"
 import { useAuth } from "../auth/AuthProvider"
 import { PasswordShowHide } from "../components/PasswordShowHide"
-
-function formatDate(dateString?: string): string {
-  if (!dateString) return "N/A"
-  try {
-    const date = new Date(dateString)
-    if (isNaN(date.getTime())) return "N/A"
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(date)
-  } catch {
-    return "N/A"
-  }
-}
+import { formatLongDate } from "../lib/formatTime"
 
 export function ProfilePage() {
   const { state, updateUser, logout } = useAuth()
@@ -575,7 +561,7 @@ export function ProfilePage() {
                   Member Since
                 </dt>
                 <dd className="mt-1 text-sm font-semibold text-gray-800">
-                  {formatDate(user.createdAt)}
+                  {formatLongDate(user.createdAt)}
                 </dd>
                 <dd className="text-xs text-gray-500">Account verified</dd>
               </div>

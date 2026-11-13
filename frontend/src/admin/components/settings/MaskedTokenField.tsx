@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import type { UseFormRegisterReturn } from "react-hook-form"
 import { Key, Check } from "lucide-react"
 import { FieldError } from "./SettingsField"
+import { formatDate } from "../../lib/formatTime"
 
 /* ================================================================
    MaskedTokenField — shows a masked placeholder when a token is
@@ -31,13 +32,8 @@ type MaskedTokenFieldProps = {
 // Relative "last updated" hint for the header row.
 function formatSavedAt(iso: string | null): string {
   if (!iso) return ""
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return ""
-  return `Last updated ${new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(date)}`
+  const formatted = formatDate(iso)
+  return formatted === "N/A" ? "" : `Last updated ${formatted}`
 }
 
 export function MaskedTokenField({
