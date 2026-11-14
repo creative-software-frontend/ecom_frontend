@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { Outlet } from "react-router"
 import { Header, MobileSidebar } from "./components/Header"
 import { Sidebar } from "./components/Sidebar"
@@ -6,6 +6,7 @@ import { Footer } from "./components/Footer"
 import { useAuth } from "../auth/AuthProvider"
 import { shopMenu } from "./menu"
 import { superAdminMenu } from "./menuSuperAdmin"
+import { SettingsSkeleton } from "../components/settings/SettingsLayout"
 
 export function AdminLayout() {
   const { state } = useAuth()
@@ -34,7 +35,15 @@ export function AdminLayout() {
             brandLabel={brandLabel}
           />
           <main className="flex-1">
-            <Outlet />
+            <Suspense
+              fallback={
+                <div className="flex flex-col gap-5 bg-(--bg-app) p-4 sm:p-6">
+                  <SettingsSkeleton />
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
           </main>
           <Footer />
         </div>

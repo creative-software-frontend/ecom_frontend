@@ -26,7 +26,7 @@ export default function SettingsPage() {
   const { tab } = useParams<{ tab: string }>()
 
   if (!isTabId(tab)) {
-    return <Navigate to="/admin/settings/store" replace />
+    return <Navigate to="/shop/settings/store" replace />
   }
 
   // Add new tabs here as they're built
@@ -53,6 +53,6 @@ export default function SettingsPage() {
     //   </div>
     // )
     default:
-      return <Navigate to="/admin/settings/store" replace />
+      return <Navigate to="/shop/settings/store" replace />
   }
 }

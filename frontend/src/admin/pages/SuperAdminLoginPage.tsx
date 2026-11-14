@@ -36,7 +36,8 @@ export function SuperAdminLoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    // TODO:remove for production
+    defaultValues: { email: "admin@email.com", password: "adminpassword" },
     mode: "onSubmit",
   })
 
@@ -232,8 +233,6 @@ export function SuperAdminLoginPage() {
                   id="sa-email"
                   type="email"
                   autoComplete="username"
-                  // TODO:remove for production
-                  defaultValue="admin@email.com"
                   placeholder="admin@powerzenox.com"
                   aria-invalid={Boolean(
                     errors.email || (errorMessage && !isRateLimited)
@@ -262,8 +261,6 @@ export function SuperAdminLoginPage() {
                     type={passwordVisible ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    // TODO:remove for production
-                    defaultValue="adminpassword"
                     aria-invalid={Boolean(
                       errors.password || (errorMessage && !isRateLimited)
                     )}

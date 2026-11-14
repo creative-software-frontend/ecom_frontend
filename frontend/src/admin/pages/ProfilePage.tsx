@@ -243,7 +243,7 @@ export function ProfilePage() {
             <div className="flex flex-wrap items-center gap-2">
               {/* <button
                 type="button"
-                onClick={() => navigate("/admin/settings")}
+                onClick={() => navigate("/shop/settings/store")}
                 className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
               >
                 <Settings className="size-3.5" />

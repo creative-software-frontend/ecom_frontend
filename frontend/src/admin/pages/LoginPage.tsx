@@ -36,7 +36,11 @@ export function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    // TODO:remove for production
+    defaultValues: {
+      email: "test-admin@powerzenox.com",
+      password: "TestPassword123",
+    },
     mode: "onSubmit",
   })
   if (state.status === "authenticated") {
@@ -249,8 +253,6 @@ export function LoginPage() {
                   type="email"
                   autoComplete="username"
                   placeholder="abdur.razzaq@powerzenox.com"
-                  // TODO:remove for production
-                  defaultValue="test-admin@powerzenox.com"
                   aria-invalid={Boolean(
                     errors.email || (errorMessage && !isRateLimited)
                   )}
@@ -279,8 +281,6 @@ export function LoginPage() {
                     type={passwordVisible ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    // TODO:remove for production
-                    defaultValue="TestPassword123"
                     aria-invalid={Boolean(
                       errors.password || (errorMessage && !isRateLimited)
                     )}

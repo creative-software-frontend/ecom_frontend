@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { type ReactNode } from "react"
 import { useNavigate } from "react-router"
 import {
   Store,
@@ -9,6 +9,7 @@ import {
   Megaphone,
   AlertCircle,
   Truck,
+  Loader2,
 } from "lucide-react"
 
 /* ================================================================
@@ -72,6 +73,59 @@ export function SettingsCard({
 }
 
 /* ================================================================
+   SettingsSkeleton — polished loading state for settings tabs
+   ================================================================ */
+
+export function SettingsSkeleton() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading settings"
+      className="flex flex-col gap-5 animate-pulse"
+    >
+      {/* Skeleton Card 1 */}
+      <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-5">
+        <div className="flex items-center justify-between border-b border-(--border-light) pb-4">
+          <div className="space-y-1.5">
+            <div className="h-4 w-36 rounded bg-(--bg-surface-hover)" />
+            <div className="h-3 w-64 rounded bg-(--bg-surface-hover)" />
+          </div>
+          <div className="h-6 w-16 rounded-full bg-(--bg-surface-hover)" />
+        </div>
+        <div className="grid grid-cols-1 gap-4 pt-5 md:grid-cols-2">
+          <div className="space-y-2">
+            <div className="h-3 w-20 rounded bg-(--bg-surface-hover)" />
+            <div className="h-9 w-full rounded-md bg-(--bg-surface-hover)" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-3 w-24 rounded bg-(--bg-surface-hover)" />
+            <div className="h-9 w-full rounded-md bg-(--bg-surface-hover)" />
+          </div>
+          <div className="col-span-full space-y-2">
+            <div className="h-3 w-28 rounded bg-(--bg-surface-hover)" />
+            <div className="h-20 w-full rounded-md bg-(--bg-surface-hover)" />
+          </div>
+        </div>
+      </div>
+
+      {/* Skeleton Card 2 */}
+      <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-5">
+        <div className="border-b border-(--border-light) pb-4">
+          <div className="space-y-1.5">
+            <div className="h-4 w-32 rounded bg-(--bg-surface-hover)" />
+            <div className="h-3 w-52 rounded bg-(--bg-surface-hover)" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 pt-5 sm:grid-cols-2">
+          <div className="h-10 rounded-md bg-(--bg-surface-hover)" />
+          <div className="h-10 rounded-md bg-(--bg-surface-hover)" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ================================================================
    SaveBar — sticky bottom when dirty
    ================================================================ */
 
@@ -93,7 +147,7 @@ function SaveBar({
   if (!isDirty) return null
 
   return (
-    <div className="sticky bottom-0 z-10 -mx-6 border-t border-(--border-light) bg-(--bg-surface) px-6 py-3 shadow-[0_-4px_12px_-4px_rgba(15,23,42,0.06)]">
+    <div className="sticky bottom-0 z-10 -mx-4 border-t border-(--border-light) bg-(--bg-surface) px-4 py-3 shadow-[0_-4px_12px_-4px_rgba(15,23,42,0.06)] sm:-mx-6 sm:px-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           {/* Warning variant (orange filled) when description is present */}
@@ -118,7 +172,7 @@ function SaveBar({
             type="button"
             onClick={onDiscard}
             disabled={isSaving}
-            className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+            className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
           >
             Discard
           </button>
@@ -126,15 +180,23 @@ function SaveBar({
             type="button"
             onClick={onSave}
             disabled={isSaving}
-            className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
           >
-            {isSaving ? "Saving..." : "Save changes"}
+            {isSaving ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <span>Save changes</span>
+            )}
           </button>
         </div>
       </div>
     </div>
   )
 }
+
 /* ================================================================
    SettingsLayout — wraps every settings tab
    ================================================================ */
@@ -144,19 +206,19 @@ export function SettingsLayout({
   children,
   isDirty = false,
   isSaving = false,
+  isLoading = false,
   onDiscard,
   onSave,
   badges,
   saveBarDescription,
   headerRight,
   saveBarTitle,
-  // pageTitle,
-  // pageSubtitle,
 }: {
   activeTab: SettingsTabId
   children: ReactNode
   isDirty?: boolean
   isSaving?: boolean
+  isLoading?: boolean
   onDiscard?: () => void
   onSave?: () => void
   badges?: Partial<Record<SettingsTabId, number>>
@@ -185,9 +247,20 @@ export function SettingsLayout({
             </span>
           )}
         </div>
-        <h1 className="mt-2 text-xl font-semibold text-(--text-primary)">
-          Settings
-        </h1>
+        <div className="flex items-center gap-2.5">
+          <h1 className="mt-2 text-xl font-semibold text-(--text-primary)">
+            Settings
+          </h1>
+          {isLoading && (
+            <span
+              className="mt-2 inline-flex items-center gap-1 text-xs text-(--text-muted)"
+              role="status"
+            >
+              <Loader2 className="size-3.5 animate-spin text-primary" />
+              <span>Loading...</span>
+            </span>
+          )}
+        </div>
         <p className="mt-0.5 text-sm text-(--text-muted)">
           Manage your store, orders and customer-facing operational channels
         </p>
@@ -227,8 +300,12 @@ export function SettingsLayout({
         </div>
       </nav>
 
-      {/* Content */}
-      <div className="flex flex-col gap-4">{children}</div>
+      {/* Content or Skeleton Loader */}
+      {isLoading ? (
+        <SettingsSkeleton />
+      ) : (
+        <div className="flex flex-col gap-4">{children}</div>
+      )}
 
       {/* Sticky save bar */}
       {onSave && onDiscard && (
