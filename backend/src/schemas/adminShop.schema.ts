@@ -4,12 +4,6 @@ const bdPhoneRegex = /^01[3-9]\d{8}$/;
 
 export const createShopSchema = z.object({
   name: z.string().trim().min(1, "Shop name is required").max(150),
-  slug: z
-    .string()
-    .trim()
-    .min(2)
-    .max(80)
-    .regex(/^[a-z0-9-]+$/, "Lowercase letters, numbers and hyphens only"),
   mobile: z
     .string()
     .trim()

@@ -8,11 +8,43 @@ import {
   updateShopSchema,
 } from "../schemas/adminShop.schema.js";
 
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .substring(0, 60);
+}
+
+async function generateShopSlug(
+  name: string,
+): Promise<{ slug: string; conflict: boolean }> {
+  const base = slugify(name);
+
+  if (!base) {
+    for (let i = 0; i < 5; i++) {
+      const slug = `shop-${Math.random().toString(36).substring(2, 8)}`;
+      const exists = await prisma.shop.findUnique({
+        where: { slug },
+        select: { id: true },
+      });
+      if (!exists) return { slug, conflict: false };
+    }
+    throw new Error("Could not generate unique slug after 5 attempts");
+  }
+
+  const exists = await prisma.shop.findUnique({
+    where: { slug: base },
+    select: { id: true },
+  });
+  return { slug: base, conflict: Boolean(exists) };
+}
+
 function toApiShape(
   s: {
     id: number;
     name: string;
-    slug: string;
     status: string;
     mobile: string | null;
     address: string | null;
@@ -26,7 +58,6 @@ function toApiShape(
   return {
     id: s.id,
     name: s.name,
-    slug: s.slug,
     status: s.status,
     mobile: s.mobile ?? "",
     address: s.address ?? "",
@@ -70,10 +101,23 @@ export async function createShop(req: Request, res: Response) {
   }
 
   try {
+    const { slug, conflict } = await generateShopSlug(parsed.data.name);
+
+    if (conflict) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "A shop with a similar name already exists. Please choose a different name.",
+        errors: {
+          name: "This name creates a URL that is already taken. Try a more specific name (e.g. add the area).",
+        },
+      });
+    }
+
     const shop = await prisma.shop.create({
       data: {
+        slug,
         name: parsed.data.name,
-        slug: parsed.data.slug,
         mobile: parsed.data.mobile || null,
         address: parsed.data.address || null,
         status: parsed.data.status,
@@ -95,8 +139,11 @@ export async function createShop(req: Request, res: Response) {
     ) {
       return res.status(409).json({
         success: false,
-        message: "Slug already in use",
-        errors: { slug: "This slug is taken" },
+        message:
+          "A shop with a similar name already exists. Please choose a different name.",
+        errors: {
+          name: "This name creates a URL that is already taken.",
+        },
       });
     }
     console.error("createShop failed:", error);

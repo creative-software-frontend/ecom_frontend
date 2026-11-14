@@ -21,6 +21,7 @@ import { listAuditLogs } from "../controllers/adminAudit.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { requireSuperAdmin } from "../middleware/requireSuperAdmin.js";
 import { getSuperAdminDashboard } from "../controllers/adminSuperDashboard.controller.js";
+import { getSuperAdminSidebarStats } from "../controllers/adminSuperSidebarStats.controller.js";
 
 const router = Router();
 
@@ -30,6 +31,9 @@ router.use(requireSuperAdmin);
 
 // Dashboard
 router.get("/dashboard", getSuperAdminDashboard);
+
+// Sidebar stats — badge counts
+router.get("/sidebar-stats", getSuperAdminSidebarStats);
 
 // Users
 router.get("/users", listUsers);

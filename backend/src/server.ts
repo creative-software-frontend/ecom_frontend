@@ -12,6 +12,7 @@ import adminSettingsRoutes from "./routes/adminSettings.routes.js";
 import adminOrderRoutes from "./routes/adminOrder.routes.js";
 import adminDashboardRoutes from "./routes/adminDashboard.routes.js";
 import adminSuperRoutes from "./routes/adminSuper.routes.js";
+import adminSidebarStatsRoutes from "./routes/adminSidebarStats.routes.js";
 import path from "node:path";
 
 dotenv.config();
@@ -37,7 +38,7 @@ app.use("/api/shop/products", adminProductRoutes);
 app.use("/api/shop/settings", adminSettingsRoutes);
 app.use("/api/shop/orders", adminOrderRoutes);
 app.use("/api/shop/dashboard", adminDashboardRoutes);
-
+app.use("/api/shop/sidebar-stats", adminSidebarStatsRoutes);
 // // Health check route
 // app.get("/", (req, res) => {
 //   res.status(200).json({
