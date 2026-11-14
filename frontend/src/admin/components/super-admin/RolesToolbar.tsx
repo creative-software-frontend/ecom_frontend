@@ -1,16 +1,11 @@
-import { Search, Plus, X } from "lucide-react"
+import { Search, X } from "lucide-react"
 
 type RolesToolbarProps = {
   search: string
   onSearchChange: (value: string) => void
-  onAdd: () => void
 }
 
-export function RolesToolbar({
-  search,
-  onSearchChange,
-  onAdd,
-}: RolesToolbarProps) {
+export function RolesToolbar({ search, onSearchChange }: RolesToolbarProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--border-light) px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -43,13 +38,6 @@ export function RolesToolbar({
           </button>
         )}
       </div>
-      <button
-        type="button"
-        onClick={onAdd}
-        className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover)"
-      >
-        <Plus className="size-3.5" /> Create Role
-      </button>
     </div>
   )
 }

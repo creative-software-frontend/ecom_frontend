@@ -1,15 +1,20 @@
-import { Search, Plus } from "lucide-react"
-import type { SuperAdminRole } from "../../types/superAdmin"
+import { Search } from "lucide-react"
+import type { SuperAdminRole, SuperAdminShop } from "../../types/superAdmin"
 
 type UsersToolbarProps = {
   search: string
   onSearchChange: (value: string) => void
   roleId: number | undefined
   onRoleChange: (value: number | undefined) => void
+  shopId: number | undefined
+  onShopChange: (value: number | undefined) => void
   status: "active" | "inactive" | undefined
   onStatusChange: (value: "active" | "inactive" | undefined) => void
   roles: SuperAdminRole[]
+  shops: SuperAdminShop[]
+  totalCount: number
   onInvite: () => void
+  onClearFilters: () => void
 }
 
 export function UsersToolbar({
@@ -17,11 +22,17 @@ export function UsersToolbar({
   onSearchChange,
   roleId,
   onRoleChange,
+  shopId,
+  onShopChange,
   status,
   onStatusChange,
   roles,
-  onInvite,
+  shops,
+  totalCount,
+  onClearFilters,
 }: UsersToolbarProps) {
+  const hasFilters = search || roleId || shopId || status
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--border-light) px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -52,6 +63,21 @@ export function UsersToolbar({
         </select>
 
         <select
+          value={shopId ?? ""}
+          onChange={(e) =>
+            onShopChange(e.target.value ? Number(e.target.value) : undefined)
+          }
+          className="h-8 rounded-md border border-(--border-light) bg-(--bg-surface) px-2 text-xs text-(--text-primary) outline-none focus:border-primary"
+        >
+          <option value="">All Shops</option>
+          {shops.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+
+        <select
           value={status ?? ""}
           onChange={(e) =>
             onStatusChange(
@@ -64,16 +90,19 @@ export function UsersToolbar({
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
-      </div>
 
-      <button
-        type="button"
-        onClick={onInvite}
-        className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover)"
-      >
-        <Plus className="size-3.5" />
-        Add user
-      </button>
+        {hasFilters && (
+          <button
+            onClick={onClearFilters}
+            className="text-xs font-medium text-(--text-muted) hover:text-primary"
+          >
+            Clear Filters
+          </button>
+        )}
+        <span className="ml-2 text-xs text-(--text-muted)">
+          Showing {totalCount} users
+        </span>
+      </div>
     </div>
   )
 }

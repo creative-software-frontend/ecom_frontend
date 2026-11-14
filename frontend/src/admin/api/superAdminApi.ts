@@ -14,6 +14,8 @@ import type {
   ShopsListResponse,
   AuditLogResponse,
   AuditLogQueryParams,
+  UpdateShopInput,
+  CreateShopInput,
 } from "../types/superAdmin"
 
 const BASE = "/admin/super"
@@ -82,68 +84,99 @@ export const superAdminApi = {
     },
   },
   shops: {
+    // ১. ব্যাকএন্ড থেকে সরাসরি লিস্ট আনা (Raw)
     list(signal?: AbortSignal): Promise<SuperAdminShop[]> {
       return apiRequest<SuperAdminShop[]>(`${BASE}/shops`, { signal })
     },
-    // নতুন: Shops List-এর জন্য ডেটা নিয়ে আসার ফাংশন (আপাতত ব্যাকএন্ড ডেটার উপর ডামি ডেটা ম্যাপ করা হবে)
+
+    // ২. নতুন শপ তৈরি করা
+    create(data: CreateShopInput): Promise<SuperAdminShop> {
+      return apiRequest<SuperAdminShop>(`${BASE}/shops`, {
+        method: "POST",
+        body: data,
+      })
+    },
+
+    // ৩. শপ আপডেট করা (ভবিষ্যতে Edit/Suspend এর জন্য কাজে লাগবে)
+    update(id: number, data: UpdateShopInput): Promise<SuperAdminShop> {
+      return apiRequest<SuperAdminShop>(`${BASE}/shops/${id}`, {
+        method: "PATCH",
+        body: data,
+      })
+    },
+
+    // ৪. ফ্রন্টএন্ডে ফিল্টার এবং পেজিনেশন
     getPaginated(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      params: any = {},
+      params: {
+        q?: string
+        status?: string
+        page?: number
+        limit?: number
+      } = {},
       signal?: AbortSignal
     ): Promise<ShopsListResponse> {
-      return apiRequest<SuperAdminShop[]>(`${BASE}/shops`, { signal }).then(
-        (shops) => {
-          const plans = ["Enterprise", "Growth", "Starter", "14-day Free Trial"]
-          const owners = [
-            "Abdur Razzaq",
-            "Mahfuz Alam",
-            "Abdur Rahim",
-            "Rezaul Karim",
-            "Nusrat Jahan Khan",
-          ]
+      return this.list(signal).then((shops) => {
+        // NOTE: Plan এবং OwnerName আপাতত ডামি, কারণ ব্যাকএন্ড DB-তে এই কলামগুলো নেই।
+        // Phase B-তে DB-তে ফিল্ড যোগ হলে এই ডামি ম্যাপিং সরিয়ে ফেলতে হবে।
+        const plans = ["Enterprise", "Growth", "Starter", "14-day Free Trial"]
+        const owners = [
+          "Abdur Razzaq",
+          "Mahfuz Alam",
+          "Abdur Rahim",
+          "Rezaul Karim",
+          "Nusrat Jahan Khan",
+        ]
 
-          const items: SuperAdminShopListItem[] = shops.map((shop, index) => ({
-            id: shop.id,
-            name: shop.name,
-            slug: shop.slug,
-            ownerName: owners[index % owners.length],
-            ownerMobile: shop.mobile || "+880 1711-000000",
-            status:
-              shop.status === "inactive"
-                ? "inactive"
-                : shop.status === "trial"
-                  ? "trial"
-                  : "active",
-            planName: plans[index % plans.length],
-            expiresAt: shop.expiryDate || shop.trialEndsAt || null,
-            userCount: shop.userCount || 0,
-          }))
+        // ব্যাকএন্ড ডেটাকে ফ্রন্টএন্ডের UI মডেলে রূপান্তর
+        let items: SuperAdminShopListItem[] = shops.map((shop, index) => ({
+          id: shop.id,
+          name: shop.name,
+          slug: shop.slug,
+          ownerName: owners[index % owners.length], // ডামি
+          ownerMobile: shop.mobile || "N/A",
+          status: (shop.status as "active" | "trial" | "inactive") || "active",
+          planName: plans[index % plans.length], // ডামি
+          expiresAt: shop.expiryDate || shop.trialEndsAt || null,
+          userCount: shop.userCount || 0,
+        }))
 
-          // সার্চ ফিল্টার (ফ্রন্টএন্ডে আপাতত)
-          let filtered = items
-          if (params.q) {
-            filtered = items.filter((i) =>
-              i.name.toLowerCase().includes(params.q.toLowerCase())
-            )
-          }
-          if (params.status && params.status !== "all") {
-            filtered = filtered.filter((i) => i.status === params.status)
-          }
-
-          return {
-            items: filtered,
-            page: 1,
-            limit: 10,
-            total: filtered.length,
-            counts: {
-              total: items.length,
-              active: items.filter((i) => i.status === "active").length,
-              trial: items.filter((i) => i.status === "trial").length,
-              inactive: items.filter((i) => i.status === "inactive").length,
-            },
-          }
+        // সার্চ ফিল্টার (Name বা Slug দিয়ে)
+        if (params.q) {
+          const query = params.q.toLowerCase()
+          items = items.filter(
+            (i) =>
+              i.name.toLowerCase().includes(query) ||
+              i.slug.toLowerCase().includes(query)
+          )
         }
-      )
+
+        // স্ট্যাটাস ফিল্টার
+        if (params.status && params.status !== "all") {
+          items = items.filter((i) => i.status === params.status)
+        }
+
+        // কাউন্ট ক্যালকুলেশন (পেজিনেশনের আগে)
+        const counts = {
+          total: items.length,
+          active: items.filter((i) => i.status === "active").length,
+          trial: items.filter((i) => i.status === "trial").length,
+          inactive: items.filter((i) => i.status === "inactive").length,
+        }
+
+        // লোকাল পেজিনেশন
+        const page = params.page || 1
+        const limit = params.limit || 10
+        const total = items.length
+        const paginatedItems = items.slice((page - 1) * limit, page * limit)
+
+        return {
+          items: paginatedItems,
+          page,
+          limit,
+          total,
+          counts,
+        }
+      })
     },
   },
 

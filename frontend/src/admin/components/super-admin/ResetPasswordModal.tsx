@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   KeyRound,
   Mail,
+  Phone,
   ShieldCheck,
   X,
 } from "lucide-react"
@@ -24,6 +25,7 @@ const resetPasswordSchema = z.object({
 
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
 type ResetPasswordStep = "request" | "verify" | "password"
+type OtpDeliveryMethod = "email" | "phone"
 
 type ResetPasswordModalProps = {
   open: boolean
@@ -47,6 +49,7 @@ export function ResetPasswordModal({
   })
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false)
   const [step, setStep] = useState<ResetPasswordStep>("request")
+  const [method, setMethod] = useState<OtpDeliveryMethod>("email")
   const [otp, setOtp] = useState("")
   const [submissionNotice, setSubmissionNotice] = useState<string | null>(null)
 
@@ -56,6 +59,7 @@ export function ResetPasswordModal({
       reset({ password: "", confirmPassword: "" })
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setStep("request")
+      setMethod("email")
       setOtp("")
       setSubmissionNotice(null)
     }
@@ -65,6 +69,8 @@ export function ResetPasswordModal({
   useEscapeKey(onClose, open && !isSubmitting)
 
   if (!open || !user) return null
+
+  const hasPhone = Boolean(user.mobile && user.mobile.trim().length > 0)
 
   function onSubmit() {
     setSubmissionNotice(
@@ -146,24 +152,89 @@ export function ResetPasswordModal({
 
             {step === "request" && (
               <div className="space-y-4">
-                <div className="flex items-start gap-3 rounded-md border border-(--border-light) bg-(--bg-app) p-3">
-                  <Mail className="mt-0.5 size-4 shrink-0 text-(--text-muted)" />
-                  <div>
-                    <p className="text-xs font-medium text-(--text-primary)">
-                      Send a one-time code
-                    </p>
-                    <p className="mt-1 text-xs text-(--text-muted)">
-                      A verification code will be sent to {user.email}.
-                    </p>
+                <div>
+                  <label className="mb-2 block text-xs font-semibold text-(--text-primary)">
+                    Choose OTP Destination
+                  </label>
+                  <div className="space-y-2">
+                    {/* Email Option */}
+                    <label
+                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-all ${
+                        method === "email"
+                          ? "border-primary bg-(--primary-soft) shadow-xs"
+                          : "border-(--border-light) bg-(--bg-app) hover:border-(--border-hover) hover:bg-(--bg-surface-hover)"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="otpMethod"
+                        value="email"
+                        checked={method === "email"}
+                        onChange={() => setMethod("email")}
+                        className="mt-0.5 accent-primary"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5 font-medium text-xs text-(--text-primary)">
+                          <Mail className="size-3.5 text-primary" />
+                          <span>Email Verification</span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-(--text-muted)">
+                          Send 6-digit verification code to <span className="font-semibold text-(--text-primary)">{user.email}</span>
+                        </p>
+                      </div>
+                    </label>
+
+                    {/* Phone Option */}
+                    <label
+                      className={`flex items-start gap-3 rounded-lg border p-3 transition-all ${
+                        !hasPhone
+                          ? "cursor-not-allowed border-(--border-light) bg-(--bg-app) opacity-60"
+                          : method === "phone"
+                            ? "cursor-pointer border-primary bg-(--primary-soft) shadow-xs"
+                            : "cursor-pointer border-(--border-light) bg-(--bg-app) hover:border-(--border-hover) hover:bg-(--bg-surface-hover)"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="otpMethod"
+                        value="phone"
+                        disabled={!hasPhone}
+                        checked={method === "phone"}
+                        onChange={() => setMethod("phone")}
+                        className="mt-0.5 accent-primary disabled:cursor-not-allowed"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5 font-medium text-xs text-(--text-primary)">
+                          <Phone className="size-3.5 text-primary" />
+                          <span>SMS / Phone Verification</span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-(--text-muted)">
+                          {hasPhone ? (
+                            <>
+                              Send code via SMS to <span className="font-semibold text-(--text-primary)">{user.mobile}</span>
+                            </>
+                          ) : (
+                            <span className="italic text-red-500">
+                              No phone number linked to this account
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </label>
                   </div>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => setStep("verify")}
                   className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover)"
                 >
-                  <Mail className="size-4" />
-                  Send OTP
+                  {method === "email" ? (
+                    <Mail className="size-4" />
+                  ) : (
+                    <Phone className="size-4" />
+                  )}
+                  Send OTP to {method === "email" ? "Email" : "Phone"}
                 </button>
               </div>
             )}
@@ -171,16 +242,24 @@ export function ResetPasswordModal({
             {step === "verify" && (
               <div className="space-y-4">
                 <div className="flex items-start gap-3 rounded-md border border-(--border-light) bg-(--bg-app) p-3">
-                  <Mail className="mt-0.5 size-4 shrink-0 text-(--text-muted)" />
+                  {method === "email" ? (
+                    <Mail className="mt-0.5 size-4 shrink-0 text-primary" />
+                  ) : (
+                    <Phone className="mt-0.5 size-4 shrink-0 text-primary" />
+                  )}
                   <div>
                     <p className="text-xs font-medium text-(--text-primary)">
-                      Check the email address
+                      Check your {method === "email" ? "inbox" : "messages"}
                     </p>
                     <p className="mt-1 text-xs text-(--text-muted)">
-                      Enter the 6-digit code sent to {user.email}.
+                      Enter the 6-digit code sent to{" "}
+                      <span className="font-semibold text-(--text-primary)">
+                        {method === "email" ? user.email : user.mobile}
+                      </span>.
                     </p>
                   </div>
                 </div>
+
                 <div>
                   <label
                     htmlFor="reset-pw-otp"
@@ -211,16 +290,25 @@ export function ResetPasswordModal({
                   <ShieldCheck className="size-4" />
                   Verify OTP
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOtp("")
-                    setSubmissionNotice(null)
-                  }}
-                  className="w-full text-center text-xs font-medium text-primary hover:underline"
-                >
-                  Resend OTP
-                </button>
+                <div className="flex items-center justify-between text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setStep("request")}
+                    className="text-(--text-muted) hover:text-(--text-primary) hover:underline"
+                  >
+                    Change method
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtp("")
+                      setSubmissionNotice(null)
+                    }}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Resend OTP
+                  </button>
+                </div>
               </div>
             )}
 

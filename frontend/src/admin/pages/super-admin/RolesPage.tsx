@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { CheckCircle2, X, Download } from "lucide-react"
+import { CheckCircle2, X, Download, Plus } from "lucide-react"
 import { RolesToolbar } from "../../components/super-admin/RolesToolbar"
 import { RolesTable } from "../../components/super-admin/RolesTable"
 import { RolesMetricsCards } from "../../components/super-admin/RolesMetricsCards"
@@ -72,12 +72,13 @@ export default function RolesPage() {
           <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
             <Download className="size-4" /> Export CSV
           </button>
-          {/* <button
+          <button
+            type="button"
             onClick={() => setCreateOpen(true)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-white hover:bg-(--primary-hover)"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover)"
           >
-            + Create Role
-          </button> */}
+            <Plus className="size-3.5" /> Create Role
+          </button>
         </div>
       </div>
 
@@ -100,11 +101,7 @@ export default function RolesPage() {
 
       {/* Table Area */}
       <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
-        <RolesToolbar
-          search={search}
-          onSearchChange={setSearch}
-          onAdd={() => setCreateOpen(true)}
-        />
+        <RolesToolbar search={search} onSearchChange={setSearch} />
         <RolesTable
           items={filteredRoles}
           isLoading={isLoading}

@@ -5,6 +5,8 @@ import {
   Check,
   CheckCircle2,
   Copy,
+  Eye,
+  EyeOff,
   IdCard,
   KeyRound,
   Loader2,
@@ -12,7 +14,7 @@ import {
   LogOut,
   Mail,
   Save,
-  Settings,
+  // Settings,
   ShieldCheck,
   UserRound,
 } from "lucide-react"
@@ -21,7 +23,6 @@ import { ApiError } from "../api/client"
 import { profileApi } from "../api/profileApi"
 import { settingsApi } from "../api/settingsApi"
 import { useAuth } from "../auth/AuthProvider"
-import { PasswordShowHide } from "../components/PasswordShowHide"
 import { formatLongDate } from "../lib/formatTime"
 
 export function ProfilePage() {
@@ -68,9 +69,10 @@ export function ProfilePage() {
   if (state.status !== "authenticated" || !currentUser) {
     return (
       <div
-        className="admin-dashboard-content min-w-0 p-4 md:p-7.5"
+        className="flex min-h-[50vh] items-center justify-center p-6 text-sm text-(--text-muted)"
         role="status"
       >
+        <Loader2 className="mr-2 size-4 animate-spin text-primary" />
         Loading profile...
       </div>
     )
@@ -185,25 +187,30 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="admin-dashboard-content min-w-0 p-4 md:p-7.5">
-      <header className="admin-page-title">
-        <h1 className="text-xl font-normal text-gray-800">Admin profile</h1>
-        <p className="pt-0.75 text-base text-gray-500">
-          Manage your administrator account details, security credentials, and
-          active session.
-        </p>
-      </header>
+    <div className="min-w-0 space-y-4 bg-(--bg-app) p-4 sm:p-6">
+      {/* Header */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-(--text-primary)">
+            Admin Profile
+          </h1>
+          <p className="mt-0.5 text-xs text-(--text-muted)">
+            Manage your administrator account details, security credentials, and
+            active session.
+          </p>
+        </div>
+      </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Profile Hero Header Card */}
         <section
-          className="admin-dashboard-card overflow-hidden bg-white"
+          className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)"
           aria-labelledby="profile-account-heading"
         >
-          <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-5">
+          <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
               <div
-                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-blue-50 text-2xl font-semibold text-[#3f6ad8] ring-4 ring-blue-50"
+                className="flex size-14 shrink-0 items-center justify-center rounded-full bg-(--primary-soft) text-xl font-bold text-primary ring-4 ring-(--primary-soft)"
                 aria-hidden="true"
               >
                 {initials}
@@ -212,40 +219,46 @@ export function ProfilePage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <h2
                     id="profile-account-heading"
-                    className="text-lg font-semibold text-gray-800"
+                    className="truncate text-base font-semibold text-(--text-primary)"
                   >
                     {user.email}
                   </h2>
-                  <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                    <span className="size-1.5 rounded-full bg-emerald-600" />
                     Active
                   </span>
                 </div>
-                <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-500">
-                  <ShieldCheck className="h-4 w-4 text-green-600" aria-hidden />
-                  Store Administrator • Full Access
+                <p className="mt-1 flex items-center gap-1.5 text-xs text-(--text-muted)">
+                  <ShieldCheck
+                    className="size-3.5 text-emerald-600"
+                    aria-hidden
+                  />
+                  {user.role === "super_admin"
+                    ? "Super Administrator • Platform Full Access"
+                    : "Store Administrator • Full Access"}
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <button
+              {/* <button
                 type="button"
                 onClick={() => navigate("/admin/settings")}
-                className="admin-template-button admin-template-button--secondary"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
               >
-                <Settings className="h-4 w-4" />
+                <Settings className="size-3.5" />
                 Store Settings
-              </button>
+              </button> */}
               <button
                 type="button"
                 onClick={() => void handleLogout()}
                 disabled={isLoggingOut}
-                className="admin-template-button admin-template-button--secondary text-red-600 hover:border-red-300 hover:bg-red-50"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-red-200 bg-red-50/50 px-3 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
               >
                 {isLoggingOut ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="size-3.5 animate-spin" />
                 ) : (
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="size-3.5" />
                 )}
                 Sign Out
               </button>
@@ -254,41 +267,46 @@ export function ProfilePage() {
         </section>
 
         {/* Edit Profile Information Form */}
-        <section className="admin-dashboard-card overflow-hidden bg-white">
-          <div className="admin-form-card-header flex items-center gap-2">
-            <UserRound className="h-5 w-5 text-[#3f6ad8]" />
+        <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+          <div className="flex items-center gap-2 border-b border-(--border-light) px-5 py-3">
+            <UserRound className="size-4 text-primary" />
             <div>
-              <h2 className="text-base font-semibold">Account Information</h2>
-              <p className="text-xs text-gray-500">
+              <h2 className="text-sm font-semibold text-(--text-primary)">
+                Account Information
+              </h2>
+              <p className="text-xs text-(--text-muted)">
                 Update your login email address and view account credentials
               </p>
             </div>
           </div>
 
-          <form onSubmit={(e) => void handleProfileSubmit(e)} className="p-6">
+          <form onSubmit={(e) => void handleProfileSubmit(e)} className="p-5">
             {profileSuccessMessage && (
               <div
-                className="mb-4 flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+                className="mb-4 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800"
                 role="status"
               >
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
+                <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
                 <span>{profileSuccessMessage}</span>
               </div>
             )}
             {profileErrorMessage && (
               <div
-                className="mb-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                className="mb-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-800"
                 role="alert"
               >
-                <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
+                <AlertCircle className="size-4 shrink-0 text-red-600" />
                 <span>{profileErrorMessage}</span>
               </div>
             )}
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="admin-form-field">
-                <label htmlFor="admin-email" className="admin-form-label">
-                  Email Address
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="admin-email"
+                  className="mb-1.5 block text-xs font-semibold text-(--text-primary)"
+                >
+                  Email Address <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -296,18 +314,21 @@ export function ProfilePage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="admin-form-control pr-10"
+                    className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-10 pl-3 text-xs text-(--text-primary) transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                     required
                   />
-                  <Mail className="pointer-events-none absolute top-2.5 right-3 h-4 w-4 text-gray-400" />
+                  <Mail className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-(--text-muted)" />
                 </div>
-                <p className="admin-form-help">
+                <p className="mt-1 text-xs text-(--text-muted)">
                   This email is used to log in to the admin dashboard.
                 </p>
               </div>
 
-              <div className="admin-form-field">
-                <label htmlFor="admin-id" className="admin-form-label">
+              <div>
+                <label
+                  htmlFor="admin-id"
+                  className="mb-1.5 block text-xs font-semibold text-(--text-primary)"
+                >
                   Admin ID
                 </label>
                 <div className="flex gap-2">
@@ -316,42 +337,48 @@ export function ProfilePage() {
                     type="text"
                     value={String(user.id)}
                     readOnly
-                    className="admin-form-control--readonly admin-form-control font-mono text-xs"
+                    className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 font-mono text-xs text-(--text-muted) outline-none select-all"
                   />
                   <button
                     type="button"
                     onClick={() => void handleCopyId()}
-                    className="admin-template-button admin-template-button--secondary shrink-0"
+                    className="inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
                     title="Copy Admin ID"
                     aria-label="Copy Admin ID"
                   >
                     {copiedId ? (
-                      <Check className="h-4 w-4 text-green-600" />
+                      <>
+                        <Check className="size-3.5 text-emerald-600" />
+                        <span className="text-emerald-600">Copied</span>
+                      </>
                     ) : (
-                      <Copy className="h-4 w-4 text-gray-600" />
+                      <>
+                        <Copy className="size-3.5 text-(--text-muted)" />
+                        <span>Copy</span>
+                      </>
                     )}
                   </button>
                 </div>
-                <p className="admin-form-help">
+                <p className="mt-1 text-xs text-(--text-muted)">
                   Unique system identifier for your administrator record.
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 flex justify-end">
+            <div className="mt-5 flex justify-end">
               <button
                 type="submit"
                 disabled={isSavingEmail}
-                className="admin-template-button admin-template-button--primary"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
               >
                 {isSavingEmail ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="size-3.5 animate-spin" />
                     Saving...
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4" />
+                    <Save className="size-3.5" />
                     Save Account Changes
                   </>
                 )}
@@ -361,44 +388,46 @@ export function ProfilePage() {
         </section>
 
         {/* Change Password Card */}
-        <section className="admin-dashboard-card overflow-hidden bg-white">
-          <div className="admin-form-card-header flex items-center gap-2">
-            <KeyRound className="h-5 w-5 text-[#3f6ad8]" />
+        <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+          <div className="flex items-center gap-2 border-b border-(--border-light) px-5 py-3">
+            <KeyRound className="size-4 text-primary" />
             <div>
-              <h2 className="text-base font-semibold">Change Password</h2>
-              <p className="text-xs text-gray-500">
+              <h2 className="text-sm font-semibold text-(--text-primary)">
+                Change Password
+              </h2>
+              <p className="text-xs text-(--text-muted)">
                 Update your login password to keep your store secure
               </p>
             </div>
           </div>
 
-          <form onSubmit={(e) => void handlePasswordSubmit(e)} className="p-6">
+          <form onSubmit={(e) => void handlePasswordSubmit(e)} className="p-5">
             {passwordSuccessMessage && (
               <div
-                className="mb-4 flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+                className="mb-4 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800"
                 role="status"
               >
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
+                <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
                 <span>{passwordSuccessMessage}</span>
               </div>
             )}
             {passwordErrorMessage && (
               <div
-                className="mb-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                className="mb-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-800"
                 role="alert"
               >
-                <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
+                <AlertCircle className="size-4 shrink-0 text-red-600" />
                 <span>{passwordErrorMessage}</span>
               </div>
             )}
 
             <div className="max-w-md space-y-4">
-              <div className="admin-form-field">
+              <div>
                 <label
                   htmlFor="profile-current-password"
-                  className="admin-form-label"
+                  className="mb-1.5 block text-xs font-semibold text-(--text-primary)"
                 >
-                  Current Password
+                  Current Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -406,29 +435,39 @@ export function ProfilePage() {
                     type={visibleCurrentPassword ? "text" : "password"}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="admin-form-control"
+                    className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-10 pl-3 text-xs text-(--text-primary) transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                     required
                     aria-invalid={Boolean(passwordFieldErrors.currentPassword)}
                   />
-                  <PasswordShowHide
-                    passwordVisible={visibleCurrentPassword}
-                    setPasswordVisible={setVisibleCurrentPassword}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCurrentPassword((v) => !v)}
+                    className="absolute top-1/2 right-2.5 -translate-y-1/2 text-(--text-muted) hover:text-(--text-primary)"
+                    aria-label={
+                      visibleCurrentPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {visibleCurrentPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </button>
                 </div>
 
                 {passwordFieldErrors.currentPassword && (
-                  <p className="admin-form-error">
+                  <p className="mt-1 text-xs font-medium text-red-600">
                     {passwordFieldErrors.currentPassword}
                   </p>
                 )}
               </div>
 
-              <div className="admin-form-field">
+              <div>
                 <label
                   htmlFor="profile-new-password"
-                  className="admin-form-label"
+                  className="mb-1.5 block text-xs font-semibold text-(--text-primary)"
                 >
-                  New Password
+                  New Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -436,31 +475,41 @@ export function ProfilePage() {
                     type={visibleNewPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="admin-form-control"
+                    className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-10 pl-3 text-xs text-(--text-primary) transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                     required
                     aria-invalid={Boolean(passwordFieldErrors.newPassword)}
                   />
-                  <PasswordShowHide
-                    passwordVisible={visibleNewPassword}
-                    setPasswordVisible={setVisibleNewPassword}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setVisibleNewPassword((v) => !v)}
+                    className="absolute top-1/2 right-2.5 -translate-y-1/2 text-(--text-muted) hover:text-(--text-primary)"
+                    aria-label={
+                      visibleNewPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {visibleNewPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </button>
                 </div>
-                <p className="admin-form-help">
+                <p className="mt-1 text-xs text-(--text-muted)">
                   Must be at least 8 characters long.
                 </p>
                 {passwordFieldErrors.newPassword && (
-                  <p className="admin-form-error">
+                  <p className="mt-1 text-xs font-medium text-red-600">
                     {passwordFieldErrors.newPassword}
                   </p>
                 )}
               </div>
 
-              <div className="admin-form-field">
+              <div>
                 <label
                   htmlFor="profile-confirm-password"
-                  className="admin-form-label"
+                  className="mb-1.5 block text-xs font-semibold text-(--text-primary)"
                 >
-                  Confirm New Password
+                  Confirm New Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -468,19 +517,28 @@ export function ProfilePage() {
                     type={visibleConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="admin-form-control"
+                    className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-10 pl-3 text-xs text-(--text-primary) transition-all outline-none focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                     required
                     aria-invalid={Boolean(passwordFieldErrors.confirmPassword)}
                   />
-
-                  <PasswordShowHide
-                    passwordVisible={visibleConfirmPassword}
-                    setPasswordVisible={setVisibleConfirmPassword}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setVisibleConfirmPassword((v) => !v)}
+                    className="absolute top-1/2 right-2.5 -translate-y-1/2 text-(--text-muted) hover:text-(--text-primary)"
+                    aria-label={
+                      visibleConfirmPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {visibleConfirmPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </button>
                 </div>
 
                 {passwordFieldErrors.confirmPassword && (
-                  <p className="admin-form-error">
+                  <p className="mt-1 text-xs font-medium text-red-600">
                     {passwordFieldErrors.confirmPassword}
                   </p>
                 )}
@@ -490,16 +548,16 @@ export function ProfilePage() {
                 <button
                   type="submit"
                   disabled={isUpdatingPassword}
-                  className="admin-template-button admin-template-button--primary"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
                 >
                   {isUpdatingPassword ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="size-3.5 animate-spin" />
                       Updating password...
                     </>
                   ) : (
                     <>
-                      <Lock className="h-4 w-4" />
+                      <Lock className="size-3.5" />
                       Update Password
                     </>
                   )}
@@ -510,60 +568,66 @@ export function ProfilePage() {
         </section>
 
         {/* Security & System Metadata Overview */}
-        <section className="admin-dashboard-card overflow-hidden bg-white">
-          <div className="admin-form-card-header flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-green-600" />
+        <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+          <div className="flex items-center gap-2 border-b border-(--border-light) px-5 py-3">
+            <ShieldCheck className="size-4 text-emerald-600" />
             <div>
-              <h2 className="text-base font-semibold">
+              <h2 className="text-sm font-semibold text-(--text-primary)">
                 Security & Session Status
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-(--text-muted)">
                 Overview of current session credentials and security settings
               </p>
             </div>
           </div>
 
-          <dl className="grid gap-4 p-6 sm:grid-cols-3">
-            <div className="flex items-start gap-3 rounded-md border border-gray-200 p-4">
-              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+          <dl className="grid gap-3 p-5 sm:grid-cols-3">
+            <div className="flex items-start gap-3 rounded-lg border border-(--border-light) bg-(--bg-app) p-3.5">
+              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />
               <div className="min-w-0">
-                <dt className="text-xs font-medium text-gray-500">
+                <dt className="text-xs font-medium text-(--text-muted)">
                   Authentication
                 </dt>
-                <dd className="mt-1 text-sm font-semibold text-gray-800">
+                <dd className="mt-0.5 text-xs font-semibold text-(--text-primary)">
                   HTTP-Only JWT Cookie
                 </dd>
-                <dd className="text-xs text-gray-500">
+                <dd className="mt-0.5 text-[11px] text-(--text-muted)">
                   8-hour session lifespan
                 </dd>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 rounded-md border border-gray-200 p-4">
-              <IdCard className="mt-0.5 h-5 w-5 shrink-0 text-[#3f6ad8]" />
+            <div className="flex items-start gap-3 rounded-lg border border-(--border-light) bg-(--bg-app) p-3.5">
+              <IdCard className="mt-0.5 size-4 shrink-0 text-primary" />
               <div className="min-w-0">
-                <dt className="text-xs font-medium text-gray-500">
+                <dt className="text-xs font-medium text-(--text-muted)">
                   Role Permissions
                 </dt>
-                <dd className="mt-1 text-sm font-semibold text-gray-800">
-                  Super Administrator
+                <dd className="mt-0.5 text-xs font-semibold text-(--text-primary)">
+                  {user.role === "super_admin"
+                    ? "Super Administrator"
+                    : "Store Administrator"}
                 </dd>
-                <dd className="text-xs text-gray-500">
-                  Full catalog & store access
+                <dd className="mt-0.5 text-[11px] text-(--text-muted)">
+                  {user.role === "super_admin"
+                    ? "Full platform management"
+                    : "Full catalog & store access"}
                 </dd>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 rounded-md border border-gray-200 p-4">
-              <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <div className="flex items-start gap-3 rounded-lg border border-(--border-light) bg-(--bg-app) p-3.5">
+              <Calendar className="mt-0.5 size-4 shrink-0 text-amber-600" />
               <div className="min-w-0">
-                <dt className="text-xs font-medium text-gray-500">
+                <dt className="text-xs font-medium text-(--text-muted)">
                   Member Since
                 </dt>
-                <dd className="mt-1 text-sm font-semibold text-gray-800">
+                <dd className="mt-0.5 text-xs font-semibold text-(--text-primary)">
                   {formatLongDate(user.createdAt)}
                 </dd>
-                <dd className="text-xs text-gray-500">Account verified</dd>
+                <dd className="mt-0.5 text-[11px] text-(--text-muted)">
+                  Account verified
+                </dd>
               </div>
             </div>
           </dl>

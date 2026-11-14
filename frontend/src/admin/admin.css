@@ -295,3 +295,7 @@ button {
 .admin-data-table .rdt_Pagination button:not(:disabled):hover {
   background-color: var(--bg-surface-hover);
 }
+
+select {
+  cursor: pointer;
+}

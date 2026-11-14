@@ -21,7 +21,7 @@ export function StoreDensityCard() {
               divisions
             </p>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-emerald-700">
             <MapPin className="size-3" /> 8 Divisions
           </span>
         </div>

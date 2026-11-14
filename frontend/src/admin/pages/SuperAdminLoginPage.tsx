@@ -175,7 +175,7 @@ export function SuperAdminLoginPage() {
       <div className="flex w-full flex-1 flex-col items-center justify-center p-6 lg:w-1/2">
         <div className="w-full max-w-105">
           <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-(--primary)">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary">
               <Layers className="size-6 text-white" />
             </div>
             <div>
@@ -232,6 +232,8 @@ export function SuperAdminLoginPage() {
                   id="sa-email"
                   type="email"
                   autoComplete="username"
+                  // TODO:remove for production
+                  defaultValue="admin@email.com"
                   placeholder="admin@powerzenox.com"
                   aria-invalid={Boolean(
                     errors.email || (errorMessage && !isRateLimited)
@@ -260,6 +262,8 @@ export function SuperAdminLoginPage() {
                     type={passwordVisible ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
+                    // TODO:remove for production
+                    defaultValue="adminpassword"
                     aria-invalid={Boolean(
                       errors.password || (errorMessage && !isRateLimited)
                     )}

@@ -249,6 +249,8 @@ export function LoginPage() {
                   type="email"
                   autoComplete="username"
                   placeholder="abdur.razzaq@powerzenox.com"
+                  // TODO:remove for production
+                  defaultValue="test-admin@powerzenox.com"
                   aria-invalid={Boolean(
                     errors.email || (errorMessage && !isRateLimited)
                   )}
@@ -277,6 +279,8 @@ export function LoginPage() {
                     type={passwordVisible ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
+                    // TODO:remove for production
+                    defaultValue="TestPassword123"
                     aria-invalid={Boolean(
                       errors.password || (errorMessage && !isRateLimited)
                     )}

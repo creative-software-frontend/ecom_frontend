@@ -1,8 +1,9 @@
 import { useState } from "react"
-import { CheckCircle2, X } from "lucide-react"
+import { CheckCircle2, X, Download, UserPlus } from "lucide-react"
 import { useDebouncedValue } from "../../hooks/useDebouncedValue"
 import { UsersToolbar } from "../../components/super-admin/UsersToolbar"
 import { UsersTable } from "../../components/super-admin/UsersTable"
+import { UsersMetricsCards } from "../../components/super-admin/UsersMetricsCards"
 import { InviteUserModal } from "../../components/super-admin/InviteUserModal"
 import { EditUserDrawer } from "../../components/super-admin/EditUserDrawer"
 import { ResetPasswordModal } from "../../components/super-admin/ResetPasswordModal"
@@ -17,7 +18,7 @@ import { useAuth } from "../../auth/AuthProvider"
 import { getErrorMessage } from "../../lib/errors"
 import type { SuperAdminUser } from "../../types/superAdmin"
 
-const DEFAULT_LIMIT = 20
+const DEFAULT_LIMIT = 10
 
 export default function UsersPage() {
   const { state: authState } = useAuth()
@@ -26,11 +27,11 @@ export default function UsersPage() {
 
   const [search, setSearch] = useState("")
   const [roleId, setRoleId] = useState<number | undefined>()
+  const [shopId, setShopId] = useState<number | undefined>()
   const [status, setStatus] = useState<"active" | "inactive" | undefined>()
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(DEFAULT_LIMIT)
 
-  // Debounce search to avoid hammering the API on every keystroke.
   const debouncedSearch = useDebouncedValue(search, 300)
 
   const { data, isLoading } = useAdminUsersList({
@@ -38,13 +39,13 @@ export default function UsersPage() {
     limit,
     q: debouncedSearch.trim() || undefined,
     roleId,
+    shopId,
     status,
   })
   const { data: roles = [] } = useAdminRolesList()
   const { data: shops = [] } = useAdminShopsList()
   const updateMutation = useUpdateAdminUserMutation()
 
-  // Modal state
   const [inviteOpen, setInviteOpen] = useState(false)
   const [editUser, setEditUser] = useState<SuperAdminUser | null>(null)
   const [resetPwUser, setResetPwUser] = useState<SuperAdminUser | null>(null)
@@ -65,23 +66,47 @@ export default function UsersPage() {
           )
           setToggleTarget(null)
         },
-        onError: (err) => {
-          setToggleError(getErrorMessage(err, "Failed to update status"))
-        },
+        onError: (err) => setToggleError(getErrorMessage(err)),
       }
     )
   }
 
+  function resetFilters() {
+    setSearch("")
+    setRoleId(undefined)
+    setShopId(undefined)
+    setStatus(undefined)
+    setPage(1)
+  }
+
   return (
     <div className="min-w-0 space-y-4 bg-(--bg-app) p-4 sm:p-6">
-      <header>
-        <h1 className="text-[20px] font-semibold text-(--text-primary)">
-          Admin Users
-        </h1>
-        <p className="mt-0.5 text-sm text-(--text-muted)">
-          Manage panel access, roles, and account statuses across the platform.
-        </p>
-      </header>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-(--text-primary)">
+            Admin Users
+          </h1>
+          <p className="mt-0.5 text-sm text-(--text-muted)">
+            Manage panel access, roles, and account statuses across the
+            platform.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
+            <Download className="size-4" /> Export CSV
+          </button>
+          <button
+            onClick={() => setInviteOpen(true)}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-white hover:bg-(--primary-hover)"
+          >
+            <UserPlus className="size-4" /> Add User
+          </button>
+        </div>
+      </div>
+
+      {/* Metrics */}
+      <UsersMetricsCards totalUsers={data?.total || 0} />
 
       {successMessage && (
         <div
@@ -89,20 +114,18 @@ export default function UsersPage() {
           className="flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-sm text-(--status-delivered-text)"
         >
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="size-4 shrink-0" />
-            {successMessage}
+            <CheckCircle2 className="size-4 shrink-0" /> {successMessage}
           </span>
           <button
-            type="button"
             onClick={() => setSuccessMessage(null)}
             className="rounded p-1 hover:bg-(--status-delivered-bg)"
-            aria-label="Dismiss"
           >
             <X className="size-3.5" />
           </button>
         </div>
       )}
 
+      {/* Table Area */}
       <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
         <UsersToolbar
           search={search}
@@ -115,13 +138,21 @@ export default function UsersPage() {
             setRoleId(v)
             setPage(1)
           }}
+          shopId={shopId}
+          onShopChange={(v) => {
+            setShopId(v)
+            setPage(1)
+          }}
           status={status}
           onStatusChange={(v) => {
             setStatus(v)
             setPage(1)
           }}
           roles={roles}
+          shops={shops}
+          totalCount={data?.total || 0}
           onInvite={() => setInviteOpen(true)}
+          onClearFilters={resetFilters}
         />
         <UsersTable
           items={data?.items ?? []}
@@ -129,6 +160,7 @@ export default function UsersPage() {
           page={page}
           limit={limit}
           total={data?.total ?? 0}
+          currentUserId={currentUserId}
           onChangePage={setPage}
           onChangeRowsPerPage={(n) => {
             setLimit(n)
@@ -164,6 +196,7 @@ export default function UsersPage() {
         open={resetPwUser !== null}
         user={resetPwUser}
         onClose={() => setResetPwUser(null)}
+        // onSuccess={(msg) => setSuccessMessage(msg)}
       />
       <ConfirmToggleStatusDialog
         open={toggleTarget !== null}

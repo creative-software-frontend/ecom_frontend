@@ -2,9 +2,8 @@ import { useEffect } from "react"
 import { useForm, Controller, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Shield, Store, X, Plus } from "lucide-react"
+import { Shield, Store, X, Plus, Globe } from "lucide-react"
 import { FieldError } from "../settings/SettingsField"
-import { FormSegmentedControl } from "../settings/SettingsField"
 import { PermissionMatrix } from "./PermissionMatrix"
 import { useCreateRoleMutation } from "../../hooks/useAdminUsers"
 import { useEscapeKey } from "../../hooks/useEscapeKey"
@@ -184,30 +183,82 @@ export function CreateRoleModal({
                 control={control}
                 name="scope"
                 render={({ field }) => (
-                  <FormSegmentedControl
+                  <div
+                    role="radiogroup"
                     aria-label="Role scope"
-                    options={[
-                      {
-                        value: "shop",
-                        label: "Shop",
-                        icon: <Store className="size-3.5" />,
-                      },
-                      {
-                        value: "platform",
-                        label: "Platform",
-                        icon: <Shield className="size-3.5" />,
-                      },
-                    ]}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
+                    className="grid grid-cols-2 gap-1 rounded-lg border border-(--border-light) bg-(--bg-surface-hover) p-1"
+                  >
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={field.value === "shop"}
+                      onClick={() => field.onChange("shop")}
+                      className={`flex h-9 items-center justify-center gap-2 rounded-md text-xs font-semibold transition-all ${
+                        field.value === "shop"
+                          ? "border border-blue-200 bg-white text-primary shadow-sm"
+                          : "text-(--text-muted) hover:bg-(--bg-surface) hover:text-(--text-primary)"
+                      }`}
+                    >
+                      <Store
+                        className={`size-4 ${field.value === "shop" ? "text-primary" : ""}`}
+                      />
+                      <span>Shop Role</span>
+                      {field.value === "shop" && (
+                        <span className="size-1.5 rounded-full bg-primary" />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={field.value === "platform"}
+                      onClick={() => field.onChange("platform")}
+                      className={`flex h-9 items-center justify-center gap-2 rounded-md text-xs font-semibold transition-all ${
+                        field.value === "platform"
+                          ? "border border-indigo-200 bg-white text-indigo-700 shadow-sm dark:border-indigo-700 dark:bg-indigo-950 dark:text-indigo-200"
+                          : "text-(--text-muted) hover:bg-(--bg-surface) hover:text-(--text-primary)"
+                      }`}
+                    >
+                      <Shield
+                        className={`size-4 ${field.value === "platform" ? "text-indigo-600 dark:text-indigo-400" : ""}`}
+                      />
+                      <span>Platform Role</span>
+                      {field.value === "platform" && (
+                        <span className="size-1.5 rounded-full bg-indigo-600" />
+                      )}
+                    </button>
+                  </div>
                 )}
               />
-              <p className="mt-1 text-xs text-(--text-muted)">
-                {scope === "platform"
-                  ? "Platform roles operate globally across all shops and system settings."
-                  : "Shop roles must be assigned to a shop. Platform roles operate across all shops."}
-              </p>
+
+              {/* Dynamic informative callout banner */}
+              <div
+                className={`mt-2 flex items-start gap-2.5 rounded-md border p-2.5 text-xs transition-all ${
+                  scope === "platform"
+                    ? "border-indigo-200 bg-indigo-50/70 text-indigo-900 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200"
+                    : "border-blue-200 bg-blue-50/70 text-primary"
+                }`}
+              >
+                {scope === "platform" ? (
+                  <Globe className="mt-0.5 size-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+                ) : (
+                  <Store className="mt-0.5 size-4 shrink-0 text-primary" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 font-semibold">
+                    <span>
+                      {scope === "platform"
+                        ? "Platform Scope (Global Access)"
+                        : "Shop Scope (Single Tenant)"}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 leading-relaxed opacity-90">
+                    {scope === "platform"
+                      ? "Platform roles operate globally across all shops, tenants, and system-wide settings."
+                      : "Shop roles are restricted to a single assigned shop and cannot modify platform settings."}
+                  </p>
+                </div>
+              </div>
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
@@ -246,7 +297,7 @@ export function CreateRoleModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="text-xm inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
             >
               Cancel
             </button>

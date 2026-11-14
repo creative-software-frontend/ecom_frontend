@@ -168,3 +168,17 @@ export type AuditLogQueryParams = {
   action?: string
   shopId?: number
 }
+
+export type CreateShopInput = {
+  name: string
+  mobile?: string
+  address?: string
+  status?: "active" | "trial" | "inactive"
+}
+
+export type UpdateShopInput = {
+  name?: string
+  mobile?: string
+  address?: string
+  status?: "active" | "trial" | "inactive"
+}

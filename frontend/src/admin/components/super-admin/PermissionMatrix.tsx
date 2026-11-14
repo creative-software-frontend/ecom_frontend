@@ -93,22 +93,73 @@ export function PermissionMatrix({
     0
   )
   const moduleCount = Object.keys(value).length
+  const maxPossibleGrants = PERMISSION_MODULES.length * ACTIONS.length
+  const isAllGranted = totalGrants === maxPossibleGrants
+
+  function toggleGrantAll() {
+    if (disabled) return
+    if (isAllGranted) {
+      // Clear all permissions
+      onChange({})
+    } else {
+      // Grant all permissions across all modules
+      const all: Record<string, string[]> = {}
+      for (const m of PERMISSION_MODULES) {
+        all[m.key] = ACTIONS.map((a) => a.key)
+      }
+      onChange(all)
+    }
+  }
 
   return (
     <div className="rounded-md border border-(--border-light) bg-(--bg-app)">
       <div className="flex items-center justify-between gap-2 border-b border-(--border-light) px-3 py-2">
         <div className="flex items-center gap-2">
           <ShieldCheck
-            className={`size-4 ${accent === "platform" ? "text-(--platform-primary)" : "text-primary"}`}
+            className={`size-4 transition-colors ${accent === "platform" ? "text-(--platform-primary)" : "text-primary"}`}
           />
           <span className="text-xs font-semibold text-(--text-primary)">
             Permissions
           </span>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all ${
+              accent === "platform"
+                ? "border border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300"
+                : "border border-blue-200 bg-blue-50 text-primary"
+            }`}
+          >
+            <span
+              className={`size-1.5 rounded-full ${
+                accent === "platform"
+                  ? "bg-indigo-600 dark:bg-indigo-400"
+                  : "bg-primary"
+              }`}
+            />
+            {accent === "platform"
+              ? "Global Platform Mode"
+              : "Shop Specific Mode"}
+          </span>
         </div>
-        <span className="text-xs text-(--text-muted) tabular-nums">
-          {totalGrants} {totalGrants === 1 ? "grant" : "grants"} across{" "}
-          {moduleCount} {moduleCount === 1 ? "module" : "modules"}
-        </span>
+        <div className="flex items-center text-xs text-(--text-muted) tabular-nums">
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={toggleGrantAll}
+            className={`mr-2 inline-flex h-6 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              isAllGranted
+                ? "border border-(--border-light) bg-(--bg-surface) text-(--text-muted) hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
+                : accent === "platform"
+                  ? "bg-(--platform-primary) text-white hover:bg-(--platform-primary-hover)"
+                  : "bg-primary text-white hover:bg-(--primary-hover)"
+            }`}
+          >
+            {isAllGranted ? "Clear All" : "Select All"}
+          </button>
+          <div className="min-w-41.5 text-right">
+            {totalGrants} {totalGrants === 1 ? "grant" : "grants"} across{" "}
+            {moduleCount} {moduleCount === 1 ? "module" : "modules"}
+          </div>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -176,7 +227,7 @@ export function PermissionMatrix({
                       aria-label={`${m.label} all actions`}
                       disabled={disabled}
                       onClick={() => toggleModuleAll(m.key, !allChecked)}
-                      className={`min-w-11.50 inline-flex h-5 items-center rounded border px-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                      className={`inline-flex h-5 items-center rounded border px-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                         allChecked
                           ? accent === "platform"
                             ? "border-(--platform-primary) bg-(--platform-primary-soft) text-(--platform-primary)"

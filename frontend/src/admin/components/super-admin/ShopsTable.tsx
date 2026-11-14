@@ -1,5 +1,11 @@
 import DataTable, { type TableColumn } from "react-data-table-component"
-import { MoreVertical, ExternalLink } from "lucide-react"
+import {
+  MoreVertical,
+  ExternalLink,
+  Pencil,
+  Power,
+  PowerOff,
+} from "lucide-react"
 import { adminDataTableStyles } from "../../lib/dataTableStyles"
 import { formatDate } from "../../lib/formatTime"
 import type { SuperAdminShopListItem } from "../../types/superAdmin"
@@ -20,16 +26,22 @@ const statusConfig = {
   },
 }
 
+type ShopsTableProps = {
+  items: SuperAdminShopListItem[]
+  isLoading: boolean
+  onEdit: (shop: SuperAdminShopListItem) => void
+  onToggleStatus: (shop: SuperAdminShopListItem) => void
+}
+
 export function ShopsTable({
   items,
   isLoading,
-}: {
-  items: SuperAdminShopListItem[]
-  isLoading: boolean
-}) {
+  onEdit,
+  onToggleStatus,
+}: ShopsTableProps) {
   const columns: TableColumn<SuperAdminShopListItem>[] = [
     {
-      name: "Shop Details",
+      name: "SHOP DETAILS",
       minWidth: "220px",
       cell: (row) => (
         <div className="flex items-center gap-3 py-2">
@@ -41,7 +53,7 @@ export function ShopsTable({
               {row.name}
             </p>
             <a
-              href={`#`}
+              href="#"
               className="flex items-center gap-1 text-xs text-(--text-muted) hover:text-primary"
             >
               {row.slug}.powerzenox.com <ExternalLink className="size-3" />
@@ -51,7 +63,7 @@ export function ShopsTable({
       ),
     },
     {
-      name: "Owner Info",
+      name: "OWNER INFO",
       minWidth: "180px",
       cell: (row) => (
         <div className="min-w-0">
@@ -65,22 +77,22 @@ export function ShopsTable({
       ),
     },
     {
-      name: "Status",
-      width: "120px",
+      name: "STATUS",
+      width: "140px",
       cell: (row) => {
         const cfg = statusConfig[row.status] || statusConfig.inactive
         return (
           <span
-            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${cfg.className}`}
+            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ${cfg.className}`}
           >
-            <span className={`size-1.5 rounded-full bg-current`} />
-            {cfg.label} {row.status === "trial" && "• 2 days left"}
+            <span className="size-1.5 rounded-full bg-current" />
+            {cfg.label}
           </span>
         )
       },
     },
     {
-      name: "Plan & Expiry",
+      name: "PLAN & EXPIRY",
       minWidth: "200px",
       cell: (row) => (
         <div>
@@ -94,7 +106,7 @@ export function ShopsTable({
       ),
     },
     {
-      name: "Users",
+      name: "USERS",
       width: "100px",
       cell: (row) => (
         <span className="text-xs font-medium text-(--text-primary) tabular-nums">
@@ -106,35 +118,66 @@ export function ShopsTable({
       name: "",
       width: "56px",
       right: true,
-      cell: (row) => (
-        <PortalActionMenu
-          label={`Actions for ${row.name}`}
-          trigger={<MoreVertical className="size-4" />}
-          triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
-          menuClassName="w-36"
-        >
-          {(closeMenu) => (
-            <>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={closeMenu}
-                className="w-full rounded px-2 py-1.5 text-left text-xs hover:bg-(--bg-surface-hover)"
-              >
-                Edit Shop
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={closeMenu}
-                className="w-full rounded px-2 py-1.5 text-left text-xs text-red-600 hover:bg-red-50"
-              >
-                Suspend
-              </button>
-            </>
-          )}
-        </PortalActionMenu>
-      ),
+      cell: (row) => {
+        const isActive = row.status === "active"
+        const isTrial = row.status === "trial"
+
+        return (
+          <PortalActionMenu
+            label={`Actions for ${row.name}`}
+            trigger={<MoreVertical className="size-4" />}
+            triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
+            menuClassName="w-44"
+          >
+            {(closeMenu) => (
+              <>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    closeMenu()
+                    onEdit(row)
+                  }}
+                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+                >
+                  <Pencil className="size-3.5" />
+                  Edit Shop
+                </button>
+
+                {isActive && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      closeMenu()
+                      onToggleStatus(row)
+                    }}
+                    className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    <PowerOff className="size-3.5" />
+                    Suspend
+                  </button>
+                )}
+
+                {!isActive && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      closeMenu()
+                      onToggleStatus(row)
+                    }}
+                    className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--primary) transition-colors hover:bg-(--bg-surface-hover)"
+                  >
+                    <Power className="size-3.5" />
+                    {isTrial ? "Promote to Active" : "Activate"}
+                  </button>
+                )}
+              </>
+            )}
+          </PortalActionMenu>
+        )
+      },
     },
   ]
 

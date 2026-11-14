@@ -3,6 +3,7 @@ import DataTable, { type TableColumn } from "react-data-table-component"
 import { adminDataTableStyles } from "../../lib/dataTableStyles"
 import { relativeTime } from "../../lib/formatTime"
 import type { SuperAdminDashboardData } from "../../types/superAdmin"
+import { ArrowRight } from "lucide-react"
 
 type AuditRow = SuperAdminDashboardData["recentAudits"][number]
 
@@ -30,9 +31,7 @@ const columns: TableColumn<AuditRow>[] = [
         <p className="truncate text-xs text-(--text-primary)">
           {row.user.name}
         </p>
-        <p className="truncate text-xs text-(--text-muted)">
-          {row.user.email}
-        </p>
+        <p className="truncate text-xs text-(--text-muted)">{row.user.email}</p>
       </div>
     ),
     minWidth: "180px",
@@ -42,9 +41,7 @@ const columns: TableColumn<AuditRow>[] = [
     name: "Shop",
     cell: (row) =>
       row.shop ? (
-        <span className="text-xs text-(--text-primary)">
-          {row.shop.name}
-        </span>
+        <span className="text-xs text-(--text-primary)">{row.shop.name}</span>
       ) : (
         <span className="text-xs text-(--text-muted) italic">Platform</span>
       ),
@@ -71,9 +68,9 @@ export function RecentAuditsTable({ audits }: { audits: AuditRow[] }) {
         </h2>
         <Link
           to="/admin/audit"
-          className="text-xs font-medium text-primary hover:underline"
+          className="flex gap-1 text-xs font-medium text-primary hover:underline"
         >
-          View all →
+          View all <ArrowRight className="icon-size" />
         </Link>
       </header>
       <DataTable
