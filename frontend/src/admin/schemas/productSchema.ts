@@ -1,54 +1,72 @@
 import { z } from "zod"
-import type { Product } from "../types/product"
 
-export const productSchema = z
-  .object({
-    name: z.string().trim().min(1, "Enter a product name."),
-    brandName: z.string().trim().min(1, "Enter a brand name."),
-    category: z.string().trim().min(1, "Enter a category."),
-    slug: z
-      .string()
-      .trim()
-      .min(1, "Enter a slug.")
-      .regex(
-        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-        "Use lowercase letters, numbers, and single hyphens only."
-      ),
-    regularPrice: z
-      .number({ error: "Enter a regular price." })
-      .int("Enter a whole number.")
-      .min(1, "Regular price must be at least 1."),
-    currentPrice: z
-      .number({ error: "Enter a current price." })
-      .int("Enter a whole number.")
-      .min(1, "Current price must be at least 1."),
-    stockQuantity: z
-      .number({ error: "Enter a stock quantity." })
-      .int("Enter a whole number.")
-      .min(0, "Stock quantity cannot be negative."),
-    isActive: z.boolean(),
-    images: z
-      .array(
-        z.object({
-          src: z.string().trim().min(1, "Enter an image URL or path."),
-        })
-      )
-      .min(1, "Add at least one product image."),
-  })
-  .superRefine(({ currentPrice, regularPrice }, context) => {
-    if (currentPrice > regularPrice) {
-      context.addIssue({
-        code: "custom",
-        message: "Current price cannot exceed regular price.",
-        path: ["currentPrice"],
+export const productFormSchema = z.object({
+  // Basic Info
+  name: z.string().trim().min(1, "Product name is required"),
+  sku: z.string().trim().optional(),
+  badge: z.string().trim().optional(),
+  category: z.string().trim().min(1, "Category is required"),
+  subcategory: z.string().trim().optional(),
+  brand: z.string().trim().optional(),
+  section: z.string().trim().optional(),
+  shortDescription: z.string().trim().optional(),
+  description: z.string().optional(),
+
+  // Pricing & Stock
+  sellingPrice: z.number().min(1, "Selling price is required"),
+  regularPrice: z.number().optional(),
+  buyingPrice: z.number().optional(),
+  stock: z.number().min(0).optional(),
+
+  // Type & Visibility
+  productType: z.enum(["single", "variant"]).default("single"),
+  inStock: z.boolean().default(true),
+  isPublic: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
+  isFreeShipping: z.boolean().default(false),
+
+  // Stock Alert
+  enableStockAlert: z.boolean().default(false),
+  stockAlertQty: z.number().optional(),
+  maxOrderQty: z.number().optional(),
+  rank: z.number().optional(),
+
+  // Images
+  images: z
+    .array(z.string().url("Must be a valid URL"))
+    .min(1, "At least one image is required"),
+
+  // Specifications
+  specifications: z
+    .array(
+      z.object({
+        key: z.string().min(1, "Key is required"),
+        value: z.string().min(1, "Value is required"),
       })
-    }
-  })
+    )
+    .optional(),
 
-export type ProductFormValues = z.infer<typeof productSchema>
+  // SEO
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  keywords: z.string().optional(),
 
-export type ProductFormInitialValues = ProductFormValues &
-  Partial<Pick<Product, "id">> & {
-    createdAt?: string
-    updatedAt?: string
-  }
+  // Variants (UI only for now)
+  sizeOptions: z.array(z.string()).optional(),
+  colorOptions: z.array(z.string()).optional(),
+  variants: z
+    .array(
+      z.object({
+        id: z.string(),
+        size: z.string(),
+        color: z.string(),
+        price: z.number(),
+        sku: z.string(),
+        stock: z.number(),
+      })
+    )
+    .optional(),
+})
+
+export type ProductFormInput = z.input<typeof productFormSchema>
+export type ProductFormValues = z.output<typeof productFormSchema>

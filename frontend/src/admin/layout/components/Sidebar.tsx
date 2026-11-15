@@ -62,7 +62,7 @@ export function Sidebar({ menu }: { menu: MenuItem[] }) {
                 </li>
               )
             }
-
+            const Icon = item.icon
             const badge = getBadge(item)
             // Hide empty/zero badges — a "0" badge is noise, not signal.
             const showBadge =
@@ -84,7 +84,10 @@ export function Sidebar({ menu }: { menu: MenuItem[] }) {
                     }`
                   }
                 >
-                  <span>{item.label}</span>
+                  <div className="flex items-center gap-1">
+                    <Icon className="icon-size" />
+                    <span>{item.label}</span>
+                  </div>
                   {showBadge && (
                     <span className="rounded-full bg-(--status-pending-bg) px-2 py-0.5 text-xs font-semibold text-(--status-pending-text)">
                       {badge}

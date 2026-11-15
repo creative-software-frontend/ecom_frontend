@@ -6,6 +6,7 @@ import {
   Download,
   PackageCheck,
   Plus,
+  Trash2,
   TriangleAlert,
 } from "lucide-react"
 import { cn } from "cn"
@@ -27,6 +28,8 @@ import {
 } from "../components/products/productCatalog"
 import { formatTaka } from "../lib/orderStatus"
 import type { Product } from "../types/product"
+import { ConfirmationDialog } from "../components/common/ConfirmationDialog"
+import { useProductDelete } from "../hooks/useProductDelete"
 
 const DEFAULT_PAGE_SIZE = 20
 const stockFilters: ProductStockFilter[] = [
@@ -104,6 +107,11 @@ export default function ProductsPage() {
   const [reloadKey, setReloadKey] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [noticeDismissed, setNoticeDismissed] = useState(false)
+
+  // product delete
+  const deleteState = useProductDelete(() => {
+    setReloadKey((k) => k + 1)
+  })
 
   useEffect(() => {
     const controller = new AbortController()
@@ -307,14 +315,35 @@ export default function ProductsPage() {
             className="flex flex-col items-center gap-3 py-14 text-center"
           />
         ) : (
-          <ProductCatalogTable
-            products={visibleProducts}
-            page={page}
-            pageSize={pageSize}
-            total={filteredProducts.length}
-            onPageChange={changePage}
-            onPageSizeChange={changePageSize}
-          />
+          <div className="min-w-0 space-y-4 bg-(--bg-app) p-4 sm:p-6">
+            <ProductCatalogTable
+              products={visibleProducts}
+              page={page}
+              pageSize={pageSize}
+              total={filteredProducts.length}
+              onPageChange={changePage}
+              onPageSizeChange={changePageSize}
+              onDelete={deleteState.open}
+            />
+            <ConfirmationDialog
+              open={deleteState.target !== null}
+              variant="danger"
+              icon={Trash2}
+              title="Delete Product?"
+              description={
+                <>
+                  Are you sure you want to delete{" "}
+                  <strong>{deleteState.target?.name}</strong>? This action is
+                  permanent and cannot be undone.
+                </>
+              }
+              confirmLabel="Delete Product"
+              isPending={deleteState.isPending}
+              errorMessage={deleteState.error}
+              onCancel={deleteState.close}
+              onConfirm={deleteState.confirm}
+            />
+          </div>
         )}
       </section>
 

@@ -10,6 +10,7 @@ import {
   AlertCircle,
   Truck,
   Loader2,
+  MessageSquare,
 } from "lucide-react"
 
 /* ================================================================
@@ -24,6 +25,7 @@ export type SettingsTabId =
   | "pages"
   | "marketing"
   | "courier"
+  | "sms"
 
 const TABS: {
   id: SettingsTabId
@@ -37,6 +39,7 @@ const TABS: {
   { id: "pages", label: "Pages", icon: FileText },
   { id: "marketing", label: "Marketing", icon: Megaphone },
   { id: "courier", label: "Courier", icon: Truck },
+  { id: "sms", label: "SMS", icon: MessageSquare },
 ]
 
 /* ================================================================
@@ -81,7 +84,7 @@ export function SettingsSkeleton() {
     <div
       role="status"
       aria-label="Loading settings"
-      className="flex flex-col gap-5 animate-pulse"
+      className="flex animate-pulse flex-col gap-5"
     >
       {/* Skeleton Card 1 */}
       <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-5">

@@ -115,8 +115,8 @@ export function ShopsTable({
       ),
     },
     {
-      name: "",
-      width: "56px",
+      name: "ACTIONS",
+      width: "90px",
       right: true,
       cell: (row) => {
         const isActive = row.status === "active"

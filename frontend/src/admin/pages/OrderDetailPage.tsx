@@ -38,6 +38,7 @@ import { InlineNotice } from "../components/common/InlineNotice"
 import { LoadingState } from "../components/common/LoadingState"
 import { NotFoundState } from "../components/common/NotFoundState"
 import { StatusBadge } from "../components/common/StatusBadge"
+import { ConfirmationDialog } from "../components/common/ConfirmationDialog"
 import { getErrorMessage } from "../lib/errors"
 import React from "react"
 
@@ -750,55 +751,28 @@ export default function OrderDetailPage() {
       </div>
 
       {/* Cancel confirmation dialog */}
-      {confirmCancelOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="cancel-dialog-title"
-          aria-describedby="cancel-dialog-desc"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-        >
-          <div className="w-full max-w-md rounded-lg border border-(--border-light) bg-white shadow-xl">
-            <div className="px-6 py-5">
-              <h2
-                id="cancel-dialog-title"
-                className="text-base font-bold text-(--text-primary)"
-              >
-                Cancel order?
-              </h2>
-              <p
-                id="cancel-dialog-desc"
-                className="mt-2 text-sm text-(--text-muted)"
-              >
-                Cancel order{" "}
-                <strong className="font-semibold text-(--text-primary)">
-                  {order.orderNumber}
-                </strong>
-                ? This action cannot be undone.
-              </p>
-            </div>
-            <div className="flex justify-end gap-3 border-t border-(--border-light) px-6 py-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setConfirmCancelOpen(false)
-                  cancelTriggerRef.current?.focus()
-                }}
-                className="admin-template-button admin-template-button--secondary"
-              >
-                Go back
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmCancel}
-                className="admin-template-button border border-red-600 bg-red-600 text-white hover:bg-red-700"
-              >
-                Cancel order
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationDialog
+        open={confirmCancelOpen}
+        title="Cancel order?"
+        variant="danger"
+        icon={XCircle}
+        confirmLabel="Cancel order"
+        cancelLabel="Go back"
+        onCancel={() => {
+          setConfirmCancelOpen(false)
+          cancelTriggerRef.current?.focus()
+        }}
+        onConfirm={handleConfirmCancel}
+        description={
+          <>
+            Cancel order{" "}
+            <strong className="font-semibold text-(--text-primary)">
+              {order.orderNumber}
+            </strong>
+            ? This action cannot be undone.
+          </>
+        }
+      />
     </div>
   )
 }

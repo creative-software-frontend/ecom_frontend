@@ -1,73 +1,37 @@
-import { useEffect, useRef, useState } from "react"
-import { useFieldArray, useForm, useWatch } from "react-hook-form"
+import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react"
-import { ApiError } from "../../api/client"
-import { StatusBadge } from "../common/StatusBadge"
-import { formatDate } from "../../lib/formatTime"
-import { getErrorMessage } from "../../lib/errors"
 import {
-  productSchema,
-  type ProductFormInitialValues,
+  ArrowLeft,
+  Tag,
+  Hash,
+  Layers,
+  Search,
+  Image as ImageIcon,
+  Plus,
+  X,
+  CheckCircle2,
+} from "lucide-react"
+import {
+  productFormSchema,
+  type ProductFormInput,
   type ProductFormValues,
 } from "../../schemas/productSchema"
-
-const defaultValues: Partial<ProductFormValues> = {
-  name: "",
-  brandName: "",
-  category: "",
-  slug: "",
-  stockQuantity: 0,
-  isActive: true,
-  images: [],
-}
-
-function createSlug(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-}
-
-function FieldError({ id, message }: { id: string; message?: string }) {
-  if (!message) return null
-  return (
-    <p id={id} className="admin-form-error" role="alert">
-      {message}
-    </p>
-  )
-}
-
-function ImagePreview({ src, index }: { src: string; index: number }) {
-  const [failedSrc, setFailedSrc] = useState<string | null>(null)
-
-  if (!src || failedSrc === src) {
-    return (
-      <div
-        className="admin-product-image-preview admin-product-image-fallback"
-        aria-label="Image preview unavailable"
-      >
-        Image preview
-      </div>
-    )
-  }
-
-  return (
-    <img
-      className="admin-product-image-preview"
-      src={src}
-      alt={`Product image ${index + 1} preview`}
-      onError={() => setFailedSrc(src)}
-    />
-  )
-}
+import { SettingsCard } from "../settings/SettingsLayout"
+import {
+  FormField,
+  FormTextarea,
+  FormToggle,
+  FieldError,
+} from "../settings/SettingsField"
+import { RichTextToolbar } from "../settings/RichTextToolbar"
 
 type ProductFormProps = {
-  initialValues?: ProductFormInitialValues
+  initialValues?: Partial<ProductFormValues>
   mode: "create" | "edit"
   onSubmit: (values: ProductFormValues) => Promise<void> | void
   submitLabel: string
   onCancel: () => void
+  isSubmitting?: boolean
 }
 
 export function ProductForm({
@@ -76,587 +40,604 @@ export function ProductForm({
   onSubmit,
   submitLabel,
   onCancel,
+  isSubmitting = false,
 }: ProductFormProps) {
-  const slugEdited = useRef(false)
   const {
-    control,
     register,
-    setValue,
-    setError,
-    clearErrors,
-    trigger,
-    handleSubmit,
-    formState: { errors, isDirty, isSubmitting },
-  } = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
-    mode: "onBlur",
-    reValidateMode: "onChange",
-    defaultValues: initialValues ?? defaultValues,
-  })
-  const { fields, append, move, remove } = useFieldArray({
     control,
-    name: "images",
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<ProductFormInput, unknown, ProductFormValues>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: {
+      productType: "single",
+      inStock: true,
+      isPublic: true,
+      isFeatured: false,
+      isFreeShipping: false,
+      enableStockAlert: false,
+      images: [""],
+      specifications: [{ key: "", value: "" }],
+      sizeOptions: [],
+      colorOptions: [],
+      variants: [],
+      sellingPrice: 0,
+      ...initialValues,
+    },
   })
-  const [newImage, setNewImage] = useState("")
-  const [submitError, setSubmitError] = useState<string | null>(null)
-  const name = useWatch({ control, name: "name" }) ?? ""
-  const regularPrice = useWatch({ control, name: "regularPrice" }) ?? 0
-  const currentPrice = useWatch({ control, name: "currentPrice" }) ?? 0
-  const stockQuantity = useWatch({ control, name: "stockQuantity" }) ?? 0
-  const watchedImages = useWatch({ control, name: "images" }) ?? []
-  const generatedSlug = createSlug(name)
-  const discountPercent =
-    Number.isFinite(regularPrice) &&
-    regularPrice > 0 &&
-    Number.isFinite(currentPrice)
-      ? Math.round(((regularPrice - currentPrice) / regularPrice) * 100)
-      : 0
-  const inStock = Number.isFinite(stockQuantity) && stockQuantity > 0
-  const slugHelp =
-    mode === "edit"
-      ? "Changing the slug changes the product's public URL."
-      : name.trim() && !generatedSlug
-        ? "This name has no Latin letters. Enter a slug manually."
-        : "Generated from Latin letters in the name; Bengali-only names need a manual slug."
-  const slugRegistration = register("slug")
-  const imageError = errors.images?.message
-  const isActiveRegistration = register("isActive")
 
-  const submitForm = async (values: ProductFormValues) => {
-    setSubmitError(null)
-    clearErrors()
+  // Dynamic arrays
+  const {
+    fields: specFields,
+    append: appendSpec,
+    remove: removeSpec,
+  } = useFieldArray({ control, name: "specifications" })
+  const { fields: variantFields } = useFieldArray({ control, name: "variants" })
 
-    try {
-      await onSubmit(values)
-    } catch (error: unknown) {
-      if (error instanceof ApiError) {
-        if (error.status === 409) {
-          setError("slug", {
-            type: "server",
-            message: error.fieldErrors?.slug ?? error.message,
-          })
-          return
-        }
+  // Watch fields
+  const imageValues = useWatch({ control, name: "images" }) || []
+  const productType = useWatch({ control, name: "productType" })
+  const enableStockAlert = useWatch({ control, name: "enableStockAlert" })
+  const sellingPrice = useWatch({ control, name: "sellingPrice" }) || 0
+  const buyingPrice = useWatch({ control, name: "buyingPrice" }) || 0
+  const sizeOptions = useWatch({ control, name: "sizeOptions" }) || []
+  const colorOptions = useWatch({ control, name: "colorOptions" }) || []
+  const metaTitle = useWatch({ control, name: "metaTitle" })
+  const metaDescription = useWatch({ control, name: "metaDescription" })
 
-        const setters: Record<string, (message: string) => void> = {
-          name: (message) => setError("name", { type: "server", message }),
-          brandName: (message) =>
-            setError("brandName", { type: "server", message }),
-          category: (message) =>
-            setError("category", { type: "server", message }),
-          slug: (message) => setError("slug", { type: "server", message }),
-          regularPrice: (message) =>
-            setError("regularPrice", { type: "server", message }),
-          currentPrice: (message) =>
-            setError("currentPrice", { type: "server", message }),
-          stockQuantity: (message) =>
-            setError("stockQuantity", { type: "server", message }),
-          images: (message) => setError("images", { type: "server", message }),
-          isActive: (message) =>
-            setError("isActive", { type: "server", message }),
-        }
-        let mappedFieldError = false
-        let unmappedFieldError = false
-        for (const [field, message] of Object.entries(
-          error.fieldErrors ?? {}
-        )) {
-          const setter = setters[field]
-          if (setter) {
-            setter(message)
-            mappedFieldError = true
-          } else {
-            unmappedFieldError = true
-          }
-        }
-        if (mappedFieldError && !unmappedFieldError) return
+  // Calculations
+  const profit = sellingPrice - buyingPrice
+  const profitPercent =
+    buyingPrice > 0 ? ((profit / buyingPrice) * 100).toFixed(1) : "0"
 
-        setSubmitError(error.message)
-        return
+  // Variant Generator (Mock)
+  const handleGenerateVariants = () => {
+    const generated = []
+    for (const size of sizeOptions) {
+      for (const color of colorOptions) {
+        generated.push({
+          id: `${size}-${color}`,
+          size,
+          color,
+          price: sellingPrice || 0,
+          sku: `PZ-${size}-${color.substring(0, 3).toUpperCase()}`,
+          stock: 0,
+        })
       }
-
-      setSubmitError(
-        getErrorMessage(
-          error,
-          "Could not save this product. Please try again."
-        )
-      )
     }
+    setValue("variants", generated)
   }
 
-  useEffect(() => {
-    if (mode === "create" && !slugEdited.current) {
-      setValue("slug", generatedSlug)
-    }
-  }, [generatedSlug, mode, setValue])
-
-  useEffect(() => {
-    if (!isDirty) return
-
-    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault()
-      event.returnValue = ""
-    }
-
-    window.addEventListener("beforeunload", warnBeforeUnload)
-    return () => window.removeEventListener("beforeunload", warnBeforeUnload)
-  }, [isDirty])
-
   return (
-    <div className="admin-dashboard-content min-w-0 p-4 md:p-7.5">
-      <header className="admin-page-title flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-xl font-normal text-gray-800">
-            {mode === "create" ? "Add product" : "Edit product"}
-          </h1>
-          <p className="pt-0.75 text-base text-gray-500">
-            {mode === "create"
-              ? "Enter product details for your catalog"
-              : "Update product details for your catalog"}
-          </p>
+    <div className="flex min-h-screen flex-col bg-(--bg-app)">
+      {/* Top Header */}
+      <div className="sticky top-0 z-10 border-b border-(--border-light) bg-(--bg-surface) px-6 py-3">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <button
+              onClick={onCancel}
+              className="mb-1 flex items-center gap-1 text-xs text-(--text-muted) hover:text-(--primary)"
+            >
+              <ArrowLeft className="size-3" /> Back to products
+            </button>
+            <h1 className="text-xl font-bold text-(--text-primary)">
+              {mode === "create" ? "Add Product" : "Edit Product"}
+            </h1>
+            <p className="text-sm text-(--text-muted)">
+              Create and configure a new product SKU, pricing, inventory,
+              variants, and SEO.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="h-9 rounded-md px-4 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)"
+            >
+              Discard
+            </button>
+            <button
+              type="button"
+              className="h-9 rounded-md border border-(--border-light) bg-(--bg-surface) px-4 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)"
+            >
+              Save draft
+            </button>
+            <button
+              onClick={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              className="flex h-9 items-center gap-1.5 rounded-md bg-(--primary) px-4 text-sm font-medium text-white hover:bg-(--primary-hover) disabled:opacity-50"
+            >
+              <CheckCircle2 className="size-4" />{" "}
+              {isSubmitting ? "Saving..." : submitLabel}
+            </button>
+          </div>
         </div>
-        {mode === "edit" && initialValues ? (
-          <dl className="grid gap-x-4 gap-y-1 text-sm text-gray-500 sm:grid-cols-3">
-            {initialValues.id ? (
-              <div>
-                <dt className="font-medium text-gray-700">ID</dt>
-                <dd>{initialValues.id}</dd>
-              </div>
-            ) : null}
-            {initialValues.createdAt ? (
-              <div>
-                <dt className="font-medium text-gray-700">Created</dt>
-                <dd>{formatDate(initialValues.createdAt)}</dd>
-              </div>
-            ) : null}
-            {initialValues.updatedAt ? (
-              <div>
-                <dt className="font-medium text-gray-700">Updated</dt>
-                <dd>{formatDate(initialValues.updatedAt)}</dd>
-              </div>
-            ) : null}
-          </dl>
-        ) : null}
-      </header>
+      </div>
 
+      {/* Main Form Layout */}
       <form
-        className="space-y-6"
-        noValidate
-        onSubmit={handleSubmit(submitForm)}
+        onSubmit={handleSubmit(onSubmit)}
+        className="mx-auto grid w-full max-w-[1600px] flex-1 grid-cols-1 gap-6 p-6 lg:grid-cols-3"
       >
-        {submitError ? (
-          <p
-            className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            role="alert"
+        {/* LEFT COLUMN (Spans 2 cols) */}
+        <div className="space-y-6 lg:col-span-2">
+          {/* Basic Information */}
+          <SettingsCard
+            title="Basic Information"
+            description="Core catalog details"
           >
-            {submitError}
-          </p>
-        ) : null}
-
-        <section
-          className="admin-dashboard-card overflow-hidden bg-white"
-          aria-labelledby="product-basic-info"
-        >
-          <div className="admin-form-card-header">
-            <h2 id="product-basic-info" className="text-base font-semibold">
-              Basic info
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-1 p-4 md:grid-cols-2 md:p-6">
-            <div className="admin-form-field">
-              <label className="admin-form-label" htmlFor="product-name">
-                Name
-              </label>
-              <input
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField
+                label="Product Name"
+                required
+                icon={<Tag className="size-4" />}
+                placeholder="Enter product name"
+                error={errors.name?.message}
                 {...register("name")}
-                id="product-name"
-                className="admin-form-control"
-                autoComplete="off"
-                aria-invalid={Boolean(errors.name)}
-                aria-describedby={
-                  errors.name ? "product-name-error" : undefined
-                }
               />
-              <FieldError
-                id="product-name-error"
-                message={errors.name?.message}
+              <FormField
+                label="SKU"
+                icon={<Hash className="size-4" />}
+                placeholder="e.g. PROD-001"
+                error={errors.sku?.message}
+                {...register("sku")}
               />
-            </div>
-
-            <div className="admin-form-field">
-              <label className="admin-form-label" htmlFor="product-brand">
-                Brand name
-              </label>
-              <input
-                {...register("brandName")}
-                id="product-brand"
-                className="admin-form-control"
-                autoComplete="off"
-                aria-invalid={Boolean(errors.brandName)}
-                aria-describedby={
-                  errors.brandName ? "product-brand-error" : undefined
-                }
+              <FormField
+                label="Badge"
+                placeholder="e.g. New, Sale"
+                {...register("badge")}
               />
-              <FieldError
-                id="product-brand-error"
-                message={errors.brandName?.message}
-              />
-            </div>
-
-            <div className="admin-form-field">
-              <label className="admin-form-label" htmlFor="product-category">
-                Category
-              </label>
-              <input
-                {...register("category")}
-                id="product-category"
-                className="admin-form-control"
-                autoComplete="off"
-                aria-invalid={Boolean(errors.category)}
-                aria-describedby={
-                  errors.category ? "product-category-error" : undefined
-                }
-              />
-              <FieldError
-                id="product-category-error"
-                message={errors.category?.message}
-              />
-            </div>
-
-            <div className="admin-form-field">
-              <label className="admin-form-label" htmlFor="product-slug">
-                Slug
-              </label>
-              <input
-                {...slugRegistration}
-                id="product-slug"
-                className="admin-form-control"
-                autoComplete="off"
-                aria-invalid={Boolean(errors.slug)}
-                aria-describedby={`product-slug-help${errors.slug ? " product-slug-error" : ""}`}
-                onChange={(event) => {
-                  slugEdited.current = true
-                  void slugRegistration.onChange(event)
-                }}
-              />
-              <p id="product-slug-help" className="admin-form-help">
-                {slugHelp}
-              </p>
-              <FieldError
-                id="product-slug-error"
-                message={errors.slug?.message}
-              />
-            </div>
-          </div>
-        </section>
-
-        <section
-          className="admin-dashboard-card overflow-hidden bg-white"
-          aria-labelledby="product-pricing"
-        >
-          <div className="admin-form-card-header">
-            <h2 id="product-pricing" className="text-base font-semibold">
-              Pricing
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-1 p-4 md:grid-cols-2 md:p-6">
-            <div className="admin-form-field">
-              <label
-                className="admin-form-label"
-                htmlFor="product-regular-price"
-              >
-                Regular price
-              </label>
-              <input
-                {...register("regularPrice", { valueAsNumber: true })}
-                id="product-regular-price"
-                type="number"
-                min={1}
-                step={1}
-                className="admin-form-control"
-                aria-invalid={Boolean(errors.regularPrice)}
-                aria-describedby={
-                  errors.regularPrice
-                    ? "product-regular-price-error"
-                    : undefined
-                }
-              />
-              <FieldError
-                id="product-regular-price-error"
-                message={errors.regularPrice?.message}
-              />
-            </div>
-
-            <div className="admin-form-field">
-              <label
-                className="admin-form-label"
-                htmlFor="product-current-price"
-              >
-                Current price
-              </label>
-              <input
-                {...register("currentPrice", { valueAsNumber: true })}
-                id="product-current-price"
-                type="number"
-                min={1}
-                step={1}
-                className="admin-form-control"
-                aria-invalid={Boolean(errors.currentPrice)}
-                aria-describedby={
-                  errors.currentPrice
-                    ? "product-current-price-error"
-                    : undefined
-                }
-              />
-              <FieldError
-                id="product-current-price-error"
-                message={errors.currentPrice?.message}
-              />
-            </div>
-
-            <div className="admin-form-field md:col-span-2">
-              <label className="admin-form-label" htmlFor="product-discount">
-                Discount percent
-              </label>
-              <input
-                id="product-discount"
-                type="number"
-                className="admin-form-control admin-form-control--readonly"
-                value={discountPercent}
-                readOnly
-                aria-readonly="true"
-              />
-              <p className="admin-form-help">
-                Calculated from regular and current prices.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section
-          className="admin-dashboard-card overflow-hidden bg-white"
-          aria-labelledby="product-inventory"
-        >
-          <div className="admin-form-card-header">
-            <h2 id="product-inventory" className="text-base font-semibold">
-              Inventory
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-1 p-4 md:grid-cols-2 md:p-6">
-            <div className="admin-form-field">
-              <label
-                className="admin-form-label"
-                htmlFor="product-stock-quantity"
-              >
-                Stock quantity
-              </label>
-              <input
-                {...register("stockQuantity", { valueAsNumber: true })}
-                id="product-stock-quantity"
-                type="number"
-                min={0}
-                step={1}
-                className="admin-form-control"
-                aria-invalid={Boolean(errors.stockQuantity)}
-                aria-describedby={
-                  errors.stockQuantity ? "product-stock-error" : undefined
-                }
-              />
-              <FieldError
-                id="product-stock-error"
-                message={errors.stockQuantity?.message}
-              />
-            </div>
-            <div className="admin-form-field">
-              <span className="admin-form-label">In stock</span>
-              <StatusBadge
-                variant={inStock ? "in-stock" : "out-of-stock"}
-                label={inStock ? "In stock" : "Out of stock"}
-                aria-live="polite"
-              />
-            </div>
-            <div className="admin-form-field md:col-span-2">
-              <label
-                className="flex items-center gap-3 text-sm text-gray-700"
-                htmlFor="product-is-active"
-              >
-                <input
-                  {...isActiveRegistration}
-                  id="product-is-active"
-                  type="checkbox"
-                  role="switch"
-                  className="h-4 w-4 accent-[#3f6ad8]"
-                  aria-invalid={Boolean(errors.isActive)}
-                  aria-describedby={
-                    errors.isActive ? "product-active-error" : undefined
-                  }
-                />
-                Active (visible on the public site)
-              </label>
-              <FieldError
-                id="product-active-error"
-                message={errors.isActive?.message}
-              />
-            </div>
-          </div>
-        </section>
-
-        <section
-          className="admin-dashboard-card overflow-hidden bg-white"
-          aria-labelledby="product-images"
-        >
-          <div className="admin-form-card-header">
-            <h2 id="product-images" className="text-base font-semibold">
-              Images
-            </h2>
-          </div>
-          <div className="space-y-5 p-4 sm:p-6">
-            <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-              <div className="admin-form-field sm:mb-0!">
-                <label className="admin-form-label" htmlFor="product-image-url">
-                  Add image by URL or path
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+                  Category
                 </label>
-                <input
-                  id="product-image-url"
-                  type="text"
-                  className="admin-form-control"
-                  value={newImage}
-                  onChange={(event) => setNewImage(event.currentTarget.value)}
-                  onBlur={() => void trigger("images")}
-                  placeholder="/images/products/example.webp"
-                  aria-invalid={Boolean(imageError)}
-                  aria-describedby={
-                    imageError ? "product-images-error" : undefined
-                  }
+                <select
+                  className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
+                  {...register("category")}
+                >
+                  <option value="">Select category</option>
+                  <option value="Herbal Supplement">Herbal Supplement</option>
+                  <option value="Vitality">Vitality</option>
+                </select>
+                {errors.category && (
+                  <FieldError>{errors.category.message}</FieldError>
+                )}
+              </div>
+              <FormField
+                label="Subcategory"
+                placeholder="Select subcategory"
+                {...register("subcategory")}
+              />
+              <FormField
+                label="Brand"
+                placeholder="Select brand"
+                {...register("brand")}
+              />
+              <div className="md:col-span-2">
+                <FormField
+                  label="Section"
+                  placeholder="Featured Section"
+                  {...register("section")}
                 />
               </div>
+              <div className="md:col-span-2">
+                <FormTextarea
+                  label="Short Description"
+                  rows={2}
+                  placeholder="Brief summary..."
+                  error={errors.shortDescription?.message}
+                  {...register("shortDescription")}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+                  Description <span className="text-red-500">*</span>
+                </label>
+                <div className="rounded-md border border-(--border-light) bg-(--bg-surface)">
+                  <RichTextToolbar
+                    onCommand={() => {
+                      /* Mock */
+                    }}
+                  />
+                  <textarea
+                    rows={6}
+                    className="w-full resize-y p-3 text-sm outline-none"
+                    placeholder="পণ্যের বিবরণ লিখুন..."
+                    {...register("description")}
+                  />
+                </div>
+              </div>
+            </div>
+          </SettingsCard>
+
+          {/* Variants */}
+          <SettingsCard
+            title="Variants"
+            description="Manage product options"
+            badge={
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-(--text-muted)">Type:</span>
+                <label className="flex cursor-pointer items-center gap-1">
+                  <input
+                    type="radio"
+                    value="single"
+                    {...register("productType")}
+                  />{" "}
+                  Single
+                </label>
+                <label className="flex cursor-pointer items-center gap-1">
+                  <input
+                    type="radio"
+                    value="variant"
+                    {...register("productType")}
+                  />{" "}
+                  Variant
+                </label>
+              </div>
+            }
+          >
+            {productType === "variant" && (
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-2 block text-xs font-semibold text-(--text-primary)">
+                    Size
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {["38", "39", "40", "41", "42", "43", "44", "45", "46"].map(
+                      (size) => (
+                        <button
+                          type="button"
+                          key={size}
+                          onClick={() =>
+                            setValue(
+                              "sizeOptions",
+                              sizeOptions.includes(size)
+                                ? sizeOptions.filter((s) => s !== size)
+                                : [...sizeOptions, size]
+                            )
+                          }
+                          className={`flex size-8 items-center justify-center rounded-full border text-xs transition-colors ${sizeOptions.includes(size) ? "border-(--primary) bg-(--primary) text-white" : "border-(--border-light) text-(--text-primary) hover:border-(--primary)"}`}
+                        >
+                          {size}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-2 block text-xs font-semibold text-(--text-primary)">
+                    Color
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {["Red", "Green", "Blue", "Black"].map((color) => (
+                      <button
+                        type="button"
+                        key={color}
+                        onClick={() =>
+                          setValue(
+                            "colorOptions",
+                            colorOptions.includes(color)
+                              ? colorOptions.filter((c) => c !== color)
+                              : [...colorOptions, color]
+                          )
+                        }
+                        className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors ${colorOptions.includes(color) ? "border-(--primary) bg-(--primary) text-white" : "border-(--border-light) text-(--text-primary) hover:border-(--primary)"}`}
+                      >
+                        {color}{" "}
+                        {colorOptions.includes(color) && (
+                          <X className="size-3" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleGenerateVariants}
+                  className="flex h-8 items-center gap-1.5 rounded-md bg-(--primary) px-4 text-xs font-medium text-white hover:bg-(--primary-hover)"
+                >
+                  <Layers className="size-3.5" /> Generate Variants
+                </button>
+                {variantFields.length > 0 && (
+                  <div className="mt-4 overflow-hidden rounded border border-(--border-light)">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-(--bg-app) text-(--text-muted)">
+                        <tr>
+                          <th className="p-2">Variant</th>
+                          <th className="p-2">Price</th>
+                          <th className="p-2">SKU</th>
+                          <th className="p-2">Stock</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-(--border-light)">
+                        {variantFields.map((v, i) => (
+                          <tr key={v.id}>
+                            <td className="p-2">
+                              {v.size} / {v.color}
+                            </td>
+                            <td className="p-2">
+                              <input
+                                type="number"
+                                className="w-16 rounded border p-1"
+                                {...register(`variants.${i}.price`, {
+                                  valueAsNumber: true,
+                                })}
+                              />
+                            </td>
+                            <td className="p-2">
+                              <input
+                                type="text"
+                                className="w-20 rounded border p-1"
+                                {...register(`variants.${i}.sku`)}
+                              />
+                            </td>
+                            <td className="p-2">
+                              <input
+                                type="number"
+                                className="w-12 rounded border p-1"
+                                {...register(`variants.${i}.stock`, {
+                                  valueAsNumber: true,
+                                })}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </SettingsCard>
+
+          {/* SEO */}
+          <SettingsCard
+            title="Search Engine Optimization (SEO)"
+            description="Google snippet optimization"
+          >
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField
+                label="Meta Title"
+                placeholder="SEO title"
+                {...register("metaTitle")}
+              />
+              <FormField
+                label="Meta Description"
+                placeholder="SEO description"
+                {...register("metaDescription")}
+              />
+              <div className="md:col-span-2">
+                <FormField
+                  label="Keywords"
+                  icon={<Hash className="size-4" />}
+                  placeholder="Comma separated keywords"
+                  {...register("keywords")}
+                />
+              </div>
+            </div>
+            <div className="mt-4 rounded-md border border-(--border-light) bg-(--bg-app) p-3">
+              <span className="text-[10px] font-semibold text-(--text-muted) uppercase">
+                Search Engine Preview
+              </span>
+              <p className="mt-1 cursor-pointer text-xs text-blue-600 hover:underline">
+                {metaTitle || "Product Title | Power Zenox"}
+              </p>
+              <p className="text-[11px] text-green-700">
+                https://powerzenox.com/products/...
+              </p>
+              <p className="mt-1 text-xs text-(--text-muted)">
+                {metaDescription || "No description provided."}
+              </p>
+            </div>
+          </SettingsCard>
+        </div>
+
+        {/* RIGHT COLUMN (Spans 1 col) */}
+        <div className="space-y-6">
+          {/* Pricing & Stock */}
+          <SettingsCard
+            title="Pricing & Stock"
+            badge={
+              <span className="rounded bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
+                Profit: ৳ {profit} ({profitPercent}%)
+              </span>
+            }
+          >
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                label="Selling Price"
+                required
+                type="number"
+                error={errors.sellingPrice?.message}
+                {...register("sellingPrice", { valueAsNumber: true })}
+              />
+              <FormField
+                label="Regular Price"
+                type="number"
+                {...register("regularPrice", { valueAsNumber: true })}
+              />
+              <FormField
+                label="Buying Price"
+                type="number"
+                {...register("buyingPrice", { valueAsNumber: true })}
+              />
+              <FormField
+                label="Stock"
+                type="number"
+                {...register("stock", { valueAsNumber: true })}
+              />
+            </div>
+          </SettingsCard>
+
+          {/* Visibility & Shipping */}
+          <SettingsCard title="Visibility & Shipping">
+            <div className="mb-4 grid grid-cols-2 gap-3">
+              <label className="flex cursor-pointer items-center gap-2 text-xs">
+                <input type="checkbox" {...register("inStock")} /> In Stock
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-xs">
+                <input type="checkbox" {...register("isPublic")} /> Public
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-xs">
+                <input type="checkbox" {...register("isFeatured")} /> Featured
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-xs">
+                <input type="checkbox" {...register("isFreeShipping")} /> Free
+                Shipping
+              </label>
+            </div>
+            <hr className="my-3 border-(--border-light)" />
+            <label className="flex cursor-pointer items-center justify-between text-xs font-semibold">
+              Enable Stock Alert & Constraints
+              <Controller
+                control={control}
+                name="enableStockAlert"
+                render={({ field }) => (
+                  <FormToggle
+                    checked={field.value ?? false}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </label>
+            {enableStockAlert && (
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <FormField
+                  label="Alert Qty"
+                  type="number"
+                  {...register("stockAlertQty", { valueAsNumber: true })}
+                />
+                <FormField
+                  label="Max Order"
+                  type="number"
+                  {...register("maxOrderQty", { valueAsNumber: true })}
+                />
+                <FormField
+                  label="Rank"
+                  type="number"
+                  {...register("rank", { valueAsNumber: true })}
+                />
+              </div>
+            )}
+          </SettingsCard>
+
+          {/* Product Images (URL based) */}
+          <SettingsCard
+            title="Product Images"
+            description={`${imageValues.length} / 6 uploaded`}
+          >
+            <div className="space-y-3">
+              {imageValues.map((_, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Controller
+                    control={control}
+                    name={`images.${index}`}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        type="text"
+                        placeholder="https://example.com/image.jpg"
+                        className="h-9 flex-1 rounded-md border border-(--border-light) px-3 text-xs outline-none focus:border-(--primary)"
+                      />
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setValue(
+                        "images",
+                        imageValues.filter(
+                          (_, imageIndex) => imageIndex !== index
+                        ),
+                        { shouldDirty: true, shouldValidate: true }
+                      )
+                    }
+                    className="rounded p-2 text-red-500 hover:bg-red-50"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              ))}
               <button
                 type="button"
-                className="admin-template-button admin-template-button--secondary"
-                disabled={!newImage.trim()}
-                onClick={() => {
-                  const image = newImage.trim()
-                  if (image) {
-                    append({ src: image })
-                    setNewImage("")
-                    void trigger("images")
-                  }
-                }}
+                onClick={() =>
+                  setValue("images", [...imageValues, ""], {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-(--border-light) transition-colors hover:border-(--primary) hover:bg-(--bg-app)"
               >
-                <Plus aria-hidden="true" className="h-4 w-4" />
-                Add image
+                <ImageIcon className="size-5 text-(--text-muted)" />
+                <span className="text-xs text-(--text-muted)">
+                  Click to add image URL
+                </span>
               </button>
             </div>
+          </SettingsCard>
 
-            <FieldError id="product-images-error" message={imageError} />
-
-            <ul className="space-y-3" aria-label="Product images">
-              {fields.map((field, index) => {
-                const imageRegistration = register(`images.${index}.src`)
-                return (
-                  <li
-                    key={field.id}
-                    className="grid grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-3 rounded border border-(--admin-form-control-border) p-3 sm:grid-cols-[4.5rem_minmax(0,1fr)_auto]"
+          {/* Specifications */}
+          <SettingsCard
+            title="Specifications"
+            badge={
+              <button
+                type="button"
+                onClick={() => appendSpec({ key: "", value: "" })}
+                className="flex items-center gap-1 text-xs font-medium text-(--primary) hover:underline"
+              >
+                <Plus className="size-3" /> Add Row
+              </button>
+            }
+          >
+            <div className="space-y-2">
+              {specFields.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Key (e.g. Material)"
+                    className="h-9 w-1/3 rounded-md border border-(--border-light) px-3 text-xs"
+                    {...register(`specifications.${index}.key`)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Value (e.g. Cotton)"
+                    className="h-9 flex-1 rounded-md border border-(--border-light) px-3 text-xs"
+                    {...register(`specifications.${index}.value`)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeSpec(index)}
+                    className="rounded p-1 text-red-500 hover:bg-red-50"
                   >
-                    <div className="relative">
-                      <ImagePreview
-                        src={watchedImages?.[index]?.src ?? ""}
-                        index={index}
-                      />
-                      {index === 0 ? (
-                        <span className="admin-product-primary-badge">
-                          Primary
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="min-w-0">
-                      <label
-                        className="admin-form-label"
-                        htmlFor={`product-image-${index}`}
-                      >
-                        Image {index + 1} path
-                      </label>
-                      <input
-                        {...imageRegistration}
-                        id={`product-image-${index}`}
-                        type="text"
-                        className="admin-form-control"
-                        aria-invalid={Boolean(errors.images?.[index]?.src)}
-                        aria-describedby={
-                          errors.images?.[index]?.src?.message
-                            ? `product-image-${index}-error`
-                            : undefined
-                        }
-                        onBlur={(event) => {
-                          void imageRegistration.onBlur(event)
-                          void trigger("images")
-                        }}
-                      />
-                      <FieldError
-                        id={`product-image-${index}-error`}
-                        message={errors.images?.[index]?.src?.message}
-                      />
-                    </div>
-                    <div className="col-span-2 flex justify-end gap-2 sm:col-span-1">
-                      <button
-                        type="button"
-                        className="admin-icon-button"
-                        aria-label={`Move image ${index + 1} up`}
-                        disabled={index === 0}
-                        onClick={() => move(index, index - 1)}
-                      >
-                        <ArrowUp aria-hidden="true" className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-icon-button"
-                        aria-label={`Move image ${index + 1} down`}
-                        disabled={index === fields.length - 1}
-                        onClick={() => move(index, index + 1)}
-                      >
-                        <ArrowDown aria-hidden="true" className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-icon-button admin-icon-button--danger"
-                        aria-label={`Remove image ${index + 1}`}
-                        onClick={() => {
-                          remove(index)
-                          void trigger("images")
-                        }}
-                      >
-                        <Trash2 aria-hidden="true" className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        </section>
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </SettingsCard>
 
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            className="admin-template-button admin-template-button--secondary"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="admin-template-button admin-template-button--primary"
-            disabled={isSubmitting}
-          >
-            {isSubmitting
-              ? mode === "create"
-                ? "Adding product..."
-                : "Saving product..."
-              : submitLabel}
-          </button>
+          {/* Related Products (UI Only) */}
+          <SettingsCard title="Related Products" description="Upsell links">
+            <div className="relative mb-3">
+              <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-(--text-muted)" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="h-9 w-full rounded-md border border-(--border-light) pr-3 pl-9 text-sm outline-none focus:border-(--primary)"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="flex items-center gap-1 rounded border border-(--border-light) bg-(--bg-app) px-2 py-1 text-xs">
+                Jingseng Plus <X className="size-3 cursor-pointer" />
+              </span>
+              <span className="flex items-center gap-1 rounded border border-(--border-light) bg-(--bg-app) px-2 py-1 text-xs">
+                Ling Long Capsules <X className="size-3 cursor-pointer" />
+              </span>
+            </div>
+          </SettingsCard>
         </div>
       </form>
     </div>
   )
 }
-
-export default ProductForm

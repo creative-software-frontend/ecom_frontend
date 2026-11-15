@@ -1,0 +1,186 @@
+import { useState } from "react"
+import {
+  Search,
+  MessageSquare,
+  RotateCcw,
+  Save,
+  Send,
+  Smartphone,
+} from "lucide-react"
+
+const VARIABLES = ["{name}", "{order_id}", "{product_name}", "{tracking_code}"]
+
+export function SmsCampaignCard() {
+  const [template, setTemplate] = useState(
+    "প্রিয় {name}, আপনার অর্ডারটি কনফার্ম হয়েছে। অর্ডারের ট্র্যাকিং কোড {tracking_code}। শীঘ্রই আপনার কাছে পৌঁছাবে।"
+  )
+
+  // লাইভ প্রিভিউ ডামি ডেটা
+  const previewText = template
+    .replace("{name}", "রহিম")
+    .replace("{order_id}", "#PZ-88391")
+    .replace("{product_name}", "Ultra Hot Capsules")
+    .replace("{tracking_code}", "PZ-88391")
+
+  // ডামি হিসাব
+  const charCount = template.length
+  const smsCount = Math.ceil(charCount / 70)
+
+  return (
+    <div className="rounded-lg border border-(--border-light) bg-(--bg-surface)">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-(--border-light) p-4">
+        <div className="flex items-center gap-2">
+          <span className="flex size-8 items-center justify-center rounded-md bg-(--primary-soft) text-(--primary)">
+            <MessageSquare className="size-4" />
+          </span>
+          <div>
+            <h2 className="text-sm font-semibold text-(--text-primary)">
+              Send Bulk SMS Campaign
+            </h2>
+            <p className="text-xs text-(--text-muted)">
+              Filter target segment and compose template with dynamic data tags
+            </p>
+          </div>
+        </div>
+        <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+          <span className="size-1.5 rounded-full bg-emerald-500" /> Ready to
+          Broadcast
+        </span>
+      </div>
+
+      <div className="space-y-5 p-4">
+        {/* Filters */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="relative">
+            <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-(--text-muted)" />
+            <input
+              type="text"
+              placeholder="Zenox Vital Organic 500ml"
+              className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-3 pl-9 text-sm outline-none focus:border-(--primary)"
+            />
+          </div>
+          <select className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)">
+            <option>Confirmed Orders</option>
+            <option>Pending Orders</option>
+          </select>
+          <select className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)">
+            <option>All Sources</option>
+            <option>Website</option>
+          </select>
+          <select className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)">
+            <option>Last 7 Days</option>
+            <option>Last 30 Days</option>
+          </select>
+        </div>
+
+        <div className="flex items-center justify-between rounded-md bg-(--bg-app) px-3 py-2 text-xs">
+          <span className="text-(--text-muted)">
+            Current target match:{" "}
+            <strong className="text-(--text-primary)">240 customers</strong>{" "}
+            filtered
+          </span>
+          <button className="flex items-center gap-1 text-(--primary) hover:underline">
+            <RotateCcw className="size-3" /> Reset filters
+          </button>
+        </div>
+
+        {/* Message Template */}
+        <div>
+          <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <label className="text-sm font-semibold text-(--text-primary)">
+                Message Template
+              </label>
+              <p className="text-xs text-(--text-muted)">
+                Write it once — variables are dynamically swapped for each
+                matched customer.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs text-(--text-muted)">
+                Insert variable:
+              </span>
+              {VARIABLES.map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setTemplate((prev) => prev + " " + v)}
+                  className="rounded border border-(--border-light) bg-(--bg-app) px-2 py-0.5 font-mono text-[11px] text-(--text-primary) hover:border-(--primary)"
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+          <textarea
+            rows={4}
+            value={template}
+            onChange={(e) => setTemplate(e.target.value)}
+            className="w-full resize-none rounded-md border border-(--border-light) bg-(--bg-app) p-3 text-sm outline-none focus:border-(--primary)"
+          />
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-(--text-muted)">
+            <div className="flex items-center gap-3">
+              <span>অ Unicode (Bengali)</span>
+              <span>• {charCount} characters</span>
+              <span>• {smsCount} SMS parts / recipient</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>
+                Audience: <strong>240</strong>
+              </span>
+              <span className="rounded bg-(--primary-soft) px-2 py-0.5 font-medium text-(--primary)">
+                Est. Cost: ৳ 120.00 (৳0.25/SMS)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Preview */}
+        <div className="rounded-md border border-(--border-light) bg-(--bg-app) p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-semibold text-(--text-primary)">
+              Recipient Handset View{" "}
+              <span className="ml-1 rounded border border-(--border-light) bg-(--bg-surface) px-1.5 py-0.5 text-[10px] text-(--text-muted)">
+                Live Preview
+              </span>
+            </span>
+            <span className="text-[10px] text-(--text-muted)">
+              Sender ID: PowerZenox
+            </span>
+          </div>
+          <div className="max-w-sm rounded-lg border border-(--border-light) bg-(--bg-surface) p-3 shadow-sm">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="flex items-center gap-1 text-xs font-bold text-(--text-primary)">
+                <Smartphone className="size-3 text-(--primary)" /> PowerZenox
+                SMS
+              </span>
+              <span className="text-[10px] text-(--text-muted)">Just now</span>
+            </div>
+            <div className="rounded-md bg-blue-50 p-2.5 text-sm text-blue-900">
+              {previewText}
+            </div>
+            <p className="mt-2 text-center text-[10px] text-(--text-muted)">
+              Delivered via Grameephone / Robi Route
+            </p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-(--border-light) pt-4">
+          <div className="flex gap-2">
+            <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
+              <Save className="size-4" /> Save as Draft Template
+            </button>
+            <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
+              <Send className="size-4" /> Send Test SMS to My Number
+            </button>
+          </div>
+          <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-(--primary) px-4 text-sm font-medium text-white hover:bg-(--primary-hover)">
+            <Send className="size-4" /> Broadcast Campaign
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

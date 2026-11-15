@@ -4,20 +4,25 @@ import { Check, ShieldCheck } from "lucide-react"
    Modules / actions shown in the permission matrix.
    Backend accepts any combination — this list is the UI mirror.
    ================================================================ */
-
+type PermissionScope = "shop" | "platform"
+interface PermissionModule {
+  readonly key: string
+  readonly label: string
+  readonly scope: PermissionScope
+}
 export const PERMISSION_MODULES = [
-  { key: "products", label: "Products" },
-  { key: "orders", label: "Orders" },
-  { key: "settings", label: "Settings" },
-  { key: "coupons", label: "Coupons" },
-  { key: "pages", label: "Pages" },
-  { key: "marketing", label: "Marketing" },
-  { key: "courier", label: "Courier" },
-  { key: "users", label: "Users" },
-  { key: "roles", label: "Roles" },
-  { key: "shops", label: "Shops" },
-  { key: "audit", label: "Audit Log" },
-] as const
+  { key: "products", label: "Products", scope: "shop" },
+  { key: "orders", label: "Orders", scope: "shop" },
+  { key: "settings", label: "Settings", scope: "shop" },
+  { key: "coupons", label: "Coupons", scope: "shop" },
+  { key: "pages", label: "Pages", scope: "shop" },
+  { key: "marketing", label: "Marketing", scope: "shop" },
+  { key: "courier", label: "Courier", scope: "shop" },
+  { key: "users", label: "Users", scope: "platform" },
+  { key: "roles", label: "Roles", scope: "platform" },
+  { key: "shops", label: "Shops", scope: "platform" },
+  { key: "audit", label: "Audit Log", scope: "platform" },
+] as const satisfies readonly PermissionModule[]
 
 const ACTIONS = [
   { key: "read", label: "Read" },
@@ -183,66 +188,68 @@ export function PermissionMatrix({
             </tr>
           </thead>
           <tbody>
-            {PERMISSION_MODULES.map((m) => {
-              const allChecked = ACTIONS.every((a) => has(m.key, a.key))
-              return (
-                <tr
-                  key={m.key}
-                  className="border-b border-(--border-light) last:border-0 hover:bg-(--bg-surface-hover)"
-                >
-                  <td className="px-3 py-1.5 text-(--text-primary)">
-                    {m.label}
-                  </td>
-                  {ACTIONS.map((a) => (
-                    <td
-                      key={a.key}
-                      className="px-2 py-1.5 text-center align-middle"
-                    >
+            {PERMISSION_MODULES.filter((module) => module.scope === scope).map(
+              (m) => {
+                const allChecked = ACTIONS.every((a) => has(m.key, a.key))
+                return (
+                  <tr
+                    key={m.key}
+                    className="border-b border-(--border-light) last:border-0 hover:bg-(--bg-surface-hover)"
+                  >
+                    <td className="px-3 py-1.5 text-(--text-primary)">
+                      {m.label}
+                    </td>
+                    {ACTIONS.map((a) => (
+                      <td
+                        key={a.key}
+                        className="px-2 py-1.5 text-center align-middle"
+                      >
+                        <button
+                          type="button"
+                          role="checkbox"
+                          aria-checked={has(m.key, a.key)}
+                          aria-label={`${m.label} ${a.label}`}
+                          disabled={disabled}
+                          onClick={() => toggleCell(m.key, a.key)}
+                          className={`inline-flex size-5 items-center justify-center rounded border align-middle transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                            has(m.key, a.key)
+                              ? accent === "platform"
+                                ? "border-(--platform-primary) bg-(--platform-primary) text-white hover:bg-(--platform-primary-hover)"
+                                : "border-primary bg-primary text-white"
+                              : accent === "platform"
+                                ? "border-(--border-hover) bg-(--bg-surface) hover:border-(--platform-primary)"
+                                : "border-(--border-hover) bg-(--bg-surface) hover:border-primary"
+                          }`}
+                        >
+                          {has(m.key, a.key) && <Check className="size-3" />}
+                        </button>
+                      </td>
+                    ))}
+                    <td className="px-2 py-1.5 text-center">
                       <button
                         type="button"
                         role="checkbox"
-                        aria-checked={has(m.key, a.key)}
-                        aria-label={`${m.label} ${a.label}`}
+                        aria-checked={allChecked}
+                        aria-label={`${m.label} all actions`}
                         disabled={disabled}
-                        onClick={() => toggleCell(m.key, a.key)}
-                        className={`inline-flex size-5 items-center justify-center rounded border align-middle transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                          has(m.key, a.key)
+                        onClick={() => toggleModuleAll(m.key, !allChecked)}
+                        className={`inline-flex h-5 items-center rounded border px-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                          allChecked
                             ? accent === "platform"
-                              ? "border-(--platform-primary) bg-(--platform-primary) text-white hover:bg-(--platform-primary-hover)"
-                              : "border-primary bg-primary text-white"
+                              ? "border-(--platform-primary) bg-(--platform-primary-soft) text-(--platform-primary)"
+                              : "border-primary bg-(--primary-soft) text-primary"
                             : accent === "platform"
-                              ? "border-(--border-hover) bg-(--bg-surface) hover:border-(--platform-primary)"
-                              : "border-(--border-hover) bg-(--bg-surface) hover:border-primary"
+                              ? "border-(--border-hover) bg-(--bg-surface) text-(--text-muted) hover:border-(--platform-primary) hover:text-(--platform-primary)"
+                              : "border-(--border-hover) bg-(--bg-surface) text-(--text-muted) hover:border-primary hover:text-(--text-primary)"
                         }`}
                       >
-                        {has(m.key, a.key) && <Check className="size-3" />}
+                        {allChecked ? "Clear" : "All"}
                       </button>
                     </td>
-                  ))}
-                  <td className="px-2 py-1.5 text-center">
-                    <button
-                      type="button"
-                      role="checkbox"
-                      aria-checked={allChecked}
-                      aria-label={`${m.label} all actions`}
-                      disabled={disabled}
-                      onClick={() => toggleModuleAll(m.key, !allChecked)}
-                      className={`inline-flex h-5 items-center rounded border px-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                        allChecked
-                          ? accent === "platform"
-                            ? "border-(--platform-primary) bg-(--platform-primary-soft) text-(--platform-primary)"
-                            : "border-primary bg-(--primary-soft) text-primary"
-                          : accent === "platform"
-                            ? "border-(--border-hover) bg-(--bg-surface) text-(--text-muted) hover:border-(--platform-primary) hover:text-(--platform-primary)"
-                            : "border-(--border-hover) bg-(--bg-surface) text-(--text-muted) hover:border-primary hover:text-(--text-primary)"
-                      }`}
-                    >
-                      {allChecked ? "Clear" : "All"}
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
+                  </tr>
+                )
+              }
+            )}
             {/* Column "all" row */}
             <tr className="bg-(--bg-surface-hover)">
               <td className="px-3 py-1.5 text-xs font-semibold text-(--text-muted) uppercase">

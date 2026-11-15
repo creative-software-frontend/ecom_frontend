@@ -1,36 +1,23 @@
 import { useNavigate } from "react-router"
 import { ProductForm } from "../components/products/ProductForm"
-import { productsApi } from "../api/productsApi"
 import type { ProductFormValues } from "../schemas/productSchema"
 
-export function ProductCreatePage() {
+export default function ProductCreatePage() {
   const navigate = useNavigate()
 
-  const submitProduct = async (values: ProductFormValues) => {
-    await productsApi.create({
-      name: values.name,
-      brandName: values.brandName,
-      category: values.category,
-      slug: values.slug,
-      regularPrice: values.regularPrice,
-      currentPrice: values.currentPrice,
-      stockQuantity: values.stockQuantity,
-      images: values.images.map((image) => image.src),
-      isActive: values.isActive,
-    })
-    navigate("/shop/products", {
-      state: { productStatus: `${values.name} was created` },
-    })
+  const onSubmit = async (values: ProductFormValues) => {
+    console.log("Create Product Payload:", values)
+    // TODO: API call later
+    // await productsApi.create(...)
+    navigate("/shop/products")
   }
 
   return (
     <ProductForm
       mode="create"
-      submitLabel="Add product"
-      onSubmit={submitProduct}
+      submitLabel="Create Product"
+      onSubmit={onSubmit}
       onCancel={() => navigate("/shop/products")}
     />
   )
 }
-
-export default ProductCreatePage

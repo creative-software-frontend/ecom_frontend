@@ -9,12 +9,12 @@ const variantStyles: Record<Variant, { wrapper: string; value: string }> = {
   },
   warning: {
     wrapper:
-      "border border-(--border-light) border-l-4 border-l-amber-500 bg-amber-50/30",
+      "border border-(--border-light) border-l-4 border-l-amber-500 bg-(--bg-surface)",
     value: "text-amber-700",
   },
   success: {
     wrapper:
-      "border border-(--border-light) border-l-4 border-l-emerald-500 bg-emerald-50/30",
+      "border border-(--border-light) border-l-4 border-l-emerald-500 bg-(--bg-surface)",
     value: "text-emerald-700",
   },
   danger: {

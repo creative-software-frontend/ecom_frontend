@@ -1,4 +1,4 @@
-import { ImageOff } from "lucide-react"
+import { ImageOff, Link, MoreVertical, Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
 import DataTable, { type TableColumn } from "react-data-table-component"
 import { StatusBadge } from "../common/StatusBadge"
@@ -6,6 +6,7 @@ import { formatTaka } from "../../lib/orderStatus"
 import type { Product } from "../../types/product"
 import { getProductStockStatus } from "./productCatalog"
 import { adminDataTableStyles } from "@/admin/lib/dataTableStyles"
+import { PortalActionMenu } from "../common/PortalActionMenu"
 
 type ProductCatalogTableProps = {
   products: Product[]
@@ -14,110 +15,8 @@ type ProductCatalogTableProps = {
   total: number
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
+  onDelete: (product: Product) => void
 }
-
-const productColumns: TableColumn<Product>[] = [
-  {
-    name: "Product Info & Slug",
-    selector: (product) => product.name,
-    minWidth: "230px",
-    cell: (product) => (
-      <div className="flex min-w-0 items-center gap-2.5 py-2">
-        <ProductThumbnail product={product} />
-        <div className="min-w-0">
-          <p className="truncate text-xs font-semibold text-foreground">
-            {product.name}
-          </p>
-          <p className="truncate text-xs text-muted-foreground">
-            {product.brandName}
-          </p>
-          <p className="mt-0.5 truncate font-mono text-xs text-primary">
-            {product.slug}
-          </p>
-        </div>
-      </div>
-    ),
-  },
-  {
-    name: "Category",
-    selector: (product) => product.category,
-    minWidth: "130px",
-    cell: (product) => (
-      <span className="inline-flex max-w-48 rounded-full bg-muted px-2 py-1 text-xs leading-tight text-foreground">
-        {product.category}
-      </span>
-    ),
-  },
-  {
-    name: "Pricing (BDT)",
-    selector: (product) => product.currentPrice,
-    minWidth: "140px",
-    cell: (product) => {
-      const hasDiscount = product.regularPrice > product.currentPrice
-      return (
-        <div>
-          <p className="text-xs font-semibold whitespace-nowrap text-foreground tabular-nums">
-            {formatTaka(product.currentPrice)}
-            {hasDiscount ? (
-              <span className="ml-1 rounded bg-(--status-pending-bg) px-1 py-0.5 text-[9px] font-bold text-(--status-pending-text)">
-                -{product.discountPercent}%
-              </span>
-            ) : null}
-          </p>
-          {hasDiscount ? (
-            <p className="text-xs text-muted-foreground tabular-nums line-through">
-              {formatTaka(product.regularPrice)}
-            </p>
-          ) : null}
-        </div>
-      )
-    },
-  },
-  {
-    name: "Stock Level",
-    selector: (product) => product.stockQuantity,
-    minWidth: "140px",
-    cell: (product) => {
-      const stockStatus = getProductStockStatus(product.stockQuantity)
-      return (
-        <div>
-          <p className="text-xs font-semibold whitespace-nowrap text-foreground tabular-nums">
-            {product.stockQuantity} units
-          </p>
-          <StatusBadge
-            variant={
-              stockStatus === "in_stock"
-                ? "in-stock"
-                : stockStatus === "low_stock"
-                  ? "low-stock"
-                  : "out-of-stock"
-            }
-            label={
-              stockStatus === "in_stock"
-                ? "In stock"
-                : stockStatus === "low_stock"
-                  ? "Low stock"
-                  : "Out of stock"
-            }
-            className="mt-0.5 justify-start! px-1.5! py-0! text-xs!"
-          />
-        </div>
-      )
-    },
-  },
-  {
-    name: "Status",
-    selector: (product) => product.isActive,
-    minWidth: "100px",
-    cell: (product) => (
-      <StatusBadge
-        variant={product.isActive ? "active" : "inactive"}
-        label={product.isActive ? "Active" : "Inactive"}
-        className="rounded-full! px-2! py-0.5! text-xs!"
-      />
-    ),
-  },
-]
 
 function ProductThumbnail({ product }: { product: Product }) {
   const imageUrl = product.images[0]
@@ -152,7 +51,146 @@ export function ProductCatalogTable({
   total,
   onPageChange,
   onPageSizeChange,
+  onDelete,
 }: ProductCatalogTableProps) {
+  const productColumns: TableColumn<Product>[] = [
+    {
+      name: "Product Info & Slug",
+      selector: (product) => product.name,
+      minWidth: "230px",
+      cell: (product) => (
+        <div className="flex min-w-0 items-center gap-2.5 py-2">
+          <ProductThumbnail product={product} />
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-foreground">
+              {product.name}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {product.brandName}
+            </p>
+            <p className="mt-0.5 truncate font-mono text-xs text-primary">
+              {product.slug}
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      name: "Category",
+      selector: (product) => product.category,
+      minWidth: "130px",
+      cell: (product) => (
+        <span className="inline-flex max-w-48 rounded-full bg-muted px-2 py-1 text-xs leading-tight text-foreground">
+          {product.category}
+        </span>
+      ),
+    },
+    {
+      name: "Pricing (BDT)",
+      selector: (product) => product.currentPrice,
+      minWidth: "140px",
+      cell: (product) => {
+        const hasDiscount = product.regularPrice > product.currentPrice
+        return (
+          <div>
+            <p className="text-xs font-semibold whitespace-nowrap text-foreground tabular-nums">
+              {formatTaka(product.currentPrice)}
+              {hasDiscount ? (
+                <span className="ml-1 rounded bg-(--status-pending-bg) px-1 py-0.5 text-[9px] font-bold text-(--status-pending-text)">
+                  -{product.discountPercent}%
+                </span>
+              ) : null}
+            </p>
+            {hasDiscount ? (
+              <p className="text-xs text-muted-foreground tabular-nums line-through">
+                {formatTaka(product.regularPrice)}
+              </p>
+            ) : null}
+          </div>
+        )
+      },
+    },
+    {
+      name: "Stock Level",
+      selector: (product) => product.stockQuantity,
+      minWidth: "140px",
+      cell: (product) => {
+        const stockStatus = getProductStockStatus(product.stockQuantity)
+        return (
+          <div>
+            <p className="text-xs font-semibold whitespace-nowrap text-foreground tabular-nums">
+              {product.stockQuantity} units
+            </p>
+            <StatusBadge
+              variant={
+                stockStatus === "in_stock"
+                  ? "in-stock"
+                  : stockStatus === "low_stock"
+                    ? "low-stock"
+                    : "out-of-stock"
+              }
+              label={
+                stockStatus === "in_stock"
+                  ? "In stock"
+                  : stockStatus === "low_stock"
+                    ? "Low stock"
+                    : "Out of stock"
+              }
+              className="mt-0.5 justify-start! px-1.5! py-0! text-xs!"
+            />
+          </div>
+        )
+      },
+    },
+    {
+      name: "Status",
+      selector: (product) => product.isActive,
+      minWidth: "100px",
+      cell: (product) => (
+        <StatusBadge
+          variant={product.isActive ? "active" : "inactive"}
+          label={product.isActive ? "Active" : "Inactive"}
+          className="rounded-full! px-2! py-0.5! text-xs!"
+        />
+      ),
+    },
+    {
+      name: "ACTIONS",
+      width: "90px",
+      right: true,
+      cell: (product) => (
+        <PortalActionMenu
+          label={`Actions for ${product.name}`}
+          trigger={<MoreVertical className="size-4" />}
+          triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
+          menuClassName="w-40"
+        >
+          {(closeMenu) => (
+            <>
+              <Link
+                to={`/shop/products/${product.id}/edit`}
+                onClick={closeMenu}
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+              >
+                <Pencil className="size-3.5" /> Edit Product
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  closeMenu()
+                  onDelete(product)
+                }}
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
+              >
+                <Trash2 className="size-3.5" /> Delete
+              </button>
+            </>
+          )}
+        </PortalActionMenu>
+      ),
+    },
+  ]
+
   return (
     <>
       <DataTable

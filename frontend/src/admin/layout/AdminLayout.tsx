@@ -21,7 +21,8 @@ export function AdminLayout() {
     <div className="admin-root min-h-screen bg-[#f1f4f6]">
       <div className="flex min-h-screen">
         <aside className="admin-sidebar-shell hidden lg:block">
-          <div className="admin-sidebar-brand flex h-14 items-center px-4 text-lg font-semibold">
+          {/* admin-sidebar-brand */}
+          <div className="flex h-14 items-center bg-(--bg-surface) px-4 text-lg font-semibold">
             {brandLabel}
           </div>
           <Sidebar menu={menu} />

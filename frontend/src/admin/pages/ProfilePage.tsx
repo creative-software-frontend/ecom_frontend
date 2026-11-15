@@ -40,7 +40,6 @@ export function ProfilePage() {
     null
   )
   const [copiedId, setCopiedId] = useState(false)
-
   // Password update form state
   const [currentPassword, setCurrentPassword] = useState("")
   const [visibleCurrentPassword, setVisibleCurrentPassword] =
@@ -62,7 +61,7 @@ export function ProfilePage() {
   const [passwordFieldErrors, setPasswordFieldErrors] = useState<
     Record<string, string>
   >({})
-
+  console.log(passwordErrorMessage)
   // Logout state
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
@@ -154,7 +153,10 @@ export function ProfilePage() {
         currentPassword,
         newPassword,
       })
-      setPasswordSuccessMessage(res.message || "Password updated successfully.")
+      console.log(res)
+      setPasswordSuccessMessage(
+        res?.message || "Password updated successfully."
+      )
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
