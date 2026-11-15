@@ -1,6 +1,7 @@
-import { ImageOff, Link, MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { ImageOff, MoreVertical, Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
 import DataTable, { type TableColumn } from "react-data-table-component"
+import { Link } from "react-router"
 import { StatusBadge } from "../common/StatusBadge"
 import { formatTaka } from "../../lib/orderStatus"
 import type { Product } from "../../types/product"
