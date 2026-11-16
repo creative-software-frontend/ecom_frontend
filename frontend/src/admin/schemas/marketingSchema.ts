@@ -15,6 +15,14 @@ export const marketingSchema = z.object({
     pixel_id: z.string().trim().max(30, "Pixel ID is too long"),
     token_input: z.string().trim(),
   }),
+  gtm: z.object({
+    enabled: z.boolean(),
+    container_id: z
+      .string()
+      .trim()
+      .max(20, "Container ID is too long")
+      .regex(/^(GTM-[A-Z0-9]{1,10})?$/, "Format must be GTM-XXXXXX"),
+  }),
 })
 
 export type MarketingFormValues = z.infer<typeof marketingSchema>
@@ -32,5 +40,9 @@ export const defaultMarketingValues: MarketingFormValues = {
     enabled: true,
     pixel_id: "CTR9824X82901P",
     token_input: "",
+  },
+  gtm: {
+    enabled: false,
+    container_id: "",
   },
 }

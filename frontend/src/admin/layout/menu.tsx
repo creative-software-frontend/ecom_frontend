@@ -3,11 +3,12 @@ import {
   LayoutGridCircles,
   Package,
   Settings,
+  Users,
   type LucideIcon,
 } from "lucide-react"
 
 export type MenuItem =
-  | { type: "section"; label: string }
+  // | { type: "section"; label: string }
   | {
       type: "link"
       label: string
@@ -25,7 +26,7 @@ export type MenuItem =
 
 /** Shop-admin sidebar menu. Super admin uses `superAdminMenu` instead. */
 export const shopMenu: MenuItem[] = [
-  { type: "section", label: "Fulfillment" },
+  // { type: "section", label: "Fulfillment" },
   {
     type: "link",
     label: "Dashboard",
@@ -46,6 +47,13 @@ export const shopMenu: MenuItem[] = [
     badge: 0,
     icon: Archive,
   },
-  { type: "section", label: "Configuration" },
+  {
+    type: "link",
+    label: "Users",
+    href: "/shop/users",
+    badge: 0,
+    icon: Users,
+  },
+  // { type: "section", label: "Configuration" },
   { type: "link", label: "Settings", href: "/shop/settings", icon: Settings },
 ]

@@ -10,6 +10,7 @@ import {
   Lock,
   BadgeCheck,
   FlaskConical,
+  Tag,
 } from "lucide-react"
 import { SettingsLayout } from "../SettingsLayout"
 import { FormToggle, FieldError } from "../SettingsField"
@@ -40,6 +41,10 @@ const mockServerState: MarketingSettings = {
     pixel_id: "CTR9824X82901P",
     token_saved: true,
     token_updated_at: "2026-09-04T00:00:00.000Z",
+  },
+  gtm: {
+    enabled: false,
+    container_id: "",
   },
 }
 
@@ -148,7 +153,8 @@ export default function MarketingTab() {
   // Watch enabled flags so the header chip and tab badge stay in sync.
   const fbEnabled = useWatch({ control, name: "facebook.enabled" })
   const ttEnabled = useWatch({ control, name: "tiktok.enabled" })
-  const activeCount = Number(fbEnabled) + Number(ttEnabled)
+  const gtmEnabled = useWatch({ control, name: "gtm.enabled" })
+  // const activeCount = Number(fbEnabled) + Number(ttEnabled) + Number(gtmEnabled)
 
   async function onSubmit(data: MarketingFormValues) {
     // TODO: wire to API — only send token_input if non-empty (means replace).
@@ -169,7 +175,7 @@ export default function MarketingTab() {
   return (
     <SettingsLayout
       activeTab="marketing"
-      badges={{ marketing: activeCount }}
+      // badges={{ marketing: activeCount }}
       isDirty={isDirty}
       isSaving={isSubmitting}
       onDiscard={handleDiscard}
@@ -221,66 +227,68 @@ export default function MarketingTab() {
           )}
         />
 
-        <div className="space-y-3 rounded-md bg-(--bg-surface-hover) p-3">
-          {/* Pixel ID + Test Event Code row */}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Controller
-              control={control}
-              name="facebook.pixel_id"
-              render={({ field }) => (
-                <CopyableField
-                  label="Pixel ID"
-                  value={field.value}
-                  hint="Dataset ID"
-                />
-              )}
-            />
-            <div>
-              <div className="mb-1.5 flex items-center justify-between gap-2">
-                <label
-                  htmlFor="fb-test-event"
-                  className="text-xs font-semibold tracking-wider text-(--text-muted) uppercase"
-                >
-                  Test event code{" "}
-                  <span className="font-normal text-(--text-muted)">
-                    (optional)
+        {fbEnabled ? (
+          <div className="space-y-3 rounded-md bg-(--bg-surface-hover) p-3">
+            {/* Pixel ID + Test Event Code row */}
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <Controller
+                control={control}
+                name="facebook.pixel_id"
+                render={({ field }) => (
+                  <CopyableField
+                    label="Pixel ID"
+                    value={field.value}
+                    hint="Dataset ID"
+                  />
+                )}
+              />
+              <div>
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <label
+                    htmlFor="fb-test-event"
+                    className="text-xs font-semibold tracking-wider text-(--text-muted) uppercase"
+                  >
+                    Test event code{" "}
+                    <span className="font-normal text-(--text-muted)">
+                      (optional)
+                    </span>
+                  </label>
+                  <span className="shrink-0 text-xs font-medium text-amber-600">
+                    Clear before live campaigns
                   </span>
-                </label>
-                <span className="shrink-0 text-xs font-medium text-amber-600">
-                  Clear before live campaigns
-                </span>
+                </div>
+                <div className="flex h-9 items-center rounded-md border border-(--border-light) bg-(--bg-surface) pr-2 pl-3">
+                  <FlaskConical className="mr-2 size-3.5 shrink-0 text-(--text-muted)" />
+                  <input
+                    id="fb-test-event"
+                    type="text"
+                    placeholder="TEST84920"
+                    className="h-full min-w-0 flex-1 bg-transparent text-sm text-(--text-primary) outline-none"
+                    {...register("facebook.test_event_code")}
+                  />
+                </div>
+                {errors.facebook?.test_event_code && (
+                  <FieldError>
+                    {errors.facebook.test_event_code.message}
+                  </FieldError>
+                )}
               </div>
-              <div className="flex h-9 items-center rounded-md border border-(--border-light) bg-(--bg-surface) pr-2 pl-3">
-                <FlaskConical className="mr-2 size-3.5 shrink-0 text-(--text-muted)" />
-                <input
-                  id="fb-test-event"
-                  type="text"
-                  placeholder="TEST84920"
-                  className="h-full min-w-0 flex-1 bg-transparent text-sm text-(--text-primary) outline-none"
-                  {...register("facebook.test_event_code")}
-                />
-              </div>
-              {errors.facebook?.test_event_code && (
-                <FieldError>
-                  {errors.facebook.test_event_code.message}
-                </FieldError>
-              )}
             </div>
-          </div>
 
-          {/* Token field */}
-          <MaskedTokenField
-            id="fb-token"
-            label="Conversions API Access Token"
-            saved={mockServerState.facebook.token_saved}
-            savedAt={mockServerState.facebook.token_updated_at}
-            editing={editingFbToken}
-            onReplace={() => setEditingFbToken(true)}
-            onCancel={() => setEditingFbToken(false)}
-            register={register("facebook.token_input")}
-            error={errors.facebook?.token_input?.message}
-          />
-        </div>
+            {/* Token field */}
+            <MaskedTokenField
+              id="fb-token"
+              label="Conversions API Access Token"
+              saved={mockServerState.facebook.token_saved}
+              savedAt={mockServerState.facebook.token_updated_at}
+              editing={editingFbToken}
+              onReplace={() => setEditingFbToken(true)}
+              onCancel={() => setEditingFbToken(false)}
+              register={register("facebook.token_input")}
+              error={errors.facebook?.token_input?.message}
+            />
+          </div>
+        ) : null}
       </section>
 
       {/* ---------- TikTok Pixel & Events API ---------- */}
@@ -303,31 +311,96 @@ export default function MarketingTab() {
           )}
         />
 
-        <div className="space-y-3 rounded-md bg-(--bg-surface-hover) p-3">
-          <Controller
-            control={control}
-            name="tiktok.pixel_id"
-            render={({ field }) => (
-              <CopyableField
-                label="Pixel ID"
-                value={field.value}
-                hint="TikTok Web Pixel ID"
-              />
-            )}
-          />
+        {ttEnabled ? (
+          <div className="space-y-3 rounded-md bg-(--bg-surface-hover) p-3">
+            <Controller
+              control={control}
+              name="tiktok.pixel_id"
+              render={({ field }) => (
+                <CopyableField
+                  label="Pixel ID"
+                  value={field.value}
+                  hint="TikTok Web Pixel ID"
+                />
+              )}
+            />
 
-          <MaskedTokenField
-            id="tt-token"
-            label="Events API Access Token"
-            saved={mockServerState.tiktok.token_saved}
-            savedAt={mockServerState.tiktok.token_updated_at}
-            editing={editingTtToken}
-            onReplace={() => setEditingTtToken(true)}
-            onCancel={() => setEditingTtToken(false)}
-            register={register("tiktok.token_input")}
-            error={errors.tiktok?.token_input?.message}
-          />
-        </div>
+            <MaskedTokenField
+              id="tt-token"
+              label="Events API Access Token"
+              saved={mockServerState.tiktok.token_saved}
+              savedAt={mockServerState.tiktok.token_updated_at}
+              editing={editingTtToken}
+              onReplace={() => setEditingTtToken(true)}
+              onCancel={() => setEditingTtToken(false)}
+              register={register("tiktok.token_input")}
+              error={errors.tiktok?.token_input?.message}
+            />
+          </div>
+        ) : null}
+      </section>
+
+      {/* ---------- Google Tag Manager ---------- */}
+      <section className="space-y-4 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+        <Controller
+          control={control}
+          name="gtm.enabled"
+          render={({ field }) => (
+            <IntegrationHeader
+              iconBg="bg-indigo-50 text-indigo-600"
+              icon={<Tag className="size-4" />}
+              title="Google Tag Manager"
+              description="Deploy tracking tags, conversion scripts, and analytics via a single GTM container without editing storefront code."
+              statusActive={field.value}
+              statusNote="Container"
+              externalLabel="Tag Manager Console"
+              externalHref="https://tagmanager.google.com/"
+              enabled={field.value}
+              onToggle={field.onChange}
+            />
+          )}
+        />
+
+        {gtmEnabled ? (
+          <div className="space-y-3 rounded-md bg-(--bg-surface-hover) p-3">
+            <div>
+              <label
+                htmlFor="gtm-container"
+                className="mb-1.5 block text-[11px] font-semibold tracking-wider text-(--text-muted) uppercase"
+              >
+                Container ID
+              </label>
+              <input
+                id="gtm-container"
+                type="text"
+                placeholder="GTM-XXXXXXX"
+                autoComplete="off"
+                spellCheck={false}
+                className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 font-mono text-[13px] tracking-wide text-(--text-primary) transition-all outline-none focus:border-(--primary) focus:ring-2 focus:ring-(--primary)/20"
+                {...register("gtm.container_id")}
+              />
+              {errors.gtm?.container_id && (
+                <FieldError>{errors.gtm.container_id.message}</FieldError>
+              )}
+              <p className="mt-1 text-[11px] text-(--text-muted)">
+                Find it at the top of your GTM dashboard (format: GTM-XXXXXXX).
+                Publicly safe to share — no secret needed.
+              </p>
+            </div>
+
+            {/* Info note about deploy behavior */}
+            <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-3">
+              <div className="flex items-start gap-2">
+                <Info className="mt-0.5 size-3.5 shrink-0 text-(--text-muted)" />
+                <p className="text-[11px] leading-relaxed text-(--text-muted)">
+                  Container is injected into storefront pages on next deploy.
+                  For server-side tagging (sGTM), configure the separate
+                  server-container URL — not managed here.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </section>
 
       {/* ---------- Encryption footer banner ---------- */}

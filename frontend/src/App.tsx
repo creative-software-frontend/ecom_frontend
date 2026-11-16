@@ -37,12 +37,17 @@ const SuperAdminAuditPage = lazy(
 // Shop pages (existing)
 const DashboardPage = lazy(() => import("./admin/pages/DashboardPage"))
 const ProductsPage = lazy(() => import("./admin/pages/ProductsPage"))
+const UsersPage = lazy(() => import("./admin/pages/shop-admin/ShopUsersPage"))
 const ProductCreatePage = lazy(() => import("./admin/pages/ProductCreatePage"))
 const ProductEditPage = lazy(() => import("./admin/pages/ProductEditPage"))
 const OrdersPage = lazy(() => import("./admin/pages/OrdersPage"))
 const OrderDetailPage = lazy(() => import("./admin/pages/OrderDetailPage"))
 const SettingsPage = lazy(() => import("./admin/pages/SettingsPage"))
 const ProfilePage = lazy(() => import("./admin/pages/ProfilePage"))
+const BrandsPage = lazy(() => import("./admin/pages/shop-admin/BrandsPage"))
+const CategoriesPage = lazy(
+  () => import("./admin/pages/shop-admin/CategoriesPage")
+)
 
 function AdminLoading() {
   return (
@@ -78,9 +83,9 @@ export function App() {
           <Route
             path="/admin/login"
             element={
-              <Suspense fallback={<AdminLoading />}>
-                <SuperAdminLoginPage />
-              </Suspense>
+              // <Suspense fallback={<AdminLoading />}>
+              <SuperAdminLoginPage />
+              // </Suspense>
             }
           />
 
@@ -101,9 +106,9 @@ export function App() {
           <Route
             path="/login"
             element={
-              <Suspense fallback={<AdminLoading />}>
-                <LoginPage />
-              </Suspense>
+              // <Suspense fallback={<AdminLoading />}>
+              <LoginPage />
+              // </Suspense>
             }
           />
 
@@ -118,10 +123,13 @@ export function App() {
                 element={<Navigate to="store" replace />}
               />
               <Route path="settings/:tab" element={<SettingsPage />} />
+              <Route path="brands" element={<BrandsPage />} />
+              <Route path="categories" element={<CategoriesPage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="products/new" element={<ProductCreatePage />} />
               <Route path="products/:id/edit" element={<ProductEditPage />} />
               <Route path="orders" element={<OrdersPage />} />
+              <Route path="users" element={<UsersPage />} />
               <Route path="orders/:id" element={<OrderDetailPage />} />
             </Route>
           </Route>

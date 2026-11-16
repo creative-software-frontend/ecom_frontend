@@ -1,5 +1,5 @@
 import { Suspense, useState } from "react"
-import { Outlet } from "react-router"
+import { Outlet, useLocation } from "react-router"
 import { Header, MobileSidebar } from "./components/Header"
 import { Sidebar } from "./components/Sidebar"
 import { Footer } from "./components/Footer"
@@ -10,6 +10,7 @@ import { SettingsSkeleton } from "../components/settings/SettingsLayout"
 
 export function AdminLayout() {
   const { state } = useAuth()
+  const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const isSuperAdmin =
@@ -20,7 +21,7 @@ export function AdminLayout() {
   return (
     <div className="admin-root min-h-screen bg-[#f1f4f6]">
       <div className="flex min-h-screen">
-        <aside className="admin-sidebar-shell hidden lg:block">
+        <aside className="admin-sidebar-shell sticky top-0 z-21 h-screen lg:block">
           {/* admin-sidebar-brand */}
           <div className="flex h-14 items-center bg-(--bg-surface) px-4 text-lg font-semibold">
             {brandLabel}
@@ -37,6 +38,7 @@ export function AdminLayout() {
           />
           <main className="flex-1">
             <Suspense
+              key={location.pathname}
               fallback={
                 <div className="flex flex-col gap-5 bg-(--bg-app) p-4 sm:p-6">
                   <SettingsSkeleton />

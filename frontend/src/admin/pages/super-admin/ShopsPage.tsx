@@ -1,5 +1,13 @@
 import { useState } from "react"
-import { Plus, Search, Download, CheckCircle2, X } from "lucide-react"
+import {
+  Plus,
+  Search,
+  Download,
+  CheckCircle2,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react"
 import {
   useAdminShopsPaginated,
   useUpdateShopMutation,
@@ -33,6 +41,7 @@ export default function ShopsPage() {
     useState<SuperAdminShopListItem | null>(null)
   const [toggleError, setToggleError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [insightsExpanded, setInsightsExpanded] = useState(true)
 
   function handleToggleConfirm() {
     if (!toggleTarget) return
@@ -100,6 +109,45 @@ export default function ShopsPage() {
       {/* Metrics */}
       {data && <ShopsMetricsCards counts={data.counts} />}
 
+      {/* Charts */}
+      <section className="mt-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-(--text-primary)">
+              Shop Insights
+            </h2>
+            <p className="mt-0.5 text-xs text-(--text-muted)">
+              Store density and top product verticals
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-expanded={insightsExpanded}
+            aria-controls="shop-insights-content"
+            onClick={() => setInsightsExpanded((expanded) => !expanded)}
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)"
+          >
+            {insightsExpanded ? (
+              <>
+                Collapse <ChevronUp className="size-3.5" />
+              </>
+            ) : (
+              <>
+                Expand <ChevronDown className="size-3.5" />
+              </>
+            )}
+          </button>
+        </div>
+        {insightsExpanded ? (
+          <div
+            id="shop-insights-content"
+            className="grid grid-cols-1 gap-4 lg:grid-cols-2"
+          >
+            <StoreDensityCard />
+            <TopVerticalsCard />
+          </div>
+        ) : null}
+      </section>
       {/* Table Area */}
       <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--border-light) px-4 py-3">
@@ -137,13 +185,6 @@ export default function ShopsPage() {
           }}
         />
       </section>
-
-      {/* Charts */}
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <StoreDensityCard />
-        <TopVerticalsCard />
-      </div>
-
       {/* Modals */}
       <CreateShopModal
         open={createOpen}

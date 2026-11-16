@@ -41,16 +41,16 @@ export function Sidebar({ menu }: { menu: MenuItem[] }) {
   return (
     <nav className="h-full overflow-y-auto bg-(--bg-surface) px-2 py-2">
       <ul className="space-y-1">
-        {menu.map((item: MenuItem, index: number) => {
-          if (item.type === "section") {
-            return (
-              <li key={`section-${index}`} className="px-3 pt-4 pb-2">
-                <span className="text-xs font-bold tracking-wider text-(--text-muted) uppercase">
-                  {item.label}
-                </span>
-              </li>
-            )
-          }
+        {menu.map((item: MenuItem) => {
+          // if (item.type === "section") {
+          //   return (
+          //     <li key={`section-${index}`} className="px-3 pt-4 pb-2">
+          //       <span className="text-xs font-bold tracking-wider text-(--text-muted) uppercase">
+          //         {item.label}
+          //       </span>
+          //     </li>
+          //   )
+          // }
 
           if (item.type === "link" && item.href) {
             if (item.disabled) {

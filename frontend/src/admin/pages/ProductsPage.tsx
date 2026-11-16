@@ -4,8 +4,10 @@ import {
   Archive,
   Banknote,
   Download,
+  LayoutGrid,
   PackageCheck,
   Plus,
+  Tags,
   Trash2,
   TriangleAlert,
 } from "lucide-react"
@@ -239,6 +241,30 @@ export default function ProductsPage() {
             <Download className="size-4" />
             Export Catalog
           </Button>
+          <Link
+            to="/shop/brands"
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-8 gap-2 rounded-md px-3 text-xs"
+            )}
+          >
+            <span aria-hidden="true">
+              <Tags className="size-4" />
+            </span>
+            Brands
+          </Link>
+          <Link
+            to="/shop/categories"
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-8 gap-2 rounded-md px-3 text-xs"
+            )}
+          >
+            <span aria-hidden="true">
+              <LayoutGrid className="size-4" />
+            </span>
+            Categories
+          </Link>
           <Link
             to="/shop/products/new"
             className={cn(

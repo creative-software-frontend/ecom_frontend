@@ -215,12 +215,12 @@ export function CreateRoleModal({
                       onClick={() => field.onChange("platform")}
                       className={`flex h-9 items-center justify-center gap-2 rounded-md text-xs font-semibold transition-all ${
                         field.value === "platform"
-                          ? "border border-indigo-200 bg-white text-indigo-700 shadow-sm dark:border-indigo-700 dark:bg-indigo-950 dark:text-indigo-200"
+                          ? "border border-indigo-200 bg-white text-indigo-700 shadow-sm"
                           : "text-(--text-muted) hover:bg-(--bg-surface) hover:text-(--text-primary)"
                       }`}
                     >
                       <Shield
-                        className={`size-4 ${field.value === "platform" ? "text-indigo-600 dark:text-indigo-400" : ""}`}
+                        className={`size-4 ${field.value === "platform" ? "text-indigo-600" : ""}`}
                       />
                       <span>Platform Role</span>
                       {field.value === "platform" && (
@@ -235,12 +235,12 @@ export function CreateRoleModal({
               <div
                 className={`mt-2 flex items-start gap-2.5 rounded-md border p-2.5 text-xs transition-all ${
                   scope === "platform"
-                    ? "border-indigo-200 bg-indigo-50/70 text-indigo-900 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200"
+                    ? "border-indigo-200 bg-indigo-50/70 text-indigo-900"
                     : "border-blue-200 bg-blue-50/70 text-primary"
                 }`}
               >
                 {scope === "platform" ? (
-                  <Globe className="mt-0.5 size-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+                  <Globe className="mt-0.5 size-4 shrink-0 text-indigo-600" />
                 ) : (
                   <Store className="mt-0.5 size-4 shrink-0 text-primary" />
                 )}

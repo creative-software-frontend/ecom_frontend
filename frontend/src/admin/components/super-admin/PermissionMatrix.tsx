@@ -129,15 +129,13 @@ export function PermissionMatrix({
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all ${
               accent === "platform"
-                ? "border border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300"
+                ? "border border-indigo-200 bg-indigo-50 text-indigo-700"
                 : "border border-blue-200 bg-blue-50 text-primary"
             }`}
           >
             <span
               className={`size-1.5 rounded-full ${
-                accent === "platform"
-                  ? "bg-indigo-600 dark:bg-indigo-400"
-                  : "bg-primary"
+                accent === "platform" ? "bg-indigo-600" : "bg-primary"
               }`}
             />
             {accent === "platform"

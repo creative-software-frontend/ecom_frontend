@@ -111,7 +111,13 @@ export type MarketingIntegration = {
   token_updated_at: string | null
 }
 
+export type GtmSettings = {
+  enabled: boolean
+  container_id: string
+}
+
 export type MarketingSettings = {
   facebook: MarketingIntegration
   tiktok: MarketingIntegration
+  gtm: GtmSettings
 }
