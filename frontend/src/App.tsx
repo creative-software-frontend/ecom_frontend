@@ -36,6 +36,15 @@ const SuperAdminAuditPage = lazy(
 const SuperAdminProductsPage = lazy(
   () => import("./admin/pages/super-admin/ProductsPage")
 )
+const SuperAdminOrdersPage = lazy(
+  () => import("./admin/pages/super-admin/OrdersPage")
+)
+const SuperAdminOrderCreatePage = lazy(
+  () => import("./admin/pages/super-admin/OrderCreatePage")
+)
+const SuperAdminOrderDetailPage = lazy(
+  () => import("./admin/pages/super-admin/OrderDetailPage")
+)
 const SuperAdminProductCreatePage = lazy(
   () => import("./admin/pages/super-admin/ProductCreatePage")
 )
@@ -50,6 +59,7 @@ const UsersPage = lazy(() => import("./admin/pages/shop-admin/ShopUsersPage"))
 const ProductCreatePage = lazy(() => import("./admin/pages/ProductCreatePage"))
 const ProductEditPage = lazy(() => import("./admin/pages/ProductEditPage"))
 const OrdersPage = lazy(() => import("./admin/pages/OrdersPage"))
+const OrderCreatePage = lazy(() => import("./admin/pages/OrderCreatePage"))
 const OrderDetailPage = lazy(() => import("./admin/pages/OrderDetailPage"))
 const SettingsPage = lazy(() => import("./admin/pages/SettingsPage"))
 const ProfilePage = lazy(() => import("./admin/pages/ProfilePage"))
@@ -106,6 +116,15 @@ export function App() {
               <Route path="users" element={<SuperAdminUsersPage />} />
               <Route path="roles" element={<SuperAdminRolesPage />} />
               <Route path="shops" element={<SuperAdminShopsPage />} />
+              <Route path="orders" element={<SuperAdminOrdersPage />} />
+              <Route
+                path="orders/new"
+                element={<SuperAdminOrderCreatePage />}
+              />
+              <Route
+                path="orders/:id"
+                element={<SuperAdminOrderDetailPage />}
+              />
               <Route path="products" element={<SuperAdminProductsPage />} />
               <Route
                 path="products/new"
@@ -146,9 +165,11 @@ export function App() {
               <Route path="products" element={<ProductsPage />} />
               <Route path="products/new" element={<ProductCreatePage />} />
               <Route path="products/:id/edit" element={<ProductEditPage />} />
+
               <Route path="orders" element={<OrdersPage />} />
-              <Route path="users" element={<UsersPage />} />
+              <Route path="orders/new" element={<OrderCreatePage />} />
               <Route path="orders/:id" element={<OrderDetailPage />} />
+              <Route path="users" element={<UsersPage />} />
             </Route>
           </Route>
         </Route>

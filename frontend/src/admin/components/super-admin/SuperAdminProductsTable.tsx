@@ -33,7 +33,11 @@ const statusLabels: Record<SuperAdminProductStatus, string> = {
 function StockCell({ product }: { product: SuperAdminProduct }) {
   const qty = product.stockQuantity
   if (qty === 0) {
-    return <span className="text-xs text-red-600">Out of stock</span>
+    return (
+      <span className="text-xs whitespace-nowrap text-red-600">
+        Out of stock
+      </span>
+    )
   }
   if (qty < LOW_STOCK_THRESHOLD) {
     return (
@@ -93,7 +97,7 @@ export function SuperAdminProductsTable({
       name: "SHOP",
       minWidth: "160px",
       cell: (row) => (
-        <span className="inline-flex items-center rounded-md bg-(--bg-table-header) px-2 py-0.5 text-[11px] font-medium text-(--text-primary)">
+        <span className="inline-flex items-center rounded-md bg-(--bg-table-header) px-2 py-0.5 text-xs font-medium text-(--text-primary)">
           {row.shopName}
         </span>
       ),

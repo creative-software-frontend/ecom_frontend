@@ -25,6 +25,8 @@ export type OrderListItem = {
   paymentMethod: string
   createdAt: string
   itemCount: number
+  shopId: number
+  shopName: string
 }
 
 export type OrdersListResponse = {
@@ -75,10 +77,69 @@ export type OrderDetail = {
   paymentStatus: PaymentStatus
   orderStatus: OrderStatus
   createdAt: string
+  shopId: number
+  shopName: string
   items: OrderItemDetail[]
 }
 
 export type UpdateStatusBody = {
   orderStatus?: OrderStatus
   paymentStatus?: PaymentStatus
+}
+
+// ==========================================
+// Create Order types
+// ==========================================
+
+export type CreateOrderItem = {
+  productId: number
+  productName: string
+  quantity: number
+  unitPrice: number
+  image: string | null
+}
+
+export type CreateOrderFormValues = {
+  customerName: string
+  customerPhone: string
+  customerAddress: string
+  items: CreateOrderItem[]
+  shippingZoneId: string
+  advance: number
+  discount: number
+  assignTo: string
+  courier: string
+  source: string
+  adminNote: string
+  courierNote: string
+}
+
+export type ShippingZone = {
+  id: string
+  name: string
+  fee: number
+}
+
+export type CourierService = {
+  id: string
+  name: string
+}
+
+export type OrderSource = {
+  id: string
+  name: string
+}
+
+export type TeamMember = {
+  id: string
+  name: string
+  role: string
+}
+
+export type PickerProduct = {
+  id: number
+  name: string
+  price: number
+  image: string | null
+  sku: string
 }
