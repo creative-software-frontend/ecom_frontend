@@ -53,7 +53,7 @@ function ComingSoonCard({
   children: ReactNode
 }) {
   return (
-    <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) opacity-80">
+    <div className="rounded-md border border-(--border-light) bg-(--bg-surface) opacity-80">
       <div className="flex items-start justify-between gap-3 p-4 pb-3">
         <div className="flex min-w-0 items-center gap-2">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-(--bg-table-header) text-(--text-muted)">

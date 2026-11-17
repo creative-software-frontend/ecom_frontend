@@ -114,7 +114,7 @@ export function LoginPage() {
         {/* Top: Logo & Badge */}
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary">
+            <div className="flex size-10 items-center justify-center rounded-md bg-primary">
               <Layers className="size-6 text-white" />
             </div>
             <div>
@@ -190,7 +190,7 @@ export function LoginPage() {
         <div className="w-full max-w-105">
           {/* Mobile Header (Visible only on small screens) */}
           <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary">
+            <div className="flex size-10 items-center justify-center rounded-md bg-primary">
               <Layers className="size-6 text-white" />
             </div>
             <div>

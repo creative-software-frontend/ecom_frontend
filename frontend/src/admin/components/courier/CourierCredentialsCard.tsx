@@ -180,7 +180,7 @@ export function CourierCredentialsCard() {
   const [sandbox, setSandbox] = useState(false)
 
   return (
-    <section className="rounded-lg border border-(--border-light) bg-(--bg-surface)">
+    <section className="rounded-md border border-(--border-light) bg-(--bg-surface)">
       <CourierCardHeader
         icon={<Key className="size-4" />}
         title="Courier Gateway API Credentials"

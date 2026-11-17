@@ -8,7 +8,7 @@ const verticals = [
 
 export function TopVerticalsCard() {
   return (
-    <div className="flex flex-col justify-between rounded-lg border border-(--border-light) bg-(--bg-surface) p-5">
+    <div className="flex flex-col justify-between rounded-md border border-(--border-light) bg-(--bg-surface) p-5">
       <div>
         <div className="flex items-start justify-between">
           <div>

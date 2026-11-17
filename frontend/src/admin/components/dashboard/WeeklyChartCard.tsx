@@ -9,7 +9,7 @@ export function WeeklyChartCard({
   const maxCount = Math.max(...chart.days.map((d) => d.count), 1)
 
   return (
-    <div className="space-y-4 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+    <div className="space-y-4 rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold text-(--text-primary)">

@@ -62,7 +62,7 @@ export default function AuditPage() {
       <AuditMetricsCards />
 
       {/* Main Content */}
-      <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+      <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
         <AuditToolbar
           search={search}
           onSearchChange={(v) => {

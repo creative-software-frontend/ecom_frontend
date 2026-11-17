@@ -126,7 +126,7 @@ export default function UsersPage() {
       )}
 
       {/* Table Area */}
-      <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+      <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
         <UsersToolbar
           search={search}
           onSearchChange={(v) => {

@@ -103,7 +103,7 @@ export function CreateShopModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface) shadow-xl"
+        className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface) shadow-xl"
       >
         <div className="flex items-center justify-between gap-3 border-b border-(--border-light) px-5 py-3">
           <div className="flex items-center gap-2">

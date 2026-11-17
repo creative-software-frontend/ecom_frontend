@@ -3,7 +3,8 @@ import type { LucideIcon } from "lucide-react"
 import { AlertCircle, X } from "lucide-react"
 import { useEscapeKey } from "../../hooks/useEscapeKey"
 
-export type ConfirmationDialogVariant = "danger" | "success" | "warning" | "primary"
+export type ConfirmationDialogVariant =
+  "danger" | "success" | "warning" | "primary"
 
 export type ConfirmationDialogProps = {
   open: boolean
@@ -77,7 +78,7 @@ export function ConfirmationDialog({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-lg border border-(--border-light) bg-(--bg-surface) shadow-xl"
+        className="w-full max-w-md rounded-md border border-(--border-light) bg-(--bg-surface) shadow-xl"
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 border-b border-(--border-light) px-5 py-4">

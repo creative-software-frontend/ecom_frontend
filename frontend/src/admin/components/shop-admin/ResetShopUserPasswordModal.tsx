@@ -59,7 +59,7 @@ export function ResetShopUserPasswordModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-lg border border-(--border-light) bg-(--bg-surface) shadow-xl"
+        className="w-full max-w-md rounded-md border border-(--border-light) bg-(--bg-surface) shadow-xl"
       >
         <div className="flex items-center justify-between gap-3 border-b border-(--border-light) px-5 py-3">
           <div className="flex items-center gap-2">

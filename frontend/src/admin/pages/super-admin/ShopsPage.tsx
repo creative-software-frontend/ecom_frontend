@@ -149,7 +149,7 @@ export default function ShopsPage() {
         ) : null}
       </section>
       {/* Table Area */}
-      <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+      <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--border-light) px-4 py-3">
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">

@@ -103,7 +103,7 @@ export function SuperAdminLoginPage() {
       <div className="relative hidden w-1/2 max-w-2xl flex-col justify-between bg-[#0F172A] p-12 text-white lg:flex xl:p-16">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary">
+            <div className="flex size-10 items-center justify-center rounded-md bg-primary">
               <Layers className="size-6 text-white" />
             </div>
             <div>
@@ -176,7 +176,7 @@ export function SuperAdminLoginPage() {
       <div className="flex w-full flex-1 flex-col items-center justify-center p-6 lg:w-1/2">
         <div className="w-full max-w-105">
           <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary">
+            <div className="flex size-10 items-center justify-center rounded-md bg-primary">
               <Layers className="size-6 text-white" />
             </div>
             <div>

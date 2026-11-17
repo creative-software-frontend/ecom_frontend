@@ -28,7 +28,7 @@ export function ShopsByStatusCard({
   trialExpiringSoon: SuperAdminDashboardData["trialExpiringSoon"]
 }) {
   return (
-    <section className="space-y-3 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+    <section className="space-y-3 rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <header className="flex items-center gap-2 border-b border-(--border-light) pb-2">
         <span className="flex size-6 items-center justify-center rounded bg-(--primary-soft) text-primary">
           <Store className="size-3.5" />

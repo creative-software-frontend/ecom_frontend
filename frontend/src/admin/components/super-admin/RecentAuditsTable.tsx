@@ -61,7 +61,7 @@ const columns: TableColumn<AuditRow>[] = [
 
 export function RecentAuditsTable({ audits }: { audits: AuditRow[] }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+    <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
       <header className="flex items-center justify-between border-b border-(--border-light) bg-(--bg-table-header) px-4 py-3">
         <h2 className="text-sm font-semibold text-(--text-primary)">
           Recent activity

@@ -11,7 +11,7 @@ const modules = [
 
 export function PermissionMatrixQuickGlance() {
   return (
-    <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+    <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="flex size-8 items-center justify-center rounded-md bg-(--primary-soft) text-primary">

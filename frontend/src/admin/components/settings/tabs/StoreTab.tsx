@@ -106,7 +106,7 @@ export default function StoreTab() {
             Store logo
           </p>
           <div className="flex items-center gap-4">
-            <div className="flex size-20 shrink-0 items-center justify-center rounded-lg border border-(--border-light) bg-(--bg-app)">
+            <div className="flex size-20 shrink-0 items-center justify-center rounded-md border border-(--border-light) bg-(--bg-app)">
               <span className="text-xs font-medium text-(--text-muted)">
                 Power Zenox
               </span>

@@ -133,7 +133,7 @@ export function CreateCouponModal({
         // onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
 
-        className="flex max-h-[90vh] w-full max-w-2xl animate-in flex-col overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface) shadow-xl duration-150 zoom-in-95 fade-in"
+        className="flex max-h-[90vh] w-full max-w-2xl animate-in flex-col overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface) shadow-xl duration-150 zoom-in-95 fade-in"
       >
         {/* ---------- Header ---------- */}
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-(--border-light) px-5 py-3">

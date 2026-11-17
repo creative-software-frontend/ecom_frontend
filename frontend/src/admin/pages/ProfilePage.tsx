@@ -206,7 +206,7 @@ export function ProfilePage() {
       <div className="space-y-4">
         {/* Profile Hero Header Card */}
         <section
-          className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)"
+          className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)"
           aria-labelledby="profile-account-heading"
         >
           <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -269,7 +269,7 @@ export function ProfilePage() {
         </section>
 
         {/* Edit Profile Information Form */}
-        <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+        <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
           <div className="flex items-center gap-2 border-b border-(--border-light) px-5 py-3">
             <UserRound className="size-4 text-primary" />
             <div>
@@ -390,7 +390,7 @@ export function ProfilePage() {
         </section>
 
         {/* Change Password Card */}
-        <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+        <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
           <div className="flex items-center gap-2 border-b border-(--border-light) px-5 py-3">
             <KeyRound className="size-4 text-primary" />
             <div>
@@ -570,7 +570,7 @@ export function ProfilePage() {
         </section>
 
         {/* Security & System Metadata Overview */}
-        <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+        <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
           <div className="flex items-center gap-2 border-b border-(--border-light) px-5 py-3">
             <ShieldCheck className="size-4 text-emerald-600" />
             <div>
@@ -584,7 +584,7 @@ export function ProfilePage() {
           </div>
 
           <dl className="grid gap-3 p-5 sm:grid-cols-3">
-            <div className="flex items-start gap-3 rounded-lg border border-(--border-light) bg-(--bg-app) p-3.5">
+            <div className="flex items-start gap-3 rounded-md border border-(--border-light) bg-(--bg-app) p-3.5">
               <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />
               <div className="min-w-0">
                 <dt className="text-xs font-medium text-(--text-muted)">
@@ -599,7 +599,7 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 rounded-lg border border-(--border-light) bg-(--bg-app) p-3.5">
+            <div className="flex items-start gap-3 rounded-md border border-(--border-light) bg-(--bg-app) p-3.5">
               <IdCard className="mt-0.5 size-4 shrink-0 text-primary" />
               <div className="min-w-0">
                 <dt className="text-xs font-medium text-(--text-muted)">
@@ -618,7 +618,7 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 rounded-lg border border-(--border-light) bg-(--bg-app) p-3.5">
+            <div className="flex items-start gap-3 rounded-md border border-(--border-light) bg-(--bg-app) p-3.5">
               <Calendar className="mt-0.5 size-4 shrink-0 text-amber-600" />
               <div className="min-w-0">
                 <dt className="text-xs font-medium text-(--text-muted)">

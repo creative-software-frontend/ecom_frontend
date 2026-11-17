@@ -202,7 +202,7 @@ export default function PagesTab() {
     >
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
         {/* ============ LEFT: page list ============ */}
-        <aside className="flex flex-col overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+        <aside className="flex flex-col overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
           <div className="flex items-center justify-between gap-2 border-b border-(--border-light) px-3 py-2.5">
             <span className="text-xs font-semibold tracking-wider text-(--text-muted) uppercase">
               Store content
@@ -235,7 +235,7 @@ export default function PagesTab() {
         {/* ============ RIGHT: editor ============ */}
         <div className="space-y-4">
           {/* Header row */}
-          <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+          <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -298,7 +298,7 @@ export default function PagesTab() {
           </div>
 
           {/* Editor card */}
-          <div className="space-y-3 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+          <div className="space-y-3 rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
             {/* Title + slug */}
             <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
               <div>
@@ -390,7 +390,7 @@ export default function PagesTab() {
 
           {/* Bottom cards */}
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-3">
+            <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-3">
               <div className="flex items-start gap-2">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-(--bg-surface-hover) text-(--text-muted)">
                   <Search className="size-3.5" />
@@ -413,7 +413,7 @@ export default function PagesTab() {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-3">
+            <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-3">
               <div className="flex items-start gap-2">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-(--bg-surface-hover) text-(--text-muted)">
                   <History className="size-3.5" />

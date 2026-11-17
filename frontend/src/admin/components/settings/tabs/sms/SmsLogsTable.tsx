@@ -102,7 +102,7 @@ export function SmsLogsTable() {
   ]
 
   return (
-    <div className="rounded-lg border border-(--border-light) bg-(--bg-surface)">
+    <div className="rounded-md border border-(--border-light) bg-(--bg-surface)">
       <div className="flex items-center justify-between border-b border-(--border-light) p-4">
         <div>
           <h2 className="text-sm font-semibold text-(--text-primary)">

@@ -15,7 +15,7 @@ export function CheckoutPreviewCard({ values }: { values: CourierFormValues }) {
   const total = DEMO_SUBTOTAL + shipping
 
   return (
-    <section className="space-y-3 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+    <section className="space-y-3 rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <Eye className="size-4 text-primary" />

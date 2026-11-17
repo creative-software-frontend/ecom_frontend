@@ -5,7 +5,7 @@ export function SmsRechargeCard() {
   const [method, setMethod] = useState<"bkash" | "nagad">("bkash")
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+    <div className="flex h-full flex-col rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-(--text-primary)">
           রিচার্জের তথ্য দিন

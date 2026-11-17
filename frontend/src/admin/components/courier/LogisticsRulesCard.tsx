@@ -8,7 +8,7 @@ const RULES = [
 
 export function LogisticsRulesCard() {
   return (
-    <section className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+    <section className="rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-(--text-primary)">
         <ShieldCheck className="size-4 text-primary" />
         Logistics Rules

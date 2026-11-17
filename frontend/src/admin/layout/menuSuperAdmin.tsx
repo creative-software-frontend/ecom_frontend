@@ -1,4 +1,5 @@
 import {
+  Archive,
   LayoutGridCircles,
   ScrollText,
   Store,
@@ -23,6 +24,7 @@ export const superAdminMenu: MenuItem[] = [
     icon: UserShield,
   },
   { type: "link", label: "Shops", href: "/admin/shops", icon: Store },
+  { type: "link", label: "Products", href: "/admin/products", icon: Archive },
   { type: "link", label: "Audit Log", href: "/admin/audit", icon: ScrollText },
   { type: "link", label: "Profile", href: "/admin/profile", icon: User },
 ]

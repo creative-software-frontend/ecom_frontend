@@ -18,7 +18,7 @@ export function MetricCard({
   showDot?: boolean
 }) {
   return (
-    <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+    <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           {/* Optional status dot before label (used by Active/Paused/Expired) */}

@@ -184,8 +184,8 @@ function ExpiryCell({ coupon }: { coupon: Coupon }) {
 
 function CouponsEmptyState({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className="rounded-lg border-2 border-dashed border-(--border-light) bg-(--bg-surface) px-6 py-12 text-center">
-      <span className="mx-auto flex size-12 items-center justify-center rounded-lg bg-(--bg-table-header) text-(--text-muted)">
+    <div className="rounded-md border-2 border-dashed border-(--border-light) bg-(--bg-surface) px-6 py-12 text-center">
+      <span className="mx-auto flex size-12 items-center justify-center rounded-md bg-(--bg-table-header) text-(--text-muted)">
         <Tag className="size-5" />
       </span>
       <h3 className="mt-3 text-sm font-semibold text-(--text-primary)">
@@ -376,7 +376,7 @@ export default function CouponsTab() {
       {mockCoupons.length === 0 ? (
         <CouponsEmptyState onAdd={handleOpenCreate} />
       ) : (
-        <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+        <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
           {/* Header: title + search + add */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--border-light) px-4 py-3">
             <div className="flex items-center gap-2">

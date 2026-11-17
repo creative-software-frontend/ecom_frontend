@@ -15,13 +15,15 @@ import type { SuperAdminUser } from "../../types/superAdmin"
 import { PasswordShowHide } from "../PasswordShowHide"
 import { useEscapeKey } from "../../hooks/useEscapeKey"
 
-const resetPasswordSchema = z.object({
-  password: z.string().min(12, "Password must be at least 12 characters"),
-  confirmPassword: z.string().min(1, "Please confirm the new password"),
-}).refine((values) => values.password === values.confirmPassword, {
-  path: ["confirmPassword"],
-  message: "Passwords do not match",
-})
+const resetPasswordSchema = z
+  .object({
+    password: z.string().min(12, "Password must be at least 12 characters"),
+    confirmPassword: z.string().min(1, "Please confirm the new password"),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  })
 
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
 type ResetPasswordStep = "request" | "verify" | "password"
@@ -73,9 +75,7 @@ export function ResetPasswordModal({
   const hasPhone = Boolean(user.mobile && user.mobile.trim().length > 0)
 
   function onSubmit() {
-    setSubmissionNotice(
-      "UI preview only. The password was not changed."
-    )
+    setSubmissionNotice("UI preview only. The password was not changed.")
   }
 
   return (
@@ -88,7 +88,7 @@ export function ResetPasswordModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-lg border border-(--border-light) bg-(--bg-surface) shadow-xl"
+        className="w-full max-w-md rounded-md border border-(--border-light) bg-(--bg-surface) shadow-xl"
       >
         <div className="flex items-start justify-between gap-3 border-b border-(--border-light) px-5 py-4">
           <div className="flex items-center gap-2">
@@ -120,13 +120,18 @@ export function ResetPasswordModal({
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="px-5 py-4">
-            <ol className="mb-5 grid grid-cols-3 gap-2" aria-label="Reset password steps">
+            <ol
+              className="mb-5 grid grid-cols-3 gap-2"
+              aria-label="Reset password steps"
+            >
               {[
                 { key: "request", label: "Send OTP" },
                 { key: "verify", label: "Verify OTP" },
                 { key: "password", label: "New password" },
               ].map((item, index) => {
-                const stepIndex = ["request", "verify", "password"].indexOf(step)
+                const stepIndex = ["request", "verify", "password"].indexOf(
+                  step
+                )
                 const isComplete = index < stepIndex
                 const isCurrent = index === stepIndex
                 return (
@@ -159,7 +164,7 @@ export function ResetPasswordModal({
                   <div className="space-y-2">
                     {/* Email Option */}
                     <label
-                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-all ${
+                      className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-all ${
                         method === "email"
                           ? "border-primary bg-(--primary-soft) shadow-xs"
                           : "border-(--border-light) bg-(--bg-app) hover:border-(--border-hover) hover:bg-(--bg-surface-hover)"
@@ -174,19 +179,22 @@ export function ResetPasswordModal({
                         className="mt-0.5 accent-primary"
                       />
                       <div className="flex-1">
-                        <div className="flex items-center gap-1.5 font-medium text-xs text-(--text-primary)">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-(--text-primary)">
                           <Mail className="size-3.5 text-primary" />
                           <span>Email Verification</span>
                         </div>
                         <p className="mt-0.5 text-xs text-(--text-muted)">
-                          Send 6-digit verification code to <span className="font-semibold text-(--text-primary)">{user.email}</span>
+                          Send 6-digit verification code to{" "}
+                          <span className="font-semibold text-(--text-primary)">
+                            {user.email}
+                          </span>
                         </p>
                       </div>
                     </label>
 
                     {/* Phone Option */}
                     <label
-                      className={`flex items-start gap-3 rounded-lg border p-3 transition-all ${
+                      className={`flex items-start gap-3 rounded-md border p-3 transition-all ${
                         !hasPhone
                           ? "cursor-not-allowed border-(--border-light) bg-(--bg-app) opacity-60"
                           : method === "phone"
@@ -204,17 +212,20 @@ export function ResetPasswordModal({
                         className="mt-0.5 accent-primary disabled:cursor-not-allowed"
                       />
                       <div className="flex-1">
-                        <div className="flex items-center gap-1.5 font-medium text-xs text-(--text-primary)">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-(--text-primary)">
                           <Phone className="size-3.5 text-primary" />
                           <span>SMS / Phone Verification</span>
                         </div>
                         <p className="mt-0.5 text-xs text-(--text-muted)">
                           {hasPhone ? (
                             <>
-                              Send code via SMS to <span className="font-semibold text-(--text-primary)">{user.mobile}</span>
+                              Send code via SMS to{" "}
+                              <span className="font-semibold text-(--text-primary)">
+                                {user.mobile}
+                              </span>
                             </>
                           ) : (
-                            <span className="italic text-red-500">
+                            <span className="text-red-500 italic">
                               No phone number linked to this account
                             </span>
                           )}
@@ -255,7 +266,8 @@ export function ResetPasswordModal({
                       Enter the 6-digit code sent to{" "}
                       <span className="font-semibold text-(--text-primary)">
                         {method === "email" ? user.email : user.mobile}
-                      </span>.
+                      </span>
+                      .
                     </p>
                   </div>
                 </div>

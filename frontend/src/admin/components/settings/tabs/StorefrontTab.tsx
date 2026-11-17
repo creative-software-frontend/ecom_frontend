@@ -425,7 +425,7 @@ export default function StorefrontTab() {
               </span>
             </div>
             <div
-              className="rounded-lg border border-(--border-light) p-4"
+              className="rounded-md border border-(--border-light) p-4"
               style={{ backgroundColor: brandBackground }}
             >
               <div className="flex items-center justify-between gap-2">

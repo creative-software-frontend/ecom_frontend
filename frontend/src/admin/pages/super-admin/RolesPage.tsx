@@ -100,7 +100,7 @@ export default function RolesPage() {
       {!isLoading && <RolesMetricsCards roles={roles} />}
 
       {/* Table Area */}
-      <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+      <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
         <RolesToolbar search={search} onSearchChange={setSearch} />
         <RolesTable
           items={filteredRoles}

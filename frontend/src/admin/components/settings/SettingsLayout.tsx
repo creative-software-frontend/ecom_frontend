@@ -58,7 +58,7 @@ export function SettingsCard({
   children: ReactNode
 }) {
   return (
-    <section className="rounded-lg border border-(--border-light) bg-(--bg-surface)">
+    <section className="rounded-md border border-(--border-light) bg-(--bg-surface)">
       <header className="flex items-start justify-between gap-3 border-b border-(--border-light) px-5 py-4">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-(--text-primary)">
@@ -87,7 +87,7 @@ export function SettingsSkeleton() {
       className="flex animate-pulse flex-col gap-5"
     >
       {/* Skeleton Card 1 */}
-      <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-5">
+      <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-5">
         <div className="flex items-center justify-between border-b border-(--border-light) pb-4">
           <div className="space-y-1.5">
             <div className="h-4 w-36 rounded bg-(--bg-surface-hover)" />
@@ -112,7 +112,7 @@ export function SettingsSkeleton() {
       </div>
 
       {/* Skeleton Card 2 */}
-      <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-5">
+      <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-5">
         <div className="border-b border-(--border-light) pb-4">
           <div className="space-y-1.5">
             <div className="h-4 w-32 rounded bg-(--bg-surface-hover)" />

@@ -77,7 +77,7 @@ export function Sidebar({ menu }: { menu: MenuItem[] }) {
                   to={item.href}
                   end={false}
                   className={({ isActive }) =>
-                    `flex items-center justify-between rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
+                    `flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                       isActive
                         ? "bg-primary font-semibold text-white"
                         : "text-(--text-primary) hover:bg-(--bg-surface-hover)"

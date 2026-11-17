@@ -175,7 +175,7 @@ export default function ShopUsersPage() {
         </div>
       )}
 
-      <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+      <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
         <ShopUsersToolbar
           search={search}
           onSearchChange={setSearch}
@@ -194,7 +194,7 @@ export default function ShopUsersPage() {
         />
       </section>
 
-      <div className="flex items-start gap-2 rounded-lg border border-(--border-light) bg-(--bg-app) p-3 text-[11px] leading-relaxed text-(--text-muted)">
+      <div className="flex items-start gap-2 rounded-md border border-(--border-light) bg-(--bg-app) p-3 text-[11px] leading-relaxed text-(--text-muted)">
         <Info className="mt-0.5 size-4 shrink-0 text-(--primary)" />
         <p>
           Shop administrators can manage permissions and staff credentials for

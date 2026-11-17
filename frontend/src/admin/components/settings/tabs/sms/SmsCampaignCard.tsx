@@ -27,7 +27,7 @@ export function SmsCampaignCard() {
   const smsCount = Math.ceil(charCount / 70)
 
   return (
-    <div className="rounded-lg border border-(--border-light) bg-(--bg-surface)">
+    <div className="rounded-md border border-(--border-light) bg-(--bg-surface)">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-(--border-light) p-4">
         <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export function SmsCampaignCard() {
               Sender ID: PowerZenox
             </span>
           </div>
-          <div className="max-w-sm rounded-lg border border-(--border-light) bg-(--bg-surface) p-3 shadow-sm">
+          <div className="max-w-sm rounded-md border border-(--border-light) bg-(--bg-surface) p-3 shadow-sm">
             <div className="mb-2 flex items-center justify-between">
               <span className="flex items-center gap-1 text-xs font-bold text-(--text-primary)">
                 <Smartphone className="size-3 text-(--primary)" /> PowerZenox

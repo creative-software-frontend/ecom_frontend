@@ -68,7 +68,7 @@ export default function SuperAdminDashboardPage() {
         <ErrorState
           message={getErrorMessage(error, "Failed to load dashboard")}
           onRetry={() => refetch()}
-          className="flex flex-col items-center gap-3 rounded-lg border border-red-200 bg-red-50 py-16 text-center"
+          className="flex flex-col items-center gap-3 rounded-md border border-red-200 bg-red-50 py-16 text-center"
           messageClassName="text-sm font-medium text-red-600"
           buttonClassName="rounded-md bg-(--primary) px-4 py-2 text-sm font-medium text-white hover:bg-(--primary-hover)"
         />

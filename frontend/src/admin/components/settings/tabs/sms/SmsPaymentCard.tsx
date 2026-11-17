@@ -10,7 +10,7 @@ const STEPS = [
 
 export function SmsPaymentCard() {
   return (
-    <div className="flex h-full flex-col rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+    <div className="flex h-full flex-col rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <div className="mb-4 flex items-center gap-2">
         <Info className="size-5 text-(--text-muted)" />
         <h2 className="text-sm font-semibold text-(--text-primary)">

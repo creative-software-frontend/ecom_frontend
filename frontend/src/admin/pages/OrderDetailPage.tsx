@@ -152,7 +152,7 @@ function Card({
   children: React.ReactNode
 }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface)">
+    <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
       <div className="border-b border-(--border-light) px-5 py-4">
         <h2 className="text-sm font-semibold text-(--text-primary)">{title}</h2>
       </div>
@@ -190,7 +190,7 @@ const STEPPER_STEPS: { key: OrderStatus; label: string }[] = [
 function OrderStatusStepper({ current }: { current: OrderStatus }) {
   if (current === "cancelled") {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-700">
+      <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-700">
         <XCircle className="size-4" aria-hidden="true" />
         This order was cancelled
       </div>
@@ -489,7 +489,7 @@ export default function OrderDetailPage() {
       </header>
 
       {/* Status stepper */}
-      <div className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+      <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
         <p className="mb-3 text-xs font-semibold tracking-wide text-(--text-muted) uppercase">
           Order progress
         </p>
@@ -498,13 +498,13 @@ export default function OrderDetailPage() {
 
       {/* KPI cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <article className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+        <article className="rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
           <p className="text-xs font-medium text-(--text-muted)">Order total</p>
           <p className="mt-1 text-xl font-bold text-(--text-primary) tabular-nums">
             {formatTaka(order.total)}
           </p>
         </article>
-        <article className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+        <article className="rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
           <p className="text-xs font-medium text-(--text-muted)">Items</p>
           <p className="mt-1 text-xl font-bold text-(--text-primary) tabular-nums">
             {itemCount}
@@ -513,7 +513,7 @@ export default function OrderDetailPage() {
             </span>
           </p>
         </article>
-        <article className="rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+        <article className="rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
           <p className="text-xs font-medium text-(--text-muted)">Payment</p>
           <p className="mt-1 text-xl font-bold text-(--text-primary)">
             {payCfg.label}

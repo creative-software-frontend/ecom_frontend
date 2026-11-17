@@ -182,7 +182,7 @@ export default function MarketingTab() {
       onSave={handleSubmit(onSubmit)}
     >
       {/* ---------- Restricted access banner ---------- */}
-      <div className="rounded-lg border border-(--border-light) bg-(--bg-surface-hover) p-4">
+      <div className="rounded-md border border-(--border-light) bg-(--bg-surface-hover) p-4">
         <div className="flex items-start gap-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-white">
             <Shield className="size-4" />
@@ -207,7 +207,7 @@ export default function MarketingTab() {
       </div>
 
       {/* ---------- Facebook Pixel & CAPI ---------- */}
-      <section className="space-y-4 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+      <section className="space-y-4 rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
         <Controller
           control={control}
           name="facebook.enabled"
@@ -292,7 +292,7 @@ export default function MarketingTab() {
       </section>
 
       {/* ---------- TikTok Pixel & Events API ---------- */}
-      <section className="space-y-4 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+      <section className="space-y-4 rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
         <Controller
           control={control}
           name="tiktok.enabled"
@@ -341,7 +341,7 @@ export default function MarketingTab() {
       </section>
 
       {/* ---------- Google Tag Manager ---------- */}
-      <section className="space-y-4 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+      <section className="space-y-4 rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
         <Controller
           control={control}
           name="gtm.enabled"

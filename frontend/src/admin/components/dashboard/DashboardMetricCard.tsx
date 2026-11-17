@@ -42,7 +42,7 @@ export function DashboardMetricCard({
 }) {
   const v = variantStyles[variant]
   return (
-    <div className={`rounded-lg p-4 ${v.wrapper}`}>
+    <div className={`rounded-md p-4 ${v.wrapper}`}>
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-bold tracking-wider text-(--text-muted) uppercase">
           {label}

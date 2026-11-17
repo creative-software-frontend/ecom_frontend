@@ -22,7 +22,7 @@ export function DeliveryZonesCard({
   const flatFeeEnabled = watch("flat_fee_enabled")
 
   return (
-    <section className="rounded-lg border border-(--border-light) bg-(--bg-surface)">
+    <section className="rounded-md border border-(--border-light) bg-(--bg-surface)">
       <CourierCardHeader
         icon={<MapPin className="size-4" />}
         title="Delivery zones"

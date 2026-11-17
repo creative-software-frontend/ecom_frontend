@@ -7,7 +7,7 @@ export function CourierCard({
   courier: DashboardData["courierSummary"]
 }) {
   return (
-    <div className="space-y-4 rounded-lg border border-(--border-light) bg-(--bg-surface) p-4">
+    <div className="space-y-4 rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <div className="flex items-center justify-between border-b border-(--border-light) pb-3">
         <div className="flex items-center gap-2">
           <span className="flex size-6 items-center justify-center rounded bg-emerald-100 text-xs font-bold text-emerald-800">
@@ -22,7 +22,7 @@ export function CourierCard({
         </span>
       </div>
 
-      <div className="flex items-center justify-between rounded-lg border border-(--border-light) bg-(--bg-table-header) p-3">
+      <div className="flex items-center justify-between rounded-md border border-(--border-light) bg-(--bg-table-header) p-3">
         <div>
           <div className="text-xs font-bold text-(--text-muted) uppercase">
             Ready for Pickup

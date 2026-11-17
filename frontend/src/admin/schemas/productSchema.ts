@@ -66,6 +66,7 @@ export const productFormSchema = z.object({
       })
     )
     .optional(),
+  shopId: z.number().nullable().optional(),
 })
 
 export type ProductFormInput = z.input<typeof productFormSchema>
