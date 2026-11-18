@@ -17,6 +17,9 @@ const SuperAdminLoginPage = lazy(
   () => import("./admin/pages/SuperAdminLoginPage")
 )
 const LoginPage = lazy(() => import("./admin/pages/LoginPage"))
+const ShopRegistrationPage = lazy(
+  () => import("./admin/pages/ShopRegistrationPage")
+)
 
 const SuperAdminDashboardPage = lazy(
   () => import("./admin/pages/super-admin/DashboardPage")
@@ -152,6 +155,10 @@ export function App() {
               <LoginPage />
               // </Suspense>
             }
+          />
+          <Route
+            path="/shop/register"
+            element={<ShopRegistrationPage />}
           />
 
           {/* Shop panel (protected) */}

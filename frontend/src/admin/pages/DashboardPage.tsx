@@ -1,5 +1,5 @@
 import { Link } from "react-router"
-import { Calendar, ClipboardList, RefreshCw } from "lucide-react"
+import { Archive, Calendar, ClipboardList, Plus, RefreshCw } from "lucide-react"
 import { useDashboardQuery } from "../hooks/useDashboardQuery"
 import { MetricsCards } from "../components/dashboard/MetricsCards"
 import { PendingVerificationCard } from "../components/dashboard/PendingVerificationCard"
@@ -29,7 +29,7 @@ export default function DashboardPage() {
             </span>
           </div>
           <p className="mt-0.5 text-xs text-(--text-muted)">
-            Real-time orders, verification queue, and fulfillment overview
+            Orders, payment, stock and fulfillment overview
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -55,6 +55,20 @@ export default function DashboardPage() {
             <ClipboardList className="icon-size" />
             View Orders
           </Link>
+          <Link
+            to="/shop/orders/new"
+            className="admin-template-button admin-template-button--secondary admin-text-dense h-8 px-3"
+          >
+            <Plus className="icon-size" />
+            Create Order
+          </Link>
+          <Link
+            to="/shop/products"
+            className="admin-template-button admin-template-button--secondary admin-text-dense h-8 px-3"
+          >
+            <Archive className="icon-size" />
+            Products
+          </Link>
         </div>
       </div>
 
@@ -79,20 +93,36 @@ export default function DashboardPage() {
       {/* Content */}
       {!isLoading && !error && data && (
         <>
-          <MetricsCards metrics={data.metrics} />
+          <MetricsCards dashboard={data} />
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="lg:col-span-8">
-              <PendingVerificationCard
-                orders={data.pendingVerificationOrders}
-                totalPending={data.metrics.waitingConfirmation.count}
-              />
+          <section
+            aria-label="Order and fulfillment operations"
+            className="space-y-3"
+          >
+            <div>
+              <h2 className="text-sm font-semibold text-(--text-primary)">
+                Order & fulfillment operations
+              </h2>
+              <p className="text-xs text-(--text-muted)">
+                Work through orders needing attention and monitor dispatch
+              </p>
             </div>
-            <div className="space-y-6 lg:col-span-4">
-              <WeeklyChartCard chart={data.weeklyChart} />
-              <CourierCard courier={data.courierSummary} />
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+              <div className="xl:col-span-8">
+                <PendingVerificationCard
+                  orders={data.pendingVerificationOrders}
+                  totalPending={data.metrics.waitingConfirmation.count}
+                />
+              </div>
+              <div className="space-y-4 xl:col-span-4">
+                <WeeklyChartCard chart={data.weeklyChart} />
+                <CourierCard
+                  courier={data.courierSummary}
+                  payment={data.metrics.newOrdersToday}
+                />
+              </div>
             </div>
-          </div>
+          </section>
         </>
       )}
     </div>

@@ -11,7 +11,7 @@ const pendingOrderColumns: TableColumn<PendingOrderItem>[] = [
     minWidth: "120px",
     cell: (order) => (
       <Link
-        to={`/admin/orders/${order.id}`}
+        to={`/shop/orders/${order.id}`}
         className="font-medium text-primary hover:underline"
       >
         {order.orderNumber}
@@ -77,7 +77,7 @@ export function PendingVerificationCard({
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--border-light) bg-(--bg-table-header) px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-(--text-primary)">
-            Needs attention — Pending phone verification
+            Orders awaiting confirmation
           </span>
           {orders.length > 0 && (
             <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
@@ -86,7 +86,7 @@ export function PendingVerificationCard({
           )}
         </div>
         <Link
-          to="/admin/orders?status=pending"
+          to="/shop/orders?status=pending"
           className="flex items-center gap-1 text-xs font-medium whitespace-nowrap text-primary hover:underline"
         >
           View all {totalPending} pending <ArrowRight className="size-3" />
@@ -110,8 +110,8 @@ export function PendingVerificationCard({
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-(--border-light) bg-(--bg-table-header) px-4 py-3 text-xs text-(--text-muted)">
-        <span>● Items held from dispatch until verified</span>
-        <span className="font-medium">SLA target: &lt; 30 mins</span>
+        <span>Review customer and order details before confirming.</span>
+        <span className="font-medium">Manage from the Orders page</span>
       </div>
     </div>
   )

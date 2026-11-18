@@ -1,9 +1,14 @@
 import { Link } from "react-router"
-import { Calendar, RefreshCw, Store } from "lucide-react"
+import { Calendar, RefreshCw, Store, UserPlus } from "lucide-react"
 import { SuperAdminMetricsCards } from "../../components/super-admin/SuperAdminMetricsCards"
 import { RecentAuditsTable } from "../../components/super-admin/RecentAuditsTable"
 import { UsersByRoleCard } from "../../components/super-admin/UsersByRoleCard"
 import { ShopsByStatusCard } from "../../components/super-admin/ShopsByStatusCard"
+import {
+  RoleAccessOverviewCard,
+  TrialShopsAttentionCard,
+} from "../../components/super-admin/PlatformGovernanceCards"
+import { SuperAdminDemoAnalytics } from "../../components/super-admin/SuperAdminDemoAnalytics"
 import { useSuperAdminDashboardQuery } from "../../hooks/useAdminUsers"
 import { ErrorState } from "../../components/common/ErrorState"
 import { formatDate } from "../../lib/formatTime"
@@ -55,6 +60,13 @@ export default function SuperAdminDashboardPage() {
             <Store className="icon-size" />
             Manage Shops
           </Link>
+          <Link
+            to="/admin/users"
+            className="admin-template-button admin-template-button--secondary h-8 px-3 text-xs"
+          >
+            <UserPlus className="icon-size" />
+            Manage Users
+          </Link>
         </div>
       </div>
 
@@ -76,19 +88,31 @@ export default function SuperAdminDashboardPage() {
 
       {!isLoading && !error && data && (
         <>
-          <SuperAdminMetricsCards metrics={data.metrics} />
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="lg:col-span-8">
-              <RecentAuditsTable audits={data.recentAudits} />
+          <SuperAdminMetricsCards dashboard={data} />
+
+          <section aria-label="Platform governance" className="space-y-3">
+            <div>
+              <h2 className="text-base font-semibold text-(--text-primary)">
+                Platform health & governance
+              </h2>
+              <p className="text-xs text-(--text-muted)">
+                Live account, access and subscription signals
+              </p>
             </div>
-            <div className="space-y-6 lg:col-span-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-4">
               <UsersByRoleCard usersByRole={data.usersByRole} />
               <ShopsByStatusCard
                 shopsByStatus={data.shopsByStatus}
                 trialExpiringSoon={data.trialExpiringSoon}
               />
+              <RoleAccessOverviewCard />
+              <TrialShopsAttentionCard shops={data.trialExpiringSoon} />
             </div>
-          </div>
+          </section>
+
+          <SuperAdminDemoAnalytics />
+
+          <RecentAuditsTable audits={data.recentAudits} />
         </>
       )}
     </div>

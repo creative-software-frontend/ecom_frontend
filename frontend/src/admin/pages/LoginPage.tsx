@@ -1,7 +1,13 @@
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Navigate, useLocation, useNavigate, type Location } from "react-router"
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useNavigate,
+  type Location,
+} from "react-router"
 import { z } from "zod"
 import { Layers, Loader2, AlertCircle, AlertTriangle } from "lucide-react"
 import { ApiError } from "../api/client"
@@ -334,6 +340,15 @@ export function LoginPage() {
                 )}
               </button>
             </form>
+            <p className="mt-5 text-center text-sm text-(--text-muted)">
+              New to Power Zenox?{" "}
+              <Link
+                to="/shop/register"
+                className="font-semibold text-(--primary) hover:underline"
+              >
+                Register your shop
+              </Link>
+            </p>
           </div>
 
           {/* Footer Text */}

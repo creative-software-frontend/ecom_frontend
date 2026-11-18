@@ -33,6 +33,15 @@ export type AdminUser = {
   updatedAt?: string
 }
 
+export type ShopRegistrationInput = {
+  shopName: string
+  name: string
+  email: string
+  mobile?: string
+  address?: string
+  password: string
+}
+
 export type AuthState =
   | { status: "loading" }
   | { status: "authenticated"; user: AdminUser }
@@ -41,6 +50,7 @@ export type AuthState =
 type AuthContextValue = {
   state: AuthState
   login: (email: string, password: string) => Promise<void>
+  registerShop: (input: ShopRegistrationInput) => Promise<void>
   logout: () => Promise<void>
   updateUser: (user: AdminUser) => void
 }
@@ -84,6 +94,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ status: "authenticated", user })
   }, [])
 
+  const registerShop = useCallback(async (input: ShopRegistrationInput) => {
+    const user = await apiRequest<AdminUser>("/auth/register", {
+      method: "POST",
+      body: input,
+    })
+    setState({ status: "authenticated", user })
+  }, [])
+
   const logout = useCallback(async () => {
     setState({ status: "unauthenticated" })
     await apiRequest<void>("/auth/logout", { method: "POST" })
@@ -94,8 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ state, login, logout, updateUser }),
-    [state, login, logout, updateUser]
+    () => ({ state, login, registerShop, logout, updateUser }),
+    [state, login, registerShop, logout, updateUser]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
