@@ -212,7 +212,8 @@ export function ProductForm({
               title="Basic Information"
               description="Core catalog details"
             >
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2 md:col-span-2">
+                {/* Product Name */}
                 <FormField
                   label="Product Name"
                   required
@@ -221,49 +222,100 @@ export function ProductForm({
                   error={errors.name?.message}
                   {...register("name")}
                 />
-                <FormField
-                  label="SKU"
-                  icon={<Hash className="size-4" />}
-                  placeholder="e.g. PROD-001"
-                  error={errors.sku?.message}
-                  {...register("sku")}
-                />
-                <FormField
-                  label="Badge"
-                  placeholder="e.g. New, Sale"
-                  {...register("badge")}
-                />
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
-                    Category
-                  </label>
-                  <select
-                    className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
-                    {...register("category")}
-                  >
-                    <option value="">Select category</option>
-                    <option value="Herbal Supplement">Herbal Supplement</option>
-                    <option value="Vitality">Vitality</option>
-                  </select>
-                  {errors.category && (
-                    <FieldError>{errors.category.message}</FieldError>
-                  )}
-                </div>
-                <FormField
-                  label="Subcategory"
-                  placeholder="Select subcategory"
-                  {...register("subcategory")}
-                />
-                <FormField
-                  label="Brand"
-                  placeholder="Select brand"
-                  {...register("brand")}
-                />
-                <div className="md:col-span-2">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {/* Badge */}
                   <FormField
+                    label="Badge"
+                    placeholder="e.g. New, Sale"
+                    {...register("badge")}
+                  />
+                  {/* Brand */}
+                  <FormField
+                    label="Brand"
+                    placeholder="Select brand"
+                    {...register("brand")}
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {/* Category */}
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+                      Category
+                    </label>
+                    <select
+                      className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
+                      {...register("category")}
+                    >
+                      <option value="">Select category</option>
+                      <option value="Herbal Supplement">
+                        Herbal Supplement
+                      </option>
+                      <option value="Vitality">Vitality</option>
+                    </select>
+                    {errors.category && (
+                      <FieldError>{errors.category.message}</FieldError>
+                    )}
+                  </div>
+                  {/* Subcategory */}
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+                      Subcategory
+                    </label>
+                    <select
+                      className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-primary"
+                      {...register("subcategory")}
+                    >
+                      <option value="">Select subcategory</option>
+                      <option value="Herbal Supplement">
+                        Herbal Supplement
+                      </option>
+                      <option value="Vitality">Vitality</option>
+                    </select>
+                    {errors.subcategory && (
+                      <FieldError>{errors.subcategory.message}</FieldError>
+                    )}
+                  </div>
+                  {/* <FormField
+                    label="Subcategory"
+                    placeholder="Select subcategory"
+                    {...register("subcategory")}
+                  /> */}
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+                      Section
+                    </label>
+                    <select
+                      className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-primary"
+                      {...register("section")}
+                    >
+                      <option value="">Select section</option>
+                      <option value="Flash Sale">Flash Sale</option>
+                      <option value="New Arrivals">New Arrivals</option>
+                      <option value="Featured Products">
+                        Featured Products
+                      </option>
+                      <option value="Upcoming Products">
+                        Upcoming Products
+                      </option>
+                    </select>
+                    {errors.section && (
+                      <FieldError>{errors.section.message}</FieldError>
+                    )}
+                  </div>
+                  {/* <FormField
                     label="Section"
                     placeholder="Featured Section"
                     {...register("section")}
+                  />{" "} */}
+                  <FormField
+                    label="SKU"
+                    icon={<Hash className="size-4" />}
+                    placeholder="e.g. PROD-001"
+                    error={errors.sku?.message}
+                    {...register("sku")}
                   />
                 </div>
                 <div className="md:col-span-2">

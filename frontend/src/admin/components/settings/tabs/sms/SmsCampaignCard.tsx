@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Search,
   MessageSquare,
@@ -10,10 +10,88 @@ import {
 
 const VARIABLES = ["{name}", "{order_id}", "{product_name}", "{tracking_code}"]
 
+type SmsTemplate = {
+  id: string
+  name: string
+  message: string
+}
+
+const DEFAULT_TEMPLATES: SmsTemplate[] = [
+  {
+    id: "confirmed",
+    name: "Confirmed Orders",
+    message:
+      "প্রিয় {name}, আপনার অর্ডারটি কনফার্ম হয়েছে। অর্ডারের ট্র্যাকিং কোড {tracking_code}। শীঘ্রই আপনার কাছে পৌঁছাবে।",
+  },
+  {
+    id: "pending",
+    name: "Pending Orders",
+    message:
+      "প্রিয় {name}, আপনার অর্ডার #{order_id} পেন্ডিং অবস্থায় আছে। দ্রুত নিশ্চিত করতে আমাদের সাথে যোগাযোগ করুন।",
+  },
+  {
+    id: "delivery",
+    name: "Delivery Update",
+    message:
+      "প্রিয় {name}, আপনার {product_name} পাঠানো হয়েছে। ট্র্যাকিং কোড: {tracking_code}।",
+  },
+]
+
+const SMS_TEMPLATE_STORAGE_KEY = "sms-campaign-draft-templates"
+
 export function SmsCampaignCard() {
-  const [template, setTemplate] = useState(
-    "প্রিয় {name}, আপনার অর্ডারটি কনফার্ম হয়েছে। অর্ডারের ট্র্যাকিং কোড {tracking_code}। শীঘ্রই আপনার কাছে পৌঁছাবে।"
+  const [templates, setTemplates] = useState<SmsTemplate[]>(DEFAULT_TEMPLATES)
+  const [selectedTemplateId, setSelectedTemplateId] = useState(
+    DEFAULT_TEMPLATES[0].id
   )
+  const [template, setTemplate] = useState(DEFAULT_TEMPLATES[0].message)
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
+  const [templateName, setTemplateName] = useState("")
+
+  useEffect(() => {
+    const saved = localStorage.getItem(SMS_TEMPLATE_STORAGE_KEY)
+    if (!saved) return
+
+    try {
+      const savedTemplates = JSON.parse(saved) as SmsTemplate[]
+      if (Array.isArray(savedTemplates) && savedTemplates.length > 0) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTemplates([...DEFAULT_TEMPLATES, ...savedTemplates])
+      }
+    } catch {
+      localStorage.removeItem(SMS_TEMPLATE_STORAGE_KEY)
+    }
+  }, [])
+
+  const handleTemplateChange = (templateId: string) => {
+    setSelectedTemplateId(templateId)
+    const selected = templates.find((item) => item.id === templateId)
+    if (selected) setTemplate(selected.message)
+  }
+
+  const saveTemplate = () => {
+    const name = templateName.trim()
+    if (!name || !template.trim()) return
+
+    const newTemplate: SmsTemplate = {
+      id: `custom-${Date.now()}`,
+      name,
+      message: template,
+    }
+    const nextTemplates = [...templates, newTemplate]
+    setTemplates(nextTemplates)
+    setSelectedTemplateId(newTemplate.id)
+    setTemplateName("")
+    setShowSaveTemplate(false)
+
+    const customTemplates = nextTemplates.filter((item) =>
+      item.id.startsWith("custom-")
+    )
+    localStorage.setItem(
+      SMS_TEMPLATE_STORAGE_KEY,
+      JSON.stringify(customTemplates)
+    )
+  }
 
   // লাইভ প্রিভিউ ডামি ডেটা
   const previewText = template
@@ -60,10 +138,21 @@ export function SmsCampaignCard() {
               className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-3 pl-9 text-sm outline-none focus:border-(--primary)"
             />
           </div>
-          <select className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)">
-            <option>Confirmed Orders</option>
-            <option>Pending Orders</option>
+          <select
+            value={selectedTemplateId}
+            onChange={(event) => handleTemplateChange(event.target.value)}
+            className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
+            aria-label="Message template"
+          >
+            {templates.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
           </select>
+          {/* <span className="pointer-events-none absolute -top-2 right-2 rounded-full bg-(--primary) px-1.5 py-0.5 text-[9px] font-bold text-white">
+              {templates.length} templates
+            </span> */}
           <select className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)">
             <option>All Sources</option>
             <option>Website</option>
@@ -136,6 +225,44 @@ export function SmsCampaignCard() {
           </div>
         </div>
 
+        {showSaveTemplate && (
+          <div className="flex flex-col gap-2 rounded-md border border-(--border-light) bg-(--bg-app) p-3 sm:flex-row sm:items-center">
+            <label
+              htmlFor="sms-template-name"
+              className="text-xs font-semibold text-(--text-primary)"
+            >
+              Template name
+            </label>
+            <input
+              id="sms-template-name"
+              value={templateName}
+              onChange={(event) => setTemplateName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") saveTemplate()
+              }}
+              placeholder="যেমন: Payment Reminder"
+              className="h-9 flex-1 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm outline-none focus:border-(--primary)"
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowSaveTemplate(false)}
+                className="h-9 rounded-md border border-(--border-light) px-3 text-sm text-(--text-primary)"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={saveTemplate}
+                disabled={!templateName.trim() || !template.trim()}
+                className="h-9 rounded-md bg-(--primary) px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Save Template
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Live Preview */}
         <div className="rounded-md border border-(--border-light) bg-(--bg-app) p-3">
           <div className="mb-2 flex items-center justify-between">
@@ -169,7 +296,11 @@ export function SmsCampaignCard() {
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-(--border-light) pt-4">
           <div className="flex gap-2">
-            <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
+            <button
+              type="button"
+              onClick={() => setShowSaveTemplate((visible) => !visible)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)"
+            >
               <Save className="size-4" /> Save as Draft Template
             </button>
             <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">

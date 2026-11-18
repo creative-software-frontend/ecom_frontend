@@ -2,8 +2,8 @@
 import { Wallet, CheckCircle2 } from "lucide-react"
 import { SettingsLayout } from "../SettingsLayout"
 import { SmsCampaignCard } from "./sms/SmsCampaignCard.tsx"
-import { SmsPaymentCard } from "./sms/SmsPaymentCard.tsx"
-import { SmsRechargeCard } from "./sms/SmsRechargeCard.tsx"
+import { PaymentCard } from "../../PaymentCard.tsx"
+import { SmsRechargeCard } from "../../RechargeCard.tsx"
 import { SmsLogsTable } from "./sms/SmsLogsTable"
 
 export default function SmsTab() {
@@ -54,7 +54,7 @@ export default function SmsTab() {
 
         {/* 2. Payment & Recharge (2 Columns) */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <SmsPaymentCard />
+          <PaymentCard />
           <div id="recharge-section" className="scroll-mt-20">
             <SmsRechargeCard />
           </div>

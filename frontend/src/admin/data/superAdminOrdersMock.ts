@@ -6,7 +6,10 @@ export const MOCK_SHOPS = [
   { id: 3, name: "Nature's Own", slug: "natures-own" },
 ]
 
-const BASE_ORDERS: Omit<OrderListItem, "shopId" | "shopName">[] = [
+const BASE_ORDERS: Omit<
+  OrderListItem,
+  "shopId" | "shopName" | "currentPrice" | "buyingPrice"
+>[] = [
   {
     id: 1,
     orderNumber: "PZ-10488",
@@ -222,5 +225,13 @@ const BASE_ORDERS: Omit<OrderListItem, "shopId" | "shopName">[] = [
 // هر order-কে একটা shop-এ assign করি
 export const MOCK_ORDERS: OrderListItem[] = BASE_ORDERS.map((order, i) => {
   const shop = MOCK_SHOPS[i % MOCK_SHOPS.length]
-  return { ...order, shopId: shop.id, shopName: shop.name }
+  const mockBuyingRates = [0.78, 0.72, 0.68, 0.82]
+
+  return {
+    ...order,
+    currentPrice: order.total,
+    buyingPrice: Math.round(order.total * mockBuyingRates[i % mockBuyingRates.length]),
+    shopId: shop.id,
+    shopName: shop.name,
+  }
 })

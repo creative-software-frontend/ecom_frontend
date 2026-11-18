@@ -66,6 +66,7 @@ const OrderCreatePage = lazy(() => import("./admin/pages/OrderCreatePage"))
 const OrderDetailPage = lazy(() => import("./admin/pages/OrderDetailPage"))
 const SettingsPage = lazy(() => import("./admin/pages/SettingsPage"))
 const ProfilePage = lazy(() => import("./admin/pages/ProfilePage"))
+const RechargePage = lazy(() => import("./admin/pages/RechargePage"))
 const BrandsPage = lazy(() => import("./admin/pages/shop-admin/BrandsPage"))
 const CategoriesPage = lazy(
   () => import("./admin/pages/shop-admin/CategoriesPage")
@@ -159,6 +160,7 @@ export function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="recharge" element={<RechargePage />} />
               <Route
                 path="settings"
                 element={<Navigate to="store" replace />}

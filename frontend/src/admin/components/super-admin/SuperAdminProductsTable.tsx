@@ -116,7 +116,6 @@ export function SuperAdminProductsTable({
       cell: (row) => {
         const selling = row.currentPrice
         const buying = row.buyingPrice ?? 0
-        console.log(row.buyingPrice)
         const profit = selling - buying
         const profitPct = buying > 0 ? Math.round((profit / buying) * 100) : 0
 

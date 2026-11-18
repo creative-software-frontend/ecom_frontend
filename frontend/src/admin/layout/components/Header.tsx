@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Bell, Menu, X } from "lucide-react"
+import { Bell, Menu, Wallet, X } from "lucide-react"
 import { useNavigate } from "react-router"
 import { useAuth } from "../../auth/AuthProvider"
 import { Sidebar } from "./Sidebar"
@@ -44,6 +44,24 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
         />
       </div>
       <div className="flex items-center gap-3">
+        {!isSuperAdmin && (
+          <button
+            type="button"
+            onClick={() => navigate("/shop/recharge")}
+            className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-2.5 py-1.5 text-left transition-colors hover:bg-gray-50 sm:px-3"
+            aria-label="অ্যাকাউন্ট রিচার্জ পেজে যান"
+          >
+            <Wallet className="size-4 shrink-0 text-emerald-600" />
+            <span>
+              <span className="hidden text-[10px] leading-none text-gray-500 sm:block">
+                Wallet balance
+              </span>
+              <span className="text-xs font-semibold tabular-nums text-gray-800 sm:text-sm">
+                ৳ 0.00
+              </span>
+            </span>
+          </button>
+        )}
         <button
           type="button"
           className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100"
@@ -117,7 +135,7 @@ export function MobileSidebar({
   return (
     <div className="fixed inset-0 z-30 lg:hidden">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="admin-sidebar-shell absolute top-0 left-0 h-full">
+      <div className="admin-sidebar-shell absolute top-0 left-0 flex h-full flex-col">
         <div className="admin-sidebar-brand flex h-14 items-center justify-between px-4">
           <div className="text-lg font-semibold">{brandLabel}</div>
           <button type="button" onClick={onClose} aria-label="Close sidebar">

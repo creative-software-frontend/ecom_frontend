@@ -8,7 +8,7 @@ const STEPS = [
   "আপনার গোপন পিন (PIN) নম্বরটি দিয়ে লেনদেনটি সফলভাবে সম্পন্ন করুন।",
 ]
 
-export function SmsPaymentCard() {
+export function PaymentCard() {
   return (
     <div className="flex h-full flex-col rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
       <div className="mb-4 flex items-center gap-2">

@@ -19,16 +19,16 @@ export function AdminLayout() {
   const brandLabel = isSuperAdmin ? "Power Zenox · Platform" : "Power Zenox"
 
   return (
-    <div className="admin-root min-h-screen bg-[#f1f4f6]">
-      <div className="flex min-h-screen">
-        <aside className="admin-sidebar-shell sticky top-0 z-21 h-screen lg:block">
+    <div className="admin-root min-h-dvh bg-[#f1f4f6]">
+      <div className="flex min-h-dvh">
+        <aside className="admin-sidebar-shell sticky top-0 z-21 flex h-dvh flex-col">
           {/* admin-sidebar-brand */}
           <div className="flex h-14 items-center bg-(--bg-surface) px-4 text-lg font-semibold">
             {brandLabel}
           </div>
           <Sidebar menu={menu} />
         </aside>
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
           <Header onToggleSidebar={() => setMobileOpen(true)} />
           <MobileSidebar
             open={mobileOpen}
