@@ -111,13 +111,40 @@ export function SuperAdminProductsTable({
     },
     {
       name: "PRICE",
-      width: "110px",
+      minWidth: "140px",
       right: true,
-      cell: (row) => (
-        <span className="text-sm font-medium text-(--text-primary) tabular-nums">
-          {formatTaka(row.currentPrice)}
-        </span>
-      ),
+      cell: (row) => {
+        const selling = row.currentPrice
+        const buying = row.buyingPrice ?? 0
+        console.log(row.buyingPrice)
+        const profit = selling - buying
+        const profitPct = buying > 0 ? Math.round((profit / buying) * 100) : 0
+
+        return (
+          <div className="flex flex-col items-end leading-tight">
+            <span className="text-sm font-semibold text-(--text-primary) tabular-nums">
+              {formatTaka(selling)}
+            </span>
+            {buying > 0 ? (
+              <span className="text-[11px] text-(--text-muted) tabular-nums">
+                Buy {formatTaka(buying)}
+                <span
+                  className={`ml-1 font-medium ${
+                    profit >= 0 ? "text-emerald-600" : "text-red-600"
+                  }`}
+                >
+                  · {profit >= 0 ? "+" : ""}
+                  {profitPct}%
+                </span>
+              </span>
+            ) : (
+              <span className="text-[11px] text-(--text-muted) italic">
+                No cost set
+              </span>
+            )}
+          </div>
+        )
+      },
     },
     {
       name: "STOCK",
@@ -211,7 +238,6 @@ export function SuperAdminProductsTable({
       ),
     },
   ]
-
   return (
     <DataTable
       columns={columns}

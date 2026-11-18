@@ -1,69 +1,34 @@
 import { useState } from "react"
 import {
   Plus,
-  Search,
   Download,
   CheckCircle2,
   X,
   ChevronDown,
   ChevronUp,
+  List,
 } from "lucide-react"
-import {
-  useAdminShopsPaginated,
-  useUpdateShopMutation,
-} from "../../hooks/useAdminUsers"
-import { useDebouncedValue } from "../../hooks/useDebouncedValue"
+import { useNavigate } from "react-router"
+import { useAdminShopsPaginated } from "../../hooks/useAdminUsers"
 import { ShopsMetricsCards } from "../../components/super-admin/ShopsMetricsCards"
-import { ShopsTable } from "../../components/super-admin/ShopsTable"
 import { StoreDensityCard } from "@/admin/components/super-admin/StoreDensityCard"
+import { DivisionSalesCard } from "@/admin/components/super-admin/DivisionSalesCard"
+import { TopSellingItemsCard } from "@/admin/components/super-admin/TopSellingItemsCard"
 import { TopVerticalsCard } from "@/admin/components/super-admin/TopVerticalsCard"
+import { TopShopsCard } from "@/admin/components/super-admin/TopShopsCard"
+import { MOCK_SHOP_SUMMARY } from "@/admin/data/shopSummaryMock"
 import { CreateShopModal } from "@/admin/components/super-admin/CreateShopModal"
-import { EditShopDrawer } from "@/admin/components/super-admin/EditShopDrawer"
-import { ConfirmToggleShopDialog } from "@/admin/components/super-admin/ConfirmToggleShopDialog"
-import type { SuperAdminShopListItem } from "@/admin/types/superAdmin"
-import { getErrorMessage } from "@/admin/lib/errors"
 
 export default function ShopsPage() {
-  const [search, setSearch] = useState("")
-  const [status, setStatus] = useState("all")
-  const debouncedSearch = useDebouncedValue(search, 300)
+  const navigate = useNavigate()
 
-  const { data, isLoading } = useAdminShopsPaginated({
-    q: debouncedSearch.trim() || undefined,
-    status: status !== "all" ? status : undefined,
-  })
-  const updateMutation = useUpdateShopMutation()
+  // Summary metrics need the full platform counts — no list filters here.
+  const { data } = useAdminShopsPaginated({})
 
   // Modal state
   const [createOpen, setCreateOpen] = useState(false)
-  const [editShop, setEditShop] = useState<SuperAdminShopListItem | null>(null)
-  const [toggleTarget, setToggleTarget] =
-    useState<SuperAdminShopListItem | null>(null)
-  const [toggleError, setToggleError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [insightsExpanded, setInsightsExpanded] = useState(true)
-
-  function handleToggleConfirm() {
-    if (!toggleTarget) return
-    const next = toggleTarget.status === "active" ? "inactive" : "active"
-    setToggleError(null)
-    updateMutation.mutate(
-      { id: toggleTarget.id, data: { status: next } },
-      {
-        onSuccess: () => {
-          setSuccessMessage(
-            next === "active"
-              ? `${toggleTarget.name} is now active.`
-              : `${toggleTarget.name} has been suspended.`
-          )
-          setToggleTarget(null)
-        },
-        onError: (err) => {
-          setToggleError(getErrorMessage(err, "Failed to update shop status"))
-        },
-      }
-    )
-  }
 
   return (
     <div className="min-w-0 space-y-4 bg-(--bg-app) p-4 sm:p-6">
@@ -78,6 +43,13 @@ export default function ShopsPage() {
         <div className="flex items-center gap-2">
           <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
             <Download className="size-4" /> Export CSV
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/admin/shops/all")}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)"
+          >
+            <List className="size-4" /> All Shops
           </button>
           <button
             onClick={() => setCreateOpen(true)}
@@ -109,21 +81,22 @@ export default function ShopsPage() {
       {/* Metrics */}
       {data && <ShopsMetricsCards counts={data.counts} />}
 
-      {/* Charts */}
+      {/* Shop Summary */}
       <section className="mt-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold text-(--text-primary)">
-              Shop Insights
+              Shop Summary
             </h2>
             <p className="mt-0.5 text-xs text-(--text-muted)">
-              Store density and top product verticals
+              Shops, today&apos;s sales and best-selling products across
+              divisions
             </p>
           </div>
           <button
             type="button"
             aria-expanded={insightsExpanded}
-            aria-controls="shop-insights-content"
+            aria-controls="shop-summary-content"
             onClick={() => setInsightsExpanded((expanded) => !expanded)}
             className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)"
           >
@@ -139,76 +112,27 @@ export default function ShopsPage() {
           </button>
         </div>
         {insightsExpanded ? (
-          <div
-            id="shop-insights-content"
-            className="grid grid-cols-1 gap-4 lg:grid-cols-2"
-          >
-            <StoreDensityCard />
-            <TopVerticalsCard />
-          </div>
-        ) : null}
-      </section>
-      {/* Table Area */}
-      <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--border-light) px-4 py-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative">
-              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-(--text-muted)" />
-              <input
-                type="search"
-                placeholder="Search shop name, slug..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-8 w-64 rounded-md border border-(--border-light) bg-(--bg-surface) pr-3 pl-8 text-xs text-(--text-primary) outline-none focus:border-(--primary)"
+          <div id="shop-summary-content" className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <StoreDensityCard divisions={MOCK_SHOP_SUMMARY.divisions} />
+              <DivisionSalesCard divisions={MOCK_SHOP_SUMMARY.divisions} />
+            </div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <TopSellingItemsCard items={MOCK_SHOP_SUMMARY.topItems} />
+              <TopVerticalsCard
+                categories={MOCK_SHOP_SUMMARY.categories}
+                totalSkus={MOCK_SHOP_SUMMARY.totalSkus}
               />
             </div>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="h-8 rounded-md border border-(--border-light) bg-(--bg-surface) px-2 text-xs text-(--text-primary) outline-none focus:border-(--primary)"
-            >
-              <option value="all">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="trial">Trial</option>
-              <option value="inactive">Suspended</option>
-            </select>
+            <TopShopsCard shops={MOCK_SHOP_SUMMARY.topShops} />
           </div>
-        </div>
-
-        <ShopsTable
-          items={data?.items || []}
-          isLoading={isLoading}
-          onEdit={(s) => setEditShop(s)}
-          onToggleStatus={(s) => {
-            setToggleTarget(s)
-            setToggleError(null)
-          }}
-        />
+        ) : null}
       </section>
       {/* Modals */}
       <CreateShopModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onSuccess={(msg) => setSuccessMessage(msg)}
-      />
-      <EditShopDrawer
-        open={editShop !== null}
-        shop={editShop}
-        onClose={() => setEditShop(null)}
-        onSuccess={(msg) => setSuccessMessage(msg)}
-      />
-      <ConfirmToggleShopDialog
-        open={toggleTarget !== null}
-        shopName={toggleTarget?.name ?? ""}
-        currentStatus={toggleTarget?.status ?? "active"}
-        nextStatus={toggleTarget?.status === "active" ? "inactive" : "active"}
-        isPending={updateMutation.isPending}
-        errorMessage={toggleError}
-        onCancel={() => {
-          setToggleTarget(null)
-          setToggleError(null)
-        }}
-        onConfirm={handleToggleConfirm}
       />
     </div>
   )

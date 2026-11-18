@@ -30,6 +30,9 @@ const SuperAdminRolesPage = lazy(
 const SuperAdminShopsPage = lazy(
   () => import("./admin/pages/super-admin/ShopsPage")
 )
+const SuperAdminAllShopsPage = lazy(
+  () => import("./admin/pages/super-admin/AllShopsPage")
+)
 const SuperAdminAuditPage = lazy(
   () => import("./admin/pages/super-admin/AuditPage")
 )
@@ -116,6 +119,7 @@ export function App() {
               <Route path="users" element={<SuperAdminUsersPage />} />
               <Route path="roles" element={<SuperAdminRolesPage />} />
               <Route path="shops" element={<SuperAdminShopsPage />} />
+              <Route path="shops/all" element={<SuperAdminAllShopsPage />} />
               <Route path="orders" element={<SuperAdminOrdersPage />} />
               <Route
                 path="orders/new"

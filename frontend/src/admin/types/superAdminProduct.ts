@@ -20,7 +20,9 @@ export type SuperAdminProduct = {
   brandName: string
   category: string
   currentPrice: number
+  buyingPrice?: number
   regularPrice: number
+  salesCount?: number
   stockQuantity: number
   images: string[]
   isActive: boolean

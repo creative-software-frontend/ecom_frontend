@@ -11,6 +11,7 @@ export type Product = {
   stockQuantity: number
   images: string[]
   isActive: boolean
+  salesCount?: number
   createdAt: string
   updatedAt: string
 }

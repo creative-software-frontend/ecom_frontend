@@ -44,7 +44,7 @@ export default function SuperAdminProductsPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return products.filter((p) => {
+    const list = products.filter((p) => {
       const matchSearch =
         !q ||
         p.name.toLowerCase().includes(q) ||
@@ -55,6 +55,11 @@ export default function SuperAdminProductsPage() {
         status === "all" || getSuperAdminProductStatus(p) === status
       const matchCategory = category === "all" || p.category === category
       return matchSearch && matchShop && matchStatus && matchCategory
+    })
+
+    return [...list].sort((a, b) => {
+      const diff = (b.salesCount ?? 0) - (a.salesCount ?? 0)
+      return diff !== 0 ? diff : b.id - a.id
     })
   }, [products, search, shopId, status, category])
 
