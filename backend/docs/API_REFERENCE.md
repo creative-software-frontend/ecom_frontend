@@ -40,6 +40,7 @@ The API is split into three scopes. The old `/api/admin/auth`, `/api/admin/produ
   - [Products](#public-products)
   - [Place an order](#place-an-order)
 - [Auth endpoints](#auth-endpoints)
+  - [Register a shop](#post-apiauthregister)
 - [Shop endpoints](#shop-endpoints)
   - [Products](#shop-products)
   - [Orders](#shop-orders)
@@ -344,6 +345,34 @@ Returns a single active product and its `reviews`.
 ---
 
 ## Auth endpoints
+
+### POST `/api/auth/register`
+
+Publicly registers a shop and its initial shop-admin account. Shop creation and
+account creation are atomic. On success, the endpoint sets the `admin_token`
+cookie and returns the authenticated user shape.
+
+**Body:**
+
+```json
+{
+  "shopName": "Herbal Vitality BD",
+  "name": "Shop Owner",
+  "email": "owner@example.com",
+  "mobile": "01712345678",
+  "address": "Dhaka, Bangladesh",
+  "password": "use-a-long-password"
+}
+```
+
+`mobile` and `address` are optional. Passwords must be at least 12 characters.
+Successful registrations create an active shop and sign the owner in.
+
+**Errors:**
+
+- `409` — email or shop URL is already in use
+- `422` — invalid registration fields
+- `429` — too many registration attempts (3 per hour per IP)
 
 ### POST `/api/auth/login`
 

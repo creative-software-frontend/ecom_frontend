@@ -2,9 +2,11 @@ import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { Prisma } from "../../generated/prisma/client.js";
 import { IS_PRODUCTION, JWT_SECRET } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 import { logAudit } from "../lib/auditLog.js";
+import { generateShopSlug } from "../lib/shopSlug.js";
 
 const DUMMY_PASSWORD_HASH =
   "$2b$12$ovTjS60rfPUAij6cC069qeltkyg7GtK7Ety/1nzknk1bx8YRFuxdK";
@@ -14,6 +16,26 @@ const SESSION_EXPIRY = 30 * 24 * 60 * 60 * 1000; // ৩০ দিন
 const loginSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
   password: z.string().min(1),
+});
+
+const registrationSchema = z.object({
+  shopName: z.string().trim().min(1, "Shop name is required").max(150),
+  name: z.string().trim().min(1, "Name is required").max(120),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email("Enter a valid email address")),
+  mobile: z
+    .string()
+    .trim()
+    .refine(
+      (value) => !value || /^01[3-9]\d{8}$/.test(value),
+      "Enter a valid mobile number",
+    )
+    .optional(),
+  address: z.string().trim().max(500).optional(),
+  password: z.string().min(12, "Password must be at least 12 characters"),
 });
 
 const cookieOptions = {
@@ -129,6 +151,124 @@ export async function login(req: Request, res: Response) {
     });
   } catch (error) {
     console.error("Error during login:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+}
+
+export async function register(req: Request, res: Response) {
+  const parsed = registrationSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    const errors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const field = issue.path.join(".") || "form";
+      if (!(field in errors)) errors[field] = issue.message;
+    }
+    return res
+      .status(422)
+      .json({ success: false, message: "Validation failed", errors });
+  }
+
+  const { shopName, name, email, mobile, address, password } = parsed.data;
+
+  try {
+    const [role, slugResult] = await Promise.all([
+      prisma.role.findUnique({ where: { name: "shop_admin" } }),
+      generateShopSlug(shopName),
+    ]);
+
+    if (!role || role.scope !== "shop") {
+      console.error("Shop admin role is missing or has an invalid scope");
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: "Registration is currently unavailable",
+        });
+    }
+
+    if (slugResult.conflict) {
+      return res.status(409).json({
+        success: false,
+        message: "A shop with a similar name already exists",
+        errors: {
+          shopName: "This shop name creates a URL that is already taken",
+        },
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const user = await prisma.$transaction(async (transaction) => {
+      const shop = await transaction.shop.create({
+        data: {
+          name: shopName,
+          slug: slugResult.slug,
+          mobile: mobile || null,
+          address: address || null,
+          status: "active",
+        },
+      });
+
+      return transaction.user.create({
+        data: {
+          email,
+          name,
+          mobile: mobile || null,
+          passwordHash,
+          roleId: role.id,
+          shopId: shop.id,
+          status: "active",
+          lastLoginAt: new Date(),
+        },
+        include: { role: true, shop: true },
+      });
+    });
+
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, {
+      algorithm: "HS256",
+      expiresIn: "8h",
+    });
+    res.cookie("admin_token", token, {
+      ...cookieOptions,
+      maxAge: SESSION_EXPIRY,
+    });
+
+    void logAudit({
+      req,
+      userId: user.id,
+      action: "shop.create",
+      entityType: "shop",
+      entityId: user.shopId ?? undefined,
+      metadata: { name: shopName, slug: slugResult.slug, selfRegistered: true },
+      targetShopId: user.shopId,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: toAuthResponse(user),
+    });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      const target = error.meta?.target;
+      const emailConflict =
+        (Array.isArray(target) && target.includes("email")) ||
+        (typeof target === "string" && target.includes("email"));
+      return res.status(409).json({
+        success: false,
+        message: emailConflict
+          ? "This email is already registered"
+          : "A shop with a similar name already exists",
+        errors: emailConflict
+          ? { email: "This email is already registered" }
+          : { shopName: "This shop name creates a URL that is already taken" },
+      });
+    }
+    console.error("Error during shop registration:", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
