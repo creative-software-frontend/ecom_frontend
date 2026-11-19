@@ -1,16 +1,23 @@
-import { useEffect, useState } from "react"
-import { CheckCircle2, ImagePlus, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { CheckCircle2, ImagePlus, QrCode, X } from "lucide-react"
 import BanglaQR from "@/assets/images/payment/BanglaQR.jpeg"
+import type { PaymentMethod } from "./PaymentCard"
 
 type RechargePaymentCardProps = {
   purpose: "sms" | "general"
+  method: PaymentMethod
+  onMethodChange: (method: PaymentMethod) => void
 }
 
-export function RechargePaymentCard({ purpose }: RechargePaymentCardProps) {
-  const [method, setMethod] = useState<"bkash" | "nagad" | "qr">("bkash")
+export function RechargePaymentCard({
+  purpose,
+  method,
+  onMethodChange,
+}: RechargePaymentCardProps) {
   const [showQrPreview, setShowQrPreview] = useState(false)
   const [proofScreenshot, setProofScreenshot] = useState<File | null>(null)
   const [proofPreviewUrl, setProofPreviewUrl] = useState<string | null>(null)
+  const qrCloseButtonRef = useRef<HTMLButtonElement>(null)
   const isSmsRecharge = purpose === "sms"
 
   useEffect(() => {
@@ -21,7 +28,14 @@ export function RechargePaymentCard({ purpose }: RechargePaymentCardProps) {
     }
 
     document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    qrCloseButtonRef.current?.focus()
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape)
+      document.body.style.overflow = previousOverflow
+    }
   }, [showQrPreview])
 
   useEffect(() => {
@@ -51,46 +65,50 @@ export function RechargePaymentCard({ purpose }: RechargePaymentCardProps) {
             </label>
             <div className="grid grid-cols-3 gap-2">
               <button
-                onClick={() => setMethod("bkash")}
+                onClick={() => onMethodChange("qr")}
+                className={`flex h-10 items-center justify-center rounded-md border font-bold ${method === "qr" ? "border-(--primary) bg-(--primary-soft) text-(--primary)" : "border-(--border-light) text-(--text-muted) hover:bg-(--bg-app)"}`}
+              >
+                Bangla QR
+              </button>
+              <button
+                onClick={() => onMethodChange("bkash")}
                 className={`flex h-10 items-center justify-center rounded-md border font-bold ${method === "bkash" ? "border-(--primary) bg-(--primary-soft) text-(--primary)" : "border-(--border-light) text-(--text-muted) hover:bg-(--bg-app)"}`}
               >
                 bKash (বিকাশ)
               </button>
               <button
-                onClick={() => setMethod("nagad")}
+                onClick={() => onMethodChange("nagad")}
                 className={`flex h-10 items-center justify-center rounded-md border font-bold ${method === "nagad" ? "border-(--primary) bg-(--primary-soft) text-(--primary)" : "border-(--border-light) text-(--text-muted) hover:bg-(--bg-app)"}`}
               >
                 Nagad (নগদ)
-              </button>
-              <button
-                onClick={() => setMethod("qr")}
-                className={`flex h-10 items-center justify-center rounded-md border font-bold ${method === "qr" ? "border-(--primary) bg-(--primary-soft) text-(--primary)" : "border-(--border-light) text-(--text-muted) hover:bg-(--bg-app)"}`}
-              >
-                Bangla QR
               </button>
             </div>
           </div>
 
           {method === "qr" && (
-            <div className="flex flex-col items-center rounded-md border border-(--border-light) bg-(--bg-app) p-3">
-              <p className="mb-2 text-xs font-semibold text-(--text-primary)">
-                QR কোড স্ক্যান করে পেমেন্ট করুন
-              </p>
+            <div className="rounded-md border border-(--border-light) bg-(--bg-app) p-3">
+              <div className="mb-2.5 flex items-start gap-2.5">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-(--primary-soft) text-(--primary)">
+                  <QrCode className="size-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-(--text-primary)">
+                    Bangla QR পেমেন্ট
+                  </p>
+                  <p className="mt-0.5 text-[11px] leading-4 text-(--text-muted)">
+                    নিরাপদে পেমেন্ট করতে QR কোড খুলুন
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowQrPreview(true)}
-                className="rounded-md border border-(--border-light) bg-white p-2 transition-transform hover:scale-[1.02] focus:ring-2 focus:ring-(--primary) focus:outline-none"
-                aria-label="QR কোড বড় করে দেখুন"
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-(--primary) bg-(--bg-surface) text-xs font-semibold text-(--primary) transition-colors hover:bg-(--primary-soft) focus-visible:ring-2 focus-visible:ring-(--primary) focus-visible:ring-offset-2 focus-visible:outline-none"
+                aria-label="QR কোড ভিউ করুন"
               >
-                <img
-                  src={BanglaQR}
-                  alt="Bangladesh QR payment"
-                  className="h-48 w-48 rounded-md object-contain"
-                />
+                <QrCode className="size-4" />
+                QR কোড দেখুন
               </button>
-              <p className="mt-2 text-[11px] text-(--text-muted)">
-                বড় করে দেখতে QR-এ ক্লিক করুন
-              </p>
             </div>
           )}
 
@@ -191,27 +209,48 @@ export function RechargePaymentCard({ purpose }: RechargePaymentCardProps) {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Bangla QR preview"
+          aria-labelledby="qr-preview-title"
           onMouseDown={() => setShowQrPreview(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-[2px]"
         >
           <div
             onMouseDown={(event) => event.stopPropagation()}
-            className="relative max-h-[90vh] max-w-[90vw]"
+            className="relative flex max-h-[calc(100vh-2rem)] w-full max-w-sm flex-col overflow-hidden rounded-lg border border-(--border-light) bg-(--bg-surface) shadow-2xl"
           >
-            <button
-              type="button"
-              onClick={() => setShowQrPreview(false)}
-              className="absolute -top-3 -right-3 flex size-9 items-center justify-center rounded-full border border-white/30 bg-black/70 text-white shadow-lg transition-colors hover:bg-black"
-              aria-label="QR preview বন্ধ করুন"
-            >
-              <X className="size-5" />
-            </button>
-            <img
-              src={BanglaQR}
-              alt="Expanded Bangladesh QR payment"
-              className="max-h-[90vh] max-w-[90vw] rounded-lg bg-white object-contain shadow-2xl"
-            />
+            <div className="flex items-center justify-between border-b border-(--border-light) px-4 py-3">
+              <div>
+                <h2
+                  id="qr-preview-title"
+                  className="text-sm font-semibold text-(--text-primary)"
+                >
+                  Bangla QR
+                </h2>
+                <p className="mt-0.5 text-[11px] text-(--text-muted)">
+                  QR স্ক্যান করে পেমেন্ট করুন
+                </p>
+              </div>
+              <button
+                ref={qrCloseButtonRef}
+                type="button"
+                onClick={() => setShowQrPreview(false)}
+                className="flex size-8 shrink-0 items-center justify-center rounded-md text-(--text-muted) transition-colors hover:bg-(--bg-app) hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--primary) focus-visible:outline-none"
+                aria-label="QR preview বন্ধ করুন"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4">
+              <div className="mx-auto flex max-w-70 flex-col items-center rounded-md border border-(--border-light) bg-white p-3">
+                <img
+                  src={BanglaQR}
+                  alt="Expanded Bangladesh QR payment"
+                  className="h-auto max-h-[52vh] w-full object-contain"
+                />
+              </div>
+              <p className="mt-3 text-center text-xs leading-5 text-(--text-muted)">
+                আপনার মোবাইল ব্যাংকিং অ্যাপ দিয়ে কোডটি স্ক্যান করুন
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -219,6 +258,18 @@ export function RechargePaymentCard({ purpose }: RechargePaymentCardProps) {
   )
 }
 
-export function SmsRechargeCard() {
-  return <RechargePaymentCard purpose="sms" />
+export function SmsRechargeCard({
+  method,
+  onMethodChange,
+}: {
+  method: PaymentMethod
+  onMethodChange: (method: PaymentMethod) => void
+}) {
+  return (
+    <RechargePaymentCard
+      purpose="sms"
+      method={method}
+      onMethodChange={onMethodChange}
+    />
+  )
 }
