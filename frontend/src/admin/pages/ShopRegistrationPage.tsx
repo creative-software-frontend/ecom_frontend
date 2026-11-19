@@ -19,7 +19,10 @@ const registrationSchema = z
       .refine((value) => !value || /^01[3-9]\d{8}$/.test(value), {
         message: "Enter a valid BD mobile number",
       }),
-    address: z.string().trim().max(500, "Address must be 500 characters or fewer"),
+    address: z
+      .string()
+      .trim()
+      .max(500, "Address must be 500 characters or fewer"),
     password: z.string().min(12, "Password must be at least 12 characters"),
     confirmPassword: z.string().min(1, "Confirm your password"),
   })
@@ -33,6 +36,7 @@ type RegistrationFormValues = z.input<typeof registrationSchema>
 export default function ShopRegistrationPage() {
   const { state, registerShop } = useAuth()
   const [passwordVisible, setPasswordVisible] = useState(false)
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false)
 
   const {
     register,
@@ -170,38 +174,62 @@ export default function ShopRegistrationPage() {
             className="space-y-5"
           >
             <fieldset disabled={isSubmitting} className="space-y-5">
-              <legend className="mb-3 text-sm font-semibold text-(--text-primary)">
+              {/* <legend className="mb-3 text-sm font-semibold text-(--text-primary)">
                 Shop information
-              </legend>
-              <div>
-                <label
-                  htmlFor="registration-shop-name"
-                  className="mb-1.5 block text-sm font-medium text-(--text-primary)"
-                >
-                  Shop name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  {...register("shopName")}
-                  id="registration-shop-name"
-                  autoComplete="organization"
-                  className={inputClass}
-                  aria-invalid={Boolean(errors.shopName)}
-                  aria-describedby={
-                    errors.shopName ? "registration-shop-name-error" : undefined
-                  }
-                />
-                {errors.shopName?.message && (
-                  <p
-                    id="registration-shop-name-error"
-                    className="mt-1 text-xs text-red-600"
-                    role="alert"
-                  >
-                    {errors.shopName.message}
-                  </p>
-                )}
-              </div>
-
+              </legend> */}
               <div className="grid gap-5 sm:grid-cols-2">
+                {/* shop name */}
+                <div>
+                  <label
+                    htmlFor="registration-shop-name"
+                    className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                  >
+                    Shop name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    {...register("shopName")}
+                    id="registration-shop-name"
+                    autoComplete="organization"
+                    className={inputClass}
+                    aria-invalid={Boolean(errors.shopName)}
+                    aria-describedby={
+                      errors.shopName
+                        ? "registration-shop-name-error"
+                        : undefined
+                    }
+                  />
+                  {errors.shopName?.message && (
+                    <p
+                      id="registration-shop-name-error"
+                      className="mt-1 text-xs text-red-600"
+                      role="alert"
+                    >
+                      {errors.shopName.message}
+                    </p>
+                  )}
+                </div>
+                {/* name */}
+                <div>
+                  <label
+                    htmlFor="registration-owner-name"
+                    className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                  >
+                    Your name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    {...register("name")}
+                    id="registration-owner-name"
+                    autoComplete="name"
+                    className={inputClass}
+                    aria-invalid={Boolean(errors.name)}
+                  />
+                  {errors.name?.message && (
+                    <p className="mt-1 text-xs text-red-600" role="alert">
+                      {errors.name.message}
+                    </p>
+                  )}
+                </div>
+                {/* mobile */}
                 <div>
                   <label
                     htmlFor="registration-mobile"
@@ -224,131 +252,110 @@ export default function ShopRegistrationPage() {
                     </p>
                   )}
                 </div>
+
+                {/* Email */}
                 <div>
                   <label
-                    htmlFor="registration-address"
+                    htmlFor="registration-email"
                     className="mb-1.5 block text-sm font-medium text-(--text-primary)"
                   >
-                    Address
+                    Email <span className="text-red-500">*</span>
                   </label>
                   <input
-                    {...register("address")}
-                    id="registration-address"
-                    autoComplete="street-address"
+                    {...register("email")}
+                    id="registration-email"
+                    type="email"
+                    autoComplete="email"
                     className={inputClass}
-                    aria-invalid={Boolean(errors.address)}
+                    aria-invalid={Boolean(errors.email)}
                   />
-                  {errors.address?.message && (
+                  {errors.email?.message && (
                     <p className="mt-1 text-xs text-red-600" role="alert">
-                      {errors.address.message}
+                      {errors.email.message}
                     </p>
                   )}
                 </div>
               </div>
-
-              <div className="border-t border-(--border-light) pt-5">
-                <p className="mb-3 text-sm font-semibold text-(--text-primary)">
-                  Owner account
-                </p>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="registration-owner-name"
-                      className="mb-1.5 block text-sm font-medium text-(--text-primary)"
-                    >
-                      Your name <span className="text-red-500">*</span>
-                    </label>
+              {/* address */}
+              <div>
+                <label
+                  htmlFor="registration-address"
+                  className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                >
+                  Address
+                </label>
+                <input
+                  {...register("address")}
+                  id="registration-address"
+                  autoComplete="street-address"
+                  className={inputClass}
+                  aria-invalid={Boolean(errors.address)}
+                />
+                {errors.address?.message && (
+                  <p className="mt-1 text-xs text-red-600" role="alert">
+                    {errors.address.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                {/* password */}
+                <div>
+                  <label
+                    htmlFor="registration-password"
+                    className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                  >
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
                     <input
-                      {...register("name")}
-                      id="registration-owner-name"
-                      autoComplete="name"
-                      className={inputClass}
-                      aria-invalid={Boolean(errors.name)}
+                      {...register("password")}
+                      id="registration-password"
+                      type={passwordVisible ? "text" : "password"}
+                      autoComplete="new-password"
+                      className={passwordInputClass}
+                      aria-invalid={Boolean(errors.password)}
                     />
-                    {errors.name?.message && (
-                      <p className="mt-1 text-xs text-red-600" role="alert">
-                        {errors.name.message}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="registration-email"
-                      className="mb-1.5 block text-sm font-medium text-(--text-primary)"
-                    >
-                      Email <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      {...register("email")}
-                      id="registration-email"
-                      type="email"
-                      autoComplete="email"
-                      className={inputClass}
-                      aria-invalid={Boolean(errors.email)}
+                    <PasswordShowHide
+                      passwordVisible={passwordVisible}
+                      setPasswordVisible={setPasswordVisible}
                     />
-                    {errors.email?.message && (
-                      <p className="mt-1 text-xs text-red-600" role="alert">
-                        {errors.email.message}
-                      </p>
-                    )}
                   </div>
-                  <div>
-                    <label
-                      htmlFor="registration-password"
-                      className="mb-1.5 block text-sm font-medium text-(--text-primary)"
-                    >
-                      Password <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        {...register("password")}
-                        id="registration-password"
-                        type={passwordVisible ? "text" : "password"}
-                        autoComplete="new-password"
-                        className={passwordInputClass}
-                        aria-invalid={Boolean(errors.password)}
-                      />
-                      <PasswordShowHide
-                        passwordVisible={passwordVisible}
-                        setPasswordVisible={setPasswordVisible}
-                      />
-                    </div>
-                    {errors.password?.message && (
-                      <p className="mt-1 text-xs text-red-600" role="alert">
-                        {errors.password.message}
-                      </p>
-                    )}
-                    <p className="mt-1 text-xs text-(--text-muted)">
-                      Use at least 12 characters.
+                  {errors.password?.message && (
+                    <p className="mt-1 text-xs text-red-600" role="alert">
+                      {errors.password.message}
                     </p>
+                  )}
+                  <p className="mt-1 text-xs text-(--text-muted)">
+                    Use at least 12 characters.
+                  </p>
+                </div>
+                {/* confirm password */}
+                <div>
+                  <label
+                    htmlFor="registration-confirm-password"
+                    className="mb-1.5 block text-sm font-medium text-(--text-primary)"
+                  >
+                    Confirm password <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      {...register("confirmPassword")}
+                      id="registration-confirm-password"
+                      type={confirmPasswordVisible ? "text" : "password"}
+                      autoComplete="new-password"
+                      className={passwordInputClass}
+                      aria-invalid={Boolean(errors.confirmPassword)}
+                    />
+                    <PasswordShowHide
+                      passwordVisible={confirmPasswordVisible}
+                      setPasswordVisible={setConfirmPasswordVisible}
+                    />
                   </div>
-                  <div>
-                    <label
-                      htmlFor="registration-confirm-password"
-                      className="mb-1.5 block text-sm font-medium text-(--text-primary)"
-                    >
-                      Confirm password <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        {...register("confirmPassword")}
-                        id="registration-confirm-password"
-                        type={passwordVisible ? "text" : "password"}
-                        autoComplete="new-password"
-                        className={passwordInputClass}
-                        aria-invalid={Boolean(errors.confirmPassword)}
-                      />
-                      <PasswordShowHide
-                        passwordVisible={passwordVisible}
-                        setPasswordVisible={setPasswordVisible}
-                      />
-                    </div>
-                    {errors.confirmPassword?.message && (
-                      <p className="mt-1 text-xs text-red-600" role="alert">
-                        {errors.confirmPassword.message}
-                      </p>
-                    )}
-                  </div>
+                  {errors.confirmPassword?.message && (
+                    <p className="mt-1 text-xs text-red-600" role="alert">
+                      {errors.confirmPassword.message}
+                    </p>
+                  )}
                 </div>
               </div>
             </fieldset>
