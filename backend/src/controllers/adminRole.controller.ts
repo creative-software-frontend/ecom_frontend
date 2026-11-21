@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { sendValidationError } from "../lib/validation.js";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
 import { parseId } from "../lib/parseId.js";
@@ -57,14 +58,7 @@ export async function listRoles(_req: Request, res: Response) {
 export async function createRole(req: Request, res: Response) {
   const parsed = createRoleSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
 
   try {
@@ -114,14 +108,7 @@ export async function updateRole(req: Request, res: Response) {
   }
   const parsed = updateRoleSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
 
   try {

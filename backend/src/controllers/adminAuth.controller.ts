@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { sendValidationError } from "../lib/validation.js";
 import {
   createHmac,
   randomBytes,
@@ -206,17 +207,8 @@ export async function requestRegistrationMobileVerification(
 ) {
   const parsed = requestMobileVerificationSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const field = issue.path[0];
-      if (typeof field === "string" && !(field in errors)) {
-        errors[field] = issue.message;
-      }
-    }
-    return res.status(422).json({
-      success: false,
-      message: "Validation failed",
-      errors,
+    return sendValidationError(res, parsed.error, {
+      firstPathSegmentOnly: true,
     });
   }
 
@@ -302,16 +294,9 @@ export async function requestRegistrationMobileVerification(
 export async function verifyRegistrationMobile(req: Request, res: Response) {
   const parsed = verifyMobileSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const field = issue.path[0];
-      if (typeof field === "string" && !(field in errors)) {
-        errors[field] = issue.message;
-      }
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error, {
+      firstPathSegmentOnly: true,
+    });
   }
 
   const { mobile, code } = parsed.data;
@@ -402,14 +387,7 @@ export async function register(req: Request, res: Response) {
   const parsed = registrationSchema.safeParse(req.body);
 
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const field = issue.path.join(".") || "form";
-      if (!(field in errors)) errors[field] = issue.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
 
   const {

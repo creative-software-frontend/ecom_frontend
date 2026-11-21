@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { sendValidationError } from "../lib/validation.js";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
 import { parseId } from "../lib/parseId.js";
@@ -58,14 +59,7 @@ export async function listShops(_req: Request, res: Response) {
 export async function createShop(req: Request, res: Response) {
   const parsed = createShopSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
 
   try {
@@ -127,14 +121,7 @@ export async function updateShop(req: Request, res: Response) {
   }
   const parsed = updateShopSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
 
   try {

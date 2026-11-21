@@ -1,40 +1,20 @@
-import type { Request } from "express";
-import rateLimit from "express-rate-limit";
+import {
+  createRateLimiter,
+  REGISTRATION_WINDOW_MS,
+} from "../lib/rateLimit.js";
 
-export const loginRateLimit = rateLimit({
+export const loginRateLimit = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 5,
+  message: "Too many attempts, try again later",
   skipSuccessfulRequests: true,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (_req, res) => {
-    res.status(429).json({
-      success: false,
-      message: "Too many attempts, try again later",
-    });
-  },
 });
 
-const REGISTRATION_WINDOW_MS = 5 * 60 * 1000;
-
-export const registrationRateLimit = rateLimit({
+export const registrationRateLimit = createRateLimiter({
   windowMs: REGISTRATION_WINDOW_MS,
   limit: 3,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    const resetTime = (
-      req as Request & { rateLimit?: { resetTime?: Date } }
-    ).rateLimit?.resetTime;
-    const retryAfterSeconds = resetTime
-      ? Math.max(1, Math.ceil((resetTime.getTime() - Date.now()) / 1000))
-      : Math.ceil(REGISTRATION_WINDOW_MS / 1000);
-    res.status(429).json({
-      success: false,
-      message: "Too many registration attempts, try again later",
-      retryAfterSeconds,
-    });
-  },
+  message: "Too many registration attempts, try again later",
+  includeRetryAfter: true,
 });
 
 // Deploy করার আগে মনে রাখার বিষয়: trust proxy

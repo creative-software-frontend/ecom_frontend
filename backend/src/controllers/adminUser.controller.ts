@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { sendValidationError } from "../lib/validation.js";
 import bcrypt from "bcryptjs";
 import { Prisma } from "../../generated/prisma/client.js";
 import { parseId } from "../lib/parseId.js";
@@ -135,14 +136,7 @@ export async function listUsers(req: Request, res: Response) {
 export async function createUser(req: Request, res: Response) {
   const parsed = createUserSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
   const data = parsed.data;
 
@@ -221,14 +215,7 @@ export async function updateUser(req: Request, res: Response) {
   const actor = req.user!;
   const parsed = updateUserSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
   const data = parsed.data;
 
