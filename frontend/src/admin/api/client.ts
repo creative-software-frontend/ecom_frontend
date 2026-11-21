@@ -9,6 +9,7 @@ type ErrorEnvelope = {
   success?: false
   message?: string
   errors?: unknown
+  retryAfterSeconds?: number
 }
 
 type ApiRequestOptions = {
@@ -20,16 +21,19 @@ type ApiRequestOptions = {
 export class ApiError extends Error {
   status: number
   fieldErrors?: Record<string, string>
+  retryAfterSeconds?: number
 
   constructor(
     status: number,
     message: string,
-    fieldErrors?: Record<string, string>
+    fieldErrors?: Record<string, string>,
+    retryAfterSeconds?: number
   ) {
     super(message)
     this.name = "ApiError"
     this.status = status
     this.fieldErrors = fieldErrors
+    this.retryAfterSeconds = retryAfterSeconds
   }
 }
 
@@ -45,7 +49,9 @@ export function registerOnUnauthorized(callback: () => void): () => void {
 }
 
 function isAuthEndpoint(path: string): boolean {
-  return /^\/auth\/(?:login|register|logout|me)$/.test(path)
+  return /^\/auth\/(?:login|register(?:\/mobile\/(?:request-code|verify-code))?|logout|me)$/.test(
+    path
+  )
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -63,6 +69,28 @@ function getFieldErrors(errors: unknown): Record<string, string> | undefined {
   }
 
   return Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined
+}
+
+function getRetryAfterSeconds(
+  response: Response,
+  errorPayload: ErrorEnvelope | null
+): number | undefined {
+  const fromBody = errorPayload?.retryAfterSeconds
+  if (
+    typeof fromBody === "number" &&
+    Number.isFinite(fromBody) &&
+    fromBody > 0
+  ) {
+    return Math.ceil(fromBody)
+  }
+
+  const fromHeader = response.headers.get("Retry-After")
+  if (fromHeader) {
+    const seconds = Number(fromHeader)
+    if (Number.isFinite(seconds) && seconds > 0) return Math.ceil(seconds)
+  }
+
+  return undefined
 }
 
 function isAbortError(error: unknown): boolean {
@@ -113,7 +141,8 @@ export async function apiRequest<T>(
     throw new ApiError(
       response.status,
       message,
-      getFieldErrors(errorPayload?.errors)
+      getFieldErrors(errorPayload?.errors),
+      getRetryAfterSeconds(response, errorPayload)
     )
   }
 

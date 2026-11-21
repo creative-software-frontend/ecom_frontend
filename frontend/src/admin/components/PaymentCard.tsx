@@ -48,12 +48,18 @@ export function PaymentCard({ method, onMethodChange }: PaymentCardProps) {
         </h2>
       </div>
 
-      <div className="mb-4 grid grid-cols-3 gap-2" role="radiogroup" aria-label="পেমেন্ট মেথড">
-        {([
-          ["bkash", "bKash"],
-          ["nagad", "Nagad"],
-          ["qr", "Bangla QR"],
-        ] as const).map(([value, label]) => (
+      <div
+        className="mb-4 grid grid-cols-3 gap-2"
+        role="radiogroup"
+        aria-label="পেমেন্ট মেথড"
+      >
+        {(
+          [
+            ["qr", "Bangla QR"],
+            ["bkash", "bKash"],
+            ["nagad", "Nagad"],
+          ] as const
+        ).map(([value, label]) => (
           <button
             key={value}
             type="button"
@@ -83,7 +89,9 @@ export function PaymentCard({ method, onMethodChange }: PaymentCardProps) {
             {method !== "qr" && i === 2 && (
               <button
                 type="button"
-                onClick={() => void navigator.clipboard.writeText(MERCHANT_NUMBER)}
+                onClick={() =>
+                  void navigator.clipboard.writeText(MERCHANT_NUMBER)
+                }
                 className="flex items-center gap-1 rounded border border-(--border-light) px-2 py-0.5 text-xs text-(--text-muted) hover:bg-(--bg-app)"
               >
                 <Copy className="size-3" /> কপি করুন

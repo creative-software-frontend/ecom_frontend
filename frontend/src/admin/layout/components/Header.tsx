@@ -73,10 +73,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
       </div>
       <div className="flex items-center gap-3">
         {!isSuperAdmin && (
-          <div
-            ref={walletRef}
-            className="relative"
-          >
+          <div ref={walletRef} className="relative">
             <button
               type="button"
               onClick={() => setWalletOpen((open) => !open)}
@@ -87,9 +84,9 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
             >
               <Wallet className="size-4 shrink-0 text-emerald-600" />
               <span>
-                <span className="hidden text-[10px] leading-none text-gray-500 sm:block">
+                {/* <span className="hidden text-[10px] leading-none text-gray-500 sm:block">
                   Wallet balance
-                </span>
+                </span> */}
                 <span className="text-xs font-semibold text-gray-800 tabular-nums sm:text-sm">
                   ৳ 0.00
                 </span>
@@ -101,22 +98,23 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
             </button>
             {walletOpen ? (
               <div
-                className="absolute top-full right-0 z-30 mt-2 w-48"
+                className="absolute top-full right-0 z-30 mt-2 w-fit"
                 role="menu"
                 aria-label="Wallet options"
               >
-                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white p-1.5 shadow-lg">
+                <div className="rounded-lg border border-gray-200 bg-white p-1.5 shadow-lg">
                   <button
                     type="button"
                     role="menuitem"
-                    className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus-visible:bg-emerald-50 focus-visible:outline-none"
+                    className="flex w-fit items-center gap-1 rounded-md px-1 py-1 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus-visible:bg-emerald-50 focus-visible:outline-none"
                     onClick={() => {
                       setWalletOpen(false)
                       navigate("/shop/recharge")
                     }}
                   >
-                    <Plus className="size-4 text-emerald-600" />
-                    Add Money
+                    <Plus className="icon-size text-emerald-600" />
+
+                    <span className="whitespace-nowrap">Add Balance</span>
                   </button>
                 </div>
               </div>

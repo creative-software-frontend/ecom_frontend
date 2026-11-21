@@ -14,6 +14,25 @@ type UserWithRelations = Prisma.UserGetPayload<{
   include: { role: true; shop: true };
 }>;
 
+function getUniqueUserField(error: unknown): "email" | "mobile" | undefined {
+  if (
+    !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+    error.code !== "P2002"
+  ) {
+    return undefined;
+  }
+
+  const target = error.meta?.target;
+  const fields = Array.isArray(target)
+    ? target.map(String)
+    : typeof target === "string"
+      ? [target]
+      : [];
+  if (fields.some((field) => field.includes("email"))) return "email";
+  if (fields.some((field) => field.includes("mobile"))) return "mobile";
+  return undefined;
+}
+
 function toApiShape(u: UserWithRelations) {
   return {
     id: u.id,
@@ -178,14 +197,16 @@ export async function createUser(req: Request, res: Response) {
 
     return res.status(201).json({ success: true, data: toApiShape(user) });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
+    const uniqueField = getUniqueUserField(error);
+    if (uniqueField) {
+      const message =
+        uniqueField === "email"
+          ? "This email is already registered"
+          : "This mobile number is already registered";
       return res.status(409).json({
         success: false,
-        message: "Email already in use",
-        errors: { email: "This email is already registered" },
+        message,
+        errors: { [uniqueField]: message },
       });
     }
     console.error("createUser failed:", error);
@@ -313,6 +334,19 @@ export async function updateUser(req: Request, res: Response) {
 
     return res.json({ success: true, data: toApiShape(updated) });
   } catch (error) {
+    const uniqueField = getUniqueUserField(error);
+    if (uniqueField) {
+      const message =
+        uniqueField === "email"
+          ? "This email is already registered"
+          : "This mobile number is already registered";
+      return res.status(409).json({
+        success: false,
+        message,
+        errors: { [uniqueField]: message },
+      });
+    }
+
     console.error("updateUser failed:", error);
     return res
       .status(500)

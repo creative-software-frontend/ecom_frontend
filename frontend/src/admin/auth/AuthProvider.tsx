@@ -37,9 +37,14 @@ export type ShopRegistrationInput = {
   shopName: string
   name: string
   email: string
-  mobile?: string
+  mobile: string
   address?: string
   password: string
+}
+
+type RegistrationOtpRequest = {
+  expiresInSeconds: number
+  developmentCode?: string
 }
 
 export type AuthState =
@@ -50,7 +55,17 @@ export type AuthState =
 type AuthContextValue = {
   state: AuthState
   login: (email: string, password: string) => Promise<void>
-  registerShop: (input: ShopRegistrationInput) => Promise<void>
+  requestRegistrationOtp: (
+    email: string,
+    mobile: string
+  ) => Promise<RegistrationOtpRequest>
+  verifyRegistrationOtp: (
+    mobile: string,
+    code: string
+  ) => Promise<{ verificationToken: string }>
+  registerShop: (
+    input: ShopRegistrationInput & { verificationToken: string }
+  ) => Promise<void>
   logout: () => Promise<void>
   updateUser: (user: AdminUser) => void
 }
@@ -94,13 +109,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ status: "authenticated", user })
   }, [])
 
-  const registerShop = useCallback(async (input: ShopRegistrationInput) => {
-    const user = await apiRequest<AdminUser>("/auth/register", {
-      method: "POST",
-      body: input,
-    })
-    setState({ status: "authenticated", user })
-  }, [])
+  const requestRegistrationOtp = useCallback(
+    (email: string, mobile: string) =>
+      apiRequest<RegistrationOtpRequest>("/auth/register/mobile/request-code", {
+        method: "POST",
+        body: { email, mobile },
+      }),
+    []
+  )
+
+  const verifyRegistrationOtp = useCallback(
+    (mobile: string, code: string) =>
+      apiRequest<{ verificationToken: string }>(
+        "/auth/register/mobile/verify-code",
+        {
+          method: "POST",
+          body: { mobile, code },
+        }
+      ),
+    []
+  )
+
+  const registerShop = useCallback(
+    async (input: ShopRegistrationInput & { verificationToken: string }) => {
+      const user = await apiRequest<AdminUser>("/auth/register", {
+        method: "POST",
+        body: input,
+      })
+      setState({ status: "authenticated", user })
+    },
+    []
+  )
 
   const logout = useCallback(async () => {
     setState({ status: "unauthenticated" })
@@ -112,8 +151,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ state, login, registerShop, logout, updateUser }),
-    [state, login, registerShop, logout, updateUser]
+    () => ({
+      state,
+      login,
+      requestRegistrationOtp,
+      verifyRegistrationOtp,
+      registerShop,
+      logout,
+      updateUser,
+    }),
+    [
+      state,
+      login,
+      requestRegistrationOtp,
+      verifyRegistrationOtp,
+      registerShop,
+      logout,
+      updateUser,
+    ]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
