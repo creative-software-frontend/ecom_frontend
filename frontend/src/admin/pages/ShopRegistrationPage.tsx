@@ -326,6 +326,7 @@ export default function ShopRegistrationPage() {
                       {...register("shopName")}
                       id="registration-shop-name"
                       autoComplete="organization"
+                      placeholder="Enter Shop/Business Name"
                       className={inputClass}
                       aria-invalid={Boolean(errors.shopName)}
                       aria-describedby={
@@ -355,6 +356,7 @@ export default function ShopRegistrationPage() {
                     <input
                       {...register("name")}
                       id="registration-owner-name"
+                      placeholder="Enter Your Name"
                       autoComplete="name"
                       className={inputClass}
                       aria-invalid={Boolean(errors.name)}
@@ -402,6 +404,7 @@ export default function ShopRegistrationPage() {
                       {...register("email")}
                       id="registration-email"
                       type="email"
+                      placeholder="example@email.com"
                       autoComplete="email"
                       className={inputClass}
                       aria-invalid={Boolean(errors.email)}
@@ -424,6 +427,7 @@ export default function ShopRegistrationPage() {
                   <input
                     {...register("address")}
                     id="registration-address"
+                    placeholder="Enter Your Full Address"
                     autoComplete="street-address"
                     className={inputClass}
                     aria-invalid={Boolean(errors.address)}
@@ -447,6 +451,7 @@ export default function ShopRegistrationPage() {
                       <input
                         {...register("password")}
                         id="registration-password"
+                        placeholder="Enter Your Password"
                         type={passwordVisible ? "text" : "password"}
                         autoComplete="new-password"
                         className={passwordInputClass}
@@ -478,6 +483,7 @@ export default function ShopRegistrationPage() {
                       <input
                         {...register("confirmPassword")}
                         id="registration-confirm-password"
+                        placeholder="Confirm Your Password"
                         type={confirmPasswordVisible ? "text" : "password"}
                         autoComplete="new-password"
                         className={passwordInputClass}

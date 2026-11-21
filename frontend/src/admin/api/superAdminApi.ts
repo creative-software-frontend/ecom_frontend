@@ -1,4 +1,5 @@
 import { apiRequest } from "./client"
+import { buildQueryString, withQuery } from "./queryParams"
 import type {
   SuperAdminUser,
   UsersListResponse,
@@ -26,18 +27,17 @@ export const superAdminApi = {
       params: UserListParams = {},
       signal?: AbortSignal
     ): Promise<UsersListResponse> {
-      const q = new URLSearchParams()
-      if (params.page !== undefined) q.set("page", String(params.page))
-      if (params.limit !== undefined) q.set("limit", String(params.limit))
-      if (params.q) q.set("q", params.q.trim())
-      if (params.roleId !== undefined) q.set("roleId", String(params.roleId))
-      if (params.shopId !== undefined) q.set("shopId", String(params.shopId))
-      if (params.status) q.set("status", params.status)
-      const qs = q.toString()
-      return apiRequest<UsersListResponse>(
-        `${BASE}/users${qs ? `?${qs}` : ""}`,
-        { signal }
-      )
+      const qs = buildQueryString({
+        page: params.page,
+        limit: params.limit,
+        q: params.q?.trim(),
+        roleId: params.roleId,
+        shopId: params.shopId,
+        status: params.status,
+      })
+      return apiRequest<UsersListResponse>(withQuery(`${BASE}/users`, qs), {
+        signal,
+      })
     },
     create(data: CreateUserInput): Promise<SuperAdminUser> {
       return apiRequest<SuperAdminUser>(`${BASE}/users`, {
@@ -193,18 +193,16 @@ export const superAdminApi = {
       params: AuditLogQueryParams,
       signal?: AbortSignal
     ): Promise<AuditLogResponse> {
-      const q = new URLSearchParams()
-      q.set("page", String(params.page))
-      q.set("limit", String(params.limit))
-      if (params.q) q.set("q", params.q)
-      if (params.action) q.set("action", params.action)
-      if (params.shopId !== undefined) q.set("shopId", String(params.shopId))
-
-      const qs = q.toString()
-      return apiRequest<AuditLogResponse>(
-        `${BASE}/audit${qs ? `?${qs}` : ""}`,
-        { signal }
-      )
+      const qs = buildQueryString({
+        page: params.page,
+        limit: params.limit,
+        q: params.q,
+        action: params.action,
+        shopId: params.shopId,
+      })
+      return apiRequest<AuditLogResponse>(withQuery(`${BASE}/audit`, qs), {
+        signal,
+      })
     },
   },
 }
