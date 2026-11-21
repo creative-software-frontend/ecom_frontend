@@ -102,7 +102,7 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
                 role="menu"
                 aria-label="Wallet options"
               >
-                <div className="rounded-lg border border-gray-200 bg-white p-1.5 shadow-lg">
+                <div className="rounded-md border border-gray-200 bg-white p-1.5 shadow-lg">
                   <button
                     type="button"
                     role="menuitem"

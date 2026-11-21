@@ -103,16 +103,24 @@ export async function apiRequest<T>(
 ): Promise<T> {
   let response: Response
   try {
+    // Detect FormData — skip Content-Type header (browser sets it with boundary),
+    // skip JSON.stringify (send FormData directly).
+    const isFormData =
+      typeof FormData !== "undefined" && options.body instanceof FormData
+
     response = await fetch(`${API_BASE_PATH}${path}`, {
       method: options.method ?? "GET",
       headers: {
         Accept: "application/json",
-        ...(options.body === undefined
+        ...(options.body === undefined || isFormData
           ? {}
           : { "Content-Type": "application/json" }),
       },
-      body:
-        options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: isFormData
+        ? (options.body as FormData)
+        : options.body === undefined
+          ? undefined
+          : JSON.stringify(options.body),
       credentials: "same-origin",
       signal: options.signal,
     })

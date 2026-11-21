@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 import BanglaQR from "@/assets/images/payment/BanglaQR.jpeg"
 import type { PaymentMethod } from "./PaymentCard"
+import { apiRequest, ApiError } from "../api/client"
 
 type RechargePaymentCardProps = {
   purpose: "sms" | "general"
@@ -36,6 +37,7 @@ export function RechargePaymentCard({
   // Extraction states
   const [extracting, setExtracting] = useState(false)
   const [extracted, setExtracted] = useState(false)
+  const [extractionError, setExtractionError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!showQrPreview) return
@@ -64,26 +66,48 @@ export function RechargePaymentCard({
   async function handleScreenshotChange(file: File | null) {
     if (!file) return
 
-    // Release previous preview URL
     if (proofPreviewUrl) URL.revokeObjectURL(proofPreviewUrl)
 
     setProofScreenshot(file)
     setProofPreviewUrl(URL.createObjectURL(file))
     setExtracting(true)
     setExtracted(false)
-
-    // Clear stale values so user sees the extraction happening
+    setExtractionError(null)
     setAccountValue("")
     setTrxIdValue("")
+    setAmountValue("")
 
     try {
-      // MOCK OCR — replace with real API later (e.g. POST /api/shop/recharge/extract)
-      await new Promise((r) => setTimeout(r, 1400))
+      const formData = new FormData()
+      formData.append("screenshot", file)
 
-      // Sample extracted values — backend will return real data
-      setAccountValue(method === "qr" ? "Bangla QR Merchant" : "01712345678")
-      setTrxIdValue("9J4K8LMNP")
+      const result = await apiRequest<{
+        trxId: string | null
+        account: string | null
+        amount: number | null
+        confidence: number
+      }>("/shop/recharge/extract", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (result.trxId) setTrxIdValue(result.trxId)
+      if (result.account) setAccountValue(result.account)
+      if (result.amount) setAmountValue(String(result.amount))
+
+      // Low confidence → warn user to verify
+      if (result.confidence < 70) {
+        setExtractionError(
+          "কিছু তথ্য পড়া যায়নি — দয়া করে ম্যানুয়ালি যাচাই করুন"
+        )
+      }
       setExtracted(true)
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : "স্ক্রিনশট পড়া যায়নি — ম্যানুয়ালি তথ্য পূরণ করুন"
+      setExtractionError(message)
     } finally {
       setExtracting(false)
     }
@@ -224,6 +248,15 @@ export function RechargePaymentCard({
                       Details Extracted
                     </span>
                   )}
+
+                  {extractionError && (
+                    <p
+                      className="mt-1.5 flex items-start gap-1 text-[11px] text-amber-700"
+                      aria-live="polite"
+                    >
+                      ⚠ {extractionError}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between gap-2 border-t border-(--border-light) bg-(--bg-surface) px-3 py-2">
@@ -237,6 +270,19 @@ export function RechargePaymentCard({
                     >
                       Replace
                     </label>
+                    {proofScreenshot && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = proofScreenshot
+                          void handleScreenshotChange(current)
+                        }}
+                        disabled={extracting}
+                        className="rounded px-2 py-1 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-50"
+                      >
+                        {extracting ? "Retrying…" : "Retry"}
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={handleRemoveScreenshot}
