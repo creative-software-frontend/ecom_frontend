@@ -1,4 +1,6 @@
 import { useForm, Controller } from "react-hook-form"
+import { useState } from "react"
+import { useNavigate } from "react-router"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   MapPin,
@@ -8,6 +10,10 @@ import {
   ShieldCheck,
   Clock,
   Info,
+  PackageCheck,
+  Truck,
+  CircleCheck,
+  Ban,
 } from "lucide-react"
 import type { ReactNode } from "react"
 import { SettingsLayout, SettingsCard } from "../SettingsLayout"
@@ -77,11 +83,68 @@ function ComingSoonCard({
   )
 }
 
+type OrderSmsStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled"
+
+const ORDER_SMS_STATUS_OPTIONS: {
+  id: OrderSmsStatus
+  label: string
+  description: string
+  icon: ReactNode
+  defaultTemplate: string
+}[] = [
+  {
+    id: "pending",
+    label: "Pending",
+    description: "অর্ডার গ্রহণ হলে পাঠানো হবে",
+    icon: <Clock className="size-3.5" />,
+    defaultTemplate: "Pending Orders",
+  },
+  {
+    id: "confirmed",
+    label: "Confirmed",
+    description: "অর্ডার কনফার্ম হলে পাঠানো হবে",
+    icon: <PackageCheck className="size-3.5" />,
+    defaultTemplate: "Confirmed Orders",
+  },
+  {
+    id: "shipped",
+    label: "Shipped",
+    description: "অর্ডার কুরিয়ারে গেলে পাঠানো হবে",
+    icon: <Truck className="size-3.5" />,
+    defaultTemplate: "Delivery Update",
+  },
+  {
+    id: "delivered",
+    label: "Delivered",
+    description: "ডেলিভারি সফল হলে পাঠানো হবে",
+    icon: <CircleCheck className="size-3.5" />,
+    defaultTemplate: "Delivery Update",
+  },
+  {
+    id: "cancelled",
+    label: "Cancelled",
+    description: "অর্ডার বাতিল হলে পাঠানো হবে",
+    icon: <Ban className="size-3.5" />,
+    defaultTemplate: "Pending Orders",
+  },
+]
+
 /* ================================================================
    OrdersTab
    ================================================================ */
 
 export default function OrdersTab() {
+  const navigate = useNavigate()
+  const [statusSmsSettings, setStatusSmsSettings] = useState<
+    Record<OrderSmsStatus, { enabled: boolean; template: string }>
+  >({
+    pending: { enabled: false, template: "Pending Orders" },
+    confirmed: { enabled: true, template: "Confirmed Orders" },
+    shipped: { enabled: false, template: "Delivery Update" },
+    delivered: { enabled: false, template: "Delivery Update" },
+    cancelled: { enabled: false, template: "Pending Orders" },
+  })
+
   const {
     control,
     register,
@@ -285,24 +348,101 @@ export default function OrdersTab() {
             </div>
           </ComingSoonCard>
 
-          {/* Order confirmation SMS */}
-          <ComingSoonCard
-            icon={<MessageSquare className="size-4" />}
-            title="Order confirmation SMS"
-            description="Automatically dispatch branded confirmation SMS to customer with tracking link upon dispatch."
-          >
-            <div className="flex items-end justify-between gap-2">
-              <span className="text-xs text-(--text-muted)">
-                Sender ID: POWERZENOX
-              </span>
-              <FormToggle
-                checked={false}
-                onChange={() => undefined}
-                disabled
-                aria-label="SMS confirmation (coming soon)"
-              />
+          {/* Order status SMS automation */}
+          <div className="md:col-span-2 rounded-md border border-(--border-light) bg-(--bg-surface)">
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-(--border-light) p-4">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-(--primary-soft) text-(--primary)">
+                  <MessageSquare className="size-4" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-semibold text-(--text-primary)">
+                    Order status SMS
+                  </h3>
+                  <p className="mt-0.5 text-xs text-(--text-muted)">
+                    অর্ডারের প্রতিটি ধাপে customer-কে কী SMS পাঠানো হবে সেটি ম্যানেজ করুন।
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/shop/settings/sms")}
+                className="inline-flex h-8 items-center rounded-md border border-(--border-light) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:border-(--primary) hover:text-(--primary)"
+              >
+                Manage SMS templates
+              </button>
             </div>
-          </ComingSoonCard>
+
+            <div className="divide-y divide-(--border-light)">
+              {ORDER_SMS_STATUS_OPTIONS.map((status) => {
+                const setting = statusSmsSettings[status.id]
+
+                return (
+                  <div
+                    key={status.id}
+                    className="grid gap-3 px-4 py-3 sm:grid-cols-[180px_minmax(180px,1fr)_auto] sm:items-center"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="flex size-7 items-center justify-center rounded-md bg-(--bg-table-header) text-(--text-muted)">
+                        {status.icon}
+                      </span>
+                      <div>
+                        <p className="text-xs font-semibold text-(--text-primary)">
+                          {status.label}
+                        </p>
+                        <p className="text-[11px] text-(--text-muted)">
+                          {status.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <select
+                      value={setting.template}
+                      onChange={(event) =>
+                        setStatusSmsSettings((current) => ({
+                          ...current,
+                          [status.id]: {
+                            ...current[status.id],
+                            template: event.target.value,
+                          },
+                        }))
+                      }
+                      disabled={!setting.enabled}
+                      className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                      aria-label={`${status.label} SMS template`}
+                    >
+                      <option>Confirmed Orders</option>
+                      <option>Pending Orders</option>
+                      <option>Delivery Update</option>
+                    </select>
+
+                    <FormToggle
+                      checked={setting.enabled}
+                      onChange={(enabled) =>
+                        setStatusSmsSettings((current) => ({
+                          ...current,
+                          [status.id]: {
+                            ...current[status.id],
+                            enabled,
+                          },
+                        }))
+                      }
+                      aria-label={`Enable ${status.label} SMS`}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-(--border-light) px-4 py-3">
+              <p className="text-[11px] text-(--text-muted)">
+                Backend automation coming soon. এখন শুধু UI configuration preview।
+              </p>
+              <span className="rounded-full bg-(--status-delivered-bg) px-2.5 py-1 text-xs font-medium text-(--status-delivered-text)">
+                {Object.values(statusSmsSettings).filter((item) => item.enabled).length} statuses enabled
+              </span>
+            </div>
+          </div>
 
           {/* VPN protection */}
           <ComingSoonCard

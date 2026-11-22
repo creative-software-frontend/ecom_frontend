@@ -1,10 +1,11 @@
-import { Info, Copy, ShieldCheck } from "lucide-react"
+import { Info, Copy, ShieldCheck, History } from "lucide-react"
 
 export type PaymentMethod = "bkash" | "nagad" | "qr"
 
 type PaymentCardProps = {
   method: PaymentMethod
   onMethodChange: (method: PaymentMethod) => void
+  onHistoryClick?: () => void
 }
 
 const MERCHANT_NUMBER = "018988-79001"
@@ -33,19 +34,35 @@ const QR_STEPS = [
   "লেনদেন সফল হলে প্রমাণ হিসেবে TrxID এবং স্ক্রিনশট সংরক্ষণ করুন।",
 ]
 
-export function PaymentCard({ method, onMethodChange }: PaymentCardProps) {
+export function PaymentCard({
+  method,
+  onMethodChange,
+  onHistoryClick,
+}: PaymentCardProps) {
   const steps = method === "qr" ? QR_STEPS : PAYMENT_STEPS[method]
 
   return (
     <div className="flex h-full flex-col rounded-md border border-(--border-light) bg-(--bg-surface) p-4">
-      <div className="mb-4 flex items-center gap-2">
-        <Info className="size-5 text-(--text-muted)" />
-        <h2 className="text-sm font-semibold text-(--text-primary)">
-          কীভাবে পেমেন্ট করবেন?{" "}
-          <span className="text-xs font-normal text-(--text-muted)">
-            (Payment Instructions)
-          </span>
-        </h2>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Info className="size-5 shrink-0 text-(--text-muted)" />
+          <h2 className="text-sm font-semibold text-(--text-primary)">
+            কীভাবে পেমেন্ট করবেন?{" "}
+            <span className="text-xs font-normal text-(--text-muted)">
+              (Payment Instructions)
+            </span>
+          </h2>
+        </div>
+        {onHistoryClick && (
+          <button
+            type="button"
+            onClick={onHistoryClick}
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:border-(--primary) hover:text-(--primary)"
+          >
+            <History className="size-4" />
+            Recharge History
+          </button>
+        )}
       </div>
 
       <div
@@ -77,7 +94,7 @@ export function PaymentCard({ method, onMethodChange }: PaymentCardProps) {
         ))}
       </div>
 
-      <div className="flex-1 space-y-3">
+      <div className="space-y-3">
         {steps.map((step, i) => (
           <div key={i} className="flex items-start gap-3">
             <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-(--primary) text-xs font-bold text-white">

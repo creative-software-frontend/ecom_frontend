@@ -1,6 +1,8 @@
 import {
   Archive,
   LayoutGridCircles,
+  LifeBuoy,
+  Newspaper,
   Package,
   Settings,
   Users,
@@ -53,6 +55,18 @@ export const shopMenu: MenuItem[] = [
     href: "/shop/users",
     badge: 0,
     icon: Users,
+  },
+  {
+    type: "link",
+    label: "News",
+    href: "/shop/news",
+    icon: Newspaper,
+  },
+  {
+    type: "link",
+    label: "Support",
+    href: "/shop/support",
+    icon: LifeBuoy,
   },
   // { type: "section", label: "Configuration" },
   { type: "link", label: "Settings", href: "/shop/settings", icon: Settings },

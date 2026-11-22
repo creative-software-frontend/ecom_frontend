@@ -4,7 +4,6 @@ import { useState } from "react"
 import { RechargePaymentCard } from "../components/RechargeCard"
 import { PaymentCard } from "../components/PaymentCard"
 import type { PaymentMethod } from "../components/PaymentCard"
-import { RechargeHistory } from "../components/recharge/RechargeHistory"
 
 export default function RechargePage() {
   const navigate = useNavigate()
@@ -34,19 +33,19 @@ export default function RechargePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <PaymentCard method={paymentMethod} onMethodChange={setPaymentMethod} />
+        <PaymentCard
+          method={paymentMethod}
+          onMethodChange={setPaymentMethod}
+          onHistoryClick={() =>
+            navigate("/shop/recharge/history?purpose=general")
+          }
+        />
         <RechargePaymentCard
           purpose="general"
           method={paymentMethod}
           onMethodChange={setPaymentMethod}
         />
       </div>
-
-      <RechargeHistory
-        purpose="general"
-        title="Recharge History"
-        description="All account balance recharges and their statuses"
-      />
     </div>
   )
 }

@@ -51,6 +51,9 @@ const SuperAdminOrderCreatePage = lazy(
 const SuperAdminOrderDetailPage = lazy(
   () => import("./admin/pages/super-admin/OrderDetailPage")
 )
+const SuperAdminInvoicePrintPage = lazy(
+  () => import("./admin/pages/InvoicePrintPage")
+)
 const SuperAdminProductCreatePage = lazy(
   () => import("./admin/pages/super-admin/ProductCreatePage")
 )
@@ -67,13 +70,19 @@ const ProductEditPage = lazy(() => import("./admin/pages/ProductEditPage"))
 const OrdersPage = lazy(() => import("./admin/pages/OrdersPage"))
 const OrderCreatePage = lazy(() => import("./admin/pages/OrderCreatePage"))
 const OrderDetailPage = lazy(() => import("./admin/pages/OrderDetailPage"))
+const InvoicePrintPage = lazy(() => import("./admin/pages/InvoicePrintPage"))
 const SettingsPage = lazy(() => import("./admin/pages/SettingsPage"))
 const ProfilePage = lazy(() => import("./admin/pages/ProfilePage"))
 const RechargePage = lazy(() => import("./admin/pages/RechargePage"))
+const RechargeHistoryPage = lazy(
+  () => import("./admin/pages/RechargeHistoryPage")
+)
 const BrandsPage = lazy(() => import("./admin/pages/shop-admin/BrandsPage"))
 const CategoriesPage = lazy(
   () => import("./admin/pages/shop-admin/CategoriesPage")
 )
+const SupportPage = lazy(() => import("./admin/pages/SupportPage"))
+const NewsPage = lazy(() => import("./admin/pages/NewsPage"))
 
 function AdminLoading() {
   return (
@@ -130,6 +139,10 @@ export function App() {
                 element={<SuperAdminOrderCreatePage />}
               />
               <Route
+                path="orders/invoice"
+                element={<SuperAdminInvoicePrintPage />}
+              />
+              <Route
                 path="orders/:id"
                 element={<SuperAdminOrderDetailPage />}
               />
@@ -169,6 +182,10 @@ export function App() {
               <Route path="profile" element={<ProfilePage />} />
               <Route path="recharge" element={<RechargePage />} />
               <Route
+                path="recharge/history"
+                element={<RechargeHistoryPage />}
+              />
+              <Route
                 path="settings"
                 element={<Navigate to="store" replace />}
               />
@@ -181,8 +198,11 @@ export function App() {
 
               <Route path="orders" element={<OrdersPage />} />
               <Route path="orders/new" element={<OrderCreatePage />} />
+              <Route path="orders/invoice" element={<InvoicePrintPage />} />
               <Route path="orders/:id" element={<OrderDetailPage />} />
               <Route path="users" element={<UsersPage />} />
+              <Route path="news" element={<NewsPage />} />
+              <Route path="support" element={<SupportPage />} />
             </Route>
           </Route>
         </Route>
