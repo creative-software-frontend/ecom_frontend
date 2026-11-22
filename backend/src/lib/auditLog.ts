@@ -25,7 +25,12 @@ export type AuditAction =
   | "shop.create"
   | "shop.update"
   | "shop.activate"
-  | "shop.deactivate";
+  | "shop.deactivate"
+  | "product.create"
+  | "product.update"
+  | "product.delete"
+  | "product.block"
+  | "product.unblock";
 
 export async function logAudit(params: {
   req: Request;
