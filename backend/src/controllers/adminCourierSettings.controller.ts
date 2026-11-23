@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { sendValidationError } from "../lib/validation.js";
 import { courierSettingsSchema } from "../schemas/courierSettings.schema.js";
 import { prisma } from "../lib/prisma.js";
 
@@ -36,14 +37,7 @@ export async function getCourierSettings(_req: Request, res: Response) {
 export async function updateCourierSettings(req: Request, res: Response) {
   const parsed = courierSettingsSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const key = issue.path.join(".") || "form";
-      if (!(key in errors)) errors[key] = issue.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
 
   const d = parsed.data;

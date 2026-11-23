@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { sendValidationError } from "../lib/validation.js";
 import { prisma } from "../lib/prisma.js";
 import { storeSettingsV2Schema } from "../schemas/storeSettings.v2.js";
 
@@ -51,16 +52,7 @@ export async function getStoreSettings(_req: Request, res: Response) {
 export async function updateStoreSettings(req: Request, res: Response) {
   const parsed = storeSettingsV2Schema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const key = issue.path.join(".");
-      if (!(key in errors)) errors[key] = issue.message;
-    }
-    return res.status(422).json({
-      success: false,
-      message: "Validation failed",
-      errors,
-    });
+    return sendValidationError(res, parsed.error, { emptyPathKey: "" });
   }
 
   const d = parsed.data;

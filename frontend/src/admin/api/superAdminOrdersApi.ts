@@ -15,7 +15,7 @@ export const superAdminOrdersApi = {
   async list(
     params: OrderListParams & { shopId?: number } = {},
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _signal: AbortSignal
+    _signal?: AbortSignal
   ): Promise<OrdersListResponse> {
     await delay(200)
 

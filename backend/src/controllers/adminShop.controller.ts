@@ -1,9 +1,14 @@
 import type { Request, Response } from "express";
+import { sendValidationError } from "../lib/validation.js";
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
 import { parseId } from "../lib/parseId.js";
 import { logAudit } from "../lib/auditLog.js";
+<<<<<<< HEAD
 import { generateShopSlug } from "../lib/shopSlug.js";
+=======
+import { generateShopSlug, isShopSlugUniqueConflict } from "../lib/shopSlug.js";
+>>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
 import {
   createShopSchema,
   updateShopSchema,
@@ -58,39 +63,31 @@ export async function listShops(_req: Request, res: Response) {
 export async function createShop(req: Request, res: Response) {
   const parsed = createShopSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
 
   try {
-    const { slug, conflict } = await generateShopSlug(parsed.data.name);
-
-    if (conflict) {
-      return res.status(409).json({
-        success: false,
-        message:
-          "A shop with a similar name already exists. Please choose a different name.",
-        errors: {
-          name: "This name creates a URL that is already taken. Try a more specific name (e.g. add the area).",
-        },
-      });
+    let shop: Awaited<ReturnType<typeof prisma.shop.create>> | undefined;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const slug = await generateShopSlug(parsed.data.name);
+      try {
+        shop = await prisma.shop.create({
+          data: {
+            slug,
+            name: parsed.data.name,
+            mobile: parsed.data.mobile || null,
+            address: parsed.data.address || null,
+            status: parsed.data.status,
+          },
+        });
+        break;
+      } catch (error) {
+        if (!isShopSlugUniqueConflict(error) || attempt === 2) throw error;
+      }
     }
 
-    const shop = await prisma.shop.create({
-      data: {
-        slug,
-        name: parsed.data.name,
-        mobile: parsed.data.mobile || null,
-        address: parsed.data.address || null,
-        status: parsed.data.status,
-      },
-    });
+    if (!shop) throw new Error("Could not create shop with a unique URL");
+
     void logAudit({
       req,
       action: "shop.create",
@@ -108,9 +105,9 @@ export async function createShop(req: Request, res: Response) {
       return res.status(409).json({
         success: false,
         message:
-          "A shop with a similar name already exists. Please choose a different name.",
+          "A shop URL with this name was just created. Please try again.",
         errors: {
-          name: "This name creates a URL that is already taken.",
+          name: "A shop with this name was just created. Please try again.",
         },
       });
     }
@@ -128,14 +125,7 @@ export async function updateShop(req: Request, res: Response) {
   }
   const parsed = updateShopSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
 
   try {

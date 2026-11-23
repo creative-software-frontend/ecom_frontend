@@ -1,13 +1,15 @@
-// import { useState } from "react"
+import { useState } from "react"
 import { Wallet, CheckCircle2 } from "lucide-react"
 import { SettingsLayout } from "../SettingsLayout"
 import { SmsCampaignCard } from "./sms/SmsCampaignCard.tsx"
 import { PaymentCard } from "../../PaymentCard.tsx"
 import { SmsRechargeCard } from "../../RechargeCard.tsx"
 import { SmsLogsTable } from "./sms/SmsLogsTable"
+import type { PaymentMethod } from "../../PaymentCard"
+import { RechargeHistory } from "../../recharge/RechargeHistory.tsx"
 
 export default function SmsTab() {
-  //   const [showRechargeModal, setShowRechargeModal] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("qr")
 
   return (
     <SettingsLayout activeTab="sms">
@@ -54,12 +56,23 @@ export default function SmsTab() {
 
         {/* 2. Payment & Recharge (2 Columns) */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <PaymentCard />
+          <PaymentCard
+            method={paymentMethod}
+            onMethodChange={setPaymentMethod}
+          />
           <div id="recharge-section" className="scroll-mt-20">
-            <SmsRechargeCard />
+            <SmsRechargeCard
+              method={paymentMethod}
+              onMethodChange={setPaymentMethod}
+            />
           </div>
         </div>
-
+        {/* 3. SMS Recharge History */}
+        <RechargeHistory
+          purpose="sms"
+          title="SMS Recharge History"
+          description="Payments made to top up your SMS gateway balance"
+        />
         {/* 3. Logs Table */}
         <SmsLogsTable />
       </div>

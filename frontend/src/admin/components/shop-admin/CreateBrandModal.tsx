@@ -2,7 +2,8 @@ import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { X, Layers, ImageIcon } from "lucide-react"
+import { DialogShell } from "../common/DialogShell"
+import { Layers, ImageIcon } from "lucide-react"
 import { FieldError, FormToggle } from "../settings/SettingsField"
 import { useEscapeKey } from "../../hooks/useEscapeKey"
 import type { Brand } from "../../types/catalog"
@@ -88,144 +89,120 @@ export function CreateBrandModal({
   const isActiveValue = watch("isActive")
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
+    <DialogShell
+      title="Add Brand"
+      icon={<Layers className="size-4" />}
+      closeButtonClassName="rounded p-1 text-(--text-muted) hover:bg-(--bg-surface-hover) hover:text-(--text-primary) disabled:opacity-50"
+      closeDisabled={isSubmitting}
+      onClose={onClose}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface) shadow-xl"
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex min-h-0 flex-1 flex-col"
       >
-        <div className="flex items-center justify-between gap-3 border-b border-(--border-light) px-5 py-3">
-          <div className="flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-md bg-(--primary-soft) text-(--primary)">
-              <Layers className="size-4" />
-            </span>
-            <h2 className="text-sm font-semibold text-(--text-primary)">
-              Add Brand
-            </h2>
+        <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+              Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Power Zenox"
+              className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
+              {...register("name")}
+            />
+            {errors.name && <FieldError>{errors.name.message}</FieldError>}
+            <p className="mt-1 text-[10px] text-(--text-muted)">
+              URL slug will be auto-generated from this name.
+            </p>
           </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+              Logo URL{" "}
+              <span className="text-xs font-normal text-(--text-muted)">
+                (optional)
+              </span>
+            </label>
+            <div className="flex items-start gap-3">
+              <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-(--border-light) bg-(--bg-app)">
+                {logoValue ? (
+                  <img
+                    src={logoValue}
+                    alt="Logo preview"
+                    className="size-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none"
+                    }}
+                  />
+                ) : (
+                  <ImageIcon className="size-5 text-(--text-muted)" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <input
+                  type="text"
+                  placeholder="https://example.com/logo.png"
+                  className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
+                  {...register("logoUrl")}
+                />
+                {errors.logoUrl && (
+                  <FieldError>{errors.logoUrl.message}</FieldError>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+              Description
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Short brand description (optional)"
+              className="w-full resize-none rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2 text-sm outline-none focus:border-(--primary)"
+              {...register("description")}
+            />
+            {errors.description && (
+              <FieldError>{errors.description.message}</FieldError>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2">
+            <div>
+              <p className="text-xs font-semibold text-(--text-primary)">
+                Active
+              </p>
+              <p className="text-[10px] text-(--text-muted)">
+                Show this brand in product forms immediately
+              </p>
+            </div>
+            <FormToggle
+              checked={isActiveValue}
+              onChange={(v) => setValue("isActive", v)}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-(--border-light) bg-(--bg-app) px-5 py-3">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded p-1 text-(--text-muted) hover:bg-(--bg-surface-hover) hover:text-(--text-primary) disabled:opacity-50"
-            aria-label="Close"
+            className="h-8 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover) disabled:opacity-50"
           >
-            <X className="size-4" />
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-(--primary) px-4 text-sm font-medium text-white hover:bg-(--primary-hover) disabled:opacity-50"
+          >
+            <Layers className="size-3.5" />
+            {isSubmitting ? "Creating..." : "Create Brand"}
           </button>
         </div>
-
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex min-h-0 flex-1 flex-col"
-        >
-          <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
-                Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Power Zenox"
-                className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
-                {...register("name")}
-              />
-              {errors.name && <FieldError>{errors.name.message}</FieldError>}
-              <p className="mt-1 text-[10px] text-(--text-muted)">
-                URL slug will be auto-generated from this name.
-              </p>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
-                Logo URL{" "}
-                <span className="text-xs font-normal text-(--text-muted)">
-                  (optional)
-                </span>
-              </label>
-              <div className="flex items-start gap-3">
-                <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-(--border-light) bg-(--bg-app)">
-                  {logoValue ? (
-                    <img
-                      src={logoValue}
-                      alt="Logo preview"
-                      className="size-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none"
-                      }}
-                    />
-                  ) : (
-                    <ImageIcon className="size-5 text-(--text-muted)" />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <input
-                    type="text"
-                    placeholder="https://example.com/logo.png"
-                    className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
-                    {...register("logoUrl")}
-                  />
-                  {errors.logoUrl && (
-                    <FieldError>{errors.logoUrl.message}</FieldError>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
-                Description
-              </label>
-              <textarea
-                rows={3}
-                placeholder="Short brand description (optional)"
-                className="w-full resize-none rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2 text-sm outline-none focus:border-(--primary)"
-                {...register("description")}
-              />
-              {errors.description && (
-                <FieldError>{errors.description.message}</FieldError>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2">
-              <div>
-                <p className="text-xs font-semibold text-(--text-primary)">
-                  Active
-                </p>
-                <p className="text-[10px] text-(--text-muted)">
-                  Show this brand in product forms immediately
-                </p>
-              </div>
-              <FormToggle
-                checked={isActiveValue}
-                onChange={(v) => setValue("isActive", v)}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 border-t border-(--border-light) bg-(--bg-app) px-5 py-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="h-8 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover) disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-(--primary) px-4 text-sm font-medium text-white hover:bg-(--primary-hover) disabled:opacity-50"
-            >
-              <Layers className="size-3.5" />
-              {isSubmitting ? "Creating..." : "Create Brand"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </DialogShell>
   )
 }

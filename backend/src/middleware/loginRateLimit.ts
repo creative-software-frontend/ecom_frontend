@@ -1,17 +1,20 @@
-import rateLimit from "express-rate-limit";
+import {
+  createRateLimiter,
+  REGISTRATION_WINDOW_MS,
+} from "../lib/rateLimit.js";
 
-export const loginRateLimit = rateLimit({
+export const loginRateLimit = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 5,
+  message: "Too many attempts, try again later",
   skipSuccessfulRequests: true,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (_req, res) => {
-    res.status(429).json({
-      success: false,
-      message: "Too many attempts, try again later",
-    });
-  },
+});
+
+export const registrationRateLimit = createRateLimiter({
+  windowMs: REGISTRATION_WINDOW_MS,
+  limit: 3,
+  message: "Too many registration attempts, try again later",
+  includeRetryAfter: true,
 });
 
 export const registrationRateLimit = rateLimit({

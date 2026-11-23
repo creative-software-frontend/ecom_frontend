@@ -1,10 +1,14 @@
 import { ArrowLeft, Wallet } from "lucide-react"
 import { useNavigate } from "react-router"
+import { useState } from "react"
 import { RechargePaymentCard } from "../components/RechargeCard"
 import { PaymentCard } from "../components/PaymentCard"
+import type { PaymentMethod } from "../components/PaymentCard"
+import { RechargeHistory } from "../components/recharge/RechargeHistory"
 
 export default function RechargePage() {
   const navigate = useNavigate()
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("qr")
 
   return (
     <div className="flex flex-col gap-5 bg-(--bg-app) p-4 sm:p-6">
@@ -30,9 +34,19 @@ export default function RechargePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <PaymentCard />
-        <RechargePaymentCard purpose="general" />
+        <PaymentCard method={paymentMethod} onMethodChange={setPaymentMethod} />
+        <RechargePaymentCard
+          purpose="general"
+          method={paymentMethod}
+          onMethodChange={setPaymentMethod}
+        />
       </div>
+
+      <RechargeHistory
+        purpose="general"
+        title="Recharge History"
+        description="All account balance recharges and their statuses"
+      />
     </div>
   )
 }

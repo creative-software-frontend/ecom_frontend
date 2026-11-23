@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { sendValidationError } from "../lib/validation.js";
 import bcrypt from "bcryptjs";
 import { Prisma } from "../../generated/prisma/client.js";
 import { parseId } from "../lib/parseId.js";
@@ -13,6 +14,25 @@ import {
 type UserWithRelations = Prisma.UserGetPayload<{
   include: { role: true; shop: true };
 }>;
+
+function getUniqueUserField(error: unknown): "email" | "mobile" | undefined {
+  if (
+    !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+    error.code !== "P2002"
+  ) {
+    return undefined;
+  }
+
+  const target = error.meta?.target;
+  const fields = Array.isArray(target)
+    ? target.map(String)
+    : typeof target === "string"
+      ? [target]
+      : [];
+  if (fields.some((field) => field.includes("email"))) return "email";
+  if (fields.some((field) => field.includes("mobile"))) return "mobile";
+  return undefined;
+}
 
 function toApiShape(u: UserWithRelations) {
   return {
@@ -116,14 +136,7 @@ export async function listUsers(req: Request, res: Response) {
 export async function createUser(req: Request, res: Response) {
   const parsed = createUserSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
   const data = parsed.data;
 
@@ -178,14 +191,16 @@ export async function createUser(req: Request, res: Response) {
 
     return res.status(201).json({ success: true, data: toApiShape(user) });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
+    const uniqueField = getUniqueUserField(error);
+    if (uniqueField) {
+      const message =
+        uniqueField === "email"
+          ? "This email is already registered"
+          : "This mobile number is already registered";
       return res.status(409).json({
         success: false,
-        message: "Email already in use",
-        errors: { email: "This email is already registered" },
+        message,
+        errors: { [uniqueField]: message },
       });
     }
     console.error("createUser failed:", error);
@@ -200,14 +215,7 @@ export async function updateUser(req: Request, res: Response) {
   const actor = req.user!;
   const parsed = updateUserSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const i of parsed.error.issues) {
-      const k = i.path.join(".") || "form";
-      if (!(k in errors)) errors[k] = i.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
   const data = parsed.data;
 
@@ -313,6 +321,19 @@ export async function updateUser(req: Request, res: Response) {
 
     return res.json({ success: true, data: toApiShape(updated) });
   } catch (error) {
+    const uniqueField = getUniqueUserField(error);
+    if (uniqueField) {
+      const message =
+        uniqueField === "email"
+          ? "This email is already registered"
+          : "This mobile number is already registered";
+      return res.status(409).json({
+        success: false,
+        message,
+        errors: { [uniqueField]: message },
+      });
+    }
+
     console.error("updateUser failed:", error);
     return res
       .status(500)

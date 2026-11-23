@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { sendValidationError } from "../lib/validation.js";
 import { parseId } from "../lib/parseId.js";
 import { prisma } from "../lib/prisma.js";
 import { storefrontSaveSchema } from "../schemas/storefrontSettings.schema.js";
@@ -75,14 +76,7 @@ export async function getStorefrontSettings(_req: Request, res: Response) {
 export async function updateStorefrontSettings(req: Request, res: Response) {
   const parsed = storefrontSaveSchema.safeParse(req.body);
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const key = issue.path.join(".") || "form";
-      if (!(key in errors)) errors[key] = issue.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
+    return sendValidationError(res, parsed.error);
   }
 
   const { announcement, banners, brand_colors } = parsed.data;

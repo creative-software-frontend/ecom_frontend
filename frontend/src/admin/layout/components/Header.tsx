@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Bell, Menu, Wallet, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { Bell, ChevronDown, Menu, Plus, Wallet, X } from "lucide-react"
 import { useNavigate } from "react-router"
 import { useAuth } from "../../auth/AuthProvider"
 import { Sidebar } from "./Sidebar"
@@ -7,12 +7,40 @@ import type { MenuItem } from "../menu"
 
 export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const [userOpen, setUserOpen] = useState(false)
+  const [walletOpen, setWalletOpen] = useState(false)
+  const walletRef = useRef<HTMLDivElement>(null)
   const { state, logout } = useAuth()
   const navigate = useNavigate()
 
   const isSuperAdmin =
     state.status === "authenticated" && state.user.role === "super_admin"
   const profilePath = isSuperAdmin ? "/admin/profile" : "/shop/profile"
+
+  useEffect(() => {
+    if (!walletOpen) return
+
+    function handlePointerDown(event: PointerEvent) {
+      if (
+        event.target instanceof Node &&
+        !walletRef.current?.contains(event.target)
+      ) {
+        setWalletOpen(false)
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setWalletOpen(false)
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown)
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [walletOpen])
 
   async function handleLogout() {
     setUserOpen(false)
@@ -45,22 +73,53 @@ export function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
       </div>
       <div className="flex items-center gap-3">
         {!isSuperAdmin && (
-          <button
-            type="button"
-            onClick={() => navigate("/shop/recharge")}
-            className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-2.5 py-1.5 text-left transition-colors hover:bg-gray-50 sm:px-3"
-            aria-label="অ্যাকাউন্ট রিচার্জ পেজে যান"
-          >
-            <Wallet className="size-4 shrink-0 text-emerald-600" />
-            <span>
-              <span className="hidden text-[10px] leading-none text-gray-500 sm:block">
-                Wallet balance
+          <div ref={walletRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setWalletOpen((open) => !open)}
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-gray-200 bg-white px-2.5 text-left shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-emerald-500/30 focus-visible:outline-none sm:px-3"
+              aria-label="অ্যাকাউন্ট ব্যালেন্স অপশন"
+              aria-haspopup="menu"
+              aria-expanded={walletOpen}
+            >
+              <Wallet className="size-4 shrink-0 text-emerald-600" />
+              <span>
+                {/* <span className="hidden text-[10px] leading-none text-gray-500 sm:block">
+                  Wallet balance
+                </span> */}
+                <span className="text-xs font-semibold text-gray-800 tabular-nums sm:text-sm">
+                  ৳ 0.00
+                </span>
               </span>
-              <span className="text-xs font-semibold tabular-nums text-gray-800 sm:text-sm">
-                ৳ 0.00
-              </span>
-            </span>
-          </button>
+              <ChevronDown
+                className={`size-3.5 shrink-0 text-gray-400 transition-transform ${walletOpen ? "rotate-180" : ""}`}
+                aria-hidden="true"
+              />
+            </button>
+            {walletOpen ? (
+              <div
+                className="absolute top-full right-0 z-30 mt-2 w-fit"
+                role="menu"
+                aria-label="Wallet options"
+              >
+                <div className="rounded-md border border-gray-200 bg-white p-1.5 shadow-lg">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-fit items-center gap-1 rounded-md px-1 py-1 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus-visible:bg-emerald-50 focus-visible:outline-none"
+                    onClick={() => {
+                      setWalletOpen(false)
+                      navigate("/shop/recharge")
+                    }}
+                  >
+                    <Plus className="icon-size text-emerald-600" />
+
+                    <span className="whitespace-nowrap">Add Balance</span>
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
         )}
         <button
           type="button"

@@ -8,8 +8,8 @@ import {
   Mail,
   Phone,
   ShieldCheck,
-  X,
 } from "lucide-react"
+import { DialogShell } from "../common/DialogShell"
 import { FieldError } from "../settings/SettingsField"
 import type { SuperAdminUser } from "../../types/superAdmin"
 import { PasswordShowHide } from "../PasswordShowHide"
@@ -79,45 +79,17 @@ export function ResetPasswordModal({
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="reset-pw-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
+    <DialogShell
+      title="Reset password"
+      titleId="reset-pw-title"
+      subtitle={<p className="text-xs text-(--text-muted)">Set a new password for {user.name}</p>}
+      icon={<KeyRound className="size-4" />}
+      iconClassName="flex size-8 items-center justify-center rounded-md bg-(--status-pending-bg) text-(--status-pending-text)"
+      panelClassName="w-full max-w-md rounded-md border border-(--border-light) bg-(--bg-surface) shadow-xl"
+      headerClassName="flex items-start justify-between gap-3 border-b border-(--border-light) px-5 py-4"
+      closeDisabled={isSubmitting}
+      onClose={onClose}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-md border border-(--border-light) bg-(--bg-surface) shadow-xl"
-      >
-        <div className="flex items-start justify-between gap-3 border-b border-(--border-light) px-5 py-4">
-          <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-md bg-(--status-pending-bg) text-(--status-pending-text)">
-              <KeyRound className="size-4" />
-            </span>
-            <div>
-              <h2
-                id="reset-pw-title"
-                className="text-sm font-semibold text-(--text-primary)"
-              >
-                Reset password
-              </h2>
-              <p className="text-xs text-(--text-muted)">
-                Set a new password for {user.name}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary) disabled:opacity-50"
-            aria-label="Close"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="px-5 py-4">
             <ol
@@ -416,8 +388,7 @@ export function ResetPasswordModal({
               </button>
             )}
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </DialogShell>
   )
 }

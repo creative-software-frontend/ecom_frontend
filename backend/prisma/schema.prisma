@@ -80,24 +80,41 @@ model Review {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  email           String    @unique
-  passwordHash    String    @map("password_hash")
-  name            String    @default("Admin")
-  mobile          String?
-  roleId          Int       @map("role_id")
-  shopId          Int?      @map("shop_id")
-  status          String    @default("active")
-  emailVerifiedAt DateTime? @map("email_verified_at")
-  lastLoginAt     DateTime? @map("last_login_at")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  passwordHash     String    @map("password_hash")
+  name             String    @default("Admin")
+  mobile           String?   @unique
+  roleId           Int       @map("role_id")
+  shopId           Int?      @map("shop_id")
+  status           String    @default("active")
+  emailVerifiedAt  DateTime? @map("email_verified_at")
+  mobileVerifiedAt DateTime? @map("mobile_verified_at")
+  lastLoginAt      DateTime? @map("last_login_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   role      Role       @relation(fields: [roleId], references: [id])
   shop      Shop?      @relation(fields: [shopId], references: [id])
   auditLogs AuditLog[]
 
   @@map("users")
+}
+
+model MobileVerification {
+  id                    Int       @id @default(autoincrement())
+  mobile                String    @db.VarChar(20)
+  codeHash              String    @map("code_hash") @db.Char(64)
+  verificationTokenHash String?   @map("verification_token_hash") @db.Char(64)
+  attempts              Int       @default(0)
+  expiresAt             DateTime  @map("expires_at")
+  verifiedAt            DateTime? @map("verified_at")
+  consumedAt            DateTime? @map("consumed_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  @@index([mobile, createdAt])
+  @@index([expiresAt])
+  @@map("mobile_verifications")
 }
 
 // ==================================================================

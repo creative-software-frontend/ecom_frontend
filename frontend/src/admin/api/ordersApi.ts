@@ -1,4 +1,5 @@
 import { apiRequest } from "./client"
+import { buildQueryString, withQuery } from "./queryParams"
 import type {
   OrdersListResponse,
   OrderListParams,
@@ -11,18 +12,19 @@ export const ordersApi = {
     params: OrderListParams = {},
     signal?: AbortSignal
   ): Promise<OrdersListResponse> {
-    const query = new URLSearchParams()
-    if (params.page !== undefined) query.set("page", String(params.page))
-    if (params.limit !== undefined) query.set("limit", String(params.limit))
-    if (params.status) query.set("status", params.status)
-    if (params.paymentStatus) query.set("paymentStatus", params.paymentStatus)
-    if (params.area) query.set("area", params.area)
-    if (params.dateFrom) query.set("dateFrom", params.dateFrom)
-    if (params.dateTo) query.set("dateTo", params.dateTo)
-    if (params.q) query.set("q", params.q.trim())
-    const qs = query.toString()
-    const path = `/shop/orders${qs ? `?${qs}` : ""}`
-    return apiRequest<OrdersListResponse>(path, { signal })
+    const qs = buildQueryString({
+      page: params.page,
+      limit: params.limit,
+      status: params.status,
+      paymentStatus: params.paymentStatus,
+      area: params.area,
+      dateFrom: params.dateFrom,
+      dateTo: params.dateTo,
+      q: params.q?.trim(),
+    })
+    return apiRequest<OrdersListResponse>(withQuery("/shop/orders", qs), {
+      signal,
+    })
   },
 
   get(id: number | string, signal?: AbortSignal): Promise<OrderDetail> {
