@@ -100,9 +100,12 @@ model Order {
   paymentMethod   String      @default("cod") @map("payment_method")
   paymentStatus   String      @default("unpaid") @map("payment_status")
   status          String      @default("pending")
+  shopId          Int         @map("shop_id")
+  shop            Shop        @relation(fields: [shopId], references: [id])
   createdAt       DateTime    @default(now()) @map("created_at")
   items           OrderItem[]
 
+  @@index([shopId, createdAt])
   @@map("orders")
 }
 
@@ -365,7 +368,8 @@ model Shop {
   auditLogs AuditLog[]
 
   products      Product[]
-  smsTemplates SmsTemplate[]
+  smsTemplates  SmsTemplate[]
+  orders        Order[]
 
   @@map("shops")
 }

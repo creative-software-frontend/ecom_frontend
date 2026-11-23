@@ -21,7 +21,15 @@ function formatDateRange(start: Date, end: Date): string {
   return `${fmt.format(start)} – ${fmt.format(end)}`;
 }
 
-export async function getDashboard(_req: Request, res: Response) {
+export async function getDashboard(req: Request, res: Response) {
+  const shopId = req.user?.shopId;
+  if (!shopId) {
+    return res.status(403).json({
+      success: false,
+      message:
+        "Shop-scoped endpoint. Super admins must use /api/admin/super/dashboard.",
+    });
+  }
   try {
     const now = new Date();
 
@@ -53,22 +61,24 @@ export async function getDashboard(_req: Request, res: Response) {
       shippedOrders,
     ] = await Promise.all([
       prisma.order.findMany({
-        where: { createdAt: { gte: startOfToday } },
+        where: { shopId, createdAt: { gte: startOfToday } },
         select: { paymentMethod: true },
       }),
       prisma.order.count({
         where: {
+          shopId,
           createdAt: { gte: startOfYesterday, lt: startOfToday },
         },
       }),
-      prisma.order.count({ where: { status: "pending" } }),
+      prisma.order.count({ where: { shopId, status: "pending" } }),
       prisma.order.findFirst({
-        where: { status: "pending" },
+        where: { shopId, status: "pending" },
         orderBy: { createdAt: "asc" },
         select: { createdAt: true },
       }),
       prisma.order.aggregate({
         where: {
+          shopId,
           status: "delivered",
           createdAt: { gte: startOfMonth },
         },
@@ -77,6 +87,7 @@ export async function getDashboard(_req: Request, res: Response) {
       }),
       prisma.product.findMany({
         where: {
+          shopId,
           isActive: true,
           stockQuantity: { lt: LOW_STOCK_THRESHOLD },
         },
@@ -84,7 +95,7 @@ export async function getDashboard(_req: Request, res: Response) {
         orderBy: { stockQuantity: "asc" },
       }),
       prisma.order.findMany({
-        where: { status: "pending" },
+        where: { shopId, status: "pending" },
         orderBy: { createdAt: "asc" },
         take: 5,
         include: {
@@ -94,11 +105,11 @@ export async function getDashboard(_req: Request, res: Response) {
         },
       }),
       prisma.order.findMany({
-        where: { createdAt: { gte: sevenDaysAgo } },
+        where: { shopId, createdAt: { gte: sevenDaysAgo } },
         select: { createdAt: true, total: true },
       }),
       prisma.order.findMany({
-        where: { status: "shipped" },
+        where: { shopId, status: "shipped" },
         select: { deliveryArea: true, total: true, paymentStatus: true },
       }),
     ]);

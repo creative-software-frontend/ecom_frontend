@@ -23,6 +23,7 @@ import { requireSuperAdmin } from "../middleware/requireSuperAdmin.js";
 import { getSuperAdminDashboard } from "../controllers/adminSuperDashboard.controller.js";
 import { getSuperAdminSidebarStats } from "../controllers/adminSuperSidebarStats.controller.js";
 import adminSuperProductRoutes from "./adminSuperProduct.routes.js";
+import adminSuperOrderRoutes from "./adminSuperOrder.routes.js";
 
 const router = Router();
 
@@ -56,6 +57,9 @@ router.patch("/shops/:id", updateShop);
 
 // Products
 router.use("/products", adminSuperProductRoutes);
+
+// Orders
+router.use("/orders", adminSuperOrderRoutes);
 
 // Audit log
 router.get("/audit", listAuditLogs);

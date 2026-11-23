@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Bell, Calendar, Megaphone, Search, Tag } from "lucide-react"
+import { Bell, Megaphone, Search, Tag } from "lucide-react"
 
 export type NewsItem = {
   id: string
@@ -84,8 +84,7 @@ export default function NewsPage() {
         !query ||
         item.title.toLowerCase().includes(query) ||
         (item.description && item.description.toLowerCase().includes(query)) ||
-        (item.categoryLabel &&
-          item.categoryLabel.toLowerCase().includes(query))
+        (item.categoryLabel && item.categoryLabel.toLowerCase().includes(query))
       return matchesCategory && matchesSearch
     })
   }, [search, selectedCategory])
@@ -96,7 +95,7 @@ export default function NewsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-(--text-primary) tracking-tight">
+            <h1 className="text-xl font-bold tracking-tight text-(--text-primary)">
               News & updates
             </h1>
             <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
@@ -104,7 +103,7 @@ export default function NewsPage() {
               {INITIAL_NEWS.length} Announcements
             </span>
           </div>
-          <p className="mt-1 text-xs sm:text-sm text-(--text-muted)">
+          <p className="mt-1 text-xs text-(--text-muted) sm:text-sm">
             Announcements from Steadfast: charge changes, new features and
             service notices.
           </p>
@@ -112,13 +111,13 @@ export default function NewsPage() {
 
         {/* Search Input */}
         <div className="relative w-full sm:w-72">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-(--text-muted)" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-(--text-muted)" />
           <input
             type="search"
             placeholder="Search news & notices..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 w-full rounded-lg border border-(--border-light) bg-white pl-9 pr-3 text-xs text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-primary focus:ring-1 focus:ring-primary shadow-xs"
+            className="h-9 w-full rounded-lg border border-(--border-light) bg-white pr-3 pl-9 text-xs text-(--text-primary) shadow-xs outline-none placeholder:text-(--text-muted) focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -130,7 +129,7 @@ export default function NewsPage() {
             key={cat.id}
             type="button"
             onClick={() => setSelectedCategory(cat.id)}
-            className={`rounded-full px-3.5 py-1.5 font-medium transition-colors cursor-pointer shrink-0 ${
+            className={`shrink-0 cursor-pointer rounded-full px-3.5 py-1.5 font-medium transition-colors ${
               selectedCategory === cat.id
                 ? "bg-primary text-white shadow-xs"
                 : "border border-(--border-light) bg-white text-(--text-muted) hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
@@ -145,7 +144,7 @@ export default function NewsPage() {
       <div className="space-y-4">
         {filteredNews.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-(--border-light) bg-white py-14 text-center shadow-xs">
-            <div className="flex size-12 items-center justify-center rounded-full bg-gray-100 text-(--text-muted) mb-3">
+            <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-gray-100 text-(--text-muted)">
               <Bell className="size-5 opacity-60" />
             </div>
             <p className="text-sm font-medium text-(--text-primary)">
@@ -159,17 +158,17 @@ export default function NewsPage() {
           filteredNews.map((news) => (
             <div
               key={news.id}
-              className="group flex flex-col sm:flex-row items-start gap-4 rounded-xl border border-(--border-light) bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-gray-300 hover:shadow-sm"
+              className="group flex flex-col items-start gap-4 rounded-xl border border-(--border-light) bg-white p-4 shadow-xs transition-all hover:border-gray-300 hover:shadow-sm sm:flex-row sm:p-5"
             >
               {/* Date Box */}
-              <div className="flex sm:flex-col items-center justify-center rounded-xl border border-gray-200 bg-gray-50/70 px-3 py-2 sm:py-2.5 text-center min-w-16 sm:min-w-[68px] shrink-0 gap-1.5 sm:gap-0 shadow-2xs">
-                <span className="text-xl sm:text-2xl font-bold tracking-tight text-(--text-primary) leading-none">
+              <div className="flex min-w-16 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50/70 px-3 py-2 text-center shadow-2xs sm:min-w-17 sm:flex-col sm:gap-0 sm:py-2.5">
+                <span className="text-xl leading-none font-bold tracking-tight text-(--text-primary) sm:text-2xl">
                   {news.day}
                 </span>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-(--text-muted) leading-none sm:mt-1">
+                <span className="text-[11px] leading-none font-bold tracking-wider text-(--text-muted) uppercase sm:mt-1">
                   {news.month}
                 </span>
-                <span className="text-[10px] text-(--text-muted) opacity-80 leading-none sm:mt-0.5">
+                <span className="text-[10px] leading-none text-(--text-muted) opacity-80 sm:mt-0.5">
                   {news.year}
                 </span>
               </div>
@@ -177,8 +176,8 @@ export default function NewsPage() {
               {/* Main Content Area */}
               <div className="min-w-0 flex-1">
                 {/* Meta header */}
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs text-(--text-muted) font-medium">
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="text-xs font-medium text-(--text-muted)">
                     {news.timeAgo}
                   </span>
                   {news.categoryLabel && (
@@ -193,13 +192,13 @@ export default function NewsPage() {
                 </div>
 
                 {/* News Title / Primary Statement */}
-                <h2 className="text-sm sm:text-[15px] font-bold text-(--text-primary) leading-relaxed">
+                <h2 className="text-sm leading-relaxed font-bold text-(--text-primary) sm:text-[15px]">
                   {news.title}
                 </h2>
 
                 {/* News Description / Sub-content */}
                 {news.description && (
-                  <p className="mt-2 text-xs sm:text-[13px] text-(--text-muted) leading-relaxed">
+                  <p className="mt-2 text-xs leading-relaxed text-(--text-muted) sm:text-[13px]">
                     {news.description}
                   </p>
                 )}

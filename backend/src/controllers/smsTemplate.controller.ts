@@ -126,3 +126,42 @@ export async function updateSmsTemplate(req: Request, res: Response) {
       .json({ success: false, message: "Internal server error" });
   }
 }
+
+export async function deleteSmsTemplate(req: Request, res: Response) {
+  const shopId = getShopId(req, res);
+  if (!shopId) return;
+
+  const templateId = Number(req.params.id);
+  if (!Number.isSafeInteger(templateId) || templateId <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid SMS template ID.",
+    });
+  }
+
+  try {
+    const existing = await prisma.smsTemplate.findFirst({
+      where: { id: templateId, shopId },
+    });
+    if (!existing) {
+      return res.status(404).json({
+        success: false,
+        message: "SMS template not found.",
+      });
+    }
+
+    await prisma.smsTemplate.delete({
+      where: { id: templateId },
+    });
+
+    return res.json({
+      success: true,
+      message: "SMS template deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Error deleting SMS template:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+}
