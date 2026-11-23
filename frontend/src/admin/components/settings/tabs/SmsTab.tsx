@@ -6,10 +6,11 @@ import { PaymentCard } from "../../PaymentCard.tsx"
 import { SmsRechargeCard } from "../../RechargeCard.tsx"
 import { SmsLogsTable } from "./sms/SmsLogsTable"
 import type { PaymentMethod } from "../../PaymentCard"
-import { RechargeHistory } from "../../recharge/RechargeHistory.tsx"
+import { useNavigate } from "react-router"
 
 export default function SmsTab() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("qr")
+  const navigate = useNavigate()
 
   return (
     <SettingsLayout activeTab="sms">
@@ -59,6 +60,9 @@ export default function SmsTab() {
           <PaymentCard
             method={paymentMethod}
             onMethodChange={setPaymentMethod}
+            onHistoryClick={() =>
+              navigate("/shop/recharge/history?purpose=sms")
+            }
           />
           <div id="recharge-section" className="scroll-mt-20">
             <SmsRechargeCard
@@ -67,12 +71,6 @@ export default function SmsTab() {
             />
           </div>
         </div>
-        {/* 3. SMS Recharge History */}
-        <RechargeHistory
-          purpose="sms"
-          title="SMS Recharge History"
-          description="Payments made to top up your SMS gateway balance"
-        />
         {/* 3. Logs Table */}
         <SmsLogsTable />
       </div>

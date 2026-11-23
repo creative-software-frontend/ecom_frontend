@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Link, useSearchParams } from "react-router"
+import { Link, useNavigate, useSearchParams } from "react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import DataTable, {
   useTableExport,
@@ -78,6 +78,7 @@ export function OrdersView({
   shopFilterOptions,
 }: OrdersViewProps) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const status = (searchParams.get("status") ?? "") as OrderStatus | ""
   const q = searchParams.get("q") ?? ""
   const shopId =
@@ -602,7 +603,10 @@ export function OrdersView({
           <button
             type="button"
             disabled={selectedOrders.length === 0}
-            onClick={() => window.print()}
+            onClick={() => {
+              const ids = selectedOrders.map((o) => o.id).join(",")
+              void navigate(`${basePath}/invoice?ids=${ids}`)
+            }}
             className="admin-template-button admin-template-button--secondary h-9 px-3 text-xs disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Printer className="icon-size" /> Print
@@ -724,35 +728,6 @@ export function OrdersView({
           />
         )}
       </div>
-      <section className="hidden p-8 print:block">
-        <h1 className="mb-4 text-xl font-bold">Selected Orders</h1>
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr>
-              <th className="border p-2 text-left">Order</th>
-              <th className="border p-2 text-left">Customer</th>
-              <th className="border p-2 text-left">Phone</th>
-              <th className="border p-2 text-left">Delivery Area</th>
-              <th className="border p-2 text-left">Status</th>
-              <th className="border p-2 text-right">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {selectedOrders.map((order) => (
-              <tr key={order.id}>
-                <td className="border p-2">{order.orderNumber}</td>
-                <td className="border p-2">{order.customerName}</td>
-                <td className="border p-2">{order.customerPhone}</td>
-                <td className="border p-2">{order.deliveryArea}</td>
-                <td className="border p-2">{order.orderStatus}</td>
-                <td className="border p-2 text-right">
-                  {formatTaka(order.total)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
     </div>
   )
 }

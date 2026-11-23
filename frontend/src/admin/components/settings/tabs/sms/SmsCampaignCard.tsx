@@ -7,11 +7,19 @@ import {
   Send,
   Smartphone,
 } from "lucide-react"
+import { apiRequest } from "../../../../api/client"
+import { useAuth } from "../../../../auth/AuthProvider"
 
-const VARIABLES = ["{name}", "{order_id}", "{product_name}", "{tracking_code}"]
+const VARIABLES = [
+  "{name}",
+  "{shop_name}",
+  "{order_id}",
+  "{product_name}",
+  "{tracking_code}",
+]
 
 type SmsTemplate = {
-  id: string
+  id: string | number
   name: string
   message: string
 }
@@ -37,9 +45,8 @@ const DEFAULT_TEMPLATES: SmsTemplate[] = [
   },
 ]
 
-const SMS_TEMPLATE_STORAGE_KEY = "sms-campaign-draft-templates"
-
 export function SmsCampaignCard() {
+  const { state } = useAuth()
   const [templates, setTemplates] = useState<SmsTemplate[]>(DEFAULT_TEMPLATES)
   const [selectedTemplateId, setSelectedTemplateId] = useState(
     DEFAULT_TEMPLATES[0].id
@@ -47,58 +54,117 @@ export function SmsCampaignCard() {
   const [template, setTemplate] = useState(DEFAULT_TEMPLATES[0].message)
   const [showSaveTemplate, setShowSaveTemplate] = useState(false)
   const [templateName, setTemplateName] = useState("")
+  const [savingTemplate, setSavingTemplate] = useState(false)
+  const [saveError, setSaveError] = useState("")
+  const [editingTemplateId, setEditingTemplateId] = useState<number | null>(
+    null
+  )
 
   useEffect(() => {
-    const saved = localStorage.getItem(SMS_TEMPLATE_STORAGE_KEY)
-    if (!saved) return
+    const controller = new AbortController()
 
-    try {
-      const savedTemplates = JSON.parse(saved) as SmsTemplate[]
-      if (Array.isArray(savedTemplates) && savedTemplates.length > 0) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+    void apiRequest<SmsTemplate[]>("/shop/settings/sms/templates", {
+      signal: controller.signal,
+    })
+      .then((savedTemplates) => {
         setTemplates([...DEFAULT_TEMPLATES, ...savedTemplates])
-      }
-    } catch {
-      localStorage.removeItem(SMS_TEMPLATE_STORAGE_KEY)
-    }
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        setSaveError("টেমপ্লেট লোড করা যায়নি।")
+      })
+
+    return () => controller.abort()
   }, [])
 
   const handleTemplateChange = (templateId: string) => {
     setSelectedTemplateId(templateId)
-    const selected = templates.find((item) => item.id === templateId)
+    const selected = templates.find(
+      (item) => String(item.id) === templateId
+    )
     if (selected) setTemplate(selected.message)
   }
 
-  const saveTemplate = () => {
+  const openCreateTemplate = () => {
+    setEditingTemplateId(null)
+    setTemplateName("")
+    setSaveError("")
+    setShowSaveTemplate(true)
+  }
+
+  const openUpdateTemplate = () => {
+    const selected = templates.find(
+      (item) => String(item.id) === String(selectedTemplateId)
+    )
+    if (!selected || typeof selected.id !== "number") return
+
+    setEditingTemplateId(selected.id)
+    setTemplateName(selected.name)
+    setTemplate(selected.message)
+    setSaveError("")
+    setShowSaveTemplate(true)
+  }
+
+  const saveTemplate = async () => {
     const name = templateName.trim()
     if (!name || !template.trim()) return
 
-    const newTemplate: SmsTemplate = {
-      id: `custom-${Date.now()}`,
-      name,
-      message: template,
-    }
-    const nextTemplates = [...templates, newTemplate]
-    setTemplates(nextTemplates)
-    setSelectedTemplateId(newTemplate.id)
-    setTemplateName("")
-    setShowSaveTemplate(false)
+    setSavingTemplate(true)
+    setSaveError("")
 
-    const customTemplates = nextTemplates.filter((item) =>
-      item.id.startsWith("custom-")
-    )
-    localStorage.setItem(
-      SMS_TEMPLATE_STORAGE_KEY,
-      JSON.stringify(customTemplates)
-    )
+    try {
+      const savedTemplate =
+        editingTemplateId === null
+          ? await apiRequest<SmsTemplate>(
+              "/shop/settings/sms/templates",
+              {
+                method: "POST",
+                body: { name, message: template },
+              }
+            )
+          : await apiRequest<SmsTemplate>(
+              `/shop/settings/sms/templates/${editingTemplateId}`,
+              {
+                method: "PUT",
+                body: { name, message: template },
+              }
+            )
+
+      setTemplates((current) =>
+        editingTemplateId === null
+          ? [...current, savedTemplate]
+          : current.map((item) =>
+              String(item.id) === String(editingTemplateId)
+                ? savedTemplate
+                : item
+            )
+      )
+      setSelectedTemplateId(String(savedTemplate.id))
+      setEditingTemplateId(null)
+      setTemplateName("")
+      setShowSaveTemplate(false)
+    } catch {
+      setSaveError("টেমপ্লেট সেভ করা যায়নি। আবার চেষ্টা করুন।")
+    } finally {
+      setSavingTemplate(false)
+    }
   }
+
+  const shopName =
+    state.status === "authenticated" ? (state.user.shop?.name ?? "") : ""
+  const selectedTemplate = templates.find(
+    (item) => String(item.id) === String(selectedTemplateId)
+  )
+  const canUpdateSelectedTemplate =
+    selectedTemplate && typeof selectedTemplate.id === "number"
 
   // লাইভ প্রিভিউ ডামি ডেটা
   const previewText = template
-    .replace("{name}", "রহিম")
-    .replace("{order_id}", "#PZ-88391")
-    .replace("{product_name}", "Ultra Hot Capsules")
-    .replace("{tracking_code}", "PZ-88391")
+    .replaceAll("{name}", "রহিম")
+    .replaceAll("{shop_name}", shopName || "আপনার দোকান")
+    .replaceAll("{order_id}", "#PZ-88391")
+    .replaceAll("{product_name}", "Ultra Hot Capsules")
+    .replaceAll("{tracking_code}", "PZ-88391")
 
   // ডামি হিসাব
   const charCount = template.length
@@ -145,7 +211,7 @@ export function SmsCampaignCard() {
             aria-label="Message template"
           >
             {templates.map((item) => (
-              <option key={item.id} value={item.id}>
+              <option key={String(item.id)} value={String(item.id)}>
                 {item.name}
               </option>
             ))}
@@ -231,7 +297,9 @@ export function SmsCampaignCard() {
               htmlFor="sms-template-name"
               className="text-xs font-semibold text-(--text-primary)"
             >
-              Template name
+              {editingTemplateId === null
+                ? "Create template name"
+                : "Update template name"}
             </label>
             <input
               id="sms-template-name"
@@ -254,12 +322,23 @@ export function SmsCampaignCard() {
               <button
                 type="button"
                 onClick={saveTemplate}
-                disabled={!templateName.trim() || !template.trim()}
+                disabled={
+                  savingTemplate ||
+                  !templateName.trim() ||
+                  !template.trim()
+                }
                 className="h-9 rounded-md bg-(--primary) px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Save Template
+                {savingTemplate
+                  ? "Saving..."
+                  : editingTemplateId === null
+                    ? "Create Template"
+                    : "Update Template"}
               </button>
             </div>
+            {saveError && (
+              <p className="text-xs text-red-600 sm:basis-full">{saveError}</p>
+            )}
           </div>
         )}
 
@@ -298,10 +377,23 @@ export function SmsCampaignCard() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setShowSaveTemplate((visible) => !visible)}
+              onClick={openCreateTemplate}
               className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)"
             >
-              <Save className="size-4" /> Save as Draft Template
+              <Save className="size-4" /> New Template
+            </button>
+            <button
+              type="button"
+              onClick={openUpdateTemplate}
+              disabled={!canUpdateSelectedTemplate}
+              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover) disabled:cursor-not-allowed disabled:opacity-50"
+              title={
+                canUpdateSelectedTemplate
+                  ? "Update the selected custom template"
+                  : "Select a custom template to update"
+              }
+            >
+              <Save className="size-4" /> Update Template
             </button>
             <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
               <Send className="size-4" /> Send Test SMS to My Number

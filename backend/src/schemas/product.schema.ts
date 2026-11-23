@@ -3,74 +3,147 @@ import { z } from "zod";
 const MAX_PRICE = 10_000_000;
 const MAX_STOCK_QUANTITY = 1_000_000;
 
-export const productInputSchema = z
+const variantSchema = z.object({
+  size: z.string().trim().max(50).optional(),
+  color: z.string().trim().max(50).optional(),
+  sku: z.string().trim().max(50).optional(),
+  price: z.number().int().min(0),
+  stock: z.number().int().min(0),
+});
+
+/**
+ * Base shape before transformation. `.refine` runs BEFORE `.transform`
+ * so it sees the original field names (sellingPrice, regularPrice).
+ */
+const baseProductSchema = z
   .object({
-    name: z
+    name: z.string().trim().min(1, "Enter a product name.").max(200),
+    sku: z
       .string()
       .trim()
-      .min(1, "Enter a product name.")
-      .max(200, "Product name must be 200 characters or fewer."),
-    brandName: z
-      .string()
-      .trim()
-      .min(1, "Enter a brand name.")
-      .max(100, "Brand name must be 100 characters or fewer."),
-    category: z
-      .string()
-      .trim()
-      .min(1, "Enter a category.")
-      .max(100, "Category must be 100 characters or fewer."),
-    slug: z
-      .string()
-      .trim()
-      .min(1, "Enter a slug.")
-      .max(100, "Slug must be 100 characters or fewer.")
-      .regex(
-        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-        "Use lowercase letters, numbers, and single hyphens only.",
-      ),
+      .max(50)
+      .regex(/^[A-Z0-9]*$/, "SKU must be uppercase letters and numbers only.")
+      .optional(),
+    badge: z.string().trim().max(50).optional(),
+    category: z.string().trim().min(1, "Enter a category.").max(100),
+    subcategory: z.string().trim().max(100).optional(),
+    brand: z.string().trim().max(100).optional(),
+    section: z.string().trim().max(100).optional(),
+    shortDescription: z.string().trim().max(300).optional(),
+    description: z.string().optional(),
+
+    sellingPrice: z
+      .number({ error: "Enter a selling price." })
+      .int()
+      .min(1)
+      .max(MAX_PRICE),
     regularPrice: z
       .number({ error: "Enter a regular price." })
-      .int("Enter a whole number.")
-      .min(1, "Regular price must be at least 1.")
-      .max(MAX_PRICE, "Regular price is too large."),
-    currentPrice: z
-      .number({ error: "Enter a current price." })
-      .int("Enter a whole number.")
-      .min(1, "Current price must be at least 1.")
-      .max(MAX_PRICE, "Current price is too large."),
-    stockQuantity: z
-      .number({ error: "Enter a stock quantity." })
-      .int("Enter a whole number.")
-      .min(0, "Stock quantity cannot be negative.")
-      .max(MAX_STOCK_QUANTITY, "Stock quantity is too large."),
+      .int()
+      .min(1)
+      .max(MAX_PRICE),
+    buyingPrice: z.number().int().min(0).max(MAX_PRICE).optional(),
+
+    stock: z.number().int().min(0).max(MAX_STOCK_QUANTITY).optional(),
+
+    productType: z.enum(["single", "variant"], {
+      error: "Select a valid product type.",
+    }),
+    inStock: z.boolean().default(true),
+    isPublic: z.boolean().default(true),
+    isFeatured: z.boolean().default(false).optional(),
+    isFreeShipping: z.boolean().default(false).optional(),
+    enableStockAlert: z.boolean().default(false).optional(),
+    stockAlertQty: z.number().int().min(0).optional(),
+    maxOrderQty: z.number().int().min(0).optional(),
+    rank: z.number().int().min(0).optional(),
+
     images: z
       .array(
         z
           .string()
           .trim()
-          .min(1, "Enter an image URL or path.")
-          .max(500, "Image URL or path must be 500 characters or fewer.")
+          .min(1)
+          .max(500)
           .refine(
-            (value) =>
-              (value.startsWith("/") && !value.startsWith("//")) ||
-              value.startsWith("https://"),
+            (v) =>
+              (v.startsWith("/") && !v.startsWith("//")) ||
+              v.startsWith("https://"),
             "Image URL or path must start with / or https://.",
           ),
       )
       .min(1, "Add at least one product image.")
-      .max(10, "You can add up to 10 product images."),
-    isActive: z.boolean({ error: "Enter a valid active status." }).optional(),
+      .max(10, "Maximum 10 images."),
+
+    specifications: z
+      .array(
+        z.object({
+          key: z.string().trim().min(1),
+          value: z.string().trim().min(1),
+        }),
+      )
+      .max(20)
+      .optional(),
+
+    seo: z
+      .object({
+        metaTitle: z.string().trim().max(300).optional(),
+        metaDescription: z.string().trim().max(300).optional(),
+        keywords: z.string().trim().max(300).optional(),
+      })
+      .optional(),
+
+    sizeOptions: z.array(z.string().trim().min(1)).max(20).optional(),
+    colorOptions: z.array(z.string().trim().min(1)).max(20).optional(),
+    variants: z.array(variantSchema).max(200).optional(),
+
+    shopId: z.number().int().positive().optional(),
   })
-  .superRefine(({ currentPrice, regularPrice }, context) => {
-    if (currentPrice > regularPrice) {
-      context.addIssue({
-        code: "custom",
-        message: "Current price cannot exceed regular price.",
-        path: ["currentPrice"],
-      });
-    }
-  });
+  // Price ordering check — runs on ORIGINAL field names (before transform)
+  .refine((data) => data.regularPrice >= data.sellingPrice, {
+    message: "Regular price must be ≥ selling price.",
+    path: ["regularPrice"],
+  })
+  // Variant cross-field rules — also pre-transform
+  .refine(
+    (data) =>
+      data.productType !== "variant" ||
+      (data.variants && data.variants.length > 0),
+    {
+      message: "Add at least one variant for a variant product.",
+      path: ["variants"],
+    },
+  )
+  .refine(
+    (data) =>
+      data.productType !== "single" ||
+      !data.variants ||
+      data.variants.length === 0,
+    {
+      message: "Single products cannot have variants.",
+      path: ["variants"],
+    },
+  );
+
+/**
+ * Final schema — transforms input names to DB names.
+ *   brand → brandName
+ *   sellingPrice → currentPrice
+ *   stock → stockQuantity
+ *   isPublic → isActive
+ */
+export const productInputSchema = baseProductSchema.transform(
+  ({ brand, sellingPrice, stock, isPublic, ...rest }) => ({
+    ...rest,
+    ...(brand !== undefined && { brandName: brand }),
+    currentPrice: sellingPrice,
+    ...(stock !== undefined && { stockQuantity: stock }),
+    isActive: isPublic,
+  }),
+);
+
+/** Backward-compat alias — other files import `productSchema`. */
+export const productSchema = productInputSchema;
 
 export type ProductInput = z.infer<typeof productInputSchema>;
 
@@ -78,15 +151,9 @@ export function formatProductValidationErrors(
   error: z.ZodError,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
-
   for (const issue of error.issues) {
-    const field =
-      typeof issue.path[0] === "string" ? issue.path[0] : "form";
-
-    if (!(field in errors)) {
-      errors[field] = issue.message;
-    }
+    const field = typeof issue.path[0] === "string" ? issue.path[0] : "form";
+    if (!(field in errors)) errors[field] = issue.message;
   }
-
   return errors;
 }

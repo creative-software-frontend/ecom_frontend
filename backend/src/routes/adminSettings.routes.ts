@@ -16,6 +16,11 @@ import {
   updateCourierSettings,
 } from "../controllers/adminCourierSettings.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import {
+  createSmsTemplate,
+  listSmsTemplates,
+  updateSmsTemplate,
+} from "../controllers/smsTemplate.controller.js";
 
 const router = Router();
 router.use(requireAuth);
@@ -35,5 +40,10 @@ router.put("/orders", updateOrderSettings);
 // Courier settings
 router.get("/courier", getCourierSettings);
 router.put("/courier", updateCourierSettings);
+
+// SMS templates
+router.get("/sms/templates", listSmsTemplates);
+router.post("/sms/templates", createSmsTemplate);
+router.put("/sms/templates/:id", updateSmsTemplate);
 
 export default router;
