@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react"
+import { useMemo, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   Layers,
   Package,
@@ -18,71 +19,147 @@ import { PortalActionMenu } from "../../components/common/PortalActionMenu"
 import { StatusBadge } from "../../components/common/StatusBadge"
 import { ConfirmationDialog } from "../../components/common/ConfirmationDialog"
 import { EditBrandDrawer } from "../../components/shop-admin/EditBrandDrawer"
-import type { Brand } from "../../types/catalog"
+import { ErrorState } from "../../components/common/ErrorState"
+import { InlineNotice } from "../../components/common/InlineNotice"
+import { LoadingState } from "../../components/common/LoadingState"
+import { useDebouncedValue } from "../../hooks/useDebouncedValue"
+import { ApiError } from "../../api/client"
+import { brandsApi, brandQueryKeys } from "../../api/catalogApi"
+import { getErrorMessage } from "../../lib/errors"
+import type {
+  Brand,
+  BrandWriteInput,
+  CatalogCounts,
+  CatalogStatusFilter,
+} from "../../types/catalog"
 import { CreateBrandModal } from "@/admin/components/shop-admin/CreateBrandModal"
 
-const MOCK_BRANDS: Brand[] = [
-  {
-    id: 1,
-    name: "Power Zenox",
-    slug: "power-zenox",
-    logoUrl: null,
-    productCount: 3,
-    isActive: true,
-  },
-  {
-    id: 2,
-    name: "Herbal Life",
-    slug: "herbal-life",
-    logoUrl: null,
-    productCount: 12,
-    isActive: true,
-  },
-  {
-    id: 3,
-    name: "Nature's Own",
-    slug: "natures-own",
-    logoUrl: null,
-    productCount: 0,
-    isActive: false,
-  },
-]
+type Notice = { tone: "success" | "error"; message: string } | null
+
+const EMPTY_COUNTS: CatalogCounts = {
+  total: 0,
+  active: 0,
+  inactive: 0,
+  linkedProducts: 0,
+  empty: 0,
+}
+
+function csvCell(value: string | number | null | undefined): string {
+  const text = value === null || value === undefined ? "" : String(value)
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text
+}
+
+function downloadBrandsCsv(items: Brand[]) {
+  const headers = ["Name", "Slug", "Products", "Status", "Description", "Logo URL"]
+  const rows = items.map((brand) => [
+    brand.name,
+    brand.slug,
+    brand.productCount,
+    brand.isActive ? "Active" : "Inactive",
+    brand.description ?? "",
+    brand.logoUrl ?? "",
+  ])
+  const csv = [headers, ...rows]
+    .map((row) => row.map(csvCell).join(","))
+    .join("\r\n")
+  const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = `brands-${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
+function fieldErrors(error: unknown): Record<string, string> | null {
+  return error instanceof ApiError && error.fieldErrors
+    ? error.fieldErrors
+    : null
+}
 
 export default function BrandsPage() {
-  const [brands, setBrands] = useState<Brand[]>(MOCK_BRANDS)
+  const queryClient = useQueryClient()
   const [search, setSearch] = useState("")
-  const [status, setStatus] = useState("all")
+  const debouncedSearch = useDebouncedValue(search, 300)
+  const [status, setStatus] = useState<CatalogStatusFilter>("all")
+  const [notice, setNotice] = useState<Notice>(null)
+
   const [createOpen, setCreateOpen] = useState(false)
-
+  const [createError, setCreateError] = useState<string | null>(null)
+  const [createFieldErrors, setCreateFieldErrors] = useState<
+    Record<string, string> | null
+  >(null)
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
+  const [editError, setEditError] = useState<string | null>(null)
+  const [editFieldErrors, setEditFieldErrors] = useState<
+    Record<string, string> | null
+  >(null)
   const [deletingBrand, setDeletingBrand] = useState<Brand | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const filteredBrands = useMemo(() => {
-    return brands.filter((b) => {
-      const matchSearch = b.name.toLowerCase().includes(search.toLowerCase())
-      const matchStatus =
-        status === "all" || (status === "active" ? b.isActive : !b.isActive)
-      return matchSearch && matchStatus
-    })
-  }, [brands, search, status])
+  const params = useMemo(
+    () => ({ q: debouncedSearch, status }),
+    [debouncedSearch, status]
+  )
+  const brandsQuery = useQuery({
+    queryKey: brandQueryKeys.list(params),
+    queryFn: ({ signal }) => brandsApi.list(params, signal),
+  })
 
-  const handleCreate = (brand: Brand) => {
-    setBrands((prev) => [brand, ...prev])
-    setSuccessMessage(`"${brand.name}" was added.`)
-  }
+  const invalidateBrands = () =>
+    queryClient.invalidateQueries({ queryKey: brandQueryKeys.all })
 
-  const handleUpdate = (updated: Brand) => {
-    setBrands((prev) => prev.map((b) => (b.id === updated.id ? updated : b)))
-    setSuccessMessage(`"${updated.name}" was updated.`)
-  }
+  const createMutation = useMutation({
+    mutationFn: (input: BrandWriteInput) => brandsApi.create(input),
+    onSuccess: (brand) => {
+      void invalidateBrands()
+      setCreateOpen(false)
+      setCreateError(null)
+      setCreateFieldErrors(null)
+      setNotice({ tone: "success", message: `"${brand.name}" was added.` })
+    },
+    onError: (error) => {
+      setCreateError(getErrorMessage(error, "Could not create the brand."))
+      setCreateFieldErrors(fieldErrors(error))
+    },
+  })
 
-  const handleDeleteConfirm = () => {
-    if (!deletingBrand) return
-    setBrands((prev) => prev.filter((b) => b.id !== deletingBrand.id))
-    setSuccessMessage(`"${deletingBrand.name}" was deleted.`)
-    setDeletingBrand(null)
-  }
+  const updateMutation = useMutation({
+    mutationFn: ({
+      brand,
+      input,
+    }: {
+      brand: Brand
+      input: BrandWriteInput
+    }) => brandsApi.update(brand.id, input),
+    onSuccess: (brand) => {
+      void invalidateBrands()
+      setEditingBrand(null)
+      setEditError(null)
+      setEditFieldErrors(null)
+      setNotice({ tone: "success", message: `"${brand.name}" was updated.` })
+    },
+    onError: (error) => {
+      setEditError(getErrorMessage(error, "Could not update the brand."))
+      setEditFieldErrors(fieldErrors(error))
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (brand: Brand) => brandsApi.remove(brand.id),
+    onSuccess: (_, brand) => {
+      void invalidateBrands()
+      setDeletingBrand(null)
+      setDeleteError(null)
+      setNotice({ tone: "success", message: `"${brand.name}" was deleted.` })
+    },
+    onError: (error) => {
+      setDeleteError(getErrorMessage(error, "Could not delete the brand."))
+    },
+  })
+
+  const brands = brandsQuery.data?.items ?? []
+  const counts = brandsQuery.data?.counts ?? EMPTY_COUNTS
 
   const columns: TableColumn<Brand>[] = [
     {
@@ -150,6 +227,8 @@ export default function BrandsPage() {
                 type="button"
                 onClick={() => {
                   closeMenu()
+                  setEditError(null)
+                  setEditFieldErrors(null)
                   setEditingBrand(row)
                 }}
                 className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
@@ -160,6 +239,7 @@ export default function BrandsPage() {
                 type="button"
                 onClick={() => {
                   closeMenu()
+                  setDeleteError(null)
                   setDeletingBrand(row)
                 }}
                 className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
@@ -173,63 +253,96 @@ export default function BrandsPage() {
     },
   ]
 
+  if (brandsQuery.isLoading) {
+    return (
+      <LoadingState
+        className="flex min-h-64 items-center justify-center text-sm text-(--text-muted)"
+        ariaLabel="Loading brands"
+      >
+        Loading brands...
+      </LoadingState>
+    )
+  }
+
+  if (brandsQuery.error) {
+    const permissionError =
+      brandsQuery.error instanceof ApiError &&
+      brandsQuery.error.status === 403
+    return (
+      <ErrorState
+        className="m-6 rounded-md border border-(--border-light) bg-(--bg-surface) p-6 text-center"
+        messageClassName="mb-3 text-sm text-(--text-muted)"
+        buttonClassName="h-8 rounded-md bg-(--primary) px-3 text-sm font-medium text-white"
+        message={
+          permissionError
+            ? "Only shop administrators can manage brands."
+            : getErrorMessage(brandsQuery.error, "Could not load brands.")
+        }
+        onRetry={() => void brandsQuery.refetch()}
+      />
+    )
+  }
+
   return (
     <div className="min-w-0 space-y-3 p-4 md:p-5">
       <CatalogPageHeader
         title="Brands"
         subtitle="Manage product brands and their logos"
-        badgeText={`${brands.length} Brands`}
-        onExport={() => alert("Export")}
-        onAdd={() => setCreateOpen(true)}
+        badgeText={`${counts.total} Brands`}
+        onExport={() => downloadBrandsCsv(brands)}
+        exportDisabled={brands.length === 0}
+        onAdd={() => {
+          setCreateError(null)
+          setCreateFieldErrors(null)
+          setCreateOpen(true)
+        }}
         addLabel="Add Brand"
       />
 
       <CatalogMetricsWrapper>
         <MetricCard
           label="Total Brands"
-          value={String(brands.length)}
+          value={String(counts.total)}
           detail="Across catalog"
           icon={Layers}
           tone="teal"
         />
         <MetricCard
           label="Active Brands"
-          value={String(brands.filter((b) => b.isActive).length)}
+          value={String(counts.active)}
           detail="Visible on site"
           icon={Activity}
           tone="teal"
         />
         <MetricCard
           label="Total Products"
-          value={String(
-            brands.reduce((acc, curr) => acc + curr.productCount, 0)
-          )}
+          value={String(counts.linkedProducts)}
           detail="Linked to brands"
           icon={Package}
           tone="indigo"
         />
         <MetricCard
           label="Empty Brands"
-          value={String(brands.filter((b) => b.productCount === 0).length)}
+          value={String(counts.empty)}
           detail="No products yet"
           icon={AlertCircle}
           tone="coral"
         />
       </CatalogMetricsWrapper>
 
-      {successMessage && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-sm text-(--status-delivered-text)"
-        >
-          <span>{successMessage}</span>
-          <button
-            onClick={() => setSuccessMessage(null)}
-            className="text-xs font-medium hover:underline"
-          >
-            Dismiss
-          </button>
-        </div>
+      {notice && (
+        <InlineNotice
+          message={notice.message}
+          variant={notice.tone}
+          ariaLive={notice.tone === "error" ? "assertive" : "polite"}
+          dismissLabel="Dismiss notification"
+          onDismiss={() => setNotice(null)}
+          className={
+            notice.tone === "error"
+              ? "flex items-center justify-between gap-3 rounded-md border border-(--status-cancelled-bg) bg-(--status-cancelled-bg)/50 px-4 py-2.5 text-sm text-(--status-cancelled-text)"
+              : "flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-sm text-(--status-delivered-text)"
+          }
+        />
       )}
 
       <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
@@ -239,7 +352,7 @@ export default function BrandsPage() {
           selects={[
             {
               value: status,
-              onChange: setStatus,
+              onChange: (value) => setStatus(value as CatalogStatusFilter),
               placeholder: "All Statuses",
               options: [
                 { label: "Active", value: "active" },
@@ -250,8 +363,9 @@ export default function BrandsPage() {
         />
         <DataTable
           columns={columns}
-          data={filteredBrands}
+          data={brands}
           customStyles={adminDataTableStyles}
+          progressPending={brandsQuery.isFetching}
           pagination
           noDataComponent={
             <p className="py-10 text-center text-sm text-(--text-muted)">
@@ -264,8 +378,16 @@ export default function BrandsPage() {
       <EditBrandDrawer
         open={editingBrand !== null}
         brand={editingBrand}
+        isPending={updateMutation.isPending}
+        error={editError}
+        fieldErrors={editFieldErrors}
+        onClearError={() => setEditError(null)}
         onClose={() => setEditingBrand(null)}
-        onSuccess={handleUpdate}
+        onSubmit={(input) => {
+          if (editingBrand) {
+            updateMutation.mutate({ brand: editingBrand, input })
+          }
+        }}
       />
 
       <ConfirmationDialog
@@ -293,13 +415,23 @@ export default function BrandsPage() {
           ) : null
         }
         confirmLabel="Delete Brand"
+        isPending={deleteMutation.isPending}
+        errorMessage={deleteError}
         onCancel={() => setDeletingBrand(null)}
-        onConfirm={handleDeleteConfirm}
+        onConfirm={() => {
+          if (deletingBrand) deleteMutation.mutate(deletingBrand)
+        }}
       />
       <CreateBrandModal
         open={createOpen}
+        isPending={createMutation.isPending}
+        error={createError}
+        fieldErrors={createFieldErrors}
+        onClearError={() => setCreateError(null)}
         onClose={() => setCreateOpen(false)}
-        onSuccess={handleCreate}
+        onSubmit={(input) => {
+          createMutation.mutate(input)
+        }}
       />
     </div>
   )

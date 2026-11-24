@@ -39,7 +39,13 @@ export type AuditAction =
   | "page.create"
   | "page.update"
   | "page.revision_restore"
-  | "page.delete";
+  | "page.delete"
+  | "brand.create"
+  | "brand.update"
+  | "brand.delete"
+  | "category.create"
+  | "category.update"
+  | "category.delete";
 
 export async function logAudit(params: {
   req: Request;

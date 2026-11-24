@@ -22,6 +22,7 @@ import { requireAuth } from "../middleware/requireAuth.js";
 import { requireSuperAdmin } from "../middleware/requireSuperAdmin.js";
 import { getSuperAdminDashboard } from "../controllers/adminSuperDashboard.controller.js";
 import { getSuperAdminSidebarStats } from "../controllers/adminSuperSidebarStats.controller.js";
+import { getShopCatalogOptions } from "../controllers/adminSuperCatalog.controller.js";
 import adminSuperProductRoutes from "./adminSuperProduct.routes.js";
 import adminSuperOrderRoutes from "./adminSuperOrder.routes.js";
 
@@ -54,6 +55,9 @@ router.delete("/roles/:id", deleteRole);
 router.get("/shops", listShops);
 router.post("/shops", createShop);
 router.patch("/shops/:id", updateShop);
+
+// Catalog options for the super-admin product form (read-only, per shop)
+router.get("/shops/:id/catalog-options", getShopCatalogOptions);
 
 // Products
 router.use("/products", adminSuperProductRoutes);
