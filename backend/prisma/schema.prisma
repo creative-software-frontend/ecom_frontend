@@ -309,7 +309,9 @@ model Coupon {
 model Page {
   id            Int      @id @default(autoincrement())
   title         String
-  slug          String   @unique
+  slug          String
+  shopId        Int      @map("shop_id")
+  shop          Shop     @relation(fields: [shopId], references: [id])
   contentHtml   String   @map("content_html") @db.LongText
   status        String   @default("draft") // "published" | "draft"
   language      String   @default("EN")
@@ -320,6 +322,8 @@ model Page {
 
   revisions PageRevision[]
 
+  @@unique([shopId, slug])
+  @@index([shopId, status])
   @@map("pages")
 }
 
@@ -374,6 +378,7 @@ model Shop {
   smsTemplates  SmsTemplate[]
   orders        Order[]
   coupons       Coupon[]
+  pages         Page[]
 
   @@map("shops")
 }

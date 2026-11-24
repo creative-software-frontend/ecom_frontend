@@ -116,27 +116,30 @@ export async function superListOrders(req: Request, res: Response) {
 
   const { page, limit, status, paymentStatus, area, dateFrom, dateTo, q } =
     parsed.data;
-  const where: Prisma.OrderWhereInput = {};
+  const baseWhere: Prisma.OrderWhereInput = {};
 
-  if (shopId !== undefined) where.shopId = shopId;
-  if (status) where.status = status;
-  if (paymentStatus) where.paymentStatus = paymentStatus;
-  if (area) where.deliveryArea = area;
+  if (shopId !== undefined) baseWhere.shopId = shopId;
+  if (paymentStatus) baseWhere.paymentStatus = paymentStatus;
+  if (area) baseWhere.deliveryArea = area;
   if (dateFrom || dateTo) {
     const dateFilter: Prisma.DateTimeFilter = {};
     if (dateFrom) dateFilter.gte = getDhakaDayStart(dateFrom);
     if (dateTo) dateFilter.lt = getDhakaDayStart(dateTo, 1);
-    where.createdAt = dateFilter;
+    baseWhere.createdAt = dateFilter;
   }
-  // order search
+
   const trimmedQ = q?.trim();
   if (trimmedQ) {
-    where.OR = [
+    baseWhere.OR = [
       { orderNumber: { contains: trimmedQ } },
       { customerName: { contains: trimmedQ } },
       { customerPhone: { contains: trimmedQ } },
     ];
   }
+
+  const where: Prisma.OrderWhereInput = status
+    ? { ...baseWhere, status }
+    : baseWhere;
   // pagination
   const skip = (page - 1) * limit;
   const take = limit;
@@ -169,7 +172,7 @@ export async function superListOrders(req: Request, res: Response) {
         prisma.order.count({ where }),
         prisma.order.groupBy({
           by: ["status"],
-          where,
+          where: baseWhere,
           _count: { _all: true },
           _sum: { total: true },
         }),

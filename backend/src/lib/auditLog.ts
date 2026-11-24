@@ -35,7 +35,11 @@ export type AuditAction =
   | "coupon.create"
   | "coupon.update"
   | "coupon.status_update"
-  | "coupon.delete";
+  | "coupon.delete"
+  | "page.create"
+  | "page.update"
+  | "page.revision_restore"
+  | "page.delete";
 
 export async function logAudit(params: {
   req: Request;

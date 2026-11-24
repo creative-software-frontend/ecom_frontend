@@ -3,6 +3,7 @@
    Active state uses a left accent bar + soft tinted background.
    ================================================================ */
 
+import { relativeTime } from "@/admin/lib/formatTime"
 import type { PageSummary } from "@/admin/types/pages"
 
 export function PageListItem({
@@ -20,6 +21,7 @@ export function PageListItem({
     <button
       type="button"
       onClick={onClick}
+      aria-current={isActive ? "true" : undefined}
       className={`w-full border-l-2 px-3 py-2.5 text-left transition-colors ${
         isActive
           ? "border-l-primary bg-(--primary-soft)"
@@ -44,8 +46,11 @@ export function PageListItem({
         <span className="truncate text-xs text-(--text-muted)">
           /{page.slug}
         </span>
-        <span className="shrink-0 text-xs text-(--text-muted)">
-          {page.edited_at}
+        <span
+          className="shrink-0 text-xs text-(--text-muted)"
+          title={`Last edited by ${page.lastEditedBy}`}
+        >
+          {relativeTime(page.updatedAt)}
         </span>
       </div>
     </button>
