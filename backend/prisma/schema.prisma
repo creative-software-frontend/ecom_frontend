@@ -281,7 +281,9 @@ model Banner {
 
 model Coupon {
   id               Int       @id @default(autoincrement())
-  code             String    @unique
+  shopId           Int       @map("shop_id") // NOT NULL after backfill
+  shop             Shop      @relation(fields: [shopId], references: [id])
+  code             String
   discountType     String    @map("discount_type") // "percentage" | "amount"
   discountValue    Int       @map("discount_value")
   note             String?
@@ -294,7 +296,8 @@ model Coupon {
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
-  @@index([status])
+  @@unique([shopId, code])
+  @@index([shopId, status])
   @@index([expiresAt])
   @@map("coupons")
 }
@@ -370,6 +373,7 @@ model Shop {
   products      Product[]
   smsTemplates  SmsTemplate[]
   orders        Order[]
+  coupons       Coupon[]
 
   @@map("shops")
 }

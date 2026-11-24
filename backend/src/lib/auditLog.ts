@@ -31,7 +31,11 @@ export type AuditAction =
   | "product.delete"
   | "product.block"
   | "product.unblock"
-  | "order.status_update";
+  | "order.status_update"
+  | "coupon.create"
+  | "coupon.update"
+  | "coupon.status_update"
+  | "coupon.delete";
 
 export async function logAudit(params: {
   req: Request;
