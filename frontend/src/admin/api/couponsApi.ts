@@ -20,9 +20,12 @@ export const couponsApi = {
   },
 
   get(id: number | string, signal?: AbortSignal): Promise<Coupon> {
-    return apiRequest<Coupon>(`/shop/coupons/${encodeURIComponent(String(id))}`, {
-      signal,
-    })
+    return apiRequest<Coupon>(
+      `/shop/coupons/${encodeURIComponent(String(id))}`,
+      {
+        signal,
+      }
+    )
   },
 
   create(input: CouponWriteInput): Promise<Coupon> {
@@ -33,10 +36,13 @@ export const couponsApi = {
   },
 
   update(id: number | string, input: CouponWriteInput): Promise<Coupon> {
-    return apiRequest<Coupon>(`/shop/coupons/${encodeURIComponent(String(id))}`, {
-      method: "PUT",
-      body: input,
-    })
+    return apiRequest<Coupon>(
+      `/shop/coupons/${encodeURIComponent(String(id))}`,
+      {
+        method: "PUT",
+        body: input,
+      }
+    )
   },
 
   updateStatus(

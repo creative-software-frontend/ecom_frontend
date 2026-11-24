@@ -129,13 +129,8 @@ export default function PagesTab() {
   const charCount = countChars(content)
 
   const saveMutation = useMutation({
-    mutationFn: ({
-      id,
-      input,
-    }: {
-      id: number
-      input: UpdatePageInput
-    }) => pagesApi.update(id, input),
+    mutationFn: ({ id, input }: { id: number; input: UpdatePageInput }) =>
+      pagesApi.update(id, input),
     onSuccess: (updated) => {
       void queryClient.invalidateQueries({ queryKey: pageQueryKeys.all })
       setNotice({ tone: "success", message: `Page "${updated.title}" saved.` })
@@ -145,7 +140,8 @@ export default function PagesTab() {
         error instanceof ApiError ? error.fieldErrors?.slug : undefined
       setNotice({
         tone: "error",
-        message: fieldMessage ??
+        message:
+          fieldMessage ??
           (error instanceof Error ? error.message : "Could not save the page"),
       })
     },

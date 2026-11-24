@@ -16,7 +16,9 @@ function previewSnippet(html: string): string {
     .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim()
-  return text.length > 140 ? `${text.slice(0, 140)}…` : text || "(empty content)"
+  return text.length > 140
+    ? `${text.slice(0, 140)}…`
+    : text || "(empty content)"
 }
 
 /* ================================================================
@@ -69,7 +71,10 @@ export function PageRevisionsModal({
     setPendingRevision(null)
   }, [open, pageId])
 
-  useEscapeKey(onClose, open && pendingRevision === null && !restoreMutation.isPending)
+  useEscapeKey(
+    onClose,
+    open && pendingRevision === null && !restoreMutation.isPending
+  )
 
   useEffect(() => {
     if (!open) return
@@ -185,7 +190,7 @@ export function PageRevisionsModal({
                         Restore
                       </button>
                     </div>
-                    <p className="mt-2 rounded bg-(--bg-table-header) px-2 py-1.5 text-xs leading-relaxed text-(--text-muted) break-words">
+                    <p className="mt-2 rounded bg-(--bg-table-header) px-2 py-1.5 text-xs leading-relaxed break-words text-(--text-muted)">
                       {previewSnippet(revision.contentHtml)}
                     </p>
                   </li>

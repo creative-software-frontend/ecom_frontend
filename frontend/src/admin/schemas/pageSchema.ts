@@ -33,11 +33,13 @@ export const createPageSchema = z.object({
     .string()
     .trim()
     .refine(
-      (value) =>
-        value === "" || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value),
+      (value) => value === "" || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value),
       "Use lowercase letters, numbers, and hyphens only"
     )
-    .refine((value) => value.length <= 100, "Slug must be 100 characters or less"),
+    .refine(
+      (value) => value.length <= 100,
+      "Slug must be 100 characters or less"
+    ),
   language: z.enum(PAGE_LANGUAGES),
   status: z.enum(PAGE_STATUSES),
 })

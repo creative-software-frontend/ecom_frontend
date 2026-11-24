@@ -13,9 +13,12 @@ export const pagesApi = {
   },
 
   get(id: number, signal?: AbortSignal): Promise<PageDetail> {
-    return apiRequest<PageDetail>(`/shop/pages/${encodeURIComponent(String(id))}`, {
-      signal,
-    })
+    return apiRequest<PageDetail>(
+      `/shop/pages/${encodeURIComponent(String(id))}`,
+      {
+        signal,
+      }
+    )
   },
 
   create(input: CreatePageInput): Promise<PageDetail> {
@@ -26,10 +29,13 @@ export const pagesApi = {
   },
 
   update(id: number, input: UpdatePageInput): Promise<PageDetail> {
-    return apiRequest<PageDetail>(`/shop/pages/${encodeURIComponent(String(id))}`, {
-      method: "PUT",
-      body: input,
-    })
+    return apiRequest<PageDetail>(
+      `/shop/pages/${encodeURIComponent(String(id))}`,
+      {
+        method: "PUT",
+        body: input,
+      }
+    )
   },
 
   revisions(id: number, signal?: AbortSignal): Promise<PageRevisionsResponse> {

@@ -219,7 +219,9 @@ export default function SuperAdminProductEditPage() {
       void queryClient.invalidateQueries({
         queryKey: superAdminProductQueryKeys.detail(productId),
       })
-      void queryClient.invalidateQueries({ queryKey: ["admin", "sidebar-stats"] })
+      void queryClient.invalidateQueries({
+        queryKey: ["admin", "sidebar-stats"],
+      })
       navigate("/admin/products")
     } catch (error) {
       setSubmitError(

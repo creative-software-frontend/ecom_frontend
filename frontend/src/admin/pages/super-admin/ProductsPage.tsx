@@ -118,7 +118,9 @@ export default function SuperAdminProductsPage() {
       void queryClient.invalidateQueries({
         queryKey: superAdminProductQueryKeys.all,
       })
-      void queryClient.invalidateQueries({ queryKey: ["admin", "sidebar-stats"] })
+      void queryClient.invalidateQueries({
+        queryKey: ["admin", "sidebar-stats"],
+      })
       setProductToBlock(null)
       setProductToUnblock(null)
       setProductToDelete(null)

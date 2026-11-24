@@ -40,7 +40,11 @@ export default function SuperAdminProductCreatePage() {
   )
 
   if (shopsQuery.isPending) {
-    return <LoadingState className="p-8 text-center text-sm text-(--text-muted)">Loading shops...</LoadingState>
+    return (
+      <LoadingState className="p-8 text-center text-sm text-(--text-muted)">
+        Loading shops...
+      </LoadingState>
+    )
   }
 
   if (shopsQuery.isError) {
@@ -67,7 +71,9 @@ export default function SuperAdminProductCreatePage() {
       void queryClient.invalidateQueries({
         queryKey: superAdminProductQueryKeys.all,
       })
-      void queryClient.invalidateQueries({ queryKey: ["admin", "sidebar-stats"] })
+      void queryClient.invalidateQueries({
+        queryKey: ["admin", "sidebar-stats"],
+      })
       navigate("/admin/products")
     } catch (error) {
       setSubmitError(

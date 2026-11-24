@@ -142,9 +142,7 @@ export function toSuperAdminProductPayload(
     stockAlertQty: cleanNumber(values.stockAlertQty),
     maxOrderQty: cleanNumber(values.maxOrderQty),
     rank: cleanNumber(values.rank),
-    images: (values.images ?? [])
-      .map((image) => image.trim())
-      .filter(Boolean),
+    images: (values.images ?? []).map((image) => image.trim()).filter(Boolean),
     specifications: specifications.length ? specifications : undefined,
     seo: hasSeo ? seo : undefined,
     sizeOptions: values.sizeOptions?.length ? values.sizeOptions : undefined,

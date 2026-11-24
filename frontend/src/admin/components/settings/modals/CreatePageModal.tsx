@@ -203,8 +203,7 @@ export function CreatePageModal({
               <p className="mt-1 text-xs leading-relaxed text-(--text-muted)">
                 Leave blank to generate the slug from an English title. For
                 Bengali titles, add a custom English slug (e.g. privacy-policy)
-                so public links stay readable. The slug cannot be changed
-                later.
+                so public links stay readable. The slug cannot be changed later.
               </p>
               {errors.slug && <FieldError>{errors.slug.message}</FieldError>}
             </div>

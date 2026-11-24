@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react"
-import {
-  useForm,
-  Controller,
-  useWatch,
-  type FieldPath,
-} from "react-hook-form"
+import { useForm, Controller, useWatch, type FieldPath } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
@@ -23,10 +18,7 @@ import { InlineNotice } from "../../common/InlineNotice"
 import { useEscapeKey } from "../../../hooks/useEscapeKey"
 import { ApiError } from "../../../api/client"
 import { couponsApi, couponQueryKeys } from "../../../api/couponsApi"
-import type {
-  Coupon,
-  CouponWriteInput,
-} from "../../../types/coupon"
+import type { Coupon, CouponWriteInput } from "../../../types/coupon"
 import {
   couponFormSchema,
   defaultCouponFormValues,

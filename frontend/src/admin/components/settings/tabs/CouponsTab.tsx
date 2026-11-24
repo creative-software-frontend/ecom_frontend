@@ -328,8 +328,7 @@ export default function CouponsTab() {
           menuClassName="w-36"
         >
           {(closeMenu) => {
-            const isActivateExpired =
-              coupon.status === "expired"
+            const isActivateExpired = coupon.status === "expired"
             return (
               <>
                 <button
@@ -545,13 +544,14 @@ export default function CouponsTab() {
         confirmLabel="Delete coupon"
         isPending={deleteMutation.isPending}
         errorMessage={
-          deleteMutation.isError &&
-          deleteMutation.error instanceof Error
+          deleteMutation.isError && deleteMutation.error instanceof Error
             ? deleteMutation.error.message
             : null
         }
         notice={
-          deletingCoupon && deletingCoupon.used > 0 && !deleteNoticeDismissed ? (
+          deletingCoupon &&
+          deletingCoupon.used > 0 &&
+          !deleteNoticeDismissed ? (
             <InlineNotice
               variant="error"
               message={`This coupon has been used ${deletingCoupon.used} time(s). Used coupons cannot be deleted; pause it instead.`}

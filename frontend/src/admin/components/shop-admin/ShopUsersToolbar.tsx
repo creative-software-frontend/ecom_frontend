@@ -8,6 +8,7 @@ export function ShopUsersToolbar({
   status,
   onStatusChange,
   totalCount,
+  roles,
 }: {
   search: string
   onSearchChange: (v: string) => void
@@ -16,6 +17,7 @@ export function ShopUsersToolbar({
   status: string
   onStatusChange: (v: string) => void
   totalCount: number
+  roles: { name: string; displayName: string }[]
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--border-light) px-4 py-3">
@@ -37,9 +39,11 @@ export function ShopUsersToolbar({
         >
           <option value="all">All Roles</option>
           <option value="shop_admin">Shop Admin</option>
-          <option value="salesman">Salesman</option>
-          <option value="order_handler">Order Handler</option>
-          <option value="product_uploader">Product Uploader</option>
+          {roles.map((item) => (
+            <option key={item.name} value={item.name}>
+              {item.displayName}
+            </option>
+          ))}
         </select>
         <select
           value={status}
