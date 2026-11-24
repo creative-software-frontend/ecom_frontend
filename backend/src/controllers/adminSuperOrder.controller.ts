@@ -128,7 +128,7 @@ export async function superListOrders(req: Request, res: Response) {
     if (dateTo) dateFilter.lt = getDhakaDayStart(dateTo, 1);
     where.createdAt = dateFilter;
   }
-
+  // order search
   const trimmedQ = q?.trim();
   if (trimmedQ) {
     where.OR = [
@@ -137,7 +137,7 @@ export async function superListOrders(req: Request, res: Response) {
       { customerPhone: { contains: trimmedQ } },
     ];
   }
-
+  // pagination
   const skip = (page - 1) * limit;
   const take = limit;
 
@@ -192,6 +192,7 @@ export async function superListOrders(req: Request, res: Response) {
       shipped: { count: 0, totalPrice: 0 },
       delivered: { count: 0, totalPrice: 0 },
       cancelled: { count: 0, totalPrice: 0 },
+      returned: { count: 0, totalPrice: 0 },
     };
 
     for (const group of statusGroups) {

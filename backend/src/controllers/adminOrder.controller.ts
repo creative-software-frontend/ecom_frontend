@@ -119,32 +119,33 @@ export async function listOrders(req: Request, res: Response) {
   const { page, limit, status, paymentStatus, area, dateFrom, dateTo, q } =
     parsed.data;
 
-  const where: Prisma.OrderWhereInput = { shopId };
+  const baseWhere: Prisma.OrderWhereInput = { shopId };
 
-  if (status) {
-    where.status = status;
-  }
   if (paymentStatus) {
-    where.paymentStatus = paymentStatus;
+    baseWhere.paymentStatus = paymentStatus;
   }
   if (area) {
-    where.deliveryArea = area;
+    baseWhere.deliveryArea = area;
   }
   if (dateFrom || dateTo) {
     const dateFilter: Prisma.DateTimeFilter = {};
     if (dateFrom) dateFilter.gte = getDhakaDayStart(dateFrom);
     if (dateTo) dateFilter.lt = getDhakaDayStart(dateTo, 1);
-    where.createdAt = dateFilter;
+    baseWhere.createdAt = dateFilter;
   }
 
   const trimmedQ = q?.trim();
   if (trimmedQ) {
-    where.OR = [
+    baseWhere.OR = [
       { orderNumber: { contains: trimmedQ } },
       { customerName: { contains: trimmedQ } },
       { customerPhone: { contains: trimmedQ } },
     ];
   }
+
+  const where: Prisma.OrderWhereInput = status
+    ? { ...baseWhere, status }
+    : baseWhere;
 
   const skip = (page - 1) * limit;
   const take = limit;
@@ -180,7 +181,7 @@ export async function listOrders(req: Request, res: Response) {
         prisma.order.count({ where }),
         prisma.order.groupBy({
           by: ["status"],
-          where,
+          where: baseWhere,
           _count: {
             _all: true,
           },
@@ -205,6 +206,7 @@ export async function listOrders(req: Request, res: Response) {
       confirmed: { count: 0, totalPrice: 0 },
       shipped: { count: 0, totalPrice: 0 },
       delivered: { count: 0, totalPrice: 0 },
+      returned: { count: 0, totalPrice: 0 },
       cancelled: { count: 0, totalPrice: 0 },
     };
     for (const group of statusGroups) {

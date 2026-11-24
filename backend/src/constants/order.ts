@@ -3,6 +3,7 @@ export const ORDER_STATUSES = [
   "confirmed",
   "shipped",
   "delivered",
+  "returned",
   "cancelled",
 ] as const;
 
@@ -18,8 +19,9 @@ export const ALLOWED_ORDER_STATUS_TRANSITIONS: Record<
 > = {
   pending: ["confirmed", "cancelled"],
   confirmed: ["shipped", "cancelled"],
-  shipped: ["delivered", "cancelled"],
-  delivered: [],
+  shipped: ["delivered", "returned", "cancelled"],
+  delivered: ["returned"],
+  returned: [],
   cancelled: [],
 } as const;
 
@@ -33,11 +35,10 @@ export function canTransitionOrderStatus(
   return allowed !== undefined && allowed.includes(nextStatus);
 }
 
-/** Cancelled orders are final for both order status and payment status. */
+/** Cancelled orders are final for payment status; returned orders remain toggleable. */
 export function canUpdatePaymentStatus(
   currentStatus: string,
   nextOrderStatus?: OrderStatus,
 ): boolean {
   return currentStatus !== "cancelled" && nextOrderStatus !== "cancelled";
 }
-

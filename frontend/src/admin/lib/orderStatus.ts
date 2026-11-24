@@ -30,6 +30,11 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
     variant: "success",
     badgeClassName: "admin-badge admin-badge--success",
   },
+  returned: {
+    label: "Returned",
+    variant: "warning",
+    badgeClassName: "admin-badge admin-badge--warning",
+  },
   cancelled: {
     label: "Cancelled",
     variant: "danger",
@@ -58,8 +63,9 @@ export const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, StatusConfig> = {
 export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending: ["confirmed", "cancelled"],
   confirmed: ["shipped", "cancelled"],
-  shipped: ["delivered", "cancelled"],
-  delivered: [],
+  shipped: ["delivered", "returned", "cancelled"],
+  delivered: ["returned"],
+  returned: [],
   cancelled: [],
 }
 
@@ -69,6 +75,7 @@ export const ORDER_STATUS_ACTION_LABEL: Record<OrderStatus, string> = {
   confirmed: "Mark as confirmed",
   shipped: "Mark as shipped",
   delivered: "Mark as delivered",
+  returned: "Mark as returned",
   cancelled: "Cancel order",
 }
 
