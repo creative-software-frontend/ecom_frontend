@@ -85,11 +85,11 @@ export async function createOrder(req: Request, res: Response) {
       });
     }
 
-    const shopIds = new Set(products.map((product) => product.shopId));
-    if (shopIds.size !== 1) {
+    const uniqueShopIds = new Set(products.map((product) => product.shopId));
+    if (uniqueShopIds.size > 1) {
       return res.status(400).json({
         success: false,
-        message: "All items in an order must belong to the same shop",
+        message: "All items must be from the same shop.",
       });
     }
 

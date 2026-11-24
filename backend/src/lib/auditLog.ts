@@ -30,7 +30,8 @@ export type AuditAction =
   | "product.update"
   | "product.delete"
   | "product.block"
-  | "product.unblock";
+  | "product.unblock"
+  | "order.status_update";
 
 export async function logAudit(params: {
   req: Request;

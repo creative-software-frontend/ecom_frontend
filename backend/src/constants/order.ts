@@ -23,3 +23,21 @@ export const ALLOWED_ORDER_STATUS_TRANSITIONS: Record<
   cancelled: [],
 } as const;
 
+/** Shared by shop admin and super admin so both enforce identical transitions. */
+export function canTransitionOrderStatus(
+  currentStatus: string,
+  nextStatus: OrderStatus,
+): boolean {
+  const allowed =
+    ALLOWED_ORDER_STATUS_TRANSITIONS[currentStatus as OrderStatus];
+  return allowed !== undefined && allowed.includes(nextStatus);
+}
+
+/** Cancelled orders are final for both order status and payment status. */
+export function canUpdatePaymentStatus(
+  currentStatus: string,
+  nextOrderStatus?: OrderStatus,
+): boolean {
+  return currentStatus !== "cancelled" && nextOrderStatus !== "cancelled";
+}
+

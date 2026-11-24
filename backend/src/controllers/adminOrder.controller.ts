@@ -1,13 +1,16 @@
 import type { Request, Response } from "express";
 import type { Prisma } from "../../generated/prisma/client.js";
 import {
-  ALLOWED_ORDER_STATUS_TRANSITIONS,
+  canTransitionOrderStatus,
+  canUpdatePaymentStatus,
   type OrderStatus,
 } from "../constants/order.js";
+import { logAudit } from "../lib/auditLog.js";
 import { prisma } from "../lib/prisma.js";
 import { parseId } from "../lib/parseId.js";
 import {
   formatOrderValidationErrors,
+  getRequestedOrderStatus,
   orderListQuerySchema,
   updateOrderStatusSchema,
 } from "../schemas/order.schema.js";
@@ -294,12 +297,13 @@ export async function updateOrderStatus(req: Request, res: Response) {
     });
   }
 
-  const { orderStatus, paymentStatus } = parsed.data;
+  const { paymentStatus } = parsed.data;
+  const orderStatus = getRequestedOrderStatus(parsed.data);
 
   try {
     const currentOrder = await prisma.order.findFirst({
       where: { id, shopId },
-      select: { id: true, status: true, paymentStatus: true },
+      select: { id: true, status: true, paymentStatus: true, shopId: true },
     });
 
     if (!currentOrder) {
@@ -308,26 +312,29 @@ export async function updateOrderStatus(req: Request, res: Response) {
         .json({ success: false, message: "Order not found" });
     }
 
-    if (orderStatus !== undefined) {
-      const currentStatus = currentOrder.status as OrderStatus;
-      const allowedTransitions =
-        ALLOWED_ORDER_STATUS_TRANSITIONS[currentStatus];
-
-      if (!allowedTransitions || !allowedTransitions.includes(orderStatus)) {
-        return res.status(409).json({
-          success: false,
-          message: `Cannot change order status from ${currentOrder.status} to ${orderStatus}`,
-        });
-      }
+    if (
+      orderStatus !== undefined &&
+      !canTransitionOrderStatus(currentOrder.status, orderStatus)
+    ) {
+      const message = `Cannot change order status from ${currentOrder.status} to ${orderStatus}`;
+      return res.status(422).json({
+        success: false,
+        message,
+        errors: { orderStatus: message },
+      });
     }
 
-    if (paymentStatus !== undefined) {
-      if (currentOrder.status === "cancelled" || orderStatus === "cancelled") {
-        return res.status(409).json({
-          success: false,
-          message: "Cannot change payment status of a cancelled order",
-        });
-      }
+    if (
+      paymentStatus !== undefined &&
+      !canUpdatePaymentStatus(currentOrder.status, orderStatus)
+    ) {
+      return res.status(422).json({
+        success: false,
+        message: "Cannot change payment status of a cancelled order",
+        errors: {
+          paymentStatus: "Cannot change payment status of a cancelled order",
+        },
+      });
     }
 
     const updateData: Prisma.OrderUpdateInput = {};
@@ -359,17 +366,28 @@ export async function updateOrderStatus(req: Request, res: Response) {
           .json({ success: false, message: "Order not found" });
       }
 
-      if (orderStatus !== undefined) {
-        return res.status(409).json({
+      if (
+        orderStatus !== undefined &&
+        !canTransitionOrderStatus(recheck.status, orderStatus)
+      ) {
+        const message = `Cannot change order status from ${recheck.status} to ${orderStatus}`;
+        return res.status(422).json({
           success: false,
-          message: `Cannot change order status from ${recheck.status} to ${orderStatus}`,
+          message,
+          errors: { orderStatus: message },
         });
       }
 
-      if (paymentStatus !== undefined && recheck.status === "cancelled") {
-        return res.status(409).json({
+      if (
+        paymentStatus !== undefined &&
+        !canUpdatePaymentStatus(recheck.status)
+      ) {
+        return res.status(422).json({
           success: false,
           message: "Cannot change payment status of a cancelled order",
+          errors: {
+            paymentStatus: "Cannot change payment status of a cancelled order",
+          },
         });
       }
 
@@ -386,6 +404,20 @@ export async function updateOrderStatus(req: Request, res: Response) {
         .status(404)
         .json({ success: false, message: "Order not found" });
     }
+
+    void logAudit({
+      req,
+      action: "order.status_update",
+      entityType: "order",
+      entityId: currentOrder.id,
+      metadata: {
+        previousStatus: currentOrder.status,
+        previousPaymentStatus: currentOrder.paymentStatus,
+        ...(orderStatus !== undefined && { status: orderStatus }),
+        ...(paymentStatus !== undefined && { paymentStatus }),
+      },
+      targetShopId: currentOrder.shopId,
+    });
 
     return res.status(200).json({ success: true, data: updated });
   } catch (error) {
