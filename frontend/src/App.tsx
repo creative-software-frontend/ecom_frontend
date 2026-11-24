@@ -42,6 +42,9 @@ const SuperAdminAuditPage = lazy(
 const SuperAdminProductsPage = lazy(
   () => import("./admin/pages/super-admin/ProductsPage")
 )
+const SuperAdminInvoicePrintPage = lazy(
+  () => import("./admin/pages/super-admin/InvoicePrintPage")
+)
 const SuperAdminOrdersPage = lazy(
   () => import("./admin/pages/super-admin/OrdersPage")
 )
@@ -51,9 +54,7 @@ const SuperAdminOrderCreatePage = lazy(
 const SuperAdminOrderDetailPage = lazy(
   () => import("./admin/pages/super-admin/OrderDetailPage")
 )
-const SuperAdminInvoicePrintPage = lazy(
-  () => import("./admin/pages/InvoicePrintPage")
-)
+
 const SuperAdminProductCreatePage = lazy(
   () => import("./admin/pages/super-admin/ProductCreatePage")
 )
@@ -169,10 +170,7 @@ export function App() {
               // </Suspense>
             }
           />
-          <Route
-            path="/shop/register"
-            element={<ShopRegistrationPage />}
-          />
+          <Route path="/shop/register" element={<ShopRegistrationPage />} />
 
           {/* Shop panel (protected) */}
           <Route path="/shop" element={<RequireShopUser />}>
