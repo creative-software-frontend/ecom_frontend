@@ -1,5 +1,5 @@
 import { Info } from "lucide-react"
-import type { CategorySummary } from "../../data/shopSummaryMock"
+import type { CategorySummary } from "../../types/superAdmin"
 
 export function TopVerticalsCard({
   categories,

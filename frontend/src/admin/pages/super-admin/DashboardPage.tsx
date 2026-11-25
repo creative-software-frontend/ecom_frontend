@@ -8,7 +8,7 @@ import {
   RoleAccessOverviewCard,
   TrialShopsAttentionCard,
 } from "../../components/super-admin/PlatformGovernanceCards"
-import { SuperAdminDemoAnalytics } from "../../components/super-admin/SuperAdminDemoAnalytics"
+import { SuperAdminCommerceAnalytics } from "../../components/super-admin/SuperAdminCommerceAnalytics"
 import { useSuperAdminDashboardQuery } from "../../hooks/useAdminUsers"
 import { ErrorState } from "../../components/common/ErrorState"
 import { formatDate } from "../../lib/formatTime"
@@ -110,7 +110,10 @@ export default function SuperAdminDashboardPage() {
             </div>
           </section>
 
-          <SuperAdminDemoAnalytics />
+          <SuperAdminCommerceAnalytics
+            commerce={data.commerce}
+            shopSummary={data.shopSummary}
+          />
 
           <RecentAuditsTable audits={data.recentAudits} />
         </>

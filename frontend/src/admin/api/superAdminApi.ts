@@ -17,6 +17,8 @@ import type {
   AuditLogQueryParams,
   UpdateShopInput,
   CreateShopInput,
+  ShopListParams,
+  ShopSummaryData,
 } from "../types/superAdmin"
 
 const BASE = "/admin/super"
@@ -106,33 +108,25 @@ export const superAdminApi = {
     },
 
     // ৪. ফ্রন্টএন্ডে ফিল্টার এবং পেজিনেশন
+    summary(signal?: AbortSignal): Promise<ShopSummaryData> {
+      return apiRequest<ShopSummaryData>(`${BASE}/shops/summary`, { signal })
+    },
+
     getPaginated(
-      params: {
-        q?: string
-        status?: string
-        page?: number
-        limit?: number
-      } = {},
+      params: ShopListParams = {},
       signal?: AbortSignal
     ): Promise<ShopsListResponse> {
       return this.list(signal).then((shops) => {
-        // NOTE: Plan এবং OwnerName আপাতত ডামি, কারণ ব্যাকএন্ড DB-তে এই কলামগুলো নেই।
-        // Phase B-তে DB-তে ফিল্ড যোগ হলে এই ডামি ম্যাপিং সরিয়ে ফেলতে হবে।
+        // NOTE: Plan model এখনো যোগ করা হয়নি — planName আপাতত ডামি।
         const plans = ["Enterprise", "Growth", "Starter", "14-day Free Trial"]
-        const owners = [
-          "Abdur Razzaq",
-          "Mahfuz Alam",
-          "Abdur Rahim",
-          "Rezaul Karim",
-          "Nusrat Jahan Khan",
-        ]
 
         // ব্যাকএন্ড ডেটাকে ফ্রন্টএন্ডের UI মডেলে রূপান্তর
         let items: SuperAdminShopListItem[] = shops.map((shop, index) => ({
           id: shop.id,
           name: shop.name,
           slug: shop.slug,
-          ownerName: owners[index % owners.length], // ডামি
+          division: shop.division,
+          ownerName: shop.ownerName || "N/A",
           ownerMobile: shop.mobile || "N/A",
           status: (shop.status as "active" | "trial" | "inactive") || "active",
           planName: plans[index % plans.length], // ডামি

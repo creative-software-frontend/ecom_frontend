@@ -1,6 +1,6 @@
 import { Flame } from "lucide-react"
 import { formatTaka } from "../../lib/orderStatus"
-import type { TopSellingItem } from "../../data/shopSummaryMock"
+import type { TopSellingItem } from "../../types/superAdmin"
 
 export function TopSellingItemsCard({ items }: { items: TopSellingItem[] }) {
   const maxUnits = Math.max(...items.map((i) => i.unitsSold), 1)

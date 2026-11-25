@@ -20,7 +20,10 @@ import {
 import { listAuditLogs } from "../controllers/adminAudit.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { requireSuperAdmin } from "../middleware/requireSuperAdmin.js";
-import { getSuperAdminDashboard } from "../controllers/adminSuperDashboard.controller.js";
+import {
+  getSuperAdminDashboard,
+  getSuperAdminShopSummary,
+} from "../controllers/adminSuperDashboard.controller.js";
 import { getSuperAdminSidebarStats } from "../controllers/adminSuperSidebarStats.controller.js";
 import { getShopCatalogOptions } from "../controllers/adminSuperCatalog.controller.js";
 import adminSuperProductRoutes from "./adminSuperProduct.routes.js";
@@ -54,6 +57,7 @@ router.patch("/roles/:id", updateRole);
 router.delete("/roles/:id", deleteRole);
 
 // Shops
+router.get("/shops/summary", getSuperAdminShopSummary);
 router.get("/shops", listShops);
 router.post("/shops", createShop);
 router.patch("/shops/:id", updateShop);

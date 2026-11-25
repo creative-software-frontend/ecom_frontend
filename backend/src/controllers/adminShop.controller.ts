@@ -14,7 +14,10 @@ function toApiShape(
   s: {
     id: number;
     name: string;
+    slug: string;
     status: string;
+    division: string;
+    ownerName: string | null;
     mobile: string | null;
     address: string | null;
     trialEndsAt: Date | null;
@@ -27,7 +30,10 @@ function toApiShape(
   return {
     id: s.id,
     name: s.name,
+    slug: s.slug,
     status: s.status,
+    division: s.division,
+    ownerName: s.ownerName ?? "",
     mobile: s.mobile ?? "",
     address: s.address ?? "",
     trialEndsAt: s.trialEndsAt,
@@ -74,6 +80,8 @@ export async function createShop(req: Request, res: Response) {
             mobile: parsed.data.mobile || null,
             address: parsed.data.address || null,
             status: parsed.data.status,
+            division: parsed.data.division,
+            ownerName: parsed.data.ownerName || null,
           },
         });
         break;
@@ -143,6 +151,12 @@ export async function updateShop(req: Request, res: Response) {
           address: parsed.data.address || null,
         }),
         ...(parsed.data.status !== undefined && { status: parsed.data.status }),
+        ...(parsed.data.division !== undefined && {
+          division: parsed.data.division,
+        }),
+        ...(parsed.data.ownerName !== undefined && {
+          ownerName: parsed.data.ownerName || null,
+        }),
       },
     });
 

@@ -10,8 +10,9 @@ import { useEscapeKey } from "../../hooks/useEscapeKey"
 import { getErrorMessage } from "../../lib/errors"
 import { ApiError } from "../../api/client"
 import type { SuperAdminShopListItem } from "../../types/superAdmin"
+import { BD_DIVISIONS, isBdDivision } from "../../lib/divisions"
 
-// name + mobile only — slug is locked (URL preservation), status via quick action
+// Slug is locked (URL preservation), status via quick action
 const editShopSchema = z.object({
   name: z.string().trim().min(1, "Shop name is required").max(150),
   mobile: z
@@ -22,6 +23,8 @@ const editShopSchema = z.object({
       "Enter a valid BD mobile number"
     )
     .optional(),
+  division: z.enum(BD_DIVISIONS),
+  ownerName: z.string().trim().max(120).optional(),
 })
 
 type EditShopFormValues = z.infer<typeof editShopSchema>
@@ -55,6 +58,8 @@ export function EditShopDrawer({
       reset({
         name: shop.name,
         mobile: shop.ownerMobile === "N/A" ? "" : shop.ownerMobile,
+        division: isBdDivision(shop.division) ? shop.division : "Dhaka",
+        ownerName: shop.ownerName === "N/A" ? "" : shop.ownerName,
       })
     }
   }, [open, shop, reset])
@@ -71,6 +76,8 @@ export function EditShopDrawer({
         data: {
           name: values.name,
           mobile: values.mobile || undefined,
+          division: values.division,
+          ownerName: values.ownerName,
         },
       })
       onSuccess(`Shop "${values.name}" updated.`)
@@ -79,8 +86,8 @@ export function EditShopDrawer({
       if (err instanceof ApiError && err.fieldErrors) {
         let mapped = false
         for (const [field, msg] of Object.entries(err.fieldErrors)) {
-          if (["name", "mobile"].includes(field)) {
-            setError(field as "name" | "mobile", {
+          if (["name", "mobile", "division", "ownerName"].includes(field)) {
+            setError(field as "name" | "mobile" | "division" | "ownerName", {
               type: "server",
               message: msg,
             })
@@ -137,6 +144,43 @@ export function EditShopDrawer({
               Changing the name does not change the URL slug — existing links
               stay valid.
             </p>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+              Owner Name{" "}
+              <span className="text-xs font-normal text-(--text-muted)">
+                (optional)
+              </span>
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Abdur Razzaq"
+              className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm transition-all outline-none focus:border-(--primary) focus:bg-(--bg-surface)"
+              {...register("ownerName")}
+            />
+            {errors.ownerName && (
+              <FieldError>{errors.ownerName.message}</FieldError>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+              Division
+            </label>
+            <select
+              className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
+              {...register("division")}
+            >
+              {BD_DIVISIONS.map((division) => (
+                <option key={division} value={division}>
+                  {division}
+                </option>
+              ))}
+            </select>
+            {errors.division && (
+              <FieldError>{errors.division.message}</FieldError>
+            )}
           </div>
 
           <div>

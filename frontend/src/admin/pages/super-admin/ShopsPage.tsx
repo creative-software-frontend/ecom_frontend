@@ -9,21 +9,32 @@ import {
   List,
 } from "lucide-react"
 import { useNavigate } from "react-router"
-import { useAdminShopsPaginated } from "../../hooks/useAdminUsers"
+import {
+  useAdminShopsPaginated,
+  useShopSummaryQuery,
+} from "../../hooks/useAdminUsers"
 import { ShopsMetricsCards } from "../../components/super-admin/ShopsMetricsCards"
 import { StoreDensityCard } from "@/admin/components/super-admin/StoreDensityCard"
 import { DivisionSalesCard } from "@/admin/components/super-admin/DivisionSalesCard"
 import { TopSellingItemsCard } from "@/admin/components/super-admin/TopSellingItemsCard"
 import { TopVerticalsCard } from "@/admin/components/super-admin/TopVerticalsCard"
 import { TopShopsCard } from "@/admin/components/super-admin/TopShopsCard"
-import { MOCK_SHOP_SUMMARY } from "@/admin/data/shopSummaryMock"
 import { CreateShopModal } from "@/admin/components/super-admin/CreateShopModal"
+import { LoadingState } from "../../components/common/LoadingState"
+import { ErrorState } from "../../components/common/ErrorState"
+import { getErrorMessage } from "../../lib/errors"
 
 export default function ShopsPage() {
   const navigate = useNavigate()
 
   // Summary metrics need the full platform counts — no list filters here.
   const { data } = useAdminShopsPaginated({})
+  const {
+    data: shopSummary,
+    isLoading: summaryLoading,
+    error: summaryError,
+    refetch: refetchSummary,
+  } = useShopSummaryQuery()
 
   // Modal state
   const [createOpen, setCreateOpen] = useState(false)
@@ -113,18 +124,37 @@ export default function ShopsPage() {
         </div>
         {insightsExpanded ? (
           <div id="shop-summary-content" className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <StoreDensityCard divisions={MOCK_SHOP_SUMMARY.divisions} />
-              <DivisionSalesCard divisions={MOCK_SHOP_SUMMARY.divisions} />
-            </div>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <TopSellingItemsCard items={MOCK_SHOP_SUMMARY.topItems} />
-              <TopVerticalsCard
-                categories={MOCK_SHOP_SUMMARY.categories}
-                totalSkus={MOCK_SHOP_SUMMARY.totalSkus}
+            {summaryLoading && !shopSummary ? (
+              <LoadingState className="rounded-md border border-(--border-light) bg-(--bg-surface) py-12 text-center text-xs text-(--text-muted)">
+                Loading shop summary…
+              </LoadingState>
+            ) : summaryError && !shopSummary ? (
+              <ErrorState
+                message={getErrorMessage(
+                  summaryError,
+                  "Failed to load shop summary"
+                )}
+                onRetry={() => void refetchSummary()}
+                className="flex flex-col items-center gap-3 rounded-md border border-red-200 bg-red-50 py-10 text-center"
+                messageClassName="text-sm font-medium text-red-600"
+                buttonClassName="rounded-md bg-(--primary) px-4 py-2 text-xs font-medium text-white hover:bg-(--primary-hover)"
               />
-            </div>
-            <TopShopsCard shops={MOCK_SHOP_SUMMARY.topShops} />
+            ) : shopSummary ? (
+              <>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <StoreDensityCard divisions={shopSummary.divisions} />
+                  <DivisionSalesCard divisions={shopSummary.divisions} />
+                </div>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <TopSellingItemsCard items={shopSummary.topItems} />
+                  <TopVerticalsCard
+                    categories={shopSummary.categories}
+                    totalSkus={shopSummary.totalSkus}
+                  />
+                </div>
+                <TopShopsCard shops={shopSummary.topShops} />
+              </>
+            ) : null}
           </div>
         ) : null}
       </section>

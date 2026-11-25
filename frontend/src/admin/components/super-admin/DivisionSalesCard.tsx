@@ -1,6 +1,6 @@
 import { TrendingUp } from "lucide-react"
 import { formatTaka } from "../../lib/orderStatus"
-import type { DivisionSummary } from "../../data/shopSummaryMock"
+import type { DivisionSummary } from "../../types/superAdmin"
 
 export function DivisionSalesCard({
   divisions,
@@ -11,6 +11,7 @@ export function DivisionSalesCard({
   const totalSales = divisions.reduce((sum, d) => sum + d.salesToday, 0)
   const totalOrders = divisions.reduce((sum, d) => sum + d.ordersToday, 0)
   const maxSales = Math.max(...divisions.map((d) => d.salesToday), 1)
+  const hasSales = totalSales > 0
 
   return (
     <div className="flex flex-col justify-between rounded-md border border-(--border-light) bg-(--bg-surface) p-5">
@@ -30,7 +31,7 @@ export function DivisionSalesCard({
         </div>
 
         <div className="mt-6 space-y-4">
-          {ranked.length === 0 ? (
+          {!hasSales ? (
             <p className="py-6 text-center text-xs text-(--text-muted)">
               No sales recorded today.
             </p>
@@ -63,7 +64,7 @@ export function DivisionSalesCard({
       <div className="mt-6 flex items-center justify-between border-t border-(--border-light) pt-3 text-xs text-(--text-muted)">
         <span>{totalOrders} orders today</span>
         <span className="font-medium text-(--text-primary)">
-          Top: {ranked[0]?.division ?? "—"}
+          Top: {hasSales ? (ranked[0]?.division ?? "—") : "—"}
         </span>
       </div>
     </div>

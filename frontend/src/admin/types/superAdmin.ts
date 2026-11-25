@@ -48,6 +48,8 @@ export type SuperAdminShop = {
   name: string
   slug: string
   status: "active" | "inactive" | "trial"
+  division: string
+  ownerName: string
   mobile: string
   address: string
   trialEndsAt: string | null
@@ -117,12 +119,15 @@ export type SuperAdminDashboardData = {
     slug: string
     trialEndsAt: string | null
   }[]
+  commerce: SuperAdminCommerceAnalytics
+  shopSummary: ShopSummaryData
 }
 
 export type SuperAdminShopListItem = {
   id: number
   name: string
   slug: string
+  division: string
   ownerName: string
   ownerMobile: string
   status: "active" | "trial" | "inactive"
@@ -174,6 +179,8 @@ export type CreateShopInput = {
   mobile?: string
   address?: string
   status?: "active" | "trial" | "inactive"
+  division: string
+  ownerName?: string
 }
 
 export type UpdateShopInput = {
@@ -181,4 +188,80 @@ export type UpdateShopInput = {
   mobile?: string
   address?: string
   status?: "active" | "trial" | "inactive"
+  division?: string
+  ownerName?: string
+}
+
+export type ShopListParams = {
+  q?: string
+  status?: string
+  page?: number
+  limit?: number
+}
+
+/* ===== Real super-admin commerce analytics ===== */
+
+export type SuperAdminCommerceAnalytics = {
+  orderPipeline: {
+    totalOrders: number
+    orderValue: number
+    unpaidAmount: number
+    estimatedProfit: number
+    countsByStatus: {
+      pending: number
+      confirmed: number
+      shipped: number
+      delivered: number
+      returned: number
+      cancelled: number
+    }
+  }
+  productHealth: {
+    totalSkus: number
+    active: number
+    blocked: number
+    lowStock: number
+    outOfStock: number
+  }
+}
+
+export type DivisionSummary = {
+  division: string
+  shops: number
+  salesToday: number
+  ordersToday: number
+}
+
+export type TopShopSummary = {
+  id: number
+  name: string
+  slug: string
+  status: "active" | "trial" | "inactive"
+  salesToday: number
+  ordersToday: number
+}
+
+export type TopSellingItem = {
+  id: number
+  name: string
+  category: string
+  unitsSold: number
+  revenue: number
+}
+
+export type CategorySummary = {
+  name: string
+  /** Share of total units sold, 0–100. */
+  share: number
+  /** Deterministic palette colour used by the donut + legend. */
+  color: string
+}
+
+export type ShopSummaryData = {
+  updatedAt: string
+  totalSkus: number
+  divisions: DivisionSummary[]
+  topShops: TopShopSummary[]
+  topItems: TopSellingItem[]
+  categories: CategorySummary[]
 }

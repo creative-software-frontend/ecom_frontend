@@ -9,6 +9,7 @@ import { useCreateShopMutation } from "../../hooks/useAdminUsers"
 import { useEscapeKey } from "../../hooks/useEscapeKey"
 import { getErrorMessage } from "../../lib/errors"
 import { ApiError } from "../../api/client"
+import { BD_DIVISIONS } from "../../lib/divisions"
 
 // Zod Schema (ব্যাকএন্ডের সাথে ম্যাচ করা)
 const createShopSchema = z.object({
@@ -23,6 +24,8 @@ const createShopSchema = z.object({
     .optional(),
   address: z.string().trim().max(500).optional(),
   status: z.enum(["active", "trial", "inactive"]).default("active"),
+  division: z.enum(BD_DIVISIONS).default("Dhaka"),
+  ownerName: z.string().trim().max(120).optional(),
 })
 
 type CreateShopFormValues = z.input<typeof createShopSchema>
@@ -53,6 +56,8 @@ export function CreateShopModal({
       mobile: "",
       address: "",
       status: "active",
+      division: "Dhaka",
+      ownerName: "",
     },
   })
 
@@ -71,13 +76,15 @@ export function CreateShopModal({
         mobile: values.mobile || undefined,
         address: values.address || undefined,
         status: values.status,
+        division: values.division ?? "Dhaka",
+        ownerName: values.ownerName,
       })
       onSuccess(`Shop "${values.name}" created successfully.`)
       onClose()
     } catch (err) {
       if (err instanceof ApiError && err.fieldErrors) {
         for (const [field, msg] of Object.entries(err.fieldErrors)) {
-          if (["name", "mobile", "address"].includes(field)) {
+          if (["name", "mobile", "address", "division", "ownerName"].includes(field)) {
             setError(field as keyof CreateShopFormValues, {
               type: "server",
               message: msg,
@@ -125,6 +132,43 @@ export function CreateShopModal({
               {...register("name")}
             />
             {errors.name && <FieldError>{errors.name.message}</FieldError>}
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+              Owner Name{" "}
+              <span className="text-xs font-normal text-(--text-muted)">
+                (optional)
+              </span>
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Abdur Razzaq"
+              className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm transition-all outline-none focus:border-(--primary) focus:bg-(--bg-surface)"
+              {...register("ownerName")}
+            />
+            {errors.ownerName && (
+              <FieldError>{errors.ownerName.message}</FieldError>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+              Division
+            </label>
+            <select
+              className="block h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
+              {...register("division")}
+            >
+              {BD_DIVISIONS.map((division) => (
+                <option key={division} value={division}>
+                  {division}
+                </option>
+              ))}
+            </select>
+            {errors.division && (
+              <FieldError>{errors.division.message}</FieldError>
+            )}
           </div>
 
           <div>

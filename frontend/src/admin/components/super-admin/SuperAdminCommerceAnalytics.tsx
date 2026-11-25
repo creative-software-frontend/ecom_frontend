@@ -1,8 +1,9 @@
 import { ArrowRight, Package, ShoppingCart, TriangleAlert } from "lucide-react"
 import { Link } from "react-router"
-import { MOCK_ORDERS } from "../../data/superAdminOrdersMock"
-import { MOCK_SUPER_ADMIN_PRODUCTS } from "../../data/superAdminProductsMock"
-import { MOCK_SHOP_SUMMARY } from "../../data/shopSummaryMock"
+import type {
+  SuperAdminCommerceAnalytics as CommerceData,
+  ShopSummaryData,
+} from "../../types/superAdmin"
 import { formatTaka } from "../../lib/orderStatus"
 import { TopSellingItemsCard } from "./TopSellingItemsCard"
 import { TopShopsCard } from "./TopShopsCard"
@@ -12,63 +13,33 @@ const ORDER_STAGES = [
   { status: "confirmed", label: "Confirmed", color: "bg-blue-500" },
   { status: "shipped", label: "Shipped", color: "bg-indigo-500" },
   { status: "delivered", label: "Delivered", color: "bg-emerald-500" },
+  { status: "returned", label: "Returned", color: "bg-orange-500" },
   { status: "cancelled", label: "Cancelled", color: "bg-red-500" },
 ] as const
 
-const orderCountByStatus = (status: string) =>
-  MOCK_ORDERS.filter((order) => order.orderStatus === status).length
+export function SuperAdminCommerceAnalytics({
+  commerce,
+  shopSummary,
+}: {
+  commerce: CommerceData
+  shopSummary: ShopSummaryData
+}) {
+  const { orderPipeline, productHealth } = commerce
 
-const orderSales = MOCK_ORDERS.reduce(
-  (sum, order) => sum + (order.currentPrice ?? order.total),
-  0
-)
-const unpaidAmount = MOCK_ORDERS.filter(
-  (order) => order.paymentStatus === "unpaid"
-).reduce((sum, order) => sum + order.total, 0)
-const estimatedProfit = MOCK_ORDERS.reduce(
-  (sum, order) =>
-    sum + (order.currentPrice ?? order.total) - (order.buyingPrice ?? 0),
-  0
-)
-
-const activeProducts = MOCK_SUPER_ADMIN_PRODUCTS.filter(
-  (product) => product.isActive && !product.isBlocked
-).length
-const blockedProducts = MOCK_SUPER_ADMIN_PRODUCTS.filter(
-  (product) => product.isBlocked
-).length
-const lowStockProducts = MOCK_SUPER_ADMIN_PRODUCTS.filter(
-  (product) =>
-    !product.isBlocked && product.stockQuantity > 0 && product.stockQuantity < 5
-).length
-const outOfStockProducts = MOCK_SUPER_ADMIN_PRODUCTS.filter(
-  (product) => !product.isBlocked && product.stockQuantity === 0
-).length
-
-function MockDataBadge() {
   return (
-    <span className="inline-flex shrink-0 items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-amber-800 uppercase">
-      Demo data
-    </span>
-  )
-}
-
-export function SuperAdminDemoAnalytics() {
-  return (
-    <section aria-labelledby="demo-analytics-heading" className="space-y-3">
+    <section aria-labelledby="commerce-analytics-heading" className="space-y-3">
       <header className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2
-            id="demo-analytics-heading"
+            id="commerce-analytics-heading"
             className="text-base font-semibold text-(--text-primary)"
           >
             Commerce analytics
           </h2>
           <p className="text-xs text-(--text-muted)">
-            Orders, products and sales performance across shops
+            Live orders, products and sales performance across shops
           </p>
         </div>
-        <MockDataBadge />
       </header>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -83,7 +54,8 @@ export function SuperAdminDemoAnalytics() {
                   Order pipeline
                 </h3>
                 <p className="text-xs text-(--text-muted)">
-                  {MOCK_ORDERS.length} sample orders
+                  {orderPipeline.totalOrders.toLocaleString("en-BD")} orders
+                  across all shops
                 </p>
               </div>
             </div>
@@ -99,13 +71,13 @@ export function SuperAdminDemoAnalytics() {
             <div className="rounded-md bg-(--bg-app) p-2.5">
               <p className="text-[11px] text-(--text-muted)">Order value</p>
               <p className="mt-1 text-sm font-bold text-(--text-primary) tabular-nums">
-                {formatTaka(orderSales)}
+                {formatTaka(orderPipeline.orderValue)}
               </p>
             </div>
             <div className="rounded-md bg-(--bg-app) p-2.5">
               <p className="text-[11px] text-(--text-muted)">Unpaid amount</p>
               <p className="mt-1 text-sm font-bold text-amber-700 tabular-nums">
-                {formatTaka(unpaidAmount)}
+                {formatTaka(orderPipeline.unpaidAmount)}
               </p>
             </div>
             <div className="rounded-md bg-(--bg-app) p-2.5">
@@ -113,16 +85,18 @@ export function SuperAdminDemoAnalytics() {
                 Est. gross profit
               </p>
               <p className="mt-1 text-sm font-bold text-emerald-700 tabular-nums">
-                {formatTaka(estimatedProfit)}
+                {formatTaka(orderPipeline.estimatedProfit)}
               </p>
             </div>
           </div>
 
           <div className="mt-4 space-y-2.5">
             {ORDER_STAGES.map((stage) => {
-              const count = orderCountByStatus(stage.status)
+              const count = orderPipeline.countsByStatus[stage.status]
               const percent =
-                MOCK_ORDERS.length > 0 ? (count / MOCK_ORDERS.length) * 100 : 0
+                orderPipeline.totalOrders > 0
+                  ? (count / orderPipeline.totalOrders) * 100
+                  : 0
 
               return (
                 <div key={stage.status}>
@@ -143,7 +117,7 @@ export function SuperAdminDemoAnalytics() {
             })}
           </div>
           <p className="mt-3 text-[10px] text-(--text-muted)">
-            Profit uses estimated buying prices from sample order data.
+            Profit calculated from products with buying price set.
           </p>
         </section>
 
@@ -158,7 +132,7 @@ export function SuperAdminDemoAnalytics() {
                   Product health
                 </h3>
                 <p className="text-xs text-(--text-muted)">
-                  {MOCK_SUPER_ADMIN_PRODUCTS.length} sample catalog products
+                  {productHealth.totalSkus.toLocaleString("en-BD")} catalog SKUs
                 </p>
               </div>
             </div>
@@ -174,13 +148,13 @@ export function SuperAdminDemoAnalytics() {
             <div className="rounded-md bg-(--bg-app) p-3">
               <p className="text-xs text-(--text-muted)">Active and live</p>
               <p className="mt-1 text-xl font-bold text-emerald-700 tabular-nums">
-                {activeProducts}
+                {productHealth.active}
               </p>
             </div>
             <div className="rounded-md bg-(--bg-app) p-3">
               <p className="text-xs text-(--text-muted)">Blocked</p>
               <p className="mt-1 text-xl font-bold text-red-600 tabular-nums">
-                {blockedProducts}
+                {productHealth.blocked}
               </p>
             </div>
             <div className="rounded-md border border-amber-100 bg-amber-50/60 p-3">
@@ -189,13 +163,13 @@ export function SuperAdminDemoAnalytics() {
                 Low stock (&lt; 5)
               </p>
               <p className="mt-1 text-lg font-bold text-amber-800 tabular-nums">
-                {lowStockProducts}
+                {productHealth.lowStock}
               </p>
             </div>
             <div className="rounded-md bg-(--bg-app) p-3">
               <p className="text-xs text-(--text-muted)">Out of stock</p>
               <p className="mt-1 text-lg font-bold text-(--text-primary) tabular-nums">
-                {outOfStockProducts}
+                {productHealth.outOfStock}
               </p>
             </div>
           </div>
@@ -204,8 +178,8 @@ export function SuperAdminDemoAnalytics() {
           </p>
         </section>
 
-        <TopShopsCard shops={MOCK_SHOP_SUMMARY.topShops} />
-        <TopSellingItemsCard items={MOCK_SHOP_SUMMARY.topItems} />
+        <TopShopsCard shops={shopSummary.topShops} />
+        <TopSellingItemsCard items={shopSummary.topItems} />
       </div>
     </section>
   )

@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
+import { getSuperAnalytics } from "../lib/superAnalytics.js";
 
 /* ================================================================
    Platform-wide metrics for the Super Admin dashboard.
@@ -26,6 +27,7 @@ export async function getSuperAdminDashboard(_req: Request, res: Response) {
       usersByRoleRaw,
       recentAudits,
       trialExpiringSoon,
+      superAnalytics,
     ] = await Promise.all([
       prisma.shop.count(),
       prisma.shop.count({ where: { status: "active" } }),
@@ -68,6 +70,8 @@ export async function getSuperAdminDashboard(_req: Request, res: Response) {
           trialEndsAt: true,
         },
       }),
+
+      getSuperAnalytics(),
     ]);
 
     // Resolve role display names for the group-by result.
@@ -112,10 +116,25 @@ export async function getSuperAdminDashboard(_req: Request, res: Response) {
           shop: a.shop,
         })),
         trialExpiringSoon,
+        commerce: superAnalytics.commerce,
+        shopSummary: superAnalytics.shopSummary,
       },
     });
   } catch (error) {
     console.error("getSuperAdminDashboard failed:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+}
+
+/** GET /api/admin/super/shops/summary — real commerce + division aggregates. */
+export async function getSuperAdminShopSummary(_req: Request, res: Response) {
+  try {
+    const { shopSummary } = await getSuperAnalytics();
+    return res.json({ success: true, data: shopSummary });
+  } catch (error) {
+    console.error("getSuperAdminShopSummary failed:", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });

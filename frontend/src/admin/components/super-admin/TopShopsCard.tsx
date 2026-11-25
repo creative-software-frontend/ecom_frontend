@@ -1,6 +1,6 @@
 import { Trophy } from "lucide-react"
 import { formatTaka } from "../../lib/orderStatus"
-import type { TopShopSummary } from "../../data/shopSummaryMock"
+import type { TopShopSummary } from "../../types/superAdmin"
 
 const statusConfig: Record<
   TopShopSummary["status"],
@@ -23,6 +23,7 @@ const statusConfig: Record<
 export function TopShopsCard({ shops }: { shops: TopShopSummary[] }) {
   const ranked = [...shops].sort((a, b) => b.salesToday - a.salesToday)
   const maxSales = Math.max(...shops.map((s) => s.salesToday), 1)
+  const hasSales = ranked.some((shop) => shop.salesToday > 0)
 
   return (
     <div className="rounded-md border border-(--border-light) bg-(--bg-surface) p-5">
@@ -40,7 +41,7 @@ export function TopShopsCard({ shops }: { shops: TopShopSummary[] }) {
         </span>
       </div>
 
-      {ranked.length === 0 ? (
+      {!hasSales ? (
         <p className="py-10 text-center text-xs text-(--text-muted)">
           No shop sales recorded today.
         </p>

@@ -433,6 +433,8 @@ model Shop {
   name        String
   slug        String    @unique
   status      String    @default("active")
+  division    String    @default("Dhaka")
+  ownerName   String?   @map("owner_name")
   trialEndsAt DateTime? @map("trial_ends_at")
   expiryDate  DateTime? @map("expiry_date")
   mobile      String?

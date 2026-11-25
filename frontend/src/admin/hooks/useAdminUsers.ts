@@ -4,6 +4,7 @@ import type {
   CreateShopInput,
   UpdateShopInput,
   UserListParams,
+  ShopListParams,
 } from "../types/superAdmin"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { CreateUserInput, UpdateUserInput } from "../types/superAdmin"
@@ -112,6 +113,14 @@ export function useSuperAdminDashboardQuery() {
     staleTime: 30 * 1000,
   })
 }
+
+export function useShopSummaryQuery() {
+  return useQuery({
+    queryKey: ADMIN_SHOP_SUMMARY_QUERY_KEY,
+    queryFn: ({ signal }) => superAdminApi.shops.summary(signal),
+    staleTime: 30 * 1000,
+  })
+}
 export const ADMIN_USERS_QUERY_KEY = ["admin", "super", "users"] as const
 export const ADMIN_ROLES_QUERY_KEY = ["admin", "super", "roles"] as const
 export const ADMIN_SHOPS_QUERY_KEY = ["admin", "super", "shops"] as const
@@ -119,6 +128,12 @@ export const ADMIN_DASHBOARD_QUERY_KEY = [
   "admin",
   "super",
   "dashboard",
+] as const
+export const ADMIN_SHOP_SUMMARY_QUERY_KEY = [
+  "admin",
+  "super",
+  "shops",
+  "summary",
 ] as const
 
 export const ADMIN_SHOPS_LIST_QUERY_KEY = [
@@ -128,8 +143,7 @@ export const ADMIN_SHOPS_LIST_QUERY_KEY = [
   "list",
 ] as const
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useAdminShopsPaginated(params: any = {}) {
+export function useAdminShopsPaginated(params: ShopListParams = {}) {
   return useQuery({
     queryKey: [...ADMIN_SHOPS_LIST_QUERY_KEY, params],
     queryFn: ({ signal }) => superAdminApi.shops.getPaginated(params, signal),
@@ -160,6 +174,8 @@ export function useCreateShopMutation() {
       // ইনভ্যালিডেট করা হচ্ছে যাতে টেবিল এবং সাইডবারের কাউন্ট আপডেট হয়
       void qc.invalidateQueries({ queryKey: ADMIN_SHOPS_LIST_QUERY_KEY })
       void qc.invalidateQueries({ queryKey: ADMIN_SHOPS_QUERY_KEY })
+      void qc.invalidateQueries({ queryKey: ADMIN_SHOP_SUMMARY_QUERY_KEY })
+      void qc.invalidateQueries({ queryKey: ADMIN_DASHBOARD_QUERY_KEY })
       void qc.invalidateQueries({ queryKey: ["admin", "sidebar-stats"] })
     },
   })
@@ -173,6 +189,8 @@ export function useUpdateShopMutation() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ADMIN_SHOPS_LIST_QUERY_KEY })
       void qc.invalidateQueries({ queryKey: ADMIN_SHOPS_QUERY_KEY })
+      void qc.invalidateQueries({ queryKey: ADMIN_SHOP_SUMMARY_QUERY_KEY })
+      void qc.invalidateQueries({ queryKey: ADMIN_DASHBOARD_QUERY_KEY })
     },
   })
 }

@@ -1,5 +1,5 @@
 import { MapPin, RefreshCcw, ArrowRight } from "lucide-react"
-import type { DivisionSummary } from "../../data/shopSummaryMock"
+import type { DivisionSummary } from "../../types/superAdmin"
 
 export function StoreDensityCard({
   divisions,
