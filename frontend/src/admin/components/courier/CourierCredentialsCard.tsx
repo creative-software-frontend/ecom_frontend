@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { Key, Unplug } from "lucide-react"
+import { Key, Loader2, Unplug, Zap } from "lucide-react"
 import { CourierCardHeader } from "./CourierCardHeader"
 import { ConfirmationDialog } from "../common/ConfirmationDialog"
 import { ErrorState } from "../common/ErrorState"
@@ -10,10 +10,13 @@ import { FormToggle } from "../settings/SettingsField"
 import {
   useCourierAccountsQuery,
   useDisconnectCourierAccountMutation,
+  useTestCourierAccountMutation,
   useToggleCourierAccountMutation,
   useUpdateCourierAccountMutation,
 } from "../../hooks/useCourierQuery"
 import { getErrorMessage } from "../../lib/errors"
+import { relativeTime } from "../../lib/formatTime"
+import { formatTaka } from "../../lib/orderStatus"
 import type {
   CourierAccount,
   CourierAccountStatus,
@@ -199,9 +202,30 @@ function isConfigured(account: CourierAccount): boolean {
   return (
     FLAG_KEYS.some((key) => account[key]) ||
     Boolean(
-      account.clientId || account.username || account.storeId || account.clientContext
+      account.clientId ||
+      account.username ||
+      account.storeId ||
+      account.clientContext
     )
   )
+}
+
+/** Mirrors the backend's required-credential list using only safe flags. */
+const REQUIRED_CREDENTIALS: Record<
+  CourierSlug,
+  readonly (keyof CourierAccount)[]
+> = {
+  steadfast: ["hasApiKey", "hasSecretKey"],
+  pathao: ["clientId", "hasClientSecret", "username", "hasPassword", "storeId"],
+  redx: ["storeId", "hasAccessToken"],
+  carrybee: ["clientId", "hasClientSecret", "storeId", "clientContext"],
+}
+
+function hasRequiredCredentials(account: CourierAccount): boolean {
+  return REQUIRED_CREDENTIALS[account.slug].every((field) => {
+    const value = account[field]
+    return typeof value === "string" ? value.trim().length > 0 : value === true
+  })
 }
 
 function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
@@ -211,18 +235,24 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
     message: string
   } | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [statusNoticeDismissed, setStatusNoticeDismissed] = useState(false)
 
   const updateMutation = useUpdateCourierAccountMutation()
   const toggleMutation = useToggleCourierAccountMutation()
   const disconnectMutation = useDisconnectCourierAccountMutation()
+  const testMutation = useTestCourierAccountMutation()
 
   useEffect(() => {
     setValues(toFormValues(account))
+    setStatusNoticeDismissed(false)
   }, [account])
 
   const fields = FIELDS[account.slug]
   const status = STATUS_META[account.status] ?? STATUS_META.error
   const configured = isConfigured(account)
+  const credentialsSaved = hasRequiredCredentials(account)
+  const dirty = JSON.stringify(values) !== JSON.stringify(toFormValues(account))
+  const canTest = credentialsSaved && !dirty && !testMutation.isPending
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -230,12 +260,12 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
 
     const payload: UpdateCourierAccountInput = {}
     for (const field of fields) {
+      // baseUrl is server-owned and read-only — it is never sent on save.
+      if (field.key === "baseUrl") continue
       const raw = values[field.key] ?? ""
       if (field.secret) {
         // Empty means "keep the saved secret"; only non-empty values are sent.
         if (raw.length > 0) payload[field.key] = raw
-      } else if (field.key === "baseUrl") {
-        if (raw.trim().length > 0) payload.baseUrl = raw.trim()
       } else {
         Object.assign(payload, { [field.key]: raw.trim() || null })
       }
@@ -291,11 +321,27 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
     }
   }
 
+  async function handleTest() {
+    setNotice(null)
+    try {
+      const result = await testMutation.mutateAsync(account.slug)
+      setNotice({
+        variant: result.ok ? "success" : "error",
+        message: result.message,
+      })
+    } catch (error) {
+      setNotice({
+        variant: "error",
+        message: getErrorMessage(error, "Could not test connection."),
+      })
+    }
+  }
+
   return (
     <div className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
       <div className="flex w-full items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded bg-(--primary-soft) text-xs font-bold text-(--primary)">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded bg-(--primary-soft) text-xs font-bold text-primary">
             {account.initials ?? account.slug.slice(0, 2).toUpperCase()}
           </span>
           <div className="min-w-0">
@@ -307,16 +353,16 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
                 variant={status.variant}
                 label={status.label}
                 ariaLive="polite"
+                className={
+                  account.status === "error"
+                    ? "bg-(--status-cancelled-bg)! text-(--status-cancelled-text)!"
+                    : undefined
+                }
               />
             </div>
             <p className="mt-0.5 truncate text-xs text-(--text-muted)">
               {account.description ?? "Courier account"}
             </p>
-            {account.statusMessage && (
-              <p className="mt-0.5 text-xs text-(--status-cancelled-text)">
-                {account.statusMessage}
-              </p>
-            )}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2 pr-3">
@@ -362,19 +408,28 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
                       [field.key]: event.target.value,
                     }))
                   }
+                  readOnly={field.key === "baseUrl"}
                   placeholder={
                     isSaved
                       ? "Saved (••••) — enter new value to replace"
                       : `Enter ${field.label.toLowerCase()}`
                   }
                   autoComplete="off"
-                  className={inputClass}
+                  className={`${inputClass} ${
+                    field.key === "baseUrl"
+                      ? "cursor-not-allowed !bg-(--bg-surface-hover) text-(--text-muted)"
+                      : ""
+                  }`}
                 />
-                {isSaved && preview && (
+                {field.key === "baseUrl" ? (
+                  <p className="mt-1 text-xs text-(--text-muted)">
+                    Official API endpoint (read-only)
+                  </p>
+                ) : isSaved && preview ? (
                   <p className="mt-1 text-xs text-(--text-muted)">
                     Saved {preview}
                   </p>
-                )}
+                ) : null}
               </div>
             )
           })}
@@ -389,12 +444,60 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
             onDismiss={() => setNotice(null)}
           />
         )}
+        {!notice &&
+          !statusNoticeDismissed &&
+          account.status === "error" &&
+          account.statusMessage && (
+            <InlineNotice
+              message={account.statusMessage}
+              variant="error"
+              className={noticeClass("error")}
+              dismissLabel="Dismiss connection error"
+              onDismiss={() => setStatusNoticeDismissed(true)}
+            />
+          )}
 
         <div className="flex flex-wrap items-center justify-between gap-2 rounded bg-(--bg-surface) px-3 py-2">
-          <span className="text-xs text-(--text-muted)">
-            Live API connection test will be added in the next phase.
-          </span>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-(--text-muted)">
+            {!credentialsSaved && (
+              <span>Save required credentials before testing.</span>
+            )}
+            {credentialsSaved && dirty && (
+              <span>Save changes before testing</span>
+            )}
+            {account.slug === "steadfast" && account.balance !== null && (
+              <span>
+                Balance:{" "}
+                <span className="font-semibold text-(--text-primary)">
+                  {formatTaka(account.balance)}
+                </span>
+              </span>
+            )}
+            {account.checkedAt && (
+              <span>Last checked: {relativeTime(account.checkedAt)}</span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => void handleTest()}
+              disabled={!canTest}
+              title={
+                !credentialsSaved
+                  ? "Save required credentials before testing"
+                  : dirty
+                    ? "Save changes before testing"
+                    : undefined
+              }
+              className="inline-flex h-7 items-center gap-1 rounded border border-(--border-light) bg-(--bg-surface) px-2 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+            >
+              {testMutation.isPending ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <Zap className="size-3" />
+              )}
+              {testMutation.isPending ? "Testing..." : "Test Connection"}
+            </button>
             {configured && (
               <button
                 type="button"
@@ -409,7 +512,7 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
             <button
               type="submit"
               disabled={updateMutation.isPending || toggleMutation.isPending}
-              className="inline-flex h-7 items-center rounded bg-primary px-2.5 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+              className="inline-flex h-7 items-center rounded bg-primary px-2.5 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
             >
               {updateMutation.isPending ? "Saving…" : "Save"}
             </button>

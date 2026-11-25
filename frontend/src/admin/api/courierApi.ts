@@ -3,6 +3,7 @@ import type {
   CourierAccount,
   CourierSettings,
   CourierSlug,
+  CourierTestResult,
   UpdateCourierAccountInput,
 } from "../types/courier"
 
@@ -43,6 +44,12 @@ export const courierApi = {
     return apiRequest<CourierAccount>(
       `/shop/settings/courier/accounts/${slug}/credentials`,
       { method: "DELETE" }
+    )
+  },
+  testAccount(slug: CourierSlug): Promise<CourierTestResult> {
+    return apiRequest<CourierTestResult>(
+      `/shop/settings/courier/accounts/${slug}/test`,
+      { method: "POST" }
     )
   },
 }

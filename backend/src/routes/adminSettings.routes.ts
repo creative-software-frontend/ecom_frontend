@@ -18,6 +18,7 @@ import {
 import {
   disconnectCourierAccount,
   listCourierAccounts,
+  testCourierAccount,
   toggleCourierAccount,
   upsertCourierAccount,
 } from "../controllers/adminCourierAccount.controller.js";
@@ -52,6 +53,7 @@ router.put("/courier", updateCourierSettings);
 router.get("/courier/accounts", listCourierAccounts);
 router.put("/courier/accounts/:slug", upsertCourierAccount);
 router.patch("/courier/accounts/:slug/toggle", toggleCourierAccount);
+router.post("/courier/accounts/:slug/test", testCourierAccount);
 router.delete("/courier/accounts/:slug/credentials", disconnectCourierAccount);
 
 // SMS templates

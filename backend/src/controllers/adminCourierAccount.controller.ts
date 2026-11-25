@@ -2,10 +2,11 @@ import type { Request, Response } from "express";
 import { Prisma } from "../../generated/prisma/client.js";
 import { logAudit } from "../lib/auditLog.js";
 import { encryptSecret, maskSecret } from "../lib/crypto.js";
+import { testCourierConnection } from "../lib/courierTester.js";
 import { prisma } from "../lib/prisma.js";
 import { sendValidationError } from "../lib/validation.js";
 import {
-  COURIER_BASE_URLS,
+  DEFAULT_COURIER_BASE_URLS,
   COURIER_SLUGS,
   toggleCourierAccountSchema,
   upsertCourierAccountSchema,
@@ -109,7 +110,7 @@ export async function ensureShopCourierAccounts(shopId: number): Promise<void> {
       shopId,
       slug,
       enabled: false,
-      baseUrl: COURIER_BASE_URLS[slug],
+      baseUrl: DEFAULT_COURIER_BASE_URLS[slug],
       apiKey: null,
       secretKey: null,
       clientId: null,
@@ -163,6 +164,14 @@ function isConfigured(
   return REQUIRED_CREDENTIALS[slug].every((field) =>
     hasCredential(credentials[field]),
   );
+}
+
+/** Stored encrypted fields are non-null when a credential has been saved. */
+function hasRequiredCredentials(
+  slug: CourierSlug,
+  row: CourierAccountRow,
+): boolean {
+  return isConfigured(slug, row);
 }
 
 export async function listCourierAccounts(req: Request, res: Response) {
@@ -240,7 +249,8 @@ export async function upsertCourierAccount(req: Request, res: Response) {
       enabled: configured ? (input.enabled ?? existing.enabled) : false,
       status,
       statusMessage: null,
-      ...(input.baseUrl !== undefined && { baseUrl: input.baseUrl }),
+      // Read-only by design: a forged client baseUrl is stripped by the schema.
+      baseUrl: DEFAULT_COURIER_BASE_URLS[slugParam],
       ...(input.clientId !== undefined && { clientId: input.clientId }),
       ...(input.username !== undefined && { username: input.username }),
       ...(input.storeId !== undefined && { storeId: input.storeId }),
@@ -353,7 +363,7 @@ export async function disconnectCourierAccount(req: Request, res: Response) {
         checkedAt: null,
         enabled: false,
         status: "not_connected",
-        baseUrl: COURIER_BASE_URLS[slugParam],
+        baseUrl: DEFAULT_COURIER_BASE_URLS[slugParam],
       },
     });
 
@@ -369,6 +379,75 @@ export async function disconnectCourierAccount(req: Request, res: Response) {
     return res.json({ success: true, data: toSafeCourierAccount(updated) });
   } catch (error) {
     console.error("Error disconnecting courier account:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+}
+
+/** Live probe with persisted, secret-free status/balance/checkedAt results. */
+export async function testCourierAccount(req: Request, res: Response) {
+  const shopId = getShopIdOrForbid(req, res);
+  if (shopId === null) return;
+
+  const slugParam = typeof req.params.slug === "string" ? req.params.slug : "";
+  if (!isCourierSlug(slugParam)) return notFound(res);
+
+  try {
+    await ensureShopCourierAccounts(shopId);
+    const existing = await findAccount(shopId, slugParam);
+    if (!existing) return notFound(res);
+
+    if (!hasRequiredCredentials(slugParam, existing)) {
+      return res.status(422).json({
+        success: false,
+        message: "Configure required credentials before testing connection.",
+      });
+    }
+
+    const result = await testCourierConnection(existing);
+    const updated = await prisma.courierAccount.update({
+      where: { id: existing.id },
+      data: {
+        // Heal any legacy/poisoned URL: only official defaults are stored.
+        baseUrl: DEFAULT_COURIER_BASE_URLS[slugParam],
+        status: result.status,
+        statusMessage: result.ok ? null : result.message,
+        checkedAt: new Date(),
+        ...(slugParam === "steadfast" &&
+          result.ok &&
+          result.balance !== undefined && { balance: result.balance }),
+        ...(slugParam === "pathao" &&
+          result.ok &&
+          result.encryptedAccessToken && {
+            accessToken: result.encryptedAccessToken,
+          }),
+      },
+    });
+
+    void logAudit({
+      req,
+      action: "courier.account_test",
+      entityType: "courier_account",
+      entityId: updated.id,
+      targetShopId: shopId,
+      metadata: {
+        slug: updated.slug,
+        ok: result.ok,
+        status: updated.status,
+      },
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        ok: result.ok,
+        message: result.message,
+        account: toSafeCourierAccount(updated),
+      },
+    });
+  } catch (error) {
+    console.error("Error testing courier connection:", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });

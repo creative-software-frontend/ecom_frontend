@@ -81,3 +81,20 @@ export function useDisconnectCourierAccountMutation() {
     courierApi.disconnectAccount(slug)
   )
 }
+
+/** Test results carry the refreshed safe account, so no secrets enter the cache. */
+export function useTestCourierAccountMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (slug: CourierSlug) => courierApi.testAccount(slug),
+    onSuccess: (result) => {
+      qc.setQueryData<CourierAccount[]>(
+        COURIER_ACCOUNTS_QUERY_KEY,
+        (current) =>
+          current?.map((item) =>
+            item.slug === result.account.slug ? result.account : item
+          )
+      )
+    },
+  })
+}

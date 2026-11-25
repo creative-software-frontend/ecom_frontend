@@ -43,6 +43,12 @@ export type CourierAccount = {
   updatedAt: string
 }
 
+export type CourierTestResult = {
+  ok: boolean
+  message: string
+  account: CourierAccount
+}
+
 export type UpdateCourierAccountInput = {
   enabled?: boolean
   baseUrl?: string | null
