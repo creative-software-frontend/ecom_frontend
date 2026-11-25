@@ -197,8 +197,32 @@ model User {
   role      Role       @relation(fields: [roleId], references: [id])
   shop      Shop?      @relation(fields: [shopId], references: [id])
   auditLogs AuditLog[]
+  newsPosts News[]
 
   @@map("users")
+}
+
+// ==================================================================
+// News — platform-wide announcements, authored by super admins.
+// Not shop scoped: published posts are readable by every shop user.
+// ==================================================================
+
+model News {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(300)
+  description String?  @db.Text
+  category    String   @default("general") // "charge" | "integration" | "notice" | "general"
+  isPinned    Boolean  @default(false) @map("is_pinned")
+  status      String   @default("published") // "published" | "draft"
+  publishedAt DateTime @default(now()) @map("published_at")
+  createdById Int      @map("created_by_id")
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([status, isPinned, publishedAt])
+  @@index([category])
+  @@map("news")
 }
 
 model MobileVerification {

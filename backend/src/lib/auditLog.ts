@@ -45,7 +45,10 @@ export type AuditAction =
   | "brand.delete"
   | "category.create"
   | "category.update"
-  | "category.delete";
+  | "category.delete"
+  | "news.create"
+  | "news.update"
+  | "news.delete";
 
 export async function logAudit(params: {
   req: Request;

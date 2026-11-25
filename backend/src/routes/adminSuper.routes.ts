@@ -25,6 +25,7 @@ import { getSuperAdminSidebarStats } from "../controllers/adminSuperSidebarStats
 import { getShopCatalogOptions } from "../controllers/adminSuperCatalog.controller.js";
 import adminSuperProductRoutes from "./adminSuperProduct.routes.js";
 import adminSuperOrderRoutes from "./adminSuperOrder.routes.js";
+import adminSuperNewsRoutes from "./adminSuperNews.routes.js";
 
 const router = Router();
 
@@ -64,6 +65,9 @@ router.use("/products", adminSuperProductRoutes);
 
 // Orders
 router.use("/orders", adminSuperOrderRoutes);
+
+// News & announcements
+router.use("/news", adminSuperNewsRoutes);
 
 // Audit log
 router.get("/audit", listAuditLogs);

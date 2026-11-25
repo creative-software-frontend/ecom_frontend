@@ -19,6 +19,7 @@ import adminSuperRoutes from "./routes/adminSuper.routes.js";
 import adminSidebarStatsRoutes from "./routes/adminSidebarStats.routes.js";
 import rechargeRoutes from "./routes/recharge.routes.js";
 import adminShopUserRoutes from "./routes/adminShopUser.routes.js";
+import adminNewsRoutes from "./routes/adminNews.routes.js";
 import path from "node:path";
 
 dotenv.config();
@@ -51,6 +52,7 @@ app.use("/api/shop/dashboard", adminDashboardRoutes);
 app.use("/api/shop/sidebar-stats", adminSidebarStatsRoutes);
 app.use("/api/shop/recharge", rechargeRoutes);
 app.use("/api/shop/users", adminShopUserRoutes);
+app.use("/api/shop/news", adminNewsRoutes);
 // // Health check route
 // app.get("/", (req, res) => {
 //   res.status(200).json({

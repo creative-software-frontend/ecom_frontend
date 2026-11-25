@@ -1,150 +1,163 @@
 import { useMemo, useState } from "react"
-import { Bell, Megaphone, Search, Tag } from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
+import { Bell, Megaphone, Pin, Search, Tag } from "lucide-react"
+import {
+  shopNewsApi,
+  shopNewsQueryKeys,
+  type NewsCategory,
+  type NewsItemDto,
+} from "../api/newsApi"
+import { ErrorState } from "../components/common/ErrorState"
+import { LoadingState } from "../components/common/LoadingState"
+import { useDebouncedValue } from "../hooks/useDebouncedValue"
+import { getErrorMessage } from "../lib/errors"
+import { relativeTime } from "../lib/formatTime"
 
-export type NewsItem = {
-  id: string
-  day: string
-  month: string
-  year: string
-  timeAgo: string
-  title: string
-  description?: string
-  category?: "charge" | "integration" | "notice" | "general"
-  categoryLabel?: string
-  isPinned?: boolean
+const DHAKA_TIMEZONE = "Asia/Dhaka"
+
+const dayFormatter = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  timeZone: DHAKA_TIMEZONE,
+})
+const monthFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  timeZone: DHAKA_TIMEZONE,
+})
+const yearFormatter = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  timeZone: DHAKA_TIMEZONE,
+})
+
+const categoryTabs: { id: NewsCategory | "all"; label: string }[] = [
+  { id: "all", label: "All News" },
+  { id: "charge", label: "Charges" },
+  { id: "integration", label: "Integration" },
+  { id: "notice", label: "Notices" },
+  { id: "general", label: "General" },
+]
+
+const categoryLabels: Record<NewsCategory, string> = {
+  charge: "Charge Update",
+  integration: "Integration",
+  notice: "Service Notice",
+  general: "General",
 }
 
-const INITIAL_NEWS: NewsItem[] = [
-  {
-    id: "news-1",
-    day: "19",
-    month: "APR",
-    year: "2026",
-    timeAgo: "7 months ago",
-    title:
-      "21 Apr 2026 থেকে ডেলিভারি চার্জ +৫ টাকা যোগ হবে। জ্বালানি ও অপারেশন খরচ বৃদ্ধির কারণে। ধন্যবাদ।",
-    category: "charge",
-    categoryLabel: "Charge Update",
-  },
-  {
-    id: "news-2",
-    day: "3",
-    month: "MAR",
-    year: "2025",
-    timeAgo: "1 year ago",
-    title:
-      "ওয়েবহুক সার্ভিস ইন্টিগ্রেশনে গুরুত্বপূর্ণ আপডেট এসেছে। যারা এই সার্ভিস ব্যবহার করছেন দয়া করে Webhook Integration Documentaion চেক করবেন।",
-    category: "integration",
-    categoryLabel: "Integration",
-  },
-  {
-    id: "news-3",
-    day: "1",
-    month: "MAR",
-    year: "2025",
-    timeAgo: "1 year ago",
-    title: "Extra 10 tk will be added from March 8 to March 29, 2025.",
-    category: "charge",
-    categoryLabel: "Notice",
-  },
-  {
-    id: "news-4",
-    day: "4",
-    month: "JAN",
-    year: "2025",
-    timeAgo: "1 year ago",
-    title:
-      "পার্সেল ইনফরমেশন এন্ট্রি করে দেয়া পার্সেলে অবশ্যই ইউজার আইডির সাথে ন্যূনতম পার্সেল আইডি বা ইনভয়েস বা কাস্টমার ফোন নাম্বার অবশ্যই সংযুক্ত করে দেয়ার অনুরোধ রইলো।",
-    description:
-      "পার্সেল ইনফরমেশন এন্ট্রি করে দেয়া পার্সেলে অবশ্যই ইউজার আইডির সাথে ন্যূনতম পার্সেল আইডি বা ইনভয়েস বা কাস্টমার ফোন নাম্বার অবশ্যই সংযুক্ত করে দেয়ার অনুরোধ রইলো। পার্সেল এন্ট্রি করা সম্ভব হবে না।",
-    category: "notice",
-    categoryLabel: "Service Notice",
-  },
-]
+function publishedDateParts(iso: string) {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) {
+    return { day: "—", month: "—", year: "" }
+  }
+  return {
+    day: dayFormatter.format(date),
+    month: monthFormatter.format(date).toUpperCase(),
+    year: yearFormatter.format(date),
+  }
+}
 
 export default function NewsPage() {
   const [search, setSearch] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const [selectedCategory, setSelectedCategory] = useState<NewsCategory | "all">(
+    "all"
+  )
+  const debouncedSearch = useDebouncedValue(search, 200)
 
-  const categories = useMemo(() => {
-    return [
-      { id: "all", label: "All News" },
-      { id: "charge", label: "Charges" },
-      { id: "integration", label: "Integration" },
-      { id: "notice", label: "Notices" },
-    ]
-  }, [])
+  const newsQuery = useQuery({
+    queryKey: shopNewsQueryKeys.list(),
+    queryFn: ({ signal }) => shopNewsApi.list({}, signal),
+  })
+
+  const items = newsQuery.data?.items ?? []
+  const totalPublished = newsQuery.data?.totalPublished ?? items.length
 
   const filteredNews = useMemo(() => {
-    return INITIAL_NEWS.filter((item) => {
+    const query = debouncedSearch.trim().toLowerCase()
+    return items.filter((item: NewsItemDto) => {
       const matchesCategory =
         selectedCategory === "all" || item.category === selectedCategory
-      const query = search.toLowerCase().trim()
       const matchesSearch =
         !query ||
         item.title.toLowerCase().includes(query) ||
-        (item.description && item.description.toLowerCase().includes(query)) ||
-        (item.categoryLabel && item.categoryLabel.toLowerCase().includes(query))
+        (item.description?.toLowerCase().includes(query) ?? false) ||
+        categoryLabels[item.category].toLowerCase().includes(query)
       return matchesCategory && matchesSearch
     })
-  }, [search, selectedCategory])
+  }, [items, selectedCategory, debouncedSearch])
+
+  if (newsQuery.isLoading) {
+    return (
+      <LoadingState
+        className="flex min-h-64 items-center justify-center text-sm text-(--text-muted)"
+        ariaLabel="Loading news"
+      >
+        Loading announcements…
+      </LoadingState>
+    )
+  }
+
+  if (newsQuery.error) {
+    return (
+      <ErrorState
+        className="m-6 rounded-md border border-(--border-light) bg-(--bg-surface) p-6 text-center"
+        messageClassName="mb-3 text-sm text-(--text-muted)"
+        buttonClassName="h-8 rounded-md bg-(--primary) px-3 text-sm font-medium text-white"
+        message={getErrorMessage(newsQuery.error, "Could not load announcements.")}
+        onRetry={() => void newsQuery.refetch()}
+      />
+    )
+  }
 
   return (
     <div className="admin-dashboard-content min-w-0 space-y-6 p-4 sm:p-6">
-      {/* Header Section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold tracking-tight text-(--text-primary)">
               News & updates
             </h1>
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+            <span className="inline-flex items-center gap-1 rounded-full bg-(--primary-soft) px-2.5 py-0.5 text-xs font-semibold text-(--primary)">
               <Megaphone className="size-3" />
-              {INITIAL_NEWS.length} Announcements
+              {totalPublished} Announcements
             </span>
           </div>
           <p className="mt-1 text-xs text-(--text-muted) sm:text-sm">
-            Announcements from Steadfast: charge changes, new features and
-            service notices.
+            Platform announcements, feature updates, and service notices.
           </p>
         </div>
 
-        {/* Search Input */}
         <div className="relative w-full sm:w-72">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-(--text-muted)" />
           <input
             type="search"
             placeholder="Search news & notices..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-9 w-full rounded-lg border border-(--border-light) bg-white pr-3 pl-9 text-xs text-(--text-primary) shadow-xs outline-none placeholder:text-(--text-muted) focus:border-primary focus:ring-1 focus:ring-primary"
+            onChange={(event) => setSearch(event.target.value)}
+            className="h-9 w-full rounded-lg border border-(--border-light) bg-(--bg-surface) pr-3 pl-9 text-xs text-(--text-primary) shadow-xs outline-none placeholder:text-(--text-muted) focus:border-(--primary) focus:ring-1 focus:ring-(--primary)"
           />
         </div>
       </div>
 
-      {/* Filter Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-        {categories.map((cat) => (
+        {categoryTabs.map((tab) => (
           <button
-            key={cat.id}
+            key={tab.id}
             type="button"
-            onClick={() => setSelectedCategory(cat.id)}
+            onClick={() => setSelectedCategory(tab.id)}
             className={`shrink-0 cursor-pointer rounded-full px-3.5 py-1.5 font-medium transition-colors ${
-              selectedCategory === cat.id
-                ? "bg-primary text-white shadow-xs"
-                : "border border-(--border-light) bg-white text-(--text-muted) hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
+              selectedCategory === tab.id
+                ? "bg-(--primary) text-white shadow-xs"
+                : "border border-(--border-light) bg-(--bg-surface) text-(--text-muted) hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
             }`}
           >
-            {cat.label}
+            {tab.label}
           </button>
         ))}
       </div>
 
-      {/* News Cards List */}
       <div className="space-y-4">
         {filteredNews.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-(--border-light) bg-white py-14 text-center shadow-xs">
-            <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-gray-100 text-(--text-muted)">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-(--border-light) bg-(--bg-surface) py-14 text-center shadow-xs">
+            <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-(--bg-surface-hover) text-(--text-muted)">
               <Bell className="size-5 opacity-60" />
             </div>
             <p className="text-sm font-medium text-(--text-primary)">
@@ -155,56 +168,56 @@ export default function NewsPage() {
             </p>
           </div>
         ) : (
-          filteredNews.map((news) => (
-            <div
-              key={news.id}
-              className="group flex flex-col items-start gap-4 rounded-xl border border-(--border-light) bg-white p-4 shadow-xs transition-all hover:border-gray-300 hover:shadow-sm sm:flex-row sm:p-5"
-            >
-              {/* Date Box */}
-              <div className="flex min-w-16 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50/70 px-3 py-2 text-center shadow-2xs sm:min-w-17 sm:flex-col sm:gap-0 sm:py-2.5">
-                <span className="text-xl leading-none font-bold tracking-tight text-(--text-primary) sm:text-2xl">
-                  {news.day}
-                </span>
-                <span className="text-[11px] leading-none font-bold tracking-wider text-(--text-muted) uppercase sm:mt-1">
-                  {news.month}
-                </span>
-                <span className="text-[10px] leading-none text-(--text-muted) opacity-80 sm:mt-0.5">
-                  {news.year}
-                </span>
-              </div>
-
-              {/* Main Content Area */}
-              <div className="min-w-0 flex-1">
-                {/* Meta header */}
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="text-xs font-medium text-(--text-muted)">
-                    {news.timeAgo}
+          filteredNews.map((news) => {
+            const { day, month, year } = publishedDateParts(news.publishedAt)
+            return (
+              <article
+                key={news.id}
+                className="flex flex-col items-start gap-4 rounded-xl border border-(--border-light) bg-(--bg-surface) p-4 shadow-xs transition-all hover:border-(--border-hover) hover:shadow-sm sm:flex-row sm:p-5"
+              >
+                <div className="flex min-w-16 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-(--border-light) bg-(--bg-app) px-3 py-2 text-center shadow-2xs sm:min-w-17 sm:flex-col sm:gap-0 sm:py-2.5">
+                  <span className="text-xl leading-none font-bold tracking-tight text-(--text-primary) sm:text-2xl">
+                    {day}
                   </span>
-                  {news.categoryLabel && (
-                    <>
-                      <span className="text-xs text-gray-300">•</span>
-                      <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-(--text-muted)">
-                        <Tag className="size-2.5" />
-                        {news.categoryLabel}
-                      </span>
-                    </>
-                  )}
+                  <span className="text-[11px] leading-none font-bold tracking-wider text-(--text-muted) uppercase sm:mt-1">
+                    {month}
+                  </span>
+                  <span className="text-[10px] leading-none text-(--text-muted) opacity-80 sm:mt-0.5">
+                    {year}
+                  </span>
                 </div>
 
-                {/* News Title / Primary Statement */}
-                <h2 className="text-sm leading-relaxed font-bold text-(--text-primary) sm:text-[15px]">
-                  {news.title}
-                </h2>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-medium text-(--text-muted)">
+                      {relativeTime(news.publishedAt)}
+                    </span>
+                    <span className="text-xs text-(--border-hover)">•</span>
+                    <span className="inline-flex items-center gap-1 rounded-md bg-(--bg-surface-hover) px-2 py-0.5 text-[10px] font-medium text-(--text-muted)">
+                      <Tag className="size-2.5" />
+                      {categoryLabels[news.category]}
+                    </span>
+                    {news.isPinned && (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-(--primary-soft) px-2 py-0.5 text-[10px] font-semibold text-(--primary)">
+                        <Pin className="size-2.5" />
+                        Pinned
+                      </span>
+                    )}
+                  </div>
 
-                {/* News Description / Sub-content */}
-                {news.description && (
-                  <p className="mt-2 text-xs leading-relaxed text-(--text-muted) sm:text-[13px]">
-                    {news.description}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))
+                  <h2 className="text-sm leading-relaxed font-bold text-(--text-primary) sm:text-[15px]">
+                    {news.title}
+                  </h2>
+
+                  {news.description && (
+                    <p className="mt-2 text-xs leading-relaxed text-(--text-muted) sm:text-[13px]">
+                      {news.description}
+                    </p>
+                  )}
+                </div>
+              </article>
+            )
+          })
         )}
       </div>
     </div>
