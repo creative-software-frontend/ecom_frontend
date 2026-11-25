@@ -10,10 +10,15 @@ import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import adminProductRoutes from "./routes/adminProduct.routes.js";
 import adminSettingsRoutes from "./routes/adminSettings.routes.js";
 import adminOrderRoutes from "./routes/adminOrder.routes.js";
+import adminCouponRoutes from "./routes/adminCoupon.routes.js";
+import adminPageRoutes from "./routes/adminPage.routes.js";
+import adminBrandRoutes from "./routes/adminBrand.routes.js";
+import adminCategoryRoutes from "./routes/adminCategory.routes.js";
 import adminDashboardRoutes from "./routes/adminDashboard.routes.js";
 import adminSuperRoutes from "./routes/adminSuper.routes.js";
 import adminSidebarStatsRoutes from "./routes/adminSidebarStats.routes.js";
 import rechargeRoutes from "./routes/recharge.routes.js";
+import adminShopUserRoutes from "./routes/adminShopUser.routes.js";
 import path from "node:path";
 
 dotenv.config();
@@ -38,9 +43,14 @@ app.use("/api/admin/super", adminSuperRoutes);
 app.use("/api/shop/products", adminProductRoutes);
 app.use("/api/shop/settings", adminSettingsRoutes);
 app.use("/api/shop/orders", adminOrderRoutes);
+app.use("/api/shop/coupons", adminCouponRoutes);
+app.use("/api/shop/pages", adminPageRoutes);
+app.use("/api/shop/brands", adminBrandRoutes);
+app.use("/api/shop/categories", adminCategoryRoutes);
 app.use("/api/shop/dashboard", adminDashboardRoutes);
 app.use("/api/shop/sidebar-stats", adminSidebarStatsRoutes);
 app.use("/api/shop/recharge", rechargeRoutes);
+app.use("/api/shop/users", adminShopUserRoutes);
 // // Health check route
 // app.get("/", (req, res) => {
 //   res.status(200).json({

@@ -9,13 +9,14 @@ export const couponFormSchema = z
       .string()
       .trim()
       .min(3, "Minimum 3 characters")
-      .max(20, "Maximum 20 characters")
-      .regex(/^[A-Za-z0-9]+$/, "Letters and numbers only"),
+      .max(32, "Maximum 32 characters")
+      .regex(/^[A-Za-z0-9_-]+$/, "Letters, numbers, - and _ only"),
     discount_type: z.enum(["percentage", "amount"]),
     discount_value: z
       .number({ error: "Enter a valid number" })
       .int("Whole number only")
       .min(1, "Minimum 1"),
+    note: z.string().trim().max(120, "Maximum 120 characters").nullable(),
     max_discount: z.object({
       enabled: z.boolean(),
       value: z.number({ error: "Enter a valid amount" }).int().min(0),
@@ -65,6 +66,7 @@ export const defaultCouponFormValues: CouponFormValues = {
   code: "",
   discount_type: "percentage",
   discount_value: 15,
+  note: null,
   max_discount: { enabled: true, value: 500 },
   min_purchase: { enabled: true, value: 1500 },
   usage_limit: 100,

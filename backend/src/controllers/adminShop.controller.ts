@@ -4,11 +4,7 @@ import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
 import { parseId } from "../lib/parseId.js";
 import { logAudit } from "../lib/auditLog.js";
-<<<<<<< HEAD
-import { generateShopSlug } from "../lib/shopSlug.js";
-=======
 import { generateShopSlug, isShopSlugUniqueConflict } from "../lib/shopSlug.js";
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
 import {
   createShopSchema,
   updateShopSchema,

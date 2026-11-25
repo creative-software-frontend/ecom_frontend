@@ -1,6 +1,7 @@
-import { useEffect } from "react"
-import { useForm, Controller, useWatch } from "react-hook-form"
+import { useEffect, useState } from "react"
+import { useForm, Controller, useWatch, type FieldPath } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   X,
   Ticket,
@@ -11,9 +12,13 @@ import {
   BadgeCheck,
   Check,
 } from "lucide-react"
-import { FieldError } from "../SettingsField"
-import { FormSegmentedControl } from "../SettingsField"
+import { FieldError, FormSegmentedControl } from "../SettingsField"
 import { FormToggleCard } from "../FormToggleCard"
+import { InlineNotice } from "../../common/InlineNotice"
+import { useEscapeKey } from "../../../hooks/useEscapeKey"
+import { ApiError } from "../../../api/client"
+import { couponsApi, couponQueryKeys } from "../../../api/couponsApi"
+import type { Coupon, CouponWriteInput } from "../../../types/coupon"
 import {
   couponFormSchema,
   defaultCouponFormValues,
@@ -38,60 +43,171 @@ const toNumberOrZero = (v: unknown): number => parseNumber(v) ?? 0
 // Empty DOM string -> null for nullable numeric fields (usage limit).
 const toNumberOrNull = (v: unknown): number | null => parseNumber(v)
 
-// Empty DOM string -> null for nullable date string.
-const toDateOrNull = (v: unknown): string | null => {
+// Empty DOM string -> null for nullable text/date fields.
+const toNullableString = (v: unknown): string | null => {
   if (typeof v !== "string" || v === "") return null
   return v
 }
 
+// Backend treats naive datetime-local strings as Asia/Dhaka (UTC+6).
+// Convert stored ISO timestamps back to the same wall-clock time for editing.
+function toDateTimeLocal(iso: string | null): string | null {
+  if (!iso) return null
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return null
+  return new Date(date.getTime() + 6 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 16)
+}
+
+function isExpiryInPast(value: string): boolean {
+  const normalized =
+    value.length === 10 ? `${value}T23:59:59.999+06:00` : `${value}+06:00`
+  const date = new Date(normalized)
+  return !Number.isNaN(date.getTime()) && date <= new Date()
+}
+
+function couponToFormValues(coupon: Coupon): CouponFormValues {
+  return {
+    code: coupon.code,
+    discount_type: coupon.discountType,
+    discount_value: coupon.discountValue,
+    note: coupon.note,
+    max_discount: {
+      enabled: coupon.maxDiscountValue !== null,
+      value: coupon.maxDiscountValue ?? 500,
+    },
+    min_purchase: {
+      enabled: coupon.minPurchaseValue !== null,
+      value: coupon.minPurchaseValue ?? 1500,
+    },
+    usage_limit: coupon.usageLimit,
+    expires_at: toDateTimeLocal(coupon.expiresAt),
+    active: coupon.status === "active",
+  }
+}
+
+function toWriteInput(
+  values: CouponFormValues,
+  editing?: Coupon | null
+): CouponWriteInput {
+  const note = values.note?.trim() ?? ""
+  const input: CouponWriteInput = {
+    code: values.code.trim().toUpperCase(),
+    discountType: values.discount_type,
+    discountValue: values.discount_value,
+    note: note || null,
+    usageLimit: values.usage_limit,
+    maxDiscountValue: values.max_discount.enabled
+      ? values.max_discount.value
+      : null,
+    minPurchaseValue: values.min_purchase.enabled
+      ? values.min_purchase.value
+      : null,
+    expiresAt: values.expires_at,
+  }
+
+  // An expired coupon with a still-past expiry stays expired unless the user
+  // explicitly asks to activate it — then the backend returns a helpful 422.
+  if (
+    editing?.status === "expired" &&
+    values.expires_at &&
+    isExpiryInPast(values.expires_at) &&
+    !values.active
+  ) {
+    return input
+  }
+
+  return { ...input, status: values.active ? "active" : "paused" }
+}
+
+// Backend field names -> react-hook-form paths.
+const serverErrorPaths: Record<string, FieldPath<CouponFormValues>> = {
+  code: "code",
+  discountType: "discount_type",
+  discountValue: "discount_value",
+  note: "note",
+  usageLimit: "usage_limit",
+  maxDiscountValue: "max_discount.value",
+  minPurchaseValue: "min_purchase.value",
+  expiresAt: "expires_at",
+  status: "active",
+}
+
 /* ================================================================
-   CreateCouponModal
+   CreateCouponModal — create + edit
    ================================================================ */
 
 type CreateCouponModalProps = {
   open: boolean
   onClose: () => void
-  onCreated?: (coupon: CouponFormValues) => void
+  coupon?: Coupon | null
+  onSaved?: (coupon: Coupon) => void
 }
 
 export function CreateCouponModal({
   open,
   onClose,
-  onCreated,
+  coupon,
+  onSaved,
 }: CreateCouponModalProps) {
+  const queryClient = useQueryClient()
+  const [formError, setFormError] = useState<string | null>(null)
+
   const {
     register,
     control,
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isSubmitting },
+    setError,
+    formState: { errors },
   } = useForm<CouponFormValues>({
     resolver: zodResolver(couponFormSchema),
     defaultValues: defaultCouponFormValues,
   })
 
-  // Watch toggle and type so we can switch UI branches dynamically.
+  // Watch the type so the prefix/suffix and max attribute switch dynamically.
   const discountType = useWatch({ name: "discount_type", control })
-  // const maxDiscountEnabled = useWatch({ name: "max_discount.enabled", control })
-  // const minPurchaseEnabled = useWatch({ name: "min_purchase.enabled", control })
 
-  // Reset form every time the modal is closed -> next open starts fresh.
-  useEffect(() => {
-    if (!open) reset(defaultCouponFormValues)
-  }, [open, reset])
+  const mutation = useMutation({
+    mutationFn: (input: CouponWriteInput) =>
+      coupon ? couponsApi.update(coupon.id, input) : couponsApi.create(input),
+    onSuccess: (saved) => {
+      void queryClient.invalidateQueries({ queryKey: couponQueryKeys.all })
+      setFormError(null)
+      onSaved?.(saved)
+      onClose()
+    },
+    onError: (error) => {
+      if (error instanceof ApiError && error.fieldErrors) {
+        let mapped = false
+        for (const [field, message] of Object.entries(error.fieldErrors)) {
+          const path = serverErrorPaths[field]
+          if (path) {
+            setError(path, { type: "server", message })
+            mapped = true
+          }
+        }
+        setFormError(mapped ? null : error.message)
+        return
+      }
+      setFormError(
+        error instanceof Error ? error.message : "Could not save the coupon"
+      )
+    },
+  })
 
-  // Escape key closes modal.
+  // Reset the form to the current coupon (or create defaults) on every open.
   useEffect(() => {
     if (!open) return
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
-    }
-    document.addEventListener("keydown", handler)
-    return () => document.removeEventListener("keydown", handler)
-  }, [open, onClose])
+    reset(coupon ? couponToFormValues(coupon) : defaultCouponFormValues)
+    setFormError(null)
+  }, [open, coupon, reset])
 
-  // Prevent body scroll while modal is open.
+  useEscapeKey(onClose, open && !mutation.isPending)
+
+  // Prevent body scroll while the modal is open.
   useEffect(() => {
     if (!open) return
     const prev = document.body.style.overflow
@@ -110,29 +226,25 @@ export function CreateCouponModal({
     })
   }
 
-  const onSubmit = async (values: CouponFormValues) => {
-    // TODO: wire to API — POST /api/admin/coupons
-    const normalized: CouponFormValues = {
-      ...values,
-      code: values.code.toUpperCase(),
-    }
-    await new Promise((r) => setTimeout(r, 400))
-    onCreated?.(normalized)
-    onClose()
+  const onSubmit = (values: CouponFormValues) => {
+    setFormError(null)
+    mutation.mutate(toWriteInput(values, coupon))
   }
+
+  const isEditing = Boolean(coupon)
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="create-coupon-title"
-      onMouseDown={onClose}
+      aria-labelledby="coupon-modal-title"
+      onMouseDown={() => {
+        if (!mutation.isPending) onClose()
+      }}
       className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-black/40 p-4 duration-150 fade-in"
     >
       <div
-        // onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
-
         className="flex max-h-[90vh] w-full max-w-2xl animate-in flex-col overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface) shadow-xl duration-150 zoom-in-95 fade-in"
       >
         {/* ---------- Header ---------- */}
@@ -142,17 +254,18 @@ export function CreateCouponModal({
               <Ticket className="size-4" />
             </span>
             <h2
-              id="create-coupon-title"
+              id="coupon-modal-title"
               className="text-base font-semibold text-(--text-primary)"
             >
-              Create coupon
+              {isEditing ? "Edit coupon" : "Create coupon"}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
+            disabled={mutation.isPending}
             aria-label="Close"
-            className="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
+            className="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary) disabled:opacity-50"
           >
             <X className="size-4" />
           </button>
@@ -164,6 +277,18 @@ export function CreateCouponModal({
           className="flex min-h-0 flex-1 flex-col"
         >
           <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+            {formError && (
+              <InlineNotice
+                variant="error"
+                message={formError}
+                onDismiss={() => setFormError(null)}
+                dismissLabel="Dismiss error"
+                className="flex items-center justify-between gap-3 rounded-md border border-(--status-cancelled-bg) bg-(--status-cancelled-bg)/50 px-3 py-2 text-xs text-(--status-cancelled-text)"
+                dismissClassName="rounded px-1 text-(--status-cancelled-text) hover:bg-(--bg-surface-hover)"
+                ariaLive="assertive"
+              />
+            )}
+
             {/* Coupon code + Generate */}
             <div>
               <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -182,7 +307,7 @@ export function CreateCouponModal({
                   id="coupon-code"
                   type="text"
                   placeholder="SUMMER25"
-                  maxLength={20}
+                  maxLength={32}
                   autoComplete="off"
                   className="h-9 min-w-0 flex-1 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 font-mono text-sm tracking-wide text-(--text-primary) uppercase transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                   {...register("code")}
@@ -262,6 +387,25 @@ export function CreateCouponModal({
               {errors.discount_value && (
                 <FieldError>{errors.discount_value.message}</FieldError>
               )}
+            </div>
+
+            {/* Note */}
+            <div>
+              <label
+                htmlFor="coupon-note"
+                className="mb-1.5 block text-sm font-semibold text-(--text-primary)"
+              >
+                Note <span className="text-(--text-muted)">(optional)</span>
+              </label>
+              <input
+                id="coupon-note"
+                type="text"
+                maxLength={120}
+                placeholder="e.g. Free Delivery"
+                className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm text-(--text-primary) transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
+                {...register("note", { setValueAs: toNullableString })}
+              />
+              {errors.note && <FieldError>{errors.note.message}</FieldError>}
             </div>
 
             {/* Max discount cap */}
@@ -387,7 +531,7 @@ export function CreateCouponModal({
                     onClick={(e) => e.currentTarget.showPicker()}
                     className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 pr-9 text-sm text-(--text-primary) scheme-light transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20 [&::-webkit-calendar-picker-indicator]:hidden"
                     {...register("expires_at", {
-                      setValueAs: toDateOrNull,
+                      setValueAs: toNullableString,
                     })}
                   />
 
@@ -408,7 +552,11 @@ export function CreateCouponModal({
               render={({ field }) => (
                 <FormToggleCard
                   title="Active status"
-                  description="Enable this coupon immediately upon creation"
+                  description={
+                    isEditing
+                      ? "Keep this coupon available after saving"
+                      : "Enable this coupon immediately upon creation"
+                  }
                   checked={field.value}
                   onChange={field.onChange}
                   variant="success"
@@ -416,11 +564,6 @@ export function CreateCouponModal({
                 />
               )}
             />
-
-            {/* Hidden debug for unused watch vars — keep TS happy on strict */
-            /* (Remove once toggle-gated content starts using these directly) */}
-            {/* {maxDiscountEnabled === null && null}
-            {minPurchaseEnabled === null && null} */}
           </div>
 
           {/* ---------- Footer ---------- */}
@@ -428,17 +571,24 @@ export function CreateCouponModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-4 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+              disabled={mutation.isPending}
+              className="inline-flex h-8 items-center rounded-md border border-(--border-light) bg-(--bg-surface) px-4 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={mutation.isPending}
               className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Check className="size-3.5" />
-              {isSubmitting ? "Creating..." : "Create coupon"}
+              {mutation.isPending
+                ? isEditing
+                  ? "Saving..."
+                  : "Creating..."
+                : isEditing
+                  ? "Save changes"
+                  : "Create coupon"}
             </button>
           </div>
         </form>

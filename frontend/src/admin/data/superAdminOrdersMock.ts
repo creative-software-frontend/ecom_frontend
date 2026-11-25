@@ -230,7 +230,9 @@ export const MOCK_ORDERS: OrderListItem[] = BASE_ORDERS.map((order, i) => {
   return {
     ...order,
     currentPrice: order.total,
-    buyingPrice: Math.round(order.total * mockBuyingRates[i % mockBuyingRates.length]),
+    buyingPrice: Math.round(
+      order.total * mockBuyingRates[i % mockBuyingRates.length]
+    ),
     shopId: shop.id,
     shopName: shop.name,
   }

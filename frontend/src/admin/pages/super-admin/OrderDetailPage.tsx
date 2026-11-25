@@ -4,9 +4,8 @@ import {
   superAdminOrdersApi,
 } from "@/admin/api/superAdminOrdersApi"
 
-// The super-admin list is still mock-backed and ignores abort signals.
 const api = {
-  get: (id: string, _signal: AbortSignal) => superAdminOrdersApi.get(id),
+  get: (id: string, signal: AbortSignal) => superAdminOrdersApi.get(id, signal),
   updateStatus: superAdminOrdersApi.updateStatus,
 }
 

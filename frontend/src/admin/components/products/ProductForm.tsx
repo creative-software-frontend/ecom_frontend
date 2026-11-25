@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -26,6 +28,58 @@ import {
 import { RichTextToolbar } from "../settings/RichTextToolbar"
 import type { ShopOption } from "@/admin/types/superAdminProduct"
 import { ShopSelectorCard } from "../super-admin/ShopSelectorCard"
+import {
+  brandQueryKeys,
+  brandsApi,
+  categoriesApi,
+  categoryQueryKeys,
+  superCatalogApi,
+  superCatalogQueryKeys,
+} from "../../api/catalogApi"
+import type {
+  CatalogOption,
+  CategoryOption,
+  SuperCatalogOptions,
+} from "../../types/catalog"
+
+type CatalogSelectOption = CatalogOption & { isLegacy: boolean }
+type CategorySelectOption = CategoryOption & { isLegacy: boolean }
+
+/**
+ * Keep an existing product's text value selectable even when the matching
+ * brand has since been deleted or deactivated. `id: -1` is only a UI marker;
+ * the option's `name` is what the product API stores.
+ */
+function withLegacyBrand(
+  options: CatalogOption[],
+  legacyName: string | undefined
+): CatalogSelectOption[] {
+  const merged: CatalogSelectOption[] = options.map((option) => ({
+    ...option,
+    isLegacy: false,
+  }))
+  const name = legacyName?.trim()
+  if (name && !merged.some((option) => option.name === name)) {
+    merged.push({ id: -1, name, slug: name, isLegacy: true })
+  }
+  return merged
+}
+
+/** Same fallback for categories (including legacy subcategories). */
+function withLegacyCategory(
+  options: CategoryOption[],
+  legacyName: string | undefined
+): CategorySelectOption[] {
+  const merged: CategorySelectOption[] = options.map((option) => ({
+    ...option,
+    isLegacy: false,
+  }))
+  const name = legacyName?.trim()
+  if (name && !merged.some((option) => option.name === name)) {
+    merged.push({ id: -1, name, slug: name, parentId: null, isLegacy: true })
+  }
+  return merged
+}
 
 type ProductFormProps = {
   initialValues?: Partial<ProductFormValues>
@@ -98,6 +152,115 @@ export function ProductForm({
   // Super admin variant requires a shop before the form is usable.
   const shopLocked = variant === "super" && !shopIdValue
   const metaDescription = useWatch({ control, name: "metaDescription" })
+  const categoryValue = useWatch({ control, name: "category" }) || ""
+  const subcategoryValue = useWatch({ control, name: "subcategory" }) || ""
+
+  // Catalog options. Shop admins use the shop-scoped endpoints; super admins
+  // load options for the shop currently selected in the form.
+  const shopBrandsQuery = useQuery({
+    queryKey: brandQueryKeys.list({ status: "active" }),
+    queryFn: ({ signal }) => brandsApi.list({ status: "active" }, signal),
+    enabled: variant === "shop",
+    staleTime: 60 * 1000,
+  })
+  const shopCategoriesQuery = useQuery({
+    queryKey: categoryQueryKeys.list({ status: "active" }),
+    queryFn: ({ signal }) => categoriesApi.list({ status: "active" }, signal),
+    enabled: variant === "shop",
+    staleTime: 60 * 1000,
+  })
+
+  const superCatalogShopId =
+    variant === "super" && shopIdValue ? shopIdValue : null
+  const superCatalogQuery = useQuery({
+    queryKey: superCatalogQueryKeys.options(superCatalogShopId ?? 0),
+    queryFn: ({ signal }): Promise<SuperCatalogOptions> => {
+      if (superCatalogShopId === null) {
+        return Promise.resolve({ brands: [], categories: [] })
+      }
+      return superCatalogApi.getOptions(superCatalogShopId, signal)
+    },
+    enabled: superCatalogShopId !== null,
+    staleTime: 60 * 1000,
+  })
+
+  const catalogReady =
+    variant === "shop"
+      ? shopBrandsQuery.isSuccess && shopCategoriesQuery.isSuccess
+      : superCatalogShopId !== null && superCatalogQuery.isSuccess
+
+  const rawBrandOptions: CatalogOption[] =
+    variant === "shop"
+      ? (shopBrandsQuery.data?.items ?? []).map(({ id, name, slug }) => ({
+          id,
+          name,
+          slug,
+        }))
+      : superCatalogQuery.data?.brands ?? []
+
+  const rawCategoryOptions: CategoryOption[] =
+    variant === "shop"
+      ? (shopCategoriesQuery.data?.items ?? []).map(
+          ({ id, name, slug, parentId }) => ({ id, name, slug, parentId })
+        )
+      : superCatalogQuery.data?.categories ?? []
+
+  const initialBrandName = initialValues?.brand?.trim()
+  const initialCategoryName = initialValues?.category?.trim()
+  const initialSubcategoryName = initialValues?.subcategory?.trim()
+
+  const brandOptions = withLegacyBrand(rawBrandOptions, initialBrandName)
+  const categoryOptions = withLegacyCategory(
+    rawCategoryOptions.filter((option) => option.parentId === null),
+    initialCategoryName
+  )
+  const selectedParent = categoryOptions.find(
+    (option) => option.name === categoryValue
+  )
+  const subcategoryOptions = withLegacyCategory(
+    selectedParent
+      ? rawCategoryOptions.filter((option) => option.parentId === selectedParent.id)
+      : [],
+    !categoryValue || categoryValue === initialCategoryName
+      ? initialSubcategoryName
+      : undefined
+  )
+
+  // Refs keep the first options load and the initial edit values from being
+  // mistaken for a user-initiated category change.
+  const previousShopIdRef = useRef<number | null>(shopIdValue)
+  const previousCategoryRef = useRef(categoryValue)
+  const catalogLoadedRef = useRef(false)
+
+  // A super-admin product's catalog values belong to one shop. Clear them
+  // when a different shop is picked so nothing leaks across tenants.
+  useEffect(() => {
+    if (variant !== "super") return
+    if (previousShopIdRef.current === shopIdValue) return
+    previousShopIdRef.current = shopIdValue
+    catalogLoadedRef.current = false
+    previousCategoryRef.current = ""
+    setValue("brand", "", { shouldDirty: true, shouldValidate: true })
+    setValue("category", "", { shouldDirty: true, shouldValidate: true })
+    setValue("subcategory", "", { shouldDirty: true, shouldValidate: true })
+  }, [shopIdValue, setValue, variant])
+
+  // Drop a stale subcategory only after the real category changes and the
+  // options for that category are available.
+  useEffect(() => {
+    if (!catalogReady) return
+    if (!catalogLoadedRef.current) {
+      catalogLoadedRef.current = true
+      previousCategoryRef.current = categoryValue
+      return
+    }
+    if (previousCategoryRef.current === categoryValue) return
+    previousCategoryRef.current = categoryValue
+    const allowed = new Set(subcategoryOptions.map((option) => option.name))
+    if (subcategoryValue && !allowed.has(subcategoryValue)) {
+      setValue("subcategory", "", { shouldDirty: true, shouldValidate: true })
+    }
+  }, [catalogReady, categoryValue, subcategoryOptions, subcategoryValue, setValue])
 
   // Calculations
   const profit = sellingPrice - buyingPrice
@@ -230,11 +393,29 @@ export function ProductForm({
                     {...register("badge")}
                   />
                   {/* Brand */}
-                  <FormField
-                    label="Brand"
-                    placeholder="Select brand"
-                    {...register("brand")}
-                  />
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
+                      Brand
+                    </label>
+                    <select
+                      className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
+                      {...register("brand")}
+                    >
+                      <option value="">
+                        {catalogReady ? "Select brand" : "Loading brands..."}
+                      </option>
+                      {brandOptions.map((option) => (
+                        <option key={option.id} value={option.name}>
+                          {option.isLegacy
+                            ? `${option.name} (legacy)`
+                            : option.name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.brand && (
+                      <FieldError>{errors.brand.message}</FieldError>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {/* Category */}
@@ -246,11 +427,18 @@ export function ProductForm({
                       className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
                       {...register("category")}
                     >
-                      <option value="">Select category</option>
-                      <option value="Herbal Supplement">
-                        Herbal Supplement
+                      <option value="">
+                        {catalogReady
+                          ? "Select category"
+                          : "Loading categories..."}
                       </option>
-                      <option value="Vitality">Vitality</option>
+                      {categoryOptions.map((option) => (
+                        <option key={option.id} value={option.name}>
+                          {option.isLegacy
+                            ? `${option.name} (legacy)`
+                            : option.name}
+                        </option>
+                      ))}
                     </select>
                     {errors.category && (
                       <FieldError>{errors.category.message}</FieldError>
@@ -262,24 +450,26 @@ export function ProductForm({
                       Subcategory
                     </label>
                     <select
-                      className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-primary"
+                      className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
                       {...register("subcategory")}
                     >
-                      <option value="">Select subcategory</option>
-                      <option value="Herbal Supplement">
-                        Herbal Supplement
+                      <option value="">
+                        {catalogReady
+                          ? "Select subcategory"
+                          : "Loading subcategories..."}
                       </option>
-                      <option value="Vitality">Vitality</option>
+                      {subcategoryOptions.map((option) => (
+                        <option key={option.id} value={option.name}>
+                          {option.isLegacy
+                            ? `${option.name} (legacy)`
+                            : option.name}
+                        </option>
+                      ))}
                     </select>
                     {errors.subcategory && (
                       <FieldError>{errors.subcategory.message}</FieldError>
                     )}
                   </div>
-                  {/* <FormField
-                    label="Subcategory"
-                    placeholder="Select subcategory"
-                    {...register("subcategory")}
-                  /> */}
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

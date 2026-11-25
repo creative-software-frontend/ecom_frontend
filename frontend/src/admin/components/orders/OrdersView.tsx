@@ -34,6 +34,7 @@ import {
   Search,
 } from "lucide-react"
 import { adminDataTableStyles } from "../../lib/dataTableStyles"
+import { InlineNotice } from "../common/InlineNotice"
 
 const PAGE_LIMIT = 10
 const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
@@ -42,6 +43,7 @@ const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
   { value: "confirmed", label: "Confirmed" },
   { value: "shipped", label: "Shipped" },
   { value: "delivered", label: "Delivered" },
+  { value: "returned", label: "Returned" },
   { value: "cancelled", label: "Cancelled" },
 ]
 
@@ -104,7 +106,10 @@ export function OrdersView({
   const [selectedOrders, setSelectedOrders] = useState<OrderListItem[]>([])
   const [clearSelectedRows, setClearSelectedRows] = useState(false)
   const [bulkStatus, setBulkStatus] = useState<OrderStatus | "">("")
-  const [bulkMessage, setBulkMessage] = useState<string | null>(null)
+  const [bulkNotice, setBulkNotice] = useState<{
+    tone: "success" | "warning" | "error"
+    message: string
+  } | null>(null)
   const params = useMemo(() => {
     const next: OrderListParams & { shopId?: number } = {
       page,
@@ -166,7 +171,7 @@ export function OrdersView({
   function resetSelectedOrders() {
     setSelectedOrders([])
     setClearSelectedRows((previous) => !previous)
-    setBulkMessage(null)
+    setBulkNotice(null)
   }
 
   function handleStatusTab(value: "" | OrderStatus) {
@@ -207,7 +212,7 @@ export function OrdersView({
   useEffect(() => {
     if (!searchScheduledRef.current) return
     searchScheduledRef.current = false
-    setBulkMessage(null)
+    setBulkNotice(null)
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev)
@@ -226,31 +231,57 @@ export function OrdersView({
   async function handleBulkStatusUpdate() {
     if (!bulkStatus || selectedOrders.length === 0 || bulkUpdating) return
 
-    setBulkMessage(null)
+    setBulkNotice(null)
     try {
       const results = await bulkStatusMutation.mutateAsync({
         orderIds: selectedOrders.map((order) => order.id),
         orderStatus: bulkStatus,
       })
-      const failedCount = results.filter(
-        (result) => result.status === "rejected"
-      ).length
+
+      const rejectedReasons = results
+        .filter(
+          (result): result is PromiseRejectedResult =>
+            result.status === "rejected"
+        )
+        .map((result) => getErrorMessage(result.reason))
+
+      const failedCount = rejectedReasons.length
+      const succeededCount = results.length - failedCount
+      const uniqueReasons = [...new Set(rejectedReasons)]
+      const reasonSummary = uniqueReasons.slice(0, 2).join(" · ")
 
       setBulkStatus("")
-      resetSelectedOrders()
 
-      if (failedCount > 0) {
-        setBulkMessage(
-          `${results.length - failedCount} order(s) updated; ${failedCount} could not be updated. Check that the selected status transitions are allowed.`
-        )
+      if (failedCount === results.length) {
+        setBulkNotice({
+          tone: "error",
+          message: `Could not update ${failedCount} selected order(s): ${reasonSummary}`,
+        })
         return
       }
 
-      setBulkMessage(`${results.length} order(s) updated successfully.`)
+      resetSelectedOrders()
+
+      if (failedCount > 0) {
+        setBulkNotice({
+          tone: "warning",
+          message: `${succeededCount} order(s) updated; ${failedCount} failed: ${reasonSummary}`,
+        })
+        return
+      }
+
+      setBulkNotice({
+        tone: "success",
+        message: `${succeededCount} order(s) updated to ${ORDER_STATUS_CONFIG[bulkStatus].label.toLowerCase()}.`,
+      })
     } catch (mutationError) {
-      setBulkMessage(
-        getErrorMessage(mutationError, "Failed to update selected orders.")
-      )
+      setBulkNotice({
+        tone: "error",
+        message: getErrorMessage(
+          mutationError,
+          "Failed to update selected orders."
+        ),
+      })
     }
   }
   const total = data?.total ?? 0
@@ -260,6 +291,7 @@ export function OrdersView({
     confirmed: { count: 0, totalPrice: 0 },
     shipped: { count: 0, totalPrice: 0 },
     delivered: { count: 0, totalPrice: 0 },
+    returned: { count: 0, totalPrice: 0 },
     cancelled: { count: 0, totalPrice: 0 },
   }
   // React Data Table Column Definitions
@@ -622,13 +654,13 @@ export function OrdersView({
               className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Update status</option>
-              {STATUS_TABS.filter(({ value }) => value !== "").map(
-                ({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                )
-              )}
+              {STATUS_TABS.filter(
+                ({ value }) => value !== "" && value !== "pending"
+              ).map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </label>
           <label>
@@ -673,13 +705,31 @@ export function OrdersView({
             {bulkUpdating ? "Applying…" : "Apply"}
           </button>
         </div>
-        {bulkMessage ? (
-          <p
-            role="status"
-            className="border-b border-(--border-light) bg-white px-4 py-2 text-xs text-(--text-muted)"
-          >
-            {bulkMessage}
-          </p>
+        {bulkNotice ? (
+          <div className="border-b border-(--border-light) bg-white px-4 py-2.5">
+            <InlineNotice
+              variant={bulkNotice.tone === "success" ? "success" : "error"}
+              ariaLive={bulkNotice.tone === "error" ? "assertive" : "polite"}
+              message={bulkNotice.message}
+              dismissLabel="Dismiss"
+              dismissText="✕"
+              onDismiss={() => setBulkNotice(null)}
+              className={
+                bulkNotice.tone === "success"
+                  ? "flex items-center justify-between gap-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800"
+                  : bulkNotice.tone === "warning"
+                    ? "flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900"
+                    : "flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-800"
+              }
+              dismissClassName={
+                bulkNotice.tone === "success"
+                  ? "rounded px-1.5 py-0.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100"
+                  : bulkNotice.tone === "warning"
+                    ? "rounded px-1.5 py-0.5 text-xs font-medium text-amber-900 hover:bg-amber-100"
+                    : "rounded px-1.5 py-0.5 text-xs font-medium text-red-700 hover:bg-red-100"
+              }
+            />
+          </div>
         ) : null}
 
         {/* Content Table / Loading / Error states */}

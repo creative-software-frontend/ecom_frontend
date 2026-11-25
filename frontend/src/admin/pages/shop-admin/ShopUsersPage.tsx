@@ -1,5 +1,9 @@
-import { useState, useMemo } from "react"
-import { Plus, Download, Info } from "lucide-react"
+import { useMemo, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Download, Info, Plus } from "lucide-react"
+import { useAuth } from "../../auth/AuthProvider"
+import { ApiError } from "../../api/client"
+import { shopUsersApi, shopUserQueryKeys } from "../../api/shopUsersApi"
 import { ShopUsersMetricsCards } from "../../components/shop-admin/ShopUsersMetricsCards"
 import { ShopUsersToolbar } from "../../components/shop-admin/ShopUsersToolbar"
 import {
@@ -10,128 +14,144 @@ import { InviteShopUserModal } from "../../components/shop-admin/InviteShopUserM
 import { EditShopUserDrawer } from "../../components/shop-admin/EditShopUserDrawer"
 import { ResetShopUserPasswordModal } from "../../components/shop-admin/ResetShopUserPasswordModal"
 import { ConfirmationDialog } from "../../components/common/ConfirmationDialog"
+import { ErrorState } from "../../components/common/ErrorState"
+import { LoadingState } from "../../components/common/LoadingState"
+import { InlineNotice } from "../../components/common/InlineNotice"
 
-const INITIAL_USERS: ShopUser[] = [
-  {
-    id: 1,
-    name: "Abdur Razzaq",
-    email: "superadmin@powerzenox.com",
-    mobile: "+880 1711-002233",
-    role: "shop_admin",
-    roleDisplayName: "Shop Admin",
-    status: "active",
-    lastLoginAt: "14 mins ago",
-  },
-  {
-    id: 2,
-    name: "Fatema Khan",
-    email: "fatema@powerzenox.com",
-    mobile: "+880 1819-445566",
-    role: "salesman",
-    roleDisplayName: "Salesman",
-    status: "active",
-    lastLoginAt: "2 hours ago",
-  },
-  {
-    id: 3,
-    name: "Kazi Rahman",
-    email: "kazi@powerzenox.com",
-    mobile: "+880 1914-729102",
-    role: "order_handler",
-    roleDisplayName: "Order Handler",
-    status: "active",
-    lastLoginAt: "4 hours ago",
-  },
-  {
-    id: 4,
-    name: "Nusrat Jahan",
-    email: "nusrat@powerzenox.com",
-    mobile: "+880 1682-112233",
-    role: "product_uploader",
-    roleDisplayName: "Product Uploader",
-    status: "inactive",
-    lastLoginAt: "8 days ago",
-  },
-  {
-    id: 5,
-    name: "Tanvir Rahman",
-    email: "tanvir@powerzenox.com",
-    mobile: "+880 1521-778899",
-    role: "salesman",
-    roleDisplayName: "Salesman",
-    status: "active",
-    lastLoginAt: "Yesterday, 6:30 PM",
-  },
-  {
-    id: 6,
-    name: "Shamim Reza",
-    email: "shamim@powerzenox.com",
-    mobile: "+880 1301-224466",
-    role: "order_handler",
-    roleDisplayName: "Order Handler",
-    status: "active",
-    lastLoginAt: "May 18, 2024",
-  },
-]
+type Notice = { tone: "success" | "error"; message: string } | null
 
-const CURRENT_USER_ID = 1
+function csvCell(value: string | number | null | undefined): string {
+  const text = value === null || value === undefined ? "" : String(value)
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text
+}
+
+function downloadUsersCsv(users: ShopUser[]) {
+  const headers = ["Name", "Email", "Mobile", "Role", "Status", "Last Active"]
+  const rows = users.map((user) => [
+    user.name,
+    user.email,
+    user.mobile,
+    user.roleDisplayName,
+    user.status,
+    user.lastLoginAt ?? "",
+  ])
+  const csv = [headers, ...rows]
+    .map((row) => row.map(csvCell).join(","))
+    .join("\r\n")
+  const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = `shop-users-${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 0)
+}
 
 export default function ShopUsersPage() {
-  const [users, setUsers] = useState<ShopUser[]>(INITIAL_USERS)
+  const { state } = useAuth()
+  const queryClient = useQueryClient()
+  const currentUserId = state.status === "authenticated" ? state.user.id : 0
+  const usersQuery = useQuery({
+    queryKey: shopUserQueryKeys.list(),
+    queryFn: ({ signal }) => shopUsersApi.list(signal),
+  })
+  const rolesQuery = useQuery({
+    queryKey: shopUserQueryKeys.roles(),
+    queryFn: ({ signal }) => shopUsersApi.listRoles(signal),
+  })
+
   const [search, setSearch] = useState("")
   const [role, setRole] = useState("all")
   const [status, setStatus] = useState("all")
-
   const [inviteOpen, setInviteOpen] = useState(false)
   const [userToEdit, setUserToEdit] = useState<ShopUser | null>(null)
   const [userToReset, setUserToReset] = useState<ShopUser | null>(null)
   const [userToToggle, setUserToToggle] = useState<ShopUser | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [notice, setNotice] = useState<Notice>(null)
 
+  const users = usersQuery.data?.items ?? []
+  const roles = rolesQuery.data ?? []
   const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
-      const q = search.toLowerCase()
-      const matchesSearch =
-        !q ||
-        u.name.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        u.mobile.includes(q)
-      const matchesRole = role === "all" || u.role === role
-      const matchesStatus = status === "all" || u.status === status
-      return matchesSearch && matchesRole && matchesStatus
-    })
+    const q = search.trim().toLowerCase()
+    return users.filter(
+      (user) =>
+        (!q ||
+          user.name.toLowerCase().includes(q) ||
+          user.email.toLowerCase().includes(q) ||
+          user.mobile.toLowerCase().includes(q)) &&
+        (role === "all" || user.role === role) &&
+        (status === "all" || user.status === status)
+    )
   }, [users, search, role, status])
 
-  const activeCount = users.filter((u) => u.status === "active").length
-  const inactiveCount = users.length - activeCount
+  const toggleMutation = useMutation({
+    mutationFn: (user: ShopUser) =>
+      shopUsersApi.update(user.id, {
+        status: user.status === "active" ? "inactive" : "active",
+      }),
+    onSuccess: (updated) => {
+      void queryClient.invalidateQueries({ queryKey: shopUserQueryKeys.all })
+      setUserToToggle(null)
+      setNotice({
+        tone: "success",
+        message: `${updated.name} was ${updated.status === "active" ? "activated" : "deactivated"}.`,
+      })
+    },
+    onError: (error) => {
+      setUserToToggle(null)
+      setNotice({
+        tone: "error",
+        message:
+          error instanceof ApiError
+            ? error.message
+            : "Could not change user status.",
+      })
+    },
+  })
 
-  function handleCreate(newUser: ShopUser) {
-    setUsers((prev) => [...prev, newUser])
-    setSuccessMessage(`${newUser.name} was added to your team.`)
-  }
+  const handleMutationSuccess = (message: string) =>
+    setNotice({ tone: "success", message })
+  const isLoading = usersQuery.isLoading || rolesQuery.isLoading
+  const queryError = usersQuery.error ?? rolesQuery.error
 
-  function handleUpdate(updated: ShopUser) {
-    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)))
-    setSuccessMessage(`${updated.name} was updated.`)
-  }
-
-  function handleResetPassword(target: ShopUser) {
-    setSuccessMessage(`Password reset for ${target.name}.`)
-  }
-
-  function handleToggleConfirm() {
-    if (!userToToggle) return
-    const next: ShopUser["status"] =
-      userToToggle.status === "active" ? "inactive" : "active"
-    setUsers((prev) =>
-      prev.map((u) => (u.id === userToToggle.id ? { ...u, status: next } : u))
+  if (isLoading) {
+    return (
+      <LoadingState
+        className="flex min-h-64 items-center justify-center text-sm text-(--text-muted)"
+        ariaLabel="Loading shop users"
+      >
+        Loading users...
+      </LoadingState>
     )
-    setSuccessMessage(
-      `${userToToggle.name} was ${next === "active" ? "activated" : "deactivated"}.`
+  }
+  if (queryError) {
+    const permissionError =
+      queryError instanceof ApiError && queryError.status === 403
+    return (
+      <ErrorState
+        className="m-6 rounded-md border border-(--border-light) bg-(--bg-surface) p-6 text-center"
+        messageClassName="mb-3 text-sm text-(--text-muted)"
+        buttonClassName="h-8 rounded-md bg-(--primary) px-3 text-sm font-medium text-white"
+        message={
+          permissionError
+            ? "Only shop administrators can manage shop staff."
+            : queryError instanceof Error
+              ? queryError.message
+              : "Could not load shop users."
+        }
+        onRetry={() => {
+          void usersQuery.refetch()
+          void rolesQuery.refetch()
+        }}
+      />
     )
-    setUserToToggle(null)
   }
 
+  const counts = usersQuery.data?.counts ?? {
+    total: users.length,
+    active: 0,
+    inactive: 0,
+  }
   return (
     <div className="min-w-0 space-y-4 bg-(--bg-app) p-4 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -142,10 +162,15 @@ export default function ShopUsersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
+          <button
+            type="button"
+            onClick={() => downloadUsersCsv(filteredUsers)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)"
+          >
             <Download className="size-4" /> Export
           </button>
           <button
+            type="button"
             onClick={() => setInviteOpen(true)}
             className="inline-flex h-9 items-center gap-1.5 rounded-md bg-(--primary) px-4 text-sm font-medium text-white hover:bg-(--primary-hover)"
           >
@@ -153,28 +178,25 @@ export default function ShopUsersPage() {
           </button>
         </div>
       </div>
-
       <ShopUsersMetricsCards
-        total={users.length}
-        active={activeCount}
-        inactive={inactiveCount}
+        total={counts.total}
+        active={counts.active}
+        inactive={counts.inactive}
       />
-
-      {successMessage && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-sm text-(--status-delivered-text)"
-        >
-          <span>{successMessage}</span>
-          <button
-            onClick={() => setSuccessMessage(null)}
-            className="text-xs font-medium hover:underline"
-          >
-            Dismiss
-          </button>
-        </div>
+      {notice && (
+        <InlineNotice
+          message={notice.message}
+          variant={notice.tone}
+          ariaLive={notice.tone === "error" ? "assertive" : "polite"}
+          dismissLabel="Dismiss notification"
+          onDismiss={() => setNotice(null)}
+          className={
+            notice.tone === "error"
+              ? "flex items-center justify-between gap-3 rounded-md border border-(--status-cancelled-bg) bg-(--status-cancelled-bg)/50 px-4 py-2.5 text-sm text-(--status-cancelled-text)"
+              : "flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-sm text-(--status-delivered-text)"
+          }
+        />
       )}
-
       <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
         <ShopUsersToolbar
           search={search}
@@ -184,16 +206,16 @@ export default function ShopUsersPage() {
           status={status}
           onStatusChange={setStatus}
           totalCount={filteredUsers.length}
+          roles={roles}
         />
         <ShopUsersTable
           users={filteredUsers}
-          currentUserId={CURRENT_USER_ID}
+          currentUserId={currentUserId}
           onEdit={setUserToEdit}
           onResetPassword={setUserToReset}
           onToggleStatus={setUserToToggle}
         />
       </section>
-
       <div className="flex items-start gap-2 rounded-md border border-(--border-light) bg-(--bg-app) p-3 text-[11px] leading-relaxed text-(--text-muted)">
         <Info className="mt-0.5 size-4 shrink-0 text-(--primary)" />
         <p>
@@ -202,25 +224,29 @@ export default function ShopUsersPage() {
           managed at the platform level.
         </p>
       </div>
-
-      {/* Modals */}
       <InviteShopUserModal
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
-        onSuccess={handleCreate}
+        roles={roles}
+        onSuccess={(user) =>
+          handleMutationSuccess(`${user.name} was added to your team.`)
+        }
       />
       <EditShopUserDrawer
         open={userToEdit !== null}
         user={userToEdit}
-        currentUserId={CURRENT_USER_ID}
+        currentUserId={currentUserId}
+        roles={roles}
         onClose={() => setUserToEdit(null)}
-        onSuccess={handleUpdate}
+        onSuccess={(user) => handleMutationSuccess(`${user.name} was updated.`)}
       />
       <ResetShopUserPasswordModal
         open={userToReset !== null}
         user={userToReset}
         onClose={() => setUserToReset(null)}
-        onSuccess={handleResetPassword}
+        onSuccess={(user) =>
+          handleMutationSuccess(`Password reset for ${user.name}.`)
+        }
       />
       <ConfirmationDialog
         open={userToToggle !== null}
@@ -240,8 +266,10 @@ export default function ShopUsersPage() {
           userToToggle?.status === "active" ? "Deactivate" : "Activate"
         }
         variant={userToToggle?.status === "active" ? "danger" : "success"}
+        isPending={toggleMutation.isPending}
+        errorMessage={null}
         onCancel={() => setUserToToggle(null)}
-        onConfirm={handleToggleConfirm}
+        onConfirm={() => userToToggle && toggleMutation.mutate(userToToggle)}
       />
     </div>
   )

@@ -83,7 +83,8 @@ function ComingSoonCard({
   )
 }
 
-type OrderSmsStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled"
+type OrderSmsStatus =
+  "pending" | "confirmed" | "shipped" | "delivered" | "cancelled"
 
 const ORDER_SMS_STATUS_OPTIONS: {
   id: OrderSmsStatus
@@ -349,7 +350,7 @@ export default function OrdersTab() {
           </ComingSoonCard>
 
           {/* Order status SMS automation */}
-          <div className="md:col-span-2 rounded-md border border-(--border-light) bg-(--bg-surface)">
+          <div className="rounded-md border border-(--border-light) bg-(--bg-surface) md:col-span-2">
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-(--border-light) p-4">
               <div className="flex min-w-0 items-center gap-2">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-(--primary-soft) text-(--primary)">
@@ -360,7 +361,8 @@ export default function OrdersTab() {
                     Order status SMS
                   </h3>
                   <p className="mt-0.5 text-xs text-(--text-muted)">
-                    অর্ডারের প্রতিটি ধাপে customer-কে কী SMS পাঠানো হবে সেটি ম্যানেজ করুন।
+                    অর্ডারের প্রতিটি ধাপে customer-কে কী SMS পাঠানো হবে সেটি
+                    ম্যানেজ করুন।
                   </p>
                 </div>
               </div>
@@ -436,10 +438,16 @@ export default function OrdersTab() {
 
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-(--border-light) px-4 py-3">
               <p className="text-[11px] text-(--text-muted)">
-                Backend automation coming soon. এখন শুধু UI configuration preview।
+                Backend automation coming soon. এখন শুধু UI configuration
+                preview।
               </p>
               <span className="rounded-full bg-(--status-delivered-bg) px-2.5 py-1 text-xs font-medium text-(--status-delivered-text)">
-                {Object.values(statusSmsSettings).filter((item) => item.enabled).length} statuses enabled
+                {
+                  Object.values(statusSmsSettings).filter(
+                    (item) => item.enabled
+                  ).length
+                }{" "}
+                statuses enabled
               </span>
             </div>
           </div>

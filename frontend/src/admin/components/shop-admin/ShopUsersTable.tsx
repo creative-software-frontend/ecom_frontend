@@ -3,17 +3,10 @@ import { MoreVertical, Pencil, KeyRound, Power, PowerOff } from "lucide-react"
 import { adminDataTableStyles } from "../../lib/dataTableStyles"
 import { PortalActionMenu } from "../common/PortalActionMenu"
 import { getInitials } from "../../lib/initials"
+import { relativeTime } from "../../lib/formatTime"
+import type { ShopUserItem } from "../../api/shopUsersApi"
 
-export type ShopUser = {
-  id: number
-  name: string
-  email: string
-  mobile: string
-  role: string
-  roleDisplayName: string
-  status: "active" | "inactive"
-  lastLoginAt: string
-}
+export type ShopUser = ShopUserItem
 
 const roleBadgeMap: Record<string, string> = {
   shop_admin: "bg-teal-50 text-teal-700",
@@ -96,7 +89,7 @@ export function ShopUsersTable({
       minWidth: "140px",
       cell: (row) => (
         <span className="text-xs text-(--text-muted) tabular-nums">
-          {row.lastLoginAt}
+          {relativeTime(row.lastLoginAt)}
         </span>
       ),
     },
@@ -108,10 +101,9 @@ export function ShopUsersTable({
         const isSelf = row.id === currentUserId
         const isShopAdmin = row.role === "shop_admin"
 
-        // লজিক: যদি নিজের রো হয়, শুধু Reset Password দেখাবে।
-        // যদি অন্য কেউ Shop Admin হয়, শুধু Reset Password দেখাবে।
-        // অন্যথায় সব অপশন দেখাবে।
-
+        if (isSelf || isShopAdmin) {
+          return <span className="text-xs text-(--text-muted)">—</span>
+        }
         return (
           <PortalActionMenu
             label={`Actions for ${row.name}`}
@@ -121,17 +113,15 @@ export function ShopUsersTable({
           >
             {(closeMenu) => (
               <>
-                {!isSelf && !isShopAdmin && (
-                  <button
-                    onClick={() => {
-                      closeMenu()
-                      onEdit(row)
-                    }}
-                    className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) hover:bg-(--bg-surface-hover)"
-                  >
-                    <Pencil className="size-3.5" /> Edit User
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    closeMenu()
+                    onEdit(row)
+                  }}
+                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) hover:bg-(--bg-surface-hover)"
+                >
+                  <Pencil className="size-3.5" /> Edit User
+                </button>
                 <button
                   onClick={() => {
                     closeMenu()
@@ -141,25 +131,23 @@ export function ShopUsersTable({
                 >
                   <KeyRound className="size-3.5" /> Reset Password
                 </button>
-                {!isSelf && !isShopAdmin && (
-                  <button
-                    onClick={() => {
-                      closeMenu()
-                      onToggleStatus(row)
-                    }}
-                    className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover) ${row.status === "active" ? "text-red-600" : "text-(--primary)"}`}
-                  >
-                    {row.status === "active" ? (
-                      <>
-                        <PowerOff className="size-3.5" /> Deactivate Staff
-                      </>
-                    ) : (
-                      <>
-                        <Power className="size-3.5" /> Activate Staff
-                      </>
-                    )}
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    closeMenu()
+                    onToggleStatus(row)
+                  }}
+                  className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover) ${row.status === "active" ? "text-red-600" : "text-(--primary)"}`}
+                >
+                  {row.status === "active" ? (
+                    <>
+                      <PowerOff className="size-3.5" /> Deactivate Staff
+                    </>
+                  ) : (
+                    <>
+                      <Power className="size-3.5" /> Activate Staff
+                    </>
+                  )}
+                </button>
               </>
             )}
           </PortalActionMenu>

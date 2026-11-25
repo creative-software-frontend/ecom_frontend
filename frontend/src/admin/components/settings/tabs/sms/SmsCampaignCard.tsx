@@ -6,9 +6,12 @@ import {
   Save,
   Send,
   Smartphone,
+  Plus,
+  Trash2,
 } from "lucide-react"
 import { apiRequest } from "../../../../api/client"
 import { useAuth } from "../../../../auth/AuthProvider"
+import { ConfirmationDialog } from "../../../../components/common/ConfirmationDialog"
 
 const VARIABLES = [
   "{name}",
@@ -59,6 +62,9 @@ export function SmsCampaignCard() {
   const [editingTemplateId, setEditingTemplateId] = useState<number | null>(
     null
   )
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deletingTemplate, setDeletingTemplate] = useState(false)
+  const [deleteError, setDeleteError] = useState("")
 
   useEffect(() => {
     const controller = new AbortController()
@@ -79,9 +85,7 @@ export function SmsCampaignCard() {
 
   const handleTemplateChange = (templateId: string) => {
     setSelectedTemplateId(templateId)
-    const selected = templates.find(
-      (item) => String(item.id) === templateId
-    )
+    const selected = templates.find((item) => String(item.id) === templateId)
     if (selected) setTemplate(selected.message)
   }
 
@@ -115,13 +119,10 @@ export function SmsCampaignCard() {
     try {
       const savedTemplate =
         editingTemplateId === null
-          ? await apiRequest<SmsTemplate>(
-              "/shop/settings/sms/templates",
-              {
-                method: "POST",
-                body: { name, message: template },
-              }
-            )
+          ? await apiRequest<SmsTemplate>("/shop/settings/sms/templates", {
+              method: "POST",
+              body: { name, message: template },
+            })
           : await apiRequest<SmsTemplate>(
               `/shop/settings/sms/templates/${editingTemplateId}`,
               {
@@ -147,6 +148,38 @@ export function SmsCampaignCard() {
       setSaveError("টেমপ্লেট সেভ করা যায়নি। আবার চেষ্টা করুন।")
     } finally {
       setSavingTemplate(false)
+    }
+  }
+
+  const openDeleteTemplate = () => {
+    setDeleteError("")
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteTemplate = async () => {
+    if (!selectedTemplate || typeof selectedTemplate.id !== "number") return
+
+    setDeletingTemplate(true)
+    setDeleteError("")
+
+    try {
+      await apiRequest(`/shop/settings/sms/templates/${selectedTemplate.id}`, {
+        method: "DELETE",
+      })
+
+      const remaining = templates.filter(
+        (item) => String(item.id) !== String(selectedTemplate.id)
+      )
+      setTemplates(remaining)
+
+      const nextTemplate = remaining[0] ?? DEFAULT_TEMPLATES[0]
+      setSelectedTemplateId(String(nextTemplate.id))
+      setTemplate(nextTemplate.message)
+      setShowDeleteConfirm(false)
+    } catch {
+      setDeleteError("টেমপ্লেট ডিলিট করা যায়নি। আবার চেষ্টা করুন।")
+    } finally {
+      setDeletingTemplate(false)
     }
   }
 
@@ -323,9 +356,7 @@ export function SmsCampaignCard() {
                 type="button"
                 onClick={saveTemplate}
                 disabled={
-                  savingTemplate ||
-                  !templateName.trim() ||
-                  !template.trim()
+                  savingTemplate || !templateName.trim() || !template.trim()
                 }
                 className="h-9 rounded-md bg-(--primary) px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -380,7 +411,7 @@ export function SmsCampaignCard() {
               onClick={openCreateTemplate}
               className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)"
             >
-              <Save className="size-4" /> New Template
+              <Plus className="size-4" /> New Template
             </button>
             <button
               type="button"
@@ -395,6 +426,19 @@ export function SmsCampaignCard() {
             >
               <Save className="size-4" /> Update Template
             </button>
+            <button
+              type="button"
+              onClick={openDeleteTemplate}
+              disabled={!canUpdateSelectedTemplate}
+              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-red-600 hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+              title={
+                canUpdateSelectedTemplate
+                  ? "Delete the selected custom template"
+                  : "Select a custom template to delete"
+              }
+            >
+              <Trash2 className="size-4" /> Delete Template
+            </button>
             <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover)">
               <Send className="size-4" /> Send Test SMS to My Number
             </button>
@@ -404,6 +448,31 @@ export function SmsCampaignCard() {
           </button>
         </div>
       </div>
+
+      <ConfirmationDialog
+        open={showDeleteConfirm}
+        title="Delete SMS Template"
+        variant="danger"
+        icon={Trash2}
+        confirmLabel={deletingTemplate ? "Deleting..." : "Delete"}
+        cancelLabel="Cancel"
+        isPending={deletingTemplate}
+        errorMessage={deleteError}
+        description={
+          <p>
+            Are you sure you want to delete the template{" "}
+            <strong>&ldquo;{selectedTemplate?.name}&rdquo;</strong>? This action
+            cannot be undone.
+          </p>
+        }
+        onCancel={() => {
+          if (!deletingTemplate) {
+            setShowDeleteConfirm(false)
+            setDeleteError("")
+          }
+        }}
+        onConfirm={confirmDeleteTemplate}
+      />
     </div>
   )
 }

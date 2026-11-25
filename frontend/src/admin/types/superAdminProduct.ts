@@ -8,10 +8,30 @@ export type ShopOption = {
 /** Three-state product status — derived from `isActive` + `isBlocked`. */
 export type SuperAdminProductStatus = "active" | "inactive" | "blocked"
 
+export type SuperAdminProductVariant = {
+  id?: number
+  size: string | null
+  color: string | null
+  sku: string | null
+  price: number
+  stock: number
+}
+
+export type SuperAdminProductSeo = {
+  metaTitle?: string | null
+  metaDescription?: string | null
+  keywords?: string | null
+}
+
+export type SuperAdminProductSpecification = {
+  key: string
+  value: string
+}
+
 /**
- * Super Admin product row — extends the base Product with shop context
- * and block flag. In production, this will be `Product & { shop: Shop }`.
- * Mock data uses this shape directly.
+ * Super Admin product row — the shape returned by the super product list/detail
+ * endpoints, including shop context and the block flag. `shopName` is always
+ * normalized by `superAdminProductsApi` from `shop?.name`.
  */
 export type SuperAdminProduct = {
   id: number
@@ -19,16 +39,37 @@ export type SuperAdminProduct = {
   slug: string
   brandName: string
   category: string
+  subcategory?: string | null
+  section?: string | null
+  sku?: string | null
+  badge?: string | null
+  shortDescription?: string | null
+  description?: string | null
   currentPrice: number
-  buyingPrice?: number
   regularPrice: number
-  salesCount?: number
+  buyingPrice?: number | null
+  discountPercent?: number | null
   stockQuantity: number
+  inStock?: boolean
+  salesCount?: number
   images: string[]
   isActive: boolean
   isBlocked: boolean
+  productType?: string
+  sizeOptions?: string[]
+  colorOptions?: string[]
+  variants?: SuperAdminProductVariant[]
+  isFeatured?: boolean
+  isFreeShipping?: boolean
+  enableStockAlert?: boolean
+  stockAlertQty?: number | null
+  maxOrderQty?: number | null
+  rank?: number | null
+  seo?: SuperAdminProductSeo | null
+  specifications?: SuperAdminProductSpecification[]
   shopId: number
   shopName: string
+  shop?: { id: number; name: string; slug: string } | null
   createdAt: string
   updatedAt: string
 }

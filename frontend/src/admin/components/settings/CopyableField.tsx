@@ -40,9 +40,7 @@ export function CopyableField({
           {label}
         </label>
         {hint && (
-          <span className="shrink-0 text-xs text-(--text-muted)">
-            {hint}
-          </span>
+          <span className="shrink-0 text-xs text-(--text-muted)">{hint}</span>
         )}
       </div>
       <div className="flex h-9 items-center rounded-md border border-(--border-light) bg-(--bg-surface) pr-1.5 pl-3">

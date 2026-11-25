@@ -21,13 +21,13 @@ export function ShopUsersMetricsCards({
       <DashboardMetricCard
         label="ACTIVE USERS"
         value={active}
-        subText="Logged in last 30 days"
+        subText="Active staff accounts"
         icon={<UserCheck className="icon-size! text-emerald-600" />}
       />
       <DashboardMetricCard
         label="INACTIVE"
         value={inactive}
-        subText={`${inactive} pending invitation`}
+        subText="Disabled accounts"
         icon={<UserX className="icon-size! text-amber-600" />}
         variant="warning"
       />

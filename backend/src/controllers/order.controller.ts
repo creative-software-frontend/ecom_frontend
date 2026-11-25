@@ -57,12 +57,57 @@ export async function createOrder(req: Request, res: Response) {
       });
     }
 
+    const productIds = Array.from(
+      new Set(
+        items.map((item) => parseId(item.productId)).filter((id): id is number => id !== null),
+      ),
+    );
+    if (productIds.length !== items.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Each item must have a valid product ID",
+      });
+    }
+
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+        isActive: true,
+        isBlocked: false,
+      },
+      select: { id: true, shopId: true },
+    });
+
+    if (products.length !== productIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: "One or more products are unavailable",
+      });
+    }
+
+    const uniqueShopIds = new Set(products.map((product) => product.shopId));
+    if (uniqueShopIds.size > 1) {
+      return res.status(400).json({
+        success: false,
+        message: "All items must be from the same shop.",
+      });
+    }
+
+    const shopId = products[0]?.shopId;
+    if (!shopId) {
+      return res.status(400).json({
+        success: false,
+        message: "Unable to determine shop for order",
+      });
+    }
+    const productById = new Map(products.map((product) => [product.id, product]));
+
     // সাবটোটাল এবং মোট হিসাব করা
     let subtotal = 0;
     const orderItemsData = [];
     for (const item of items) {
       const productId = parseId(item.productId);
-      if (productId === null) {
+      if (productId === null || !productById.has(productId)) {
         return res.status(400).json({
           success: false,
           message: "Each item must have a valid product ID",
@@ -84,6 +129,7 @@ export async function createOrder(req: Request, res: Response) {
     // ট্রানজ্যাকশনের মাধ্যমে অর্ডার এবং অর্ডার আইটেম সেভ করা
     const newOrder = await prisma.order.create({
       data: {
+        shopId,
         orderNumber,
         customerName,
         customerPhone,

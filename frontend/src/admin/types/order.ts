@@ -1,5 +1,5 @@
 export type OrderStatus =
-  "pending" | "confirmed" | "shipped" | "delivered" | "cancelled"
+  "pending" | "confirmed" | "shipped" | "delivered" | "cancelled" | "returned"
 
 export type PaymentStatus = "unpaid" | "paid"
 
@@ -10,6 +10,7 @@ export type OrderCounts = {
   shipped: { count: number; totalPrice: number }
   delivered: { count: number; totalPrice: number }
   cancelled: { count: number; totalPrice: number }
+  returned: { count: number; totalPrice: number }
 }
 
 export type OrderListItem = {

@@ -194,7 +194,7 @@ function InvoiceSheet({
           {/* Merchant info */}
           <div>
             <p className="text-lg leading-tight font-bold text-gray-900">
-              {shop?.name ?? "Your Shop"}
+              {shop?.name ?? (order.shopName || "Your Shop")}
             </p>
             <p className="mt-0.5 text-xs text-gray-500">
               Merchant ID: {order.shopId}
@@ -356,7 +356,7 @@ function LabelSheet({
         {/* Shop name header */}
         <div className="mb-3 border-b-2 border-gray-900 pb-2">
           <p className="text-center text-base font-black">
-            {shop?.name ?? "Shop"}
+            {shop?.name ?? (order.shopName || "Shop")}
           </p>
         </div>
 
@@ -367,7 +367,7 @@ function LabelSheet({
               From
             </p>
             <p className="font-semibold text-gray-900">
-              {shop?.name ?? "Shop"}
+              {shop?.name ?? (order.shopName || "Shop")}
             </p>
           </div>
           <div>

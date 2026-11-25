@@ -2,11 +2,8 @@ import { Router } from "express";
 import {
   login,
   register,
-<<<<<<< HEAD
-=======
   requestRegistrationMobileVerification,
   verifyRegistrationMobile,
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
   logout,
   me,
   updateProfile,
@@ -16,21 +13,16 @@ import {
   loginRateLimit,
   registrationRateLimit,
 } from "../middleware/loginRateLimit.js";
-<<<<<<< HEAD
-=======
 import {
   registrationOtpRequestRateLimit,
   registrationOtpVerifyRateLimit,
 } from "../middleware/mobileVerificationRateLimit.js";
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
 import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
 
 // Public — no auth required
 router.post("/login", loginRateLimit, login);
-<<<<<<< HEAD
-=======
 router.post(
   "/register/mobile/request-code",
   registrationOtpRequestRateLimit,
@@ -41,7 +33,6 @@ router.post(
   registrationOtpVerifyRateLimit,
   verifyRegistrationMobile,
 );
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
 router.post("/register", registrationRateLimit, register);
 router.post("/logout", logout);
 

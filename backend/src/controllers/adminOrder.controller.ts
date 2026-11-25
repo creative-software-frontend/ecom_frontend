@@ -1,13 +1,16 @@
 import type { Request, Response } from "express";
 import type { Prisma } from "../../generated/prisma/client.js";
 import {
-  ALLOWED_ORDER_STATUS_TRANSITIONS,
+  canTransitionOrderStatus,
+  canUpdatePaymentStatus,
   type OrderStatus,
 } from "../constants/order.js";
+import { logAudit } from "../lib/auditLog.js";
 import { prisma } from "../lib/prisma.js";
 import { parseId } from "../lib/parseId.js";
 import {
   formatOrderValidationErrors,
+  getRequestedOrderStatus,
   orderListQuerySchema,
   updateOrderStatusSchema,
 } from "../schemas/order.schema.js";
@@ -21,11 +24,24 @@ function getDhakaDayStart(date: string, dayOffset = 0): Date {
   );
 }
 
-// get order details by id
-async function fetchOrderDetail(id: number) {
-  const order = await prisma.order.findUnique({
-    where: { id },
+function getShopIdOrForbid(req: Request, res: Response): number | null {
+  const shopId = req.user?.shopId;
+  if (!shopId) {
+    res.status(403).json({
+      success: false,
+      message:
+        "Shop-scoped endpoint. Super admins must use /api/admin/super/orders.",
+    });
+    return null;
+  }
+  return shopId;
+}
+
+async function fetchOrderDetail(id: number, shopId?: number) {
+  const order = await prisma.order.findFirst({
+    where: { id, ...(shopId !== undefined ? { shopId } : {}) },
     include: {
+      shop: { select: { id: true, name: true, slug: true } },
       items: {
         include: {
           product: {
@@ -59,6 +75,8 @@ async function fetchOrderDetail(id: number) {
     paymentStatus: order.paymentStatus,
     status: order.status,
     orderStatus: order.status,
+    shopId: order.shopId,
+    shop: order.shop,
     createdAt: order.createdAt,
     items: order.items.map((item) => {
       let image: string | null = null;
@@ -85,6 +103,9 @@ async function fetchOrderDetail(id: number) {
 }
 
 export async function listOrders(req: Request, res: Response) {
+  const shopId = getShopIdOrForbid(req, res);
+  if (shopId === null) return;
+
   const parsed = orderListQuerySchema.safeParse(req.query);
 
   if (!parsed.success) {
@@ -98,32 +119,33 @@ export async function listOrders(req: Request, res: Response) {
   const { page, limit, status, paymentStatus, area, dateFrom, dateTo, q } =
     parsed.data;
 
-  const where: Prisma.OrderWhereInput = {};
+  const baseWhere: Prisma.OrderWhereInput = { shopId };
 
-  if (status) {
-    where.status = status;
-  }
   if (paymentStatus) {
-    where.paymentStatus = paymentStatus;
+    baseWhere.paymentStatus = paymentStatus;
   }
   if (area) {
-    where.deliveryArea = area;
+    baseWhere.deliveryArea = area;
   }
   if (dateFrom || dateTo) {
     const dateFilter: Prisma.DateTimeFilter = {};
     if (dateFrom) dateFilter.gte = getDhakaDayStart(dateFrom);
     if (dateTo) dateFilter.lt = getDhakaDayStart(dateTo, 1);
-    where.createdAt = dateFilter;
+    baseWhere.createdAt = dateFilter;
   }
 
   const trimmedQ = q?.trim();
   if (trimmedQ) {
-    where.OR = [
+    baseWhere.OR = [
       { orderNumber: { contains: trimmedQ } },
       { customerName: { contains: trimmedQ } },
       { customerPhone: { contains: trimmedQ } },
     ];
   }
+
+  const where: Prisma.OrderWhereInput = status
+    ? { ...baseWhere, status }
+    : baseWhere;
 
   const skip = (page - 1) * limit;
   const take = limit;
@@ -147,6 +169,7 @@ export async function listOrders(req: Request, res: Response) {
             status: true,
             paymentStatus: true,
             paymentMethod: true,
+            shopId: true,
             createdAt: true,
             _count: {
               select: {
@@ -158,6 +181,7 @@ export async function listOrders(req: Request, res: Response) {
         prisma.order.count({ where }),
         prisma.order.groupBy({
           by: ["status"],
+          where: baseWhere,
           _count: {
             _all: true,
           },
@@ -166,6 +190,7 @@ export async function listOrders(req: Request, res: Response) {
           },
         }),
         prisma.order.findMany({
+          where: { shopId },
           distinct: ["deliveryArea"],
           select: { deliveryArea: true },
           orderBy: { deliveryArea: "asc" },
@@ -181,6 +206,7 @@ export async function listOrders(req: Request, res: Response) {
       confirmed: { count: 0, totalPrice: 0 },
       shipped: { count: 0, totalPrice: 0 },
       delivered: { count: 0, totalPrice: 0 },
+      returned: { count: 0, totalPrice: 0 },
       cancelled: { count: 0, totalPrice: 0 },
     };
     for (const group of statusGroups) {
@@ -205,6 +231,7 @@ export async function listOrders(req: Request, res: Response) {
       status: o.status,
       paymentStatus: o.paymentStatus,
       paymentMethod: o.paymentMethod,
+      shopId: o.shopId,
       createdAt: o.createdAt,
       itemCount: o._count.items,
     }));
@@ -228,13 +255,16 @@ export async function listOrders(req: Request, res: Response) {
 }
 
 export async function getOrderById(req: Request, res: Response) {
+  const shopId = getShopIdOrForbid(req, res);
+  if (shopId === null) return;
+
   const id = parseId(req.params.id);
   if (id === null) {
     return res.status(404).json({ success: false, message: "Order not found" });
   }
 
   try {
-    const order = await fetchOrderDetail(id);
+    const order = await fetchOrderDetail(id, shopId);
     if (!order) {
       return res
         .status(404)
@@ -251,6 +281,9 @@ export async function getOrderById(req: Request, res: Response) {
 }
 
 export async function updateOrderStatus(req: Request, res: Response) {
+  const shopId = getShopIdOrForbid(req, res);
+  if (shopId === null) return;
+
   const id = parseId(req.params.id);
   if (id === null) {
     return res.status(404).json({ success: false, message: "Order not found" });
@@ -266,12 +299,13 @@ export async function updateOrderStatus(req: Request, res: Response) {
     });
   }
 
-  const { orderStatus, paymentStatus } = parsed.data;
+  const { paymentStatus } = parsed.data;
+  const orderStatus = getRequestedOrderStatus(parsed.data);
 
   try {
-    const currentOrder = await prisma.order.findUnique({
-      where: { id },
-      select: { id: true, status: true, paymentStatus: true },
+    const currentOrder = await prisma.order.findFirst({
+      where: { id, shopId },
+      select: { id: true, status: true, paymentStatus: true, shopId: true },
     });
 
     if (!currentOrder) {
@@ -280,26 +314,29 @@ export async function updateOrderStatus(req: Request, res: Response) {
         .json({ success: false, message: "Order not found" });
     }
 
-    if (orderStatus !== undefined) {
-      const currentStatus = currentOrder.status as OrderStatus;
-      const allowedTransitions =
-        ALLOWED_ORDER_STATUS_TRANSITIONS[currentStatus];
-
-      if (!allowedTransitions || !allowedTransitions.includes(orderStatus)) {
-        return res.status(409).json({
-          success: false,
-          message: `Cannot change order status from ${currentOrder.status} to ${orderStatus}`,
-        });
-      }
+    if (
+      orderStatus !== undefined &&
+      !canTransitionOrderStatus(currentOrder.status, orderStatus)
+    ) {
+      const message = `Cannot change order status from ${currentOrder.status} to ${orderStatus}`;
+      return res.status(422).json({
+        success: false,
+        message,
+        errors: { orderStatus: message },
+      });
     }
 
-    if (paymentStatus !== undefined) {
-      if (currentOrder.status === "cancelled" || orderStatus === "cancelled") {
-        return res.status(409).json({
-          success: false,
-          message: "Cannot change payment status of a cancelled order",
-        });
-      }
+    if (
+      paymentStatus !== undefined &&
+      !canUpdatePaymentStatus(currentOrder.status, orderStatus)
+    ) {
+      return res.status(422).json({
+        success: false,
+        message: "Cannot change payment status of a cancelled order",
+        errors: {
+          paymentStatus: "Cannot change payment status of a cancelled order",
+        },
+      });
     }
 
     const updateData: Prisma.OrderUpdateInput = {};
@@ -313,14 +350,15 @@ export async function updateOrderStatus(req: Request, res: Response) {
     const updateResult = await prisma.order.updateMany({
       where: {
         id,
+        shopId,
         status: currentOrder.status,
       },
       data: updateData,
     });
 
     if (updateResult.count === 0) {
-      const recheck = await prisma.order.findUnique({
-        where: { id },
+      const recheck = await prisma.order.findFirst({
+        where: { id, shopId },
         select: { id: true, status: true },
       });
 
@@ -330,17 +368,28 @@ export async function updateOrderStatus(req: Request, res: Response) {
           .json({ success: false, message: "Order not found" });
       }
 
-      if (orderStatus !== undefined) {
-        return res.status(409).json({
+      if (
+        orderStatus !== undefined &&
+        !canTransitionOrderStatus(recheck.status, orderStatus)
+      ) {
+        const message = `Cannot change order status from ${recheck.status} to ${orderStatus}`;
+        return res.status(422).json({
           success: false,
-          message: `Cannot change order status from ${recheck.status} to ${orderStatus}`,
+          message,
+          errors: { orderStatus: message },
         });
       }
 
-      if (paymentStatus !== undefined && recheck.status === "cancelled") {
-        return res.status(409).json({
+      if (
+        paymentStatus !== undefined &&
+        !canUpdatePaymentStatus(recheck.status)
+      ) {
+        return res.status(422).json({
           success: false,
           message: "Cannot change payment status of a cancelled order",
+          errors: {
+            paymentStatus: "Cannot change payment status of a cancelled order",
+          },
         });
       }
 
@@ -350,13 +399,27 @@ export async function updateOrderStatus(req: Request, res: Response) {
       });
     }
 
-    const updated = await fetchOrderDetail(id);
+    const updated = await fetchOrderDetail(id, shopId);
 
     if (!updated) {
       return res
         .status(404)
         .json({ success: false, message: "Order not found" });
     }
+
+    void logAudit({
+      req,
+      action: "order.status_update",
+      entityType: "order",
+      entityId: currentOrder.id,
+      metadata: {
+        previousStatus: currentOrder.status,
+        previousPaymentStatus: currentOrder.paymentStatus,
+        ...(orderStatus !== undefined && { status: orderStatus }),
+        ...(paymentStatus !== undefined && { paymentStatus }),
+      },
+      targetShopId: currentOrder.shopId,
+    });
 
     return res.status(200).json({ success: true, data: updated });
   } catch (error) {

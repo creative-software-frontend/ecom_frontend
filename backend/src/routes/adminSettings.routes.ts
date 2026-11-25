@@ -18,6 +18,7 @@ import {
 import { requireAuth } from "../middleware/requireAuth.js";
 import {
   createSmsTemplate,
+  deleteSmsTemplate,
   listSmsTemplates,
   updateSmsTemplate,
 } from "../controllers/smsTemplate.controller.js";
@@ -45,5 +46,6 @@ router.put("/courier", updateCourierSettings);
 router.get("/sms/templates", listSmsTemplates);
 router.post("/sms/templates", createSmsTemplate);
 router.put("/sms/templates/:id", updateSmsTemplate);
+router.delete("/sms/templates/:id", deleteSmsTemplate);
 
 export default router;

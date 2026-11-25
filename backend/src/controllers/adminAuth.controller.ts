@@ -13,11 +13,7 @@ import { Prisma } from "../../generated/prisma/client.js";
 import { IS_PRODUCTION, JWT_SECRET } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 import { logAudit } from "../lib/auditLog.js";
-<<<<<<< HEAD
-import { generateShopSlug } from "../lib/shopSlug.js";
-=======
 import { generateShopSlug, isShopSlugUniqueConflict } from "../lib/shopSlug.js";
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
 
 const DUMMY_PASSWORD_HASH =
   "$2b$12$ovTjS60rfPUAij6cC069qeltkyg7GtK7Ety/1nzknk1bx8YRFuxdK";
@@ -62,17 +58,6 @@ const registrationSchema = z.object({
   mobile: z
     .string()
     .trim()
-<<<<<<< HEAD
-    .refine(
-      (value) => !value || /^01[3-9]\d{8}$/.test(value),
-      "Enter a valid mobile number",
-    )
-    .optional(),
-  address: z.string().trim().max(500).optional(),
-  password: z.string().min(12, "Password must be at least 12 characters"),
-});
-
-=======
     .regex(BD_MOBILE_PATTERN, "Enter a valid mobile number"),
   address: z.string().trim().max(500).optional(),
   password: z.string().min(12, "Password must be at least 12 characters"),
@@ -97,7 +82,6 @@ function hashesMatch(expectedHash: string, actualHash: string): boolean {
 
 class InvalidMobileVerificationError extends Error {}
 
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
 const cookieOptions = {
   httpOnly: true,
   sameSite: "lax" as const,
@@ -217,8 +201,6 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-<<<<<<< HEAD
-=======
 export async function requestRegistrationMobileVerification(
   req: Request,
   res: Response,
@@ -401,48 +383,10 @@ export async function verifyRegistrationMobile(req: Request, res: Response) {
   }
 }
 
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
 export async function register(req: Request, res: Response) {
   const parsed = registrationSchema.safeParse(req.body);
 
   if (!parsed.success) {
-<<<<<<< HEAD
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const field = issue.path.join(".") || "form";
-      if (!(field in errors)) errors[field] = issue.message;
-    }
-    return res
-      .status(422)
-      .json({ success: false, message: "Validation failed", errors });
-  }
-
-  const { shopName, name, email, mobile, address, password } = parsed.data;
-
-  try {
-    const [role, slugResult] = await Promise.all([
-      prisma.role.findUnique({ where: { name: "shop_admin" } }),
-      generateShopSlug(shopName),
-    ]);
-
-    if (!role || role.scope !== "shop") {
-      console.error("Shop admin role is missing or has an invalid scope");
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "Registration is currently unavailable",
-        });
-    }
-
-    if (slugResult.conflict) {
-      return res.status(409).json({
-        success: false,
-        message: "A shop with a similar name already exists",
-        errors: {
-          shopName: "This shop name creates a URL that is already taken",
-        },
-=======
     return sendValidationError(res, parsed.error);
   }
 
@@ -485,38 +429,10 @@ export async function register(req: Request, res: Response) {
       return res.status(500).json({
         success: false,
         message: "Registration is currently unavailable",
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
       });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-<<<<<<< HEAD
-    const user = await prisma.$transaction(async (transaction) => {
-      const shop = await transaction.shop.create({
-        data: {
-          name: shopName,
-          slug: slugResult.slug,
-          mobile: mobile || null,
-          address: address || null,
-          status: "active",
-        },
-      });
-
-      return transaction.user.create({
-        data: {
-          email,
-          name,
-          mobile: mobile || null,
-          passwordHash,
-          roleId: role.id,
-          shopId: shop.id,
-          status: "active",
-          lastLoginAt: new Date(),
-        },
-        include: { role: true, shop: true },
-      });
-    });
-=======
     const createRegistration = (slug: string) =>
       prisma.$transaction(async (transaction) => {
         const verificationAt = new Date();
@@ -578,7 +494,6 @@ export async function register(req: Request, res: Response) {
     if (!user || !slug) {
       throw new Error("Could not create shop with a unique URL");
     }
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
 
     const token = jwt.sign({ id: user.id }, JWT_SECRET, {
       algorithm: "HS256",
@@ -595,11 +510,7 @@ export async function register(req: Request, res: Response) {
       action: "shop.create",
       entityType: "shop",
       entityId: user.shopId ?? undefined,
-<<<<<<< HEAD
-      metadata: { name: shopName, slug: slugResult.slug, selfRegistered: true },
-=======
       metadata: { name: shopName, slug, selfRegistered: true },
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
       targetShopId: user.shopId,
     });
 
@@ -608,8 +519,6 @@ export async function register(req: Request, res: Response) {
       data: toAuthResponse(user),
     });
   } catch (error) {
-<<<<<<< HEAD
-=======
     if (error instanceof InvalidMobileVerificationError) {
       return res.status(422).json({
         success: false,
@@ -618,7 +527,6 @@ export async function register(req: Request, res: Response) {
       });
     }
 
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
@@ -627,22 +535,13 @@ export async function register(req: Request, res: Response) {
       const emailConflict =
         (Array.isArray(target) && target.includes("email")) ||
         (typeof target === "string" && target.includes("email"));
-<<<<<<< HEAD
-=======
       const mobileConflict =
         (Array.isArray(target) && target.includes("mobile")) ||
         (typeof target === "string" && target.includes("mobile"));
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
       return res.status(409).json({
         success: false,
         message: emailConflict
           ? "This email is already registered"
-<<<<<<< HEAD
-          : "A shop with a similar name already exists",
-        errors: emailConflict
-          ? { email: "This email is already registered" }
-          : { shopName: "This shop name creates a URL that is already taken" },
-=======
           : mobileConflict
             ? "This mobile number is already registered"
             : "A shop with this name was just created. Please try again.",
@@ -651,7 +550,6 @@ export async function register(req: Request, res: Response) {
           : mobileConflict
             ? { mobile: "This mobile number is already registered" }
             : { shopName: "Please retry shop registration." },
->>>>>>> 943589b71143456bbd5207a815a53a15c35d7a01
       });
     }
     console.error("Error during shop registration:", error);

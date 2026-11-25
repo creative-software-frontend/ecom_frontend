@@ -267,9 +267,7 @@ export function FormColorPicker({
         <label className="text-xs font-semibold text-(--text-primary)">
           {label}
         </label>
-        {hint && (
-          <span className="text-xs text-(--text-muted)">{hint}</span>
-        )}
+        {hint && <span className="text-xs text-(--text-muted)">{hint}</span>}
       </div>
       <div className="flex items-center gap-2">
         <label className="relative cursor-pointer">

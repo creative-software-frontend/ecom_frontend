@@ -3,10 +3,11 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { DialogShell } from "../common/DialogShell"
+import { InlineNotice } from "../common/InlineNotice"
 import { Save, Layers, Lock, ImageIcon } from "lucide-react"
 import { FieldError, FormToggle } from "../settings/SettingsField"
 import { useEscapeKey } from "../../hooks/useEscapeKey"
-import type { Brand } from "../../types/catalog"
+import type { Brand, BrandWriteInput } from "../../types/catalog"
 
 const editBrandSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -14,8 +15,12 @@ const editBrandSchema = z.object({
     .string()
     .trim()
     .refine(
-      (v) => !v || /^https?:\/\//.test(v),
-      "Must start with http:// or https://"
+      (v) =>
+        !v ||
+        (v.startsWith("/") && !v.startsWith("//")) ||
+        v.startsWith("https://") ||
+        v.startsWith("http://"),
+      "Must start with /, http:// or https://"
     ),
   description: z.string().trim().max(500),
   isActive: z.boolean(),
@@ -26,15 +31,23 @@ type EditBrandFormValues = z.infer<typeof editBrandSchema>
 type EditBrandDrawerProps = {
   open: boolean
   brand: Brand | null
+  isPending?: boolean
+  error?: string | null
+  fieldErrors?: Record<string, string> | null
+  onClearError?: () => void
   onClose: () => void
-  onSuccess: (updated: Brand) => void
+  onSubmit: (input: BrandWriteInput) => Promise<void> | void
 }
 
 export function EditBrandDrawer({
   open,
   brand,
+  isPending = false,
+  error,
+  fieldErrors,
+  onClearError,
   onClose,
-  onSuccess,
+  onSubmit,
 }: EditBrandDrawerProps) {
   const {
     register,
@@ -42,6 +55,7 @@ export function EditBrandDrawer({
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<EditBrandFormValues>({
     resolver: zodResolver(editBrandSchema),
@@ -58,21 +72,26 @@ export function EditBrandDrawer({
     }
   }, [open, brand, reset])
 
-  useEscapeKey(onClose, open && !isSubmitting)
+  useEffect(() => {
+    if (!open || !fieldErrors) return
+    for (const field of ["name", "logoUrl", "description"] as const) {
+      const message = fieldErrors[field]
+      if (message) setError(field, { type: "server", message })
+    }
+  }, [fieldErrors, open, setError])
+
+  const busy = isSubmitting || isPending
+  useEscapeKey(onClose, open && !busy)
 
   if (!open || !brand) return null
 
-  const onSubmit = async (values: EditBrandFormValues) => {
-    // Mock save — backend integration later
-    await new Promise((r) => setTimeout(r, 300))
-    onSuccess({
-      ...brand,
+  const submitForm = async (values: EditBrandFormValues) => {
+    await onSubmit({
       name: values.name,
       logoUrl: values.logoUrl || null,
-      description: values.description,
+      description: values.description || null,
       isActive: values.isActive,
     })
-    onClose()
   }
 
   const logoValue = watch("logoUrl")
@@ -85,14 +104,24 @@ export function EditBrandDrawer({
       subtitle={<p className="text-[11px] text-(--text-muted)">{brand.name}</p>}
       icon={<Layers className="size-4" />}
       closeButtonClassName="rounded p-1 text-(--text-muted) hover:bg-(--bg-surface-hover) hover:text-(--text-primary) disabled:opacity-50"
-      closeDisabled={isSubmitting}
+      closeDisabled={busy}
       onClose={onClose}
     >
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(submitForm)}
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+          {error && (
+            <InlineNotice
+              message={error}
+              variant="error"
+              ariaLive="assertive"
+              dismissLabel="Dismiss error"
+              onDismiss={onClearError ?? (() => undefined)}
+              className="flex items-center justify-between gap-3 rounded-md border border-(--status-cancelled-bg) bg-(--status-cancelled-bg)/50 px-3 py-2 text-xs text-(--status-cancelled-text)"
+            />
+          )}
           {/* Logo */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
@@ -116,7 +145,7 @@ export function EditBrandDrawer({
               <div className="min-w-0 flex-1">
                 <input
                   type="text"
-                  placeholder="https://example.com/logo.png"
+                  placeholder="/uploads/logo.png or https://example.com/logo.png"
                   className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
                   {...register("logoUrl")}
                 />
@@ -196,18 +225,18 @@ export function EditBrandDrawer({
           <button
             type="button"
             onClick={onClose}
-            disabled={isSubmitting}
+            disabled={busy}
             className="h-8 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--text-primary) hover:bg-(--bg-surface-hover) disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={busy}
             className="inline-flex h-8 items-center gap-1.5 rounded-md bg-(--primary) px-4 text-sm font-medium text-white hover:bg-(--primary-hover) disabled:opacity-50"
           >
             <Save className="size-3.5" />
-            {isSubmitting ? "Saving..." : "Save Changes"}
+            {busy ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </form>

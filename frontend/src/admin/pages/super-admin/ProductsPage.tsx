@@ -1,26 +1,89 @@
 import { useMemo, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Plus, Download, Ban, Trash2, Unlock } from "lucide-react"
 import { useNavigate } from "react-router"
 import { SuperAdminProductsMetrics } from "../../components/super-admin/SuperAdminProductsMetrics"
 import { SuperAdminProductsToolbar } from "../../components/super-admin/SuperAdminProductsToolbar"
 import { SuperAdminProductsTable } from "../../components/super-admin/SuperAdminProductsTable"
 import { ConfirmationDialog } from "../../components/common/ConfirmationDialog"
+import { ErrorState } from "../../components/common/ErrorState"
+import { InlineNotice } from "../../components/common/InlineNotice"
+import { superAdminApi } from "../../api/superAdminApi"
 import {
-  MOCK_SHOPS,
-  MOCK_SUPER_ADMIN_PRODUCTS,
-} from "../../data/superAdminProductsMock"
+  describeSuperAdminProductError,
+  superAdminProductQueryKeys,
+  superAdminProductsApi,
+} from "../../api/superAdminProductsApi"
 import {
   getSuperAdminProductStatus,
   type SuperAdminProduct,
 } from "../../types/superAdminProduct"
 
+type ProductAction = "block" | "unblock" | "delete"
+type ActionInput = { action: ProductAction; product: SuperAdminProduct }
+type Notice = { tone: "success" | "error"; message: string }
+
+function csvCell(value: string | number | null | undefined): string {
+  const text = value === null || value === undefined ? "" : String(value)
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text
+}
+
+function downloadProductsCsv(products: SuperAdminProduct[]) {
+  const headers = [
+    "Name",
+    "Slug",
+    "Brand",
+    "Category",
+    "Shop",
+    "Selling Price (BDT)",
+    "Regular Price (BDT)",
+    "Buying Price (BDT)",
+    "Stock",
+    "Status",
+    "Sales",
+  ]
+  const rows = products.map((product) => [
+    product.name,
+    product.slug,
+    product.brandName,
+    product.category,
+    product.shopName,
+    product.currentPrice,
+    product.regularPrice,
+    product.buyingPrice ?? "",
+    product.stockQuantity,
+    getSuperAdminProductStatus(product),
+    product.salesCount ?? 0,
+  ])
+  const csv = [headers, ...rows]
+    .map((row) => row.map(csvCell).join(","))
+    .join("\r\n")
+  const blob = new Blob(["\uFEFF", csv], {
+    type: "text/csv;charset=utf-8",
+  })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = `super-admin-products-${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
 export default function SuperAdminProductsPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  // Mutable state — mock mutations only. Backend will replace this later.
-  const [products, setProducts] = useState<SuperAdminProduct[]>(
-    MOCK_SUPER_ADMIN_PRODUCTS
-  )
+  const productsQuery = useQuery({
+    queryKey: superAdminProductQueryKeys.list(),
+    queryFn: ({ signal }) => superAdminProductsApi.list({}, signal),
+    staleTime: 30 * 1000,
+  })
+  const shopsQuery = useQuery({
+    queryKey: ["admin", "super", "shops", "product-filter-options"],
+    queryFn: ({ signal }) => superAdminApi.shops.list(signal),
+    staleTime: 60 * 1000,
+  })
+
   const [search, setSearch] = useState("")
   const [shopId, setShopId] = useState<number | "all">("all")
   const [status, setStatus] = useState<
@@ -35,7 +98,71 @@ export default function SuperAdminProductsPage() {
     useState<SuperAdminProduct | null>(null)
   const [productToDelete, setProductToDelete] =
     useState<SuperAdminProduct | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [notice, setNotice] = useState<Notice | null>(null)
+
+  const actionMutation = useMutation({
+    mutationFn: async ({ action, product }: ActionInput): Promise<void> => {
+      switch (action) {
+        case "block":
+          await superAdminProductsApi.block(product.id)
+          return
+        case "unblock":
+          await superAdminProductsApi.unblock(product.id)
+          return
+        case "delete":
+          await superAdminProductsApi.remove(product.id)
+          return
+      }
+    },
+    onSuccess: (_result, { action, product }) => {
+      void queryClient.invalidateQueries({
+        queryKey: superAdminProductQueryKeys.all,
+      })
+      void queryClient.invalidateQueries({
+        queryKey: ["admin", "sidebar-stats"],
+      })
+      setProductToBlock(null)
+      setProductToUnblock(null)
+      setProductToDelete(null)
+      const verb =
+        action === "block"
+          ? "blocked"
+          : action === "unblock"
+            ? "unblocked"
+            : "deleted"
+      setNotice({
+        tone: "success",
+        message: `"${product.name}" was ${verb}.`,
+      })
+    },
+    onError: (error, { action, product }) => {
+      // Close the dialog first so the backend message stays visible in the notice.
+      setProductToBlock(null)
+      setProductToUnblock(null)
+      setProductToDelete(null)
+      const verb =
+        action === "block"
+          ? "block"
+          : action === "unblock"
+            ? "unblock"
+            : "delete"
+      setNotice({
+        tone: "error",
+        message: `Failed to ${verb} "${product.name}": ${describeSuperAdminProductError(error, "Please try again.")}`,
+      })
+    },
+  })
+
+  const products = useMemo(() => productsQuery.data ?? [], [productsQuery.data])
+  const shops = useMemo(
+    () =>
+      (shopsQuery.data ?? []).map((shop) => ({
+        id: shop.id,
+        name: shop.name,
+        slug: shop.slug,
+      })),
+    [shopsQuery.data]
+  )
 
   const categories = useMemo(
     () => [...new Set(products.map((p) => p.category))].sort(),
@@ -63,38 +190,29 @@ export default function SuperAdminProductsPage() {
     })
   }, [products, search, shopId, status, category])
 
-  // Handlers
+  const queryError = productsQuery.error ?? shopsQuery.error
+  if (queryError) {
+    return (
+      <div className="p-4 md:p-5">
+        <ErrorState
+          message={describeSuperAdminProductError(
+            queryError,
+            "Failed to load products"
+          )}
+          onRetry={() => {
+            void productsQuery.refetch()
+            void shopsQuery.refetch()
+          }}
+          className="flex flex-col items-center gap-3 rounded-md border border-(--border-light) bg-(--bg-surface) py-16 text-center"
+          messageClassName="text-sm font-medium text-(--text-muted)"
+          buttonClassName="inline-flex h-9 items-center rounded-md bg-(--primary) px-4 text-sm font-medium text-white hover:bg-(--primary-hover)"
+        />
+      </div>
+    )
+  }
+
   function handleEdit(product: SuperAdminProduct) {
     navigate(`/admin/products/${product.id}/edit`)
-  }
-
-  function handleBlockConfirm() {
-    if (!productToBlock) return
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === productToBlock.id ? { ...p, isBlocked: true } : p
-      )
-    )
-    setSuccessMessage(`"${productToBlock.name}" was blocked.`)
-    setProductToBlock(null)
-  }
-
-  function handleUnblockConfirm() {
-    if (!productToUnblock) return
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === productToUnblock.id ? { ...p, isBlocked: false } : p
-      )
-    )
-    setSuccessMessage(`"${productToUnblock.name}" was unblocked.`)
-    setProductToUnblock(null)
-  }
-
-  function handleDeleteConfirm() {
-    if (!productToDelete) return
-    setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id))
-    setSuccessMessage(`"${productToDelete.name}" was deleted.`)
-    setProductToDelete(null)
   }
 
   return (
@@ -117,7 +235,7 @@ export default function SuperAdminProductsPage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => alert("Export — backend later")}
+            onClick={() => downloadProductsCsv(filtered)}
             className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
           >
             <Download className="size-4" />
@@ -137,20 +255,21 @@ export default function SuperAdminProductsPage() {
       {/* Metrics */}
       <SuperAdminProductsMetrics products={products} />
 
-      {/* Success banner */}
-      {successMessage && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-sm text-(--status-delivered-text)"
-        >
-          <span>{successMessage}</span>
-          <button
-            onClick={() => setSuccessMessage(null)}
-            className="text-xs font-medium hover:underline"
-          >
-            Dismiss
-          </button>
-        </div>
+      {/* Feedback */}
+      {notice && (
+        <InlineNotice
+          message={notice.message}
+          variant={notice.tone}
+          ariaLive={notice.tone === "error" ? "assertive" : "polite"}
+          dismissLabel="Dismiss notification"
+          onDismiss={() => setNotice(null)}
+          className={
+            notice.tone === "error"
+              ? "flex items-center justify-between gap-3 rounded-md border border-(--status-cancelled-bg) bg-(--status-cancelled-bg)/50 px-4 py-2.5 text-sm text-(--status-cancelled-text)"
+              : "flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg)/50 px-4 py-2.5 text-sm text-(--status-delivered-text)"
+          }
+          dismissClassName="text-xs font-medium hover:underline"
+        />
       )}
 
       {/* Table card */}
@@ -160,7 +279,7 @@ export default function SuperAdminProductsPage() {
           onSearchChange={setSearch}
           shopId={shopId}
           onShopChange={setShopId}
-          shops={MOCK_SHOPS}
+          shops={shops}
           status={status}
           onStatusChange={setStatus}
           category={category}
@@ -171,6 +290,7 @@ export default function SuperAdminProductsPage() {
         />
         <SuperAdminProductsTable
           products={filtered}
+          isLoading={productsQuery.isPending}
           onEdit={handleEdit}
           onBlock={setProductToBlock}
           onUnblock={setProductToUnblock}
@@ -201,8 +321,12 @@ export default function SuperAdminProductsPage() {
           </div>
         }
         confirmLabel="Block Product"
+        isPending={actionMutation.isPending}
         onCancel={() => setProductToBlock(null)}
-        onConfirm={handleBlockConfirm}
+        onConfirm={() =>
+          productToBlock &&
+          actionMutation.mutate({ action: "block", product: productToBlock })
+        }
       />
 
       {/* Unblock confirmation */}
@@ -219,8 +343,15 @@ export default function SuperAdminProductsPage() {
           </>
         }
         confirmLabel="Unblock Product"
+        isPending={actionMutation.isPending}
         onCancel={() => setProductToUnblock(null)}
-        onConfirm={handleUnblockConfirm}
+        onConfirm={() =>
+          productToUnblock &&
+          actionMutation.mutate({
+            action: "unblock",
+            product: productToUnblock,
+          })
+        }
       />
 
       {/* Delete confirmation */}
@@ -236,8 +367,12 @@ export default function SuperAdminProductsPage() {
           </>
         }
         confirmLabel="Delete Product"
+        isPending={actionMutation.isPending}
         onCancel={() => setProductToDelete(null)}
-        onConfirm={handleDeleteConfirm}
+        onConfirm={() =>
+          productToDelete &&
+          actionMutation.mutate({ action: "delete", product: productToDelete })
+        }
       />
     </div>
   )

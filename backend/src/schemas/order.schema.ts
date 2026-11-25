@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { ORDER_STATUSES, PAYMENT_STATUSES } from "../constants/order.js";
+import {
+  ORDER_STATUSES,
+  PAYMENT_STATUSES,
+  type OrderStatus,
+} from "../constants/order.js";
 
 export const orderListQuerySchema = z
   .object({
@@ -46,6 +50,12 @@ export const updateOrderStatusSchema = z
         error: "Invalid order status",
       })
       .optional(),
+    // `status` is accepted as an alias so both admin APIs share one schema.
+    status: z
+      .enum(ORDER_STATUSES, {
+        error: "Invalid order status",
+      })
+      .optional(),
     paymentStatus: z
       .enum(PAYMENT_STATUSES, {
         error: "Invalid payment status",
@@ -55,14 +65,33 @@ export const updateOrderStatusSchema = z
   .strip()
   .refine(
     (data) =>
-      data.orderStatus !== undefined || data.paymentStatus !== undefined,
+      data.orderStatus !== undefined ||
+      data.status !== undefined ||
+      data.paymentStatus !== undefined,
     {
       message: "At least one of orderStatus or paymentStatus is required",
       path: ["form"],
     },
+  )
+  .refine(
+    (data) =>
+      data.orderStatus === undefined ||
+      data.status === undefined ||
+      data.orderStatus === data.status,
+    {
+      message: "status and orderStatus must match when both are provided",
+      path: ["status"],
+    },
   );
 
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
+
+/** Normalize the status alias before applying the shared transition rules. */
+export function getRequestedOrderStatus(
+  input: UpdateOrderStatusInput,
+): OrderStatus | undefined {
+  return input.orderStatus ?? input.status;
+}
 
 export function formatOrderValidationErrors(
   error: z.ZodError,

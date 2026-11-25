@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import DataTable, { type TableColumn } from "react-data-table-component"
 import {
   Plus,
@@ -16,59 +17,32 @@ import {
 } from "lucide-react"
 import { SettingsLayout } from "../SettingsLayout"
 import { MetricCard } from "../MetricCard"
-import type { Coupon, CouponStatus } from "../../../types/coupon"
+import type {
+  Coupon,
+  CouponCounts,
+  CouponEditableStatus,
+  CouponStatus,
+} from "../../../types/coupon"
+import { couponsApi, couponQueryKeys } from "../../../api/couponsApi"
 import { CreateCouponModal } from "../modals/CreateCouponModal"
 import { formatDate } from "../../../lib/formatTime"
+import { formatTaka } from "../../../lib/orderStatus"
 import { PortalActionMenu } from "../../common/PortalActionMenu"
+import { ConfirmationDialog } from "../../common/ConfirmationDialog"
+import { InlineNotice } from "../../common/InlineNotice"
+import { LoadingState } from "../../common/LoadingState"
+import { ErrorState } from "../../common/ErrorState"
+import { useDebouncedValue } from "../../../hooks/useDebouncedValue"
 import { adminDataTableStyles } from "../../../lib/dataTableStyles"
 
-/* ================================================================
-   Mock data — replace with API later
-   ================================================================ */
+const EMPTY_COUNTS: CouponCounts = {
+  total: 0,
+  active: 0,
+  paused: 0,
+  expired: 0,
+}
 
-const mockCoupons: Coupon[] = [
-  {
-    id: "c1",
-    code: "EID2026",
-    discount_type: "percentage",
-    discount_value: 20,
-    used: 48,
-    usage_limit: 200,
-    expires_at: "2026-05-15",
-    status: "active",
-  },
-  {
-    id: "c2",
-    code: "WELCOME10",
-    discount_type: "percentage",
-    discount_value: 10,
-    used: 114,
-    usage_limit: null,
-    expires_at: null,
-    status: "active",
-  },
-  {
-    id: "c3",
-    code: "FREESHIP",
-    discount_type: "amount",
-    discount_value: 120,
-    note: "Free Delivery",
-    used: 32,
-    usage_limit: 50,
-    expires_at: "2024-11-30",
-    status: "paused",
-  },
-  {
-    id: "c4",
-    code: "RAMADAN25",
-    discount_type: "amount",
-    discount_value: 200,
-    used: 100,
-    usage_limit: 100,
-    expires_at: "2024-04-10",
-    status: "expired",
-  },
-]
+type Notice = { tone: "success" | "error"; message: string }
 
 /* ================================================================
    Helpers
@@ -76,9 +50,9 @@ const mockCoupons: Coupon[] = [
 
 function formatDiscount(coupon: Coupon): string {
   const base =
-    coupon.discount_type === "percentage"
-      ? `${coupon.discount_value}% off`
-      : `৳${coupon.discount_value.toLocaleString()} off`
+    coupon.discountType === "percentage"
+      ? `${coupon.discountValue}% off`
+      : `${formatTaka(coupon.discountValue)} off`
   return coupon.note ? `${base} (${coupon.note})` : base
 }
 
@@ -122,27 +96,22 @@ function CouponStatusChip({ status }: { status: CouponStatus }) {
 
 /* ================================================================
    UsedCell — usage count + mini progress bar
-   Bar color depends on status and usage ratio:
-     - Paused → amber
-     - Expired → muted
-     - Active + >=80% → amber (near limit)
-     - Active + <80% → green
    ================================================================ */
 
 function UsedCell({ coupon }: { coupon: Coupon }) {
-  const hasLimit = coupon.usage_limit !== null
-  const ratio = hasLimit ? coupon.used / coupon.usage_limit! : 0
+  const hasLimit = coupon.usageLimit !== null
+  const ratio = coupon.usageLimit !== null ? coupon.used / coupon.usageLimit : 0
   const progressPct = hasLimit ? Math.min(100, ratio * 100) : 0
 
-  let barClass = "bg-(--status-delivered-text)" // default green
-  if (coupon.status === "paused") barClass = "bg-amber-600"
+  let barClass = "bg-(--status-delivered-text)"
+  if (coupon.status === "paused") barClass = "bg-(--status-pending-text)"
   else if (coupon.status === "expired") barClass = "bg-(--text-muted)"
-  else if (ratio >= 0.8) barClass = "bg-amber-600"
+  else if (ratio >= 0.8) barClass = "bg-(--status-pending-text)"
 
   return (
     <div className="flex items-center gap-2">
       <span className="text-(--text-primary) tabular-nums">
-        {coupon.used} / {hasLimit ? coupon.usage_limit : "∞"}
+        {coupon.used} / {hasLimit ? coupon.usageLimit : "∞"}
       </span>
       {hasLimit && (
         <div className="h-1 w-10 overflow-hidden rounded-full bg-(--bg-table-header)">
@@ -161,25 +130,25 @@ function UsedCell({ coupon }: { coupon: Coupon }) {
    ================================================================ */
 
 function ExpiryCell({ coupon }: { coupon: Coupon }) {
-  if (coupon.status === "expired" && coupon.expires_at) {
+  if (coupon.status === "expired" && coupon.expiresAt) {
     return (
       <span className="text-(--text-muted)">
-        Expired ({formatDate(coupon.expires_at)})
+        Expired ({formatDate(coupon.expiresAt)})
       </span>
     )
   }
-  if (!coupon.expires_at) {
+  if (!coupon.expiresAt) {
     return <span className="text-(--text-muted)">Ongoing</span>
   }
   return (
     <span className="text-(--text-primary)">
-      {formatDate(coupon.expires_at)}
+      {formatDate(coupon.expiresAt)}
     </span>
   )
 }
 
 /* ================================================================
-   EmptyState — shown when 0 coupons exist
+   CouponsEmptyState — shown when 0 coupons exist
    ================================================================ */
 
 function CouponsEmptyState({ onAdd }: { onAdd: () => void }) {
@@ -212,25 +181,79 @@ function CouponsEmptyState({ onAdd }: { onAdd: () => void }) {
    ================================================================ */
 
 export default function CouponsTab() {
+  const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState("")
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const debouncedSearch = useDebouncedValue(searchQuery, 300)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
+  const [deletingCoupon, setDeletingCoupon] = useState<Coupon | null>(null)
+  const [deleteNoticeDismissed, setDeleteNoticeDismissed] = useState(false)
+  const [notice, setNotice] = useState<Notice | null>(null)
 
-  // Client-side filter by code — swap to server-side search once API is ready
-  const filteredCoupons = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase()
-    if (!q) return mockCoupons
-    return mockCoupons.filter((c) => c.code.toLowerCase().includes(q))
-  }, [searchQuery])
+  const couponsQuery = useQuery({
+    queryKey: couponQueryKeys.list({ q: debouncedSearch }),
+    queryFn: ({ signal }) => couponsApi.list({ q: debouncedSearch }, signal),
+  })
 
-  // Aggregate counts for the metric cards and the tab badge
-  const counts = useMemo(() => {
-    return {
-      total: mockCoupons.length,
-      active: mockCoupons.filter((c) => c.status === "active").length,
-      paused: mockCoupons.filter((c) => c.status === "paused").length,
-      expired: mockCoupons.filter((c) => c.status === "expired").length,
-    }
-  }, [])
+  const coupons = couponsQuery.data?.items ?? []
+  const counts = couponsQuery.data?.counts ?? EMPTY_COUNTS
+
+  const statusMutation = useMutation({
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: number
+      status: CouponEditableStatus
+    }) => couponsApi.updateStatus(id, { status }),
+    onSuccess: (updated) => {
+      void queryClient.invalidateQueries({ queryKey: couponQueryKeys.all })
+      setNotice({
+        tone: "success",
+        message: `Coupon ${updated.code} is now ${updated.status}.`,
+      })
+    },
+    onError: (error) => {
+      setNotice({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Could not update the coupon status",
+      })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (coupon: Coupon) => couponsApi.remove(coupon.id),
+    onSuccess: (_data, coupon) => {
+      void queryClient.invalidateQueries({ queryKey: couponQueryKeys.all })
+      setDeletingCoupon(null)
+      setNotice({
+        tone: "success",
+        message: `Coupon ${coupon.code} deleted.`,
+      })
+    },
+    onError: (error) => {
+      setNotice({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Could not delete the coupon",
+      })
+    },
+  })
+
+  function openCreate() {
+    setEditingCoupon(null)
+    setModalOpen(true)
+  }
+
+  function openEdit(coupon: Coupon) {
+    setEditingCoupon(coupon)
+    setModalOpen(true)
+  }
 
   function handleMenuAction(
     coupon: Coupon,
@@ -238,12 +261,24 @@ export default function CouponsTab() {
     closeMenu: () => void
   ) {
     closeMenu()
-    // TODO: wire these to real mutations once API is available
-    console.log(`[${action}] coupon ${coupon.code}`)
-  }
 
-  function handleOpenCreate() {
-    setShowCreateModal(true)
+    if (action === "edit") {
+      openEdit(coupon)
+      return
+    }
+
+    if (action === "delete") {
+      setNotice(null)
+      setDeleteNoticeDismissed(false)
+      setDeletingCoupon(coupon)
+      return
+    }
+
+    const nextStatus: CouponEditableStatus =
+      coupon.status === "active" ? "paused" : "active"
+    if (coupon.status === "expired" && nextStatus === "active") return
+    setNotice(null)
+    statusMutation.mutate({ id: coupon.id, status: nextStatus })
   }
 
   const columns: TableColumn<Coupon>[] = [
@@ -259,7 +294,7 @@ export default function CouponsTab() {
     },
     {
       name: "Discount",
-      selector: (coupon) => coupon.discount_value,
+      selector: (coupon) => coupon.discountValue,
       minWidth: "180px",
       cell: (coupon) => (
         <span className="text-(--text-primary)">{formatDiscount(coupon)}</span>
@@ -273,7 +308,7 @@ export default function CouponsTab() {
     },
     {
       name: "Expires",
-      selector: (coupon) => coupon.expires_at ?? "",
+      selector: (coupon) => coupon.expiresAt ?? "",
       minWidth: "170px",
       cell: (coupon) => <ExpiryCell coupon={coupon} />,
     },
@@ -290,44 +325,53 @@ export default function CouponsTab() {
           label={`Actions for coupon ${coupon.code}`}
           trigger={<MoreVertical className="size-4" />}
           triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--text-primary)"
-          menuClassName="w-32"
+          menuClassName="w-36"
         >
-          {(closeMenu) => (
-            <>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => handleMenuAction(coupon, "edit", closeMenu)}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
-              >
-                <Pencil className="size-3.5" /> Edit
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => handleMenuAction(coupon, "toggle", closeMenu)}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
-              >
-                {coupon.status === "active" ? (
-                  <>
-                    <Pause className="size-3.5" /> Pause
-                  </>
-                ) : (
-                  <>
-                    <Play className="size-3.5" /> Activate
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => handleMenuAction(coupon, "delete", closeMenu)}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
-              >
-                <Trash2 className="size-3.5" /> Delete
-              </button>
-            </>
-          )}
+          {(closeMenu) => {
+            const isActivateExpired = coupon.status === "expired"
+            return (
+              <>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => handleMenuAction(coupon, "edit", closeMenu)}
+                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
+                >
+                  <Pencil className="size-3.5" /> Edit
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={isActivateExpired}
+                  title={
+                    isActivateExpired
+                      ? "Extend expiry date via Edit to reactivate"
+                      : undefined
+                  }
+                  onClick={() => handleMenuAction(coupon, "toggle", closeMenu)}
+                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover) disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {coupon.status === "active" ? (
+                    <>
+                      <Pause className="size-3.5" /> Pause
+                    </>
+                  ) : (
+                    <>
+                      <Play className="size-3.5" /> Activate
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => handleMenuAction(coupon, "delete", closeMenu)}
+                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--status-cancelled-text) transition-colors hover:bg-(--status-cancelled-bg)"
+                >
+                  <Trash2 className="size-3.5" /> Delete
+                </button>
+              </>
+            )
+          }}
         </PortalActionMenu>
       ),
       width: "90px",
@@ -343,8 +387,8 @@ export default function CouponsTab() {
           label="Total Coupons"
           value={counts.total}
           icon={<Ticket className="size-4" />}
-          iconBgClass="bg-violet-50"
-          iconColorClass="text-violet-600"
+          iconBgClass="bg-(--primary-soft)"
+          iconColorClass="text-primary"
         />
         <MetricCard
           label="Active"
@@ -372,10 +416,45 @@ export default function CouponsTab() {
         />
       </div>
 
-      {/* ---------- All coupons card ---------- */}
-      {mockCoupons.length === 0 ? (
-        <CouponsEmptyState onAdd={handleOpenCreate} />
+      {notice && (
+        <InlineNotice
+          variant={notice.tone}
+          ariaLive={notice.tone === "error" ? "assertive" : "polite"}
+          message={notice.message}
+          dismissLabel="Dismiss"
+          onDismiss={() => setNotice(null)}
+          className={
+            notice.tone === "success"
+              ? "flex items-center justify-between gap-3 rounded-md border border-(--status-delivered-bg) bg-(--status-delivered-bg) px-3 py-2 text-xs font-medium text-(--status-delivered-text)"
+              : "flex items-center justify-between gap-3 rounded-md border border-(--status-cancelled-bg) bg-(--status-cancelled-bg)/50 px-3 py-2 text-xs font-medium text-(--status-cancelled-text)"
+          }
+          dismissClassName="rounded px-1 text-current hover:bg-(--bg-surface-hover)"
+        />
+      )}
+
+      {couponsQuery.isPending ? (
+        <LoadingState
+          className="rounded-md border border-(--border-light) bg-(--bg-surface) px-4 py-10 text-center text-xs text-(--text-muted)"
+          ariaLabel="Loading coupons"
+        >
+          Loading coupons…
+        </LoadingState>
+      ) : couponsQuery.isError ? (
+        <ErrorState
+          message={
+            couponsQuery.error instanceof Error
+              ? couponsQuery.error.message
+              : "Could not load coupons"
+          }
+          onRetry={() => void couponsQuery.refetch()}
+          className="rounded-md border border-(--border-light) bg-(--bg-surface) px-4 py-10 text-center text-xs text-(--text-muted)"
+          buttonClassName="mt-2 rounded-md border border-(--border-light) px-3 py-1.5 text-xs text-(--text-primary) hover:bg-(--bg-surface-hover)"
+          role="alert"
+        />
+      ) : counts.total === 0 ? (
+        <CouponsEmptyState onAdd={openCreate} />
       ) : (
+        /* ---------- All coupons card ---------- */
         <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
           {/* Header: title + search + add */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--border-light) px-4 py-3">
@@ -400,7 +479,7 @@ export default function CouponsTab() {
               </div>
               <button
                 type="button"
-                onClick={handleOpenCreate}
+                onClick={openCreate}
                 className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-(--primary-hover)"
               >
                 <Plus className="size-3.5" />
@@ -414,7 +493,7 @@ export default function CouponsTab() {
             className="admin-data-table"
             keyField="id"
             columns={columns}
-            data={filteredCoupons}
+            data={coupons}
             customStyles={adminDataTableStyles}
             pagination={false}
             responsive
@@ -428,20 +507,68 @@ export default function CouponsTab() {
           {/* Footer */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-(--border-light) px-4 py-2.5 text-xs text-(--text-muted)">
             <span>
-              Showing {filteredCoupons.length} of {counts.total} coupons
+              Showing {coupons.length} of {counts.total} coupons
             </span>
-            <span>Auto-applied discounts: 0</span>
+            <span>{counts.active} active</span>
           </div>
         </section>
       )}
 
-      {/* Create-coupon modal */}
+      {/* Create / edit coupon modal */}
       <CreateCouponModal
-        open={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onCreated={(coupon) => {
-          // TODO: refresh list from API — e.g. queryClient.invalidateQueries
-          console.log("Coupon created:", coupon.code)
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        coupon={editingCoupon}
+        onSaved={(saved) =>
+          setNotice({
+            tone: "success",
+            message: `Coupon ${saved.code} saved.`,
+          })
+        }
+      />
+
+      {/* Delete confirmation */}
+      <ConfirmationDialog
+        open={deletingCoupon !== null}
+        title="Delete coupon?"
+        description={
+          deletingCoupon ? (
+            <>
+              Delete <strong>{deletingCoupon.code}</strong>? This action cannot
+              be undone.
+            </>
+          ) : null
+        }
+        variant="danger"
+        icon={Trash2}
+        confirmLabel="Delete coupon"
+        isPending={deleteMutation.isPending}
+        errorMessage={
+          deleteMutation.isError && deleteMutation.error instanceof Error
+            ? deleteMutation.error.message
+            : null
+        }
+        notice={
+          deletingCoupon &&
+          deletingCoupon.used > 0 &&
+          !deleteNoticeDismissed ? (
+            <InlineNotice
+              variant="error"
+              message={`This coupon has been used ${deletingCoupon.used} time(s). Used coupons cannot be deleted; pause it instead.`}
+              dismissLabel="Dismiss"
+              onDismiss={() => setDeleteNoticeDismissed(true)}
+              className="flex items-center justify-between gap-3 rounded-md border border-(--status-cancelled-bg) bg-(--status-cancelled-bg)/50 px-3 py-2 text-xs text-(--status-cancelled-text)"
+              dismissClassName="rounded px-1 text-(--status-cancelled-text)"
+            />
+          ) : null
+        }
+        onCancel={() => {
+          if (deleteMutation.isPending) return
+          setDeletingCoupon(null)
+          deleteMutation.reset()
+        }}
+        onConfirm={() => {
+          if (deletingCoupon) deleteMutation.mutate(deletingCoupon)
         }}
       />
     </SettingsLayout>

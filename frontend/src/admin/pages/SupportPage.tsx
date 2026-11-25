@@ -16,12 +16,7 @@ import {
 
 type TicketStatus = "open" | "answered" | "closed"
 type TicketCategory =
-  | "pickup"
-  | "delivery"
-  | "payment"
-  | "billing"
-  | "service"
-  | "other"
+  "pickup" | "delivery" | "payment" | "billing" | "service" | "other"
 
 type Message = {
   id: string
@@ -119,23 +114,21 @@ const CATEGORIES: { value: TicketCategory; label: string; icon: string }[] = [
 
 type FilterTab = "all" | TicketStatus
 
-const STATUS_BADGE: Record<
-  TicketStatus,
-  { label: string; className: string }
-> = {
-  open: {
-    label: "Open",
-    className: "bg-amber-100 text-amber-700",
-  },
-  answered: {
-    label: "Answered",
-    className: "bg-emerald-100 text-emerald-700",
-  },
-  closed: {
-    label: "Closed",
-    className: "bg-gray-100 text-gray-500",
-  },
-}
+const STATUS_BADGE: Record<TicketStatus, { label: string; className: string }> =
+  {
+    open: {
+      label: "Open",
+      className: "bg-amber-100 text-amber-700",
+    },
+    answered: {
+      label: "Answered",
+      className: "bg-emerald-100 text-emerald-700",
+    },
+    closed: {
+      label: "Closed",
+      className: "bg-gray-100 text-gray-500",
+    },
+  }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -197,13 +190,11 @@ export default function SupportPage() {
   function handleMarkClosed() {
     if (!selectedId) return
     setTickets((prev) =>
-      prev.map((t) =>
-        t.id === selectedId ? { ...t, status: "closed" } : t
-      )
+      prev.map((t) => (t.id === selectedId ? { ...t, status: "closed" } : t))
     )
   }
 
-  const activeCount = tickets.filter((t) => t.status === "open").length
+  // const activeCount = tickets.filter((t) => t.status === "open").length
 
   return (
     <div className="admin-dashboard-content flex h-[calc(100dvh-56px-41px)] flex-col overflow-hidden">
@@ -218,10 +209,8 @@ export default function SupportPage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="admin-template-button admin-template-button--secondary flex items-center gap-1.5 h-8 px-3 text-xs"
-            onClick={() =>
-              window.open("https://wa.me/8801891614300", "_blank")
-            }
+            className="admin-template-button admin-template-button--secondary flex h-8 items-center gap-1.5 px-3 text-xs"
+            onClick={() => window.open("https://wa.me/8801891614300", "_blank")}
           >
             <MessageCircle className="size-3.5" />
             Prefer WhatsApp?
@@ -229,7 +218,7 @@ export default function SupportPage() {
           <button
             type="button"
             onClick={() => setShowNewModal(true)}
-            className="admin-template-button admin-template-button--primary flex items-center gap-1.5 h-8 px-3 text-xs"
+            className="admin-template-button admin-template-button--primary flex h-8 items-center gap-1.5 px-3 text-xs"
           >
             <Plus className="size-3.5" />
             New ticket
@@ -250,7 +239,7 @@ export default function SupportPage() {
                 placeholder="Search tickets"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-8 w-full rounded-md border border-(--border-light) bg-(--bg-app) pl-9 pr-3 text-xs text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-primary focus:ring-1 focus:ring-primary"
+                className="h-8 w-full rounded-md border border-(--border-light) bg-(--bg-app) pr-3 pl-9 text-xs text-(--text-primary) outline-none placeholder:text-(--text-muted) focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </label>
           </div>
@@ -269,7 +258,9 @@ export default function SupportPage() {
                       : "text-(--text-muted) hover:bg-(--bg-app)"
                   }`}
                 >
-                  {tab === "all" ? "All" : STATUS_BADGE[tab as TicketStatus].label}
+                  {tab === "all"
+                    ? "All"
+                    : STATUS_BADGE[tab as TicketStatus].label}
                 </button>
               )
             )}
@@ -304,7 +295,7 @@ export default function SupportPage() {
                   onClick={() => setSelectedId(ticket.id)}
                   className={`w-full border-b border-(--border-light) px-4 py-3 text-left transition-colors ${
                     selectedId === ticket.id
-                      ? "bg-primary/5 border-l-2 border-l-primary"
+                      ? "border-l-2 border-l-primary bg-primary/5"
                       : "hover:bg-(--bg-app)"
                   }`}
                 >
@@ -361,7 +352,9 @@ export default function SupportPage() {
                   </div>
                   <p className="mt-0.5 text-xs text-(--text-muted)">
                     Started {selectedTicket.createdAt} · Category:{" "}
-                    <span className="font-medium">{selectedTicket.category}</span>
+                    <span className="font-medium">
+                      {selectedTicket.category}
+                    </span>
                   </p>
                 </div>
                 {selectedTicket.status !== "closed" && (
@@ -376,7 +369,7 @@ export default function SupportPage() {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
                 {selectedTicket.messages.map((msg) => (
                   <ChatBubble key={msg.id} message={msg} />
                 ))}
@@ -421,10 +414,9 @@ export default function SupportPage() {
                     type="button"
                     onClick={handleSendReply}
                     disabled={
-                      !replyText.trim() ||
-                      selectedTicket.status === "closed"
+                      !replyText.trim() || selectedTicket.status === "closed"
                     }
-                    className="admin-template-button admin-template-button--primary flex items-center gap-1.5 h-8 px-4 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                    className="admin-template-button admin-template-button--primary flex h-8 items-center gap-1.5 px-4 text-xs disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Send className="size-3.5" />
                     Send Reply
@@ -580,7 +572,7 @@ function NewTicketModal({
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-5">
+        <div className="space-y-5 px-6 py-5">
           {/* Category */}
           <div>
             <p className="mb-3 text-sm font-medium text-(--text-primary)">
@@ -637,7 +629,7 @@ function NewTicketModal({
             type="button"
             onClick={handleSubmit}
             disabled={!category || !description.trim()}
-            className="admin-template-button admin-template-button--primary flex items-center gap-1.5 h-9 px-5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+            className="admin-template-button admin-template-button--primary flex h-9 items-center gap-1.5 px-5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="size-3.5" />
             Send ticket

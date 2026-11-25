@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { Link, useLocation, useParams } from "react-router"
+import { Link, useLocation, useNavigate, useParams } from "react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import DataTable, {
   type TableColumn,
@@ -31,6 +31,7 @@ import {
   Package,
   Phone,
   Printer,
+  RotateCcw,
   UserRound,
   XCircle,
 } from "lucide-react"
@@ -216,6 +217,15 @@ function OrderStatusStepper({ current }: { current: OrderStatus }) {
     )
   }
 
+  if (current === "returned") {
+    return (
+      <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-medium text-amber-800">
+        <RotateCcw className="size-4" aria-hidden="true" />
+        This order was returned
+      </div>
+    )
+  }
+
   const currentIndex = STEPPER_STEPS.findIndex((s) => s.key === current)
 
   return (
@@ -284,6 +294,7 @@ export function OrderDetailView({
 }: OrderDetailViewConfig) {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const backHref = getBackHref(location.state, basePath)
 
@@ -291,7 +302,9 @@ export function OrderDetailView({
   const [mutationError, setMutationError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false)
+  const [confirmTarget, setConfirmTarget] = useState<
+    "cancelled" | "returned" | null
+  >(null)
   const cancelTriggerRef = useRef<HTMLButtonElement>(null)
 
   const orderQuery = useQuery({
@@ -367,17 +380,24 @@ export function OrderDetailView({
   }
 
   function handleOrderStatusClick(next: OrderStatus) {
-    if (next === "cancelled") {
-      setConfirmCancelOpen(true)
+    if (next === "cancelled" || next === "returned") {
+      setConfirmTarget(next)
     } else {
       void applyStatus({ orderStatus: next }, `order-${next}`)
     }
   }
 
-  function handleConfirmCancel() {
-    setConfirmCancelOpen(false)
-    void applyStatus({ orderStatus: "cancelled" }, "order-cancelled")
+  function handleConfirmIrreversibleStatus() {
+    if (!confirmTarget) return
+    const target = confirmTarget
+    setConfirmTarget(null)
+    void applyStatus({ orderStatus: target }, `order-${target}`)
   }
+
+  // function handleConfirmCancel() {
+  //   setConfirmTarget(false)
+  //   void applyStatus({ orderStatus: "cancelled" }, "order-cancelled")
+  // }
 
   function handlePaymentToggle(currentPayment: PaymentStatus) {
     const next: PaymentStatus = currentPayment === "paid" ? "unpaid" : "paid"
@@ -515,7 +535,7 @@ export function OrderDetailView({
         </div>
         <button
           type="button"
-          onClick={() => window.print()}
+          onClick={() => void navigate(`${basePath}/invoice?ids=${id}`)}
           className="admin-template-button admin-template-button--secondary self-start"
         >
           <Printer className="icon-size" aria-hidden="true" />
@@ -721,6 +741,7 @@ export function OrderDetailView({
                   <div className="flex flex-col gap-2">
                     {nextStatuses.map((next) => {
                       const isCancelBtn = next === "cancelled"
+                      const isReturnBtn = next === "returned"
                       const key = `order-${next}`
                       const isPending = mutating && pendingAction === key
                       return (
@@ -733,7 +754,9 @@ export function OrderDetailView({
                           className={`admin-template-button w-full disabled:cursor-not-allowed disabled:opacity-50 ${
                             isCancelBtn
                               ? "border border-red-200 bg-white text-red-700 hover:bg-red-50"
-                              : "admin-template-button--primary"
+                              : isReturnBtn
+                                ? "border border-amber-300 bg-white text-amber-800 hover:bg-amber-50"
+                                : "admin-template-button--primary"
                           }`}
                         >
                           {isPending
@@ -787,25 +810,42 @@ export function OrderDetailView({
 
       {/* Cancel confirmation dialog */}
       <ConfirmationDialog
-        open={confirmCancelOpen}
-        title="Cancel order?"
-        variant="danger"
-        icon={XCircle}
-        confirmLabel="Cancel order"
+        open={confirmTarget !== null}
+        title={
+          confirmTarget === "returned"
+            ? "Mark order as returned?"
+            : "Cancel order?"
+        }
+        variant={confirmTarget === "returned" ? "warning" : "danger"}
+        icon={confirmTarget === "returned" ? RotateCcw : XCircle}
+        confirmLabel={
+          confirmTarget === "returned" ? "Mark as returned" : "Cancel order"
+        }
         cancelLabel="Go back"
         onCancel={() => {
-          setConfirmCancelOpen(false)
-          cancelTriggerRef.current?.focus()
+          const wasCancel = confirmTarget === "cancelled"
+          setConfirmTarget(null)
+          if (wasCancel) cancelTriggerRef.current?.focus()
         }}
-        onConfirm={handleConfirmCancel}
+        onConfirm={handleConfirmIrreversibleStatus}
         description={
-          <>
-            Cancel order{" "}
-            <strong className="font-semibold text-(--text-primary)">
-              {order.orderNumber}
-            </strong>
-            ? This action cannot be undone.
-          </>
+          confirmTarget === "returned" ? (
+            <>
+              Mark order{" "}
+              <strong className="font-semibold text-(--text-primary)">
+                {order.orderNumber}
+              </strong>{" "}
+              as returned? This action cannot be undone.
+            </>
+          ) : (
+            <>
+              Cancel order{" "}
+              <strong className="font-semibold text-(--text-primary)">
+                {order.orderNumber}
+              </strong>
+              ? This action cannot be undone.
+            </>
+          )
         }
       />
     </div>
