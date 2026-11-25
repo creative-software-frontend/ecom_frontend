@@ -4,10 +4,15 @@ import type {
   OrdersListResponse,
   OrderListParams,
   OrderDetail,
+  CreateOrderPayload,
   UpdateStatusBody,
 } from "../types/order"
 
 export const ordersApi = {
+  create(body: CreateOrderPayload): Promise<OrderDetail> {
+    return apiRequest<OrderDetail>("/shop/orders", { method: "POST", body })
+  },
+
   list(
     params: OrderListParams = {},
     signal?: AbortSignal

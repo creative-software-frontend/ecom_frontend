@@ -31,6 +31,7 @@ export type AuditAction =
   | "product.delete"
   | "product.block"
   | "product.unblock"
+  | "order.create"
   | "order.status_update"
   | "coupon.create"
   | "coupon.update"

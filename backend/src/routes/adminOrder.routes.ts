@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  createShopOrder,
   getOrderById,
   listOrders,
   updateOrderStatus,
@@ -10,6 +11,7 @@ const router = Router();
 
 router.use(requireAuth);
 
+router.post("/", createShopOrder);
 router.get("/", listOrders);
 router.get("/:id", getOrderById);
 router.patch("/:id/status", updateOrderStatus);

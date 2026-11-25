@@ -8,7 +8,9 @@ import {
 import { logAudit } from "../lib/auditLog.js";
 import { prisma } from "../lib/prisma.js";
 import { parseId } from "../lib/parseId.js";
+import { createAdminOrder } from "../lib/createAdminOrder.js";
 import {
+  createAdminOrderSchema,
   formatOrderValidationErrors,
   getRequestedOrderStatus,
   orderListQuerySchema,
@@ -37,6 +39,7 @@ async function fetchOrderDetail(id: number) {
     where: { id },
     include: {
       shop: { select: { id: true, name: true, slug: true } },
+      assignedTo: { select: { id: true, name: true } },
       items: {
         include: {
           product: {
@@ -63,7 +66,15 @@ async function fetchOrderDetail(id: number) {
     deliveryArea: order.deliveryArea,
     deliveryCharge: order.deliveryCharge,
     subtotal: order.subtotal,
+    discount: order.discount,
+    advance: order.advance,
+    dueAmount: Math.max(0, order.total - order.advance),
     total: order.total,
+    source: order.source,
+    courier: order.courier,
+    courierNote: order.courierNote,
+    assignedToId: order.assignedToId,
+    assignedTo: order.assignedTo,
     paymentMethod: order.paymentMethod,
     paymentStatus: order.paymentStatus,
     status: order.status,
@@ -93,6 +104,70 @@ async function fetchOrderDetail(id: number) {
       };
     }),
   };
+}
+
+export async function superCreateOrder(req: Request, res: Response) {
+  const parsed = createAdminOrderSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(422).json({
+      success: false,
+      message: "Validation failed",
+      errors: formatOrderValidationErrors(parsed.error),
+    });
+  }
+
+  const shopId = parsed.data.shopId;
+  if (shopId === undefined) {
+    return res.status(422).json({
+      success: false,
+      message: "Validation failed",
+      errors: { shopId: "Shop is required" },
+    });
+  }
+
+  try {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      select: { id: true },
+    });
+    if (!shop) {
+      return res.status(422).json({
+        success: false,
+        message: "Validation failed",
+        errors: { shopId: "Shop not found" },
+      });
+    }
+
+    const result = await createAdminOrder(req, shopId);
+    if (!result.ok) {
+      return res.status(result.status).json(result.body);
+    }
+
+    const created = result.order;
+    void logAudit({
+      req,
+      action: "order.create",
+      entityType: "order",
+      entityId: created.id,
+      metadata: {
+        orderNumber: created.orderNumber,
+        total: created.total,
+        source: created.source,
+      },
+      targetShopId: created.shopId,
+    });
+
+    const detail = await fetchOrderDetail(created.id);
+    if (!detail) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+    return res.status(201).json({ success: true, data: detail });
+  } catch (error) {
+    console.error("Error creating super admin order:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
 }
 
 export async function superListOrders(req: Request, res: Response) {
@@ -324,9 +399,32 @@ export async function superUpdateOrderStatus(req: Request, res: Response) {
     if (orderStatus !== undefined) updateData.status = orderStatus;
     if (paymentStatus !== undefined) updateData.paymentStatus = paymentStatus;
 
-    const updateResult = await prisma.order.updateMany({
-      where: { id, status: currentOrder.status },
-      data: updateData,
+    const restoresStock =
+      orderStatus === "cancelled" && currentOrder.status !== "cancelled";
+
+    const updateResult = await prisma.$transaction(async (tx) => {
+      const updated = await tx.order.updateMany({
+        where: { id, status: currentOrder.status },
+        data: updateData,
+      });
+
+      if (updated.count === 1 && restoresStock) {
+        const lines = await tx.orderItem.findMany({
+          where: { orderId: id },
+          select: { productId: true, quantity: true },
+        });
+        for (const line of lines) {
+          await tx.product.updateMany({
+            where: { id: line.productId },
+            data: {
+              stockQuantity: { increment: line.quantity },
+              inStock: true,
+            },
+          });
+        }
+      }
+
+      return updated;
     });
 
     if (updateResult.count === 0) {

@@ -75,7 +75,15 @@ export type OrderDetail = {
   deliveryArea: string
   deliveryCharge: number
   subtotal: number
+  discount?: number
+  advance?: number
+  dueAmount?: number
   total: number
+  source?: string | null
+  courier?: string | null
+  courierNote?: string | null
+  assignedToId?: number | null
+  assignedTo?: { id: number; name: string } | null
   paymentMethod: string
   paymentStatus: PaymentStatus
   orderStatus: OrderStatus
@@ -102,19 +110,20 @@ export type CreateOrderItem = {
   image: string | null
 }
 
-export type CreateOrderFormValues = {
+export type CreateOrderPayload = {
   customerName: string
   customerPhone: string
   customerAddress: string
-  items: CreateOrderItem[]
+  items: { productId: number; quantity: number }[]
   shippingZoneId: string
   advance: number
   discount: number
-  assignTo: string
-  courier: string
+  assignedToId?: number | null
+  courier?: string | null
   source: string
-  adminNote: string
-  courierNote: string
+  adminNote?: string | null
+  courierNote?: string | null
+  shopId?: number
 }
 
 export type ShippingZone = {
@@ -134,9 +143,9 @@ export type OrderSource = {
 }
 
 export type TeamMember = {
-  id: string
+  id: number
   name: string
-  role: string
+  role?: string
 }
 
 export type PickerProduct = {
@@ -145,4 +154,6 @@ export type PickerProduct = {
   price: number
   image: string | null
   sku: string
+  stockQuantity: number
+  inStock: boolean
 }

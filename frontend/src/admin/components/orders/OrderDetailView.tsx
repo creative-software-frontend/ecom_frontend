@@ -702,12 +702,29 @@ export function OrderDetailView({
             <dl className="divide-y divide-(--border-light)">
               <Row label="Subtotal">{formatTaka(order.subtotal)}</Row>
               <Row label="Delivery">{formatTaka(order.deliveryCharge)}</Row>
+              <Row label="Discount">
+                {formatTaka(order.discount ?? 0)}
+              </Row>
               <div className="flex items-center justify-between gap-3 py-3">
                 <dt className="text-sm font-semibold text-(--text-primary)">
                   Total
                 </dt>
                 <dd className="text-lg font-bold text-primary tabular-nums">
                   {formatTaka(order.total)}
+                </dd>
+              </div>
+              <Row label="Advance paid">
+                {formatTaka(order.advance ?? 0)}
+              </Row>
+              <div className="flex items-center justify-between gap-3 py-3">
+                <dt className="text-sm font-semibold text-(--text-primary)">
+                  Amount to collect
+                </dt>
+                <dd className="text-lg font-bold text-primary tabular-nums">
+                  {formatTaka(
+                    order.dueAmount ??
+                      Math.max(0, order.total - (order.advance ?? 0))
+                  )}
                 </dd>
               </div>
               <Row label="Method">
@@ -723,6 +740,23 @@ export function OrderDetailView({
                   )}
                   {payCfg.label}
                 </span>
+              </Row>
+            </dl>
+          </Card>
+
+          <Card title="Order details">
+            <dl className="divide-y divide-(--border-light)">
+              <Row label="Source">{order.source || "—"}</Row>
+              <Row label="Courier">{order.courier || "—"}</Row>
+              <Row label="Courier note">
+                {order.courierNote || (
+                  <span className="text-(--text-muted) italic">
+                    No courier note
+                  </span>
+                )}
+              </Row>
+              <Row label="Assigned to">
+                {order.assignedTo?.name || "Unassigned"}
               </Row>
             </dl>
           </Card>

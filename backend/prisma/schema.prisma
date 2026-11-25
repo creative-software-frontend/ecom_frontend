@@ -139,16 +139,24 @@ model Order {
   deliveryArea    String      @map("delivery_area")
   deliveryCharge  Int         @map("delivery_charge")
   subtotal        Int
+  discount        Int         @default(0)
+  advance         Int         @default(0)
   total           Int
   paymentMethod   String      @default("cod") @map("payment_method")
   paymentStatus   String      @default("unpaid") @map("payment_status")
   status          String      @default("pending")
+  source          String?
+  courier         String?
+  courierNote     String?     @map("courier_note") @db.Text
+  assignedToId    Int?        @map("assigned_to_id")
+  assignedTo      User?       @relation("OrderAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
   shopId          Int         @map("shop_id")
   shop            Shop        @relation(fields: [shopId], references: [id])
   createdAt       DateTime    @default(now()) @map("created_at")
   items           OrderItem[]
 
   @@index([shopId, createdAt])
+  @@index([assignedToId])
   @@map("orders")
 }
 
@@ -198,6 +206,7 @@ model User {
   shop                 Shop?             @relation(fields: [shopId], references: [id])
   auditLogs            AuditLog[]
   newsPosts            News[]
+  assignedOrders       Order[]           @relation("OrderAssignee")
   createdSupportTickets SupportTicket[]  @relation("SupportTicketCreator")
   supportMessages      SupportMessage[]  @relation("SupportMessageSender")
 

@@ -27,8 +27,10 @@ export function OrderItemsPicker({
   }, [products, query])
 
   function addProduct(product: PickerProduct) {
+    if (product.stockQuantity <= 0) return
     const existing = items.find((i) => i.productId === product.id)
     if (existing) {
+      if (existing.quantity >= product.stockQuantity) return
       onChange(
         items.map((i) =>
           i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i
@@ -52,10 +54,20 @@ export function OrderItemsPicker({
   }
 
   function updateQty(productId: number, delta: number) {
+    const stock = products.find((p) => p.id === productId)?.stockQuantity
     onChange(
       items.map((i) =>
         i.productId === productId
-          ? { ...i, quantity: Math.max(1, i.quantity + delta) }
+          ? {
+              ...i,
+              quantity: Math.max(
+                1,
+                Math.min(
+                  i.quantity + delta,
+                  stock === undefined ? i.quantity + delta : stock
+                )
+              ),
+            }
           : i
       )
     )
@@ -102,15 +114,21 @@ export function OrderItemsPicker({
                 <button
                   key={p.id}
                   type="button"
+                  disabled={p.stockQuantity <= 0}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => addProduct(p)}
-                  className="flex w-full items-center justify-between gap-2 border-b border-(--border-light) px-3 py-2 text-left text-sm transition-colors last:border-0 hover:bg-(--bg-surface-hover)"
+                  className="flex w-full items-center justify-between gap-2 border-b border-(--border-light) px-3 py-2 text-left text-sm transition-colors last:border-0 hover:bg-(--bg-surface-hover) disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <div className="min-w-0">
                     <p className="truncate font-medium text-(--text-primary)">
                       {p.name}
                     </p>
-                    <p className="text-[11px] text-(--text-muted)">{p.sku}</p>
+                    <p className="text-[11px] text-(--text-muted)">
+                      {p.sku} ·{" "}
+                      {p.stockQuantity > 0
+                        ? `${p.stockQuantity} in stock`
+                        : "Out of stock"}
+                    </p>
                   </div>
                   <span className="shrink-0 text-xs font-semibold text-(--text-primary) tabular-nums">
                     {formatTaka(p.price)}
@@ -128,22 +146,6 @@ export function OrderItemsPicker({
             <p className="text-sm text-(--text-muted)">
               Search and add products to the order
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <button
-                type="button"
-                onClick={() => addProduct(products[3])}
-                className="rounded border border-(--border-light) bg-(--bg-surface) px-2.5 py-1 text-[11px] font-medium text-(--text-muted) hover:bg-(--bg-surface-hover)"
-              >
-                + Add Sample: Zenox Tonic
-              </button>
-              <button
-                type="button"
-                onClick={() => addProduct(products[0])}
-                className="rounded border border-(--border-light) bg-(--bg-surface) px-2.5 py-1 text-[11px] font-medium text-(--text-muted) hover:bg-(--bg-surface-hover)"
-              >
-                + Add Sample: Capsules
-              </button>
-            </div>
           </div>
         ) : (
           <div className="overflow-hidden rounded-md border border-(--border-light)">
@@ -158,7 +160,12 @@ export function OrderItemsPicker({
                 </tr>
               </thead>
               <tbody className="divide-y divide-(--border-light)">
-                {items.map((item) => (
+                {items.map((item) => {
+                  const stock = products.find(
+                    (p) => p.id === item.productId
+                  )?.stockQuantity
+                  const atStockLimit = stock !== undefined && item.quantity >= stock
+                  return (
                   <tr key={item.productId} className="bg-(--bg-surface)">
                     <td className="px-3 py-2 font-medium text-(--text-primary)">
                       {item.productName}
@@ -177,12 +184,21 @@ export function OrderItemsPicker({
                         </span>
                         <button
                           type="button"
+                          disabled={atStockLimit}
                           onClick={() => updateQty(item.productId, 1)}
-                          className="flex size-6 items-center justify-center rounded border border-(--border-light) text-(--text-muted) hover:bg-(--bg-surface-hover)"
+                          className="flex size-6 items-center justify-center rounded border border-(--border-light) text-(--text-muted) hover:bg-(--bg-surface-hover) disabled:cursor-not-allowed disabled:opacity-40"
+                          title={atStockLimit ? "Stock limit reached" : undefined}
                         >
                           <Plus className="size-3" />
                         </button>
                       </div>
+                      <p className="mt-1 text-center text-[10px] text-(--text-muted)">
+                        {stock === undefined
+                          ? ""
+                          : stock > 0
+                            ? `${stock} in stock`
+                            : "Out of stock"}
+                      </p>
                     </td>
                     <td className="px-3 py-2 text-right text-xs text-(--text-muted) tabular-nums">
                       {formatTaka(item.unitPrice)}
@@ -201,7 +217,8 @@ export function OrderItemsPicker({
                       </button>
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
             <div className="flex items-center justify-between border-t border-(--border-light) bg-(--bg-table-header) px-3 py-2 text-xs">

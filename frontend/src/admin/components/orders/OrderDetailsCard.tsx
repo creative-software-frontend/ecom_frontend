@@ -5,6 +5,8 @@ type OrderDetailsCardProps = {
   teamMembers: TeamMember[]
   assignTo: string
   onAssignToChange: (id: string) => void
+  /** Platform-created orders may deliberately have no assignee. */
+  allowUnassigned?: boolean
   couriers: CourierService[]
   courier: string
   onCourierChange: (id: string) => void
@@ -17,6 +19,7 @@ export function OrderDetailsCard({
   teamMembers,
   assignTo,
   onAssignToChange,
+  allowUnassigned = false,
   couriers,
   courier,
   onCourierChange,
@@ -43,9 +46,11 @@ export function OrderDetailsCard({
             onChange={(e) => onAssignToChange(e.target.value)}
             className="h-10 w-full rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm text-(--text-primary) outline-none focus:border-(--primary) focus:ring-2 focus:ring-(--primary)/20"
           >
+            {allowUnassigned && <option value="">Unassigned</option>}
             {teamMembers.map((m) => (
-              <option key={m.id} value={m.id}>
+              <option key={m.id} value={String(m.id)}>
                 {m.name}
+                {m.role ? ` — ${m.role}` : ""}
               </option>
             ))}
           </select>

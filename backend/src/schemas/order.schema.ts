@@ -43,6 +43,79 @@ export const orderListQuerySchema = z
 
 export type OrderListQuery = z.infer<typeof orderListQuerySchema>;
 
+export const ORDER_SOURCES = [
+  "whatsapp",
+  "facebook",
+  "phone",
+  "website",
+  "walk-in",
+] as const;
+
+export const ORDER_COURIERS = [
+  "steadfast",
+  "pathao",
+  "redx",
+  "carrybee",
+] as const;
+
+export const SHIPPING_ZONE_IDS = [
+  "inside-dhaka",
+  "sub-dhaka",
+  "outside-dhaka",
+  "free",
+] as const;
+
+function blankToNull(value: unknown): unknown {
+  return typeof value === "string" && value.trim() === "" ? null : value;
+}
+
+function optionalNullableId(value: unknown): unknown {
+  return value === "" || value === null ? null : value;
+}
+
+export const createAdminOrderSchema = z.object({
+  customerName: z.string().trim().min(1).max(120),
+  customerPhone: z
+    .string()
+    .trim()
+    .regex(/^01[3-9]\d{8}$/, "Enter a valid BD phone (01XXXXXXXXX)"),
+  customerAddress: z.string().trim().min(1).max(500),
+  items: z
+    .array(
+      z.object({
+        productId: z.coerce.number().int().positive(),
+        quantity: z.coerce.number().int().min(1).max(1000),
+      }),
+    )
+    .min(1, "Add at least one product"),
+  shippingZoneId: z.enum(SHIPPING_ZONE_IDS, {
+    error: "Select a valid shipping zone",
+  }),
+  advance: z.coerce.number().int().min(0).default(0),
+  discount: z.coerce.number().int().min(0).default(0),
+  assignedToId: z.preprocess(
+    optionalNullableId,
+    z.coerce.number().int().positive().nullable().optional(),
+  ),
+  courier: z.preprocess(
+    blankToNull,
+    z.enum(ORDER_COURIERS).nullable().optional(),
+  ),
+  source: z.enum(ORDER_SOURCES).default("whatsapp"),
+  adminNote: z.preprocess(
+    blankToNull,
+    z.string().trim().max(1000).nullable().optional(),
+  ),
+  courierNote: z.preprocess(
+    blankToNull,
+    z.string().trim().max(1000).nullable().optional(),
+  ),
+  // Super Admin only — shop admins are always scoped by their auth cookie.
+  shopId: z.coerce.number().int().positive().optional(),
+});
+
+export type CreateAdminOrderInput = z.infer<typeof createAdminOrderSchema>;
+
 export const updateOrderStatusSchema = z
   .object({
     orderStatus: z

@@ -5,6 +5,7 @@ import type {
   OrderListItem,
   OrderListParams,
   OrdersListResponse,
+  CreateOrderPayload,
   UpdateStatusBody,
 } from "../types/order"
 
@@ -45,6 +46,14 @@ function normalizeOrderDetail(detail: RawOrderDetail): OrderDetail {
 }
 
 export const superAdminOrdersApi = {
+  async create(body: CreateOrderPayload): Promise<OrderDetail> {
+    const res = await apiRequest<RawOrderDetail>("/admin/super/orders", {
+      method: "POST",
+      body,
+    })
+    return normalizeOrderDetail(res)
+  },
+
   async list(
     params: OrderListParams & { shopId?: number } = {},
     signal?: AbortSignal

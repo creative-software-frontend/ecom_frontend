@@ -25,7 +25,8 @@ export function PricingCard({
 }: PricingCardProps) {
   const selectedZone = shippingZones.find((z) => z.id === shippingZoneId)
   const shippingFee = selectedZone?.fee ?? 0
-  const total = subtotal + shippingFee - advance - discount
+  const orderTotal = Math.max(0, subtotal + shippingFee - discount)
+  const dueAmount = Math.max(0, orderTotal - advance)
 
   return (
     <section className="rounded-lg border border-(--border-light) bg-(--bg-surface)">
@@ -92,24 +93,28 @@ export function PricingCard({
             <span>Shipping Fee</span>
             <span className="tabular-nums">{formatTaka(shippingFee)}</span>
           </div>
-          {advance > 0 && (
-            <div className="flex justify-between text-(--text-muted)">
-              <span>Advance Paid</span>
-              <span className="tabular-nums">− {formatTaka(advance)}</span>
-            </div>
-          )}
-          {discount > 0 && (
-            <div className="flex justify-between text-(--text-muted)">
-              <span>Discount</span>
-              <span className="tabular-nums">− {formatTaka(discount)}</span>
-            </div>
-          )}
+          <div className="flex justify-between text-(--text-muted)">
+            <span>Discount</span>
+            <span className="tabular-nums">− {formatTaka(discount)}</span>
+          </div>
           <div className="flex items-center justify-between border-t border-(--border-light) pt-3">
             <span className="text-sm font-semibold text-(--text-primary)">
-              Total
+              Order Total
             </span>
             <span className="text-lg font-bold text-(--primary) tabular-nums">
-              {formatTaka(Math.max(0, total))}
+              {formatTaka(orderTotal)}
+            </span>
+          </div>
+          <div className="flex justify-between text-(--text-muted)">
+            <span>Advance Paid</span>
+            <span className="tabular-nums">− {formatTaka(advance)}</span>
+          </div>
+          <div className="flex items-center justify-between rounded-md bg-(--primary-soft) px-3 py-2">
+            <span className="text-sm font-semibold text-(--text-primary)">
+              Amount to Collect (Due)
+            </span>
+            <span className="text-base font-bold text-(--primary) tabular-nums">
+              {formatTaka(dueAmount)}
             </span>
           </div>
         </div>

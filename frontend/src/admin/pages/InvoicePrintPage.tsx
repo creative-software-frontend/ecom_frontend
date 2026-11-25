@@ -294,13 +294,52 @@ function InvoiceSheet({
           </tbody>
         </table>
 
+        {/* ── Payment breakdown ── */}
+        <table className="mb-4 w-full text-xs text-gray-600">
+          <tbody>
+            <tr>
+              <td className="py-0.5 text-gray-400">Subtotal</td>
+              <td className="py-0.5 text-right font-medium">
+                {formatTaka(order.subtotal)}
+              </td>
+            </tr>
+            <tr>
+              <td className="py-0.5 text-gray-400">Delivery</td>
+              <td className="py-0.5 text-right font-medium">
+                {formatTaka(order.deliveryCharge)}
+              </td>
+            </tr>
+            <tr>
+              <td className="py-0.5 text-gray-400">Discount</td>
+              <td className="py-0.5 text-right font-medium">
+                {formatTaka(order.discount ?? 0)}
+              </td>
+            </tr>
+            <tr>
+              <td className="py-1 text-gray-800 font-semibold">Total</td>
+              <td className="py-1 text-right font-semibold text-gray-800">
+                {formatTaka(order.total)}
+              </td>
+            </tr>
+            <tr>
+              <td className="py-0.5 text-gray-400">Advance paid</td>
+              <td className="py-0.5 text-right font-medium">
+                {formatTaka(order.advance ?? 0)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
         {/* ── Amount to Collect ── */}
         <div className="mb-4 flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3">
           <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase">
             Amount to Collect
           </span>
           <span className="text-lg font-bold text-emerald-900">
-            {formatTaka(order.total)}
+            {formatTaka(
+              order.dueAmount ??
+                Math.max(0, order.total - (order.advance ?? 0))
+            )}
           </span>
         </div>
 
@@ -389,10 +428,15 @@ function LabelSheet({
           </p>
         </div>
 
-        {/* COD amount */}
+        {/* COD amount due */}
         <div className="mt-2 flex justify-between rounded border border-gray-900 px-3 py-1">
-          <span className="text-[10px] font-bold uppercase">COD</span>
-          <span className="font-bold">{formatTaka(order.total)}</span>
+          <span className="text-[10px] font-bold uppercase">COD due</span>
+          <span className="font-bold">
+            {formatTaka(
+              order.dueAmount ??
+                Math.max(0, order.total - (order.advance ?? 0))
+            )}
+          </span>
         </div>
       </div>
     </div>

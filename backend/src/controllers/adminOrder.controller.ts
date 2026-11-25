@@ -6,6 +6,7 @@ import {
   type OrderStatus,
 } from "../constants/order.js";
 import { logAudit } from "../lib/auditLog.js";
+import { createAdminOrder } from "../lib/createAdminOrder.js";
 import { prisma } from "../lib/prisma.js";
 import { parseId } from "../lib/parseId.js";
 import {
@@ -42,6 +43,7 @@ async function fetchOrderDetail(id: number, shopId?: number) {
     where: { id, ...(shopId !== undefined ? { shopId } : {}) },
     include: {
       shop: { select: { id: true, name: true, slug: true } },
+      assignedTo: { select: { id: true, name: true } },
       items: {
         include: {
           product: {
@@ -70,7 +72,15 @@ async function fetchOrderDetail(id: number, shopId?: number) {
     deliveryArea: order.deliveryArea,
     deliveryCharge: order.deliveryCharge,
     subtotal: order.subtotal,
+    discount: order.discount,
+    advance: order.advance,
+    dueAmount: Math.max(0, order.total - order.advance),
     total: order.total,
+    source: order.source,
+    courier: order.courier,
+    courierNote: order.courierNote,
+    assignedToId: order.assignedToId,
+    assignedTo: order.assignedTo,
     paymentMethod: order.paymentMethod,
     paymentStatus: order.paymentStatus,
     status: order.status,
@@ -100,6 +110,36 @@ async function fetchOrderDetail(id: number, shopId?: number) {
       };
     }),
   };
+}
+
+export async function createShopOrder(req: Request, res: Response) {
+  const shopId = getShopIdOrForbid(req, res);
+  if (shopId === null) return;
+
+  const result = await createAdminOrder(req, shopId);
+  if (!result.ok) {
+    return res.status(result.status).json(result.body);
+  }
+
+  const created = result.order;
+  void logAudit({
+    req,
+    action: "order.create",
+    entityType: "order",
+    entityId: created.id,
+    metadata: {
+      orderNumber: created.orderNumber,
+      total: created.total,
+      source: created.source,
+    },
+    targetShopId: created.shopId,
+  });
+
+  const detail = await fetchOrderDetail(created.id, shopId);
+  if (!detail) {
+    return res.status(404).json({ success: false, message: "Order not found" });
+  }
+  return res.status(201).json({ success: true, data: detail });
 }
 
 export async function listOrders(req: Request, res: Response) {
@@ -347,13 +387,36 @@ export async function updateOrderStatus(req: Request, res: Response) {
       updateData.paymentStatus = paymentStatus;
     }
 
-    const updateResult = await prisma.order.updateMany({
-      where: {
-        id,
-        shopId,
-        status: currentOrder.status,
-      },
-      data: updateData,
+    const restoresStock =
+      orderStatus === "cancelled" && currentOrder.status !== "cancelled";
+
+    const updateResult = await prisma.$transaction(async (tx) => {
+      const updated = await tx.order.updateMany({
+        where: {
+          id,
+          shopId,
+          status: currentOrder.status,
+        },
+        data: updateData,
+      });
+
+      if (updated.count === 1 && restoresStock) {
+        const lines = await tx.orderItem.findMany({
+          where: { orderId: id },
+          select: { productId: true, quantity: true },
+        });
+        for (const line of lines) {
+          await tx.product.updateMany({
+            where: { id: line.productId, shopId },
+            data: {
+              stockQuantity: { increment: line.quantity },
+              inStock: true,
+            },
+          });
+        }
+      }
+
+      return updated;
     });
 
     if (updateResult.count === 0) {
