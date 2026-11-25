@@ -419,13 +419,14 @@ model PageRevision {
 }
 
 // ==================================================================
-// Courier settings — singleton (id=1)
+// Courier settings — one row per shop.
 // Zones are hardcoded in frontend (3 fixed tiers for Bangladesh).
 // Only fee amounts + toggles are stored server-side.
 // ==================================================================
 
 model CourierSettings {
-  id                Int      @id @default(1)
+  id                Int      @id @default(autoincrement())
+  shopId            Int      @unique @map("shop_id")
   enabled           Boolean  @default(true)
   flatFeeEnabled    Boolean  @default(true) @map("flat_fee_enabled")
   insideDhakaFee    Int      @default(60) @map("inside_dhaka_fee")
@@ -434,7 +435,45 @@ model CourierSettings {
   freeDeliveryAbove Int      @default(2000) @map("free_delivery_above")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
   @@map("courier_settings")
+}
+
+// ==================================================================
+// Courier accounts — four per shop (one per supported courier).
+// Credential columns hold AES-256-GCM encrypted values only and are
+// never returned to clients. Connection tests are a later phase.
+// ==================================================================
+
+model CourierAccount {
+  id               Int       @id @default(autoincrement())
+  shopId           Int       @map("shop_id")
+  slug             String    @db.VarChar(30) // steadfast | pathao | redx | carrybee
+  enabled          Boolean   @default(false)
+  baseUrl          String?   @map("base_url") @db.VarChar(255)
+  apiKey           String?   @map("api_key") @db.Text
+  secretKey        String?   @map("secret_key") @db.Text
+  clientId         String?   @map("client_id") @db.VarChar(255)
+  clientSecret     String?   @map("client_secret") @db.Text
+  username         String?   @db.VarChar(255)
+  password         String?   @db.Text
+  storeId          String?   @map("store_id") @db.VarChar(255)
+  accessToken      String?   @map("access_token") @db.Text
+  clientContext    String?   @map("client_context") @db.VarChar(255)
+  credentialsLegacy String?  @map("credentials_legacy") @db.Text
+  status           String    @default("not_connected") @db.VarChar(20)
+  statusMessage    String?   @map("status_message") @db.VarChar(255)
+  balance          Decimal?  @db.Decimal(12, 2)
+  checkedAt        DateTime? @map("checked_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, slug])
+  @@index([shopId, enabled])
+  @@map("courier_accounts")
 }
 
 model Shop {
@@ -462,6 +501,8 @@ model Shop {
   coupons         Coupon[]
   pages           Page[]
   supportTickets  SupportTicket[]
+  courierSettings CourierSettings?
+  courierAccounts CourierAccount[]
 
   @@map("shops")
 }

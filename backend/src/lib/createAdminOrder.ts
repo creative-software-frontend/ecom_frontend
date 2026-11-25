@@ -91,7 +91,7 @@ export async function createAdminOrder(
   }
 
   const courierSettings = await prisma.courierSettings.findUnique({
-    where: { id: 1 },
+    where: { shopId: targetShopId },
   });
   const fees = {
     insideDhakaFee: courierSettings?.insideDhakaFee ?? 60,

@@ -15,6 +15,12 @@ import {
   getCourierSettings,
   updateCourierSettings,
 } from "../controllers/adminCourierSettings.controller.js";
+import {
+  disconnectCourierAccount,
+  listCourierAccounts,
+  toggleCourierAccount,
+  upsertCourierAccount,
+} from "../controllers/adminCourierAccount.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import {
   createSmsTemplate,
@@ -41,6 +47,12 @@ router.put("/orders", updateOrderSettings);
 // Courier settings
 router.get("/courier", getCourierSettings);
 router.put("/courier", updateCourierSettings);
+
+// Courier accounts (per-shop encrypted credentials)
+router.get("/courier/accounts", listCourierAccounts);
+router.put("/courier/accounts/:slug", upsertCourierAccount);
+router.patch("/courier/accounts/:slug/toggle", toggleCourierAccount);
+router.delete("/courier/accounts/:slug/credentials", disconnectCourierAccount);
 
 // SMS templates
 router.get("/sms/templates", listSmsTemplates);

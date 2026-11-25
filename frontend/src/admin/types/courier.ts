@@ -7,6 +7,57 @@ export type CourierSettings = {
   free_delivery_above: number
 }
 
+export type CourierSlug = "steadfast" | "pathao" | "redx" | "carrybee"
+
+export type CourierAccountStatus =
+  | "not_connected"
+  | "ready"
+  | "connected"
+  | "error"
+
+export type CourierAccount = {
+  id: number
+  shopId: number
+  slug: CourierSlug
+  enabled: boolean
+  baseUrl: string | null
+  clientId: string | null
+  username: string | null
+  storeId: string | null
+  clientContext: string | null
+  status: CourierAccountStatus
+  statusMessage: string | null
+  balance: number | null
+  checkedAt: string | null
+  // Secrets are never sent by the server — only these flags and previews.
+  hasApiKey: boolean
+  hasSecretKey: boolean
+  hasClientSecret: boolean
+  hasPassword: boolean
+  hasAccessToken: boolean
+  apiKeyPreview: string | null
+  secretKeyPreview: string | null
+  clientSecretPreview: string | null
+  passwordPreview: string | null
+  accessTokenPreview: string | null
+  updatedAt: string
+}
+
+export type UpdateCourierAccountInput = {
+  enabled?: boolean
+  baseUrl?: string | null
+  clientId?: string | null
+  username?: string | null
+  storeId?: string | null
+  clientContext?: string | null
+  // Omit / send an empty string to preserve the stored encrypted value.
+  apiKey?: string
+  secretKey?: string
+  clientSecret?: string
+  password?: string
+  accessToken?: string
+}
+
 // Zones are hardcoded per design: "strictly predefined for Bangladesh".
 // Only the `feeKey` links to a mutable backend field.
 export type CourierZoneDef = {

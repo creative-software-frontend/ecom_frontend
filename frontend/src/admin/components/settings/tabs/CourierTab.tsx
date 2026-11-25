@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { SettingsLayout } from "../SettingsLayout"
@@ -6,7 +6,11 @@ import { DeliveryZonesCard } from "../../courier/DeliveryZonesCard"
 import { CourierCredentialsCard } from "../../courier/CourierCredentialsCard"
 import { CheckoutPreviewCard } from "../../courier/CheckoutPreviewCard"
 import { LogisticsRulesCard } from "../../courier/LogisticsRulesCard"
+import { ErrorState } from "../../common/ErrorState"
+import { InlineNotice } from "../../common/InlineNotice"
+import { LoadingState } from "../../common/LoadingState"
 import {
+  useCourierAccountsQuery,
   useCourierQuery,
   useUpdateCourierMutation,
 } from "../../../hooks/useCourierQuery"
@@ -18,8 +22,13 @@ import {
 import { getErrorMessage } from "../../../lib/errors"
 
 export default function CourierTab() {
-  const { data, isLoading, error } = useCourierQuery()
+  const { data, isLoading, error, refetch } = useCourierQuery()
   const updateMutation = useUpdateCourierMutation()
+  const accountsQuery = useCourierAccountsQuery()
+  const [saveNotice, setSaveNotice] = useState<{
+    variant: "success" | "error"
+    message: string
+  } | null>(null)
 
   const form = useForm<CourierFormValues>({
     resolver: zodResolver(courierSchema),
@@ -36,21 +45,33 @@ export default function CourierTab() {
     ...useWatch({ control: form.control }),
   } as CourierFormValues
   const isDirty = form.formState.isDirty
+  const enabledCount =
+    accountsQuery.data?.filter((account) => account.enabled).length ?? 0
 
   async function onSubmit(values: CourierFormValues) {
-    await updateMutation.mutateAsync(values)
-    // Server response updates cache -> useEffect resets form -> dirty cleared
+    setSaveNotice(null)
+    try {
+      await updateMutation.mutateAsync(values)
+      setSaveNotice({
+        variant: "success",
+        message: "Delivery zone settings saved.",
+      })
+      // Server response updates cache -> useEffect resets form -> dirty cleared
+    } catch (error) {
+      setSaveNotice({
+        variant: "error",
+        message: getErrorMessage(error, "Could not save delivery zone settings."),
+      })
+    }
   }
 
   return (
     <SettingsLayout
       activeTab="courier"
-      //   pageTitle="Courier Settings"
-      //   pageSubtitle="Configure delivery fees, zones, and courier API integrations in one unified hub"
       headerRight={
         <span className="inline-flex items-center gap-1.5 rounded-full bg-(--status-delivered-bg) px-2.5 py-1 text-xs font-medium text-(--status-delivered-text)">
           <span className="size-1.5 rounded-full bg-(--status-delivered-text)" />
-          Automated Dispatch Active
+          {enabledCount} Courier{enabledCount === 1 ? "" : "s"} Enabled
         </span>
       }
       isDirty={isDirty}
@@ -60,17 +81,33 @@ export default function CourierTab() {
       saveBarTitle="You have unsaved changes in Courier Settings"
       saveBarDescription="Changes in Dhaka zone fees and free delivery rules are pending saving."
     >
+      {saveNotice && (
+        <InlineNotice
+          message={saveNotice.message}
+          variant={saveNotice.variant}
+          className={`mb-4 flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-xs ${
+            saveNotice.variant === "success"
+              ? "border-(--status-delivered-text) bg-(--status-delivered-bg) text-(--status-delivered-text)"
+              : "border-(--status-cancelled-text) bg-(--status-cancelled-bg) text-(--status-cancelled-text)"
+          }`}
+          dismissLabel="Dismiss notice"
+          onDismiss={() => setSaveNotice(null)}
+        />
+      )}
+
       {isLoading && (
-        <div className="flex min-h-80 items-center justify-center text-sm text-(--text-muted)">
+        <LoadingState className="flex min-h-80 items-center justify-center text-sm text-(--text-muted)">
           Loading courier settings…
-        </div>
+        </LoadingState>
       )}
 
       {error && !isLoading && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          Failed to load courier settings:{" "}
-          {getErrorMessage(error, "Unknown error")}
-        </div>
+        <ErrorState
+          message={`Failed to load courier settings: ${getErrorMessage(error, "Unknown error")}`}
+          onRetry={() => void refetch()}
+          className="rounded-md border border-(--border-light) bg-(--bg-surface) p-4 text-sm text-(--status-cancelled-text)"
+          buttonClassName="mt-2 rounded border border-(--border-light) bg-(--bg-surface) px-3 py-1.5 text-xs font-medium text-(--text-primary)"
+        />
       )}
 
       {!isLoading && !error && (

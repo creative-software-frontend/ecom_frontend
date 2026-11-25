@@ -53,7 +53,11 @@ export type AuditAction =
   | "support.create"
   | "support.reply"
   | "support.close"
-  | "support.status_update";
+  | "support.status_update"
+  | "courier.settings_update"
+  | "courier.account_update"
+  | "courier.account_toggle"
+  | "courier.account_disconnect";
 
 export async function logAudit(params: {
   req: Request;
