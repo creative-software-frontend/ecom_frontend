@@ -26,6 +26,7 @@ import { getShopCatalogOptions } from "../controllers/adminSuperCatalog.controll
 import adminSuperProductRoutes from "./adminSuperProduct.routes.js";
 import adminSuperOrderRoutes from "./adminSuperOrder.routes.js";
 import adminSuperNewsRoutes from "./adminSuperNews.routes.js";
+import adminSuperSupportRoutes from "./adminSuperSupport.routes.js";
 
 const router = Router();
 
@@ -68,6 +69,9 @@ router.use("/orders", adminSuperOrderRoutes);
 
 // News & announcements
 router.use("/news", adminSuperNewsRoutes);
+
+// Support inbox
+router.use("/support", adminSuperSupportRoutes);
 
 // Audit log
 router.get("/audit", listAuditLogs);

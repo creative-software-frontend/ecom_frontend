@@ -194,10 +194,12 @@ model User {
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
-  role      Role       @relation(fields: [roleId], references: [id])
-  shop      Shop?      @relation(fields: [shopId], references: [id])
-  auditLogs AuditLog[]
-  newsPosts News[]
+  role                 Role              @relation(fields: [roleId], references: [id])
+  shop                 Shop?             @relation(fields: [shopId], references: [id])
+  auditLogs            AuditLog[]
+  newsPosts            News[]
+  createdSupportTickets SupportTicket[]  @relation("SupportTicketCreator")
+  supportMessages      SupportMessage[]  @relation("SupportMessageSender")
 
   @@map("users")
 }
@@ -441,13 +443,14 @@ model Shop {
   users     User[]
   auditLogs AuditLog[]
 
-  products      Product[]
-  brands        Brand[]
-  categories    Category[]
-  smsTemplates  SmsTemplate[]
-  orders        Order[]
-  coupons       Coupon[]
-  pages         Page[]
+  products        Product[]
+  brands          Brand[]
+  categories      Category[]
+  smsTemplates    SmsTemplate[]
+  orders          Order[]
+  coupons         Coupon[]
+  pages           Page[]
+  supportTickets  SupportTicket[]
 
   @@map("shops")
 }
@@ -502,4 +505,46 @@ model AuditLog {
   @@index([shopId])
   @@index([action])
   @@map("audit_logs")
+}
+
+// ==================================================================
+// Support — shop tickets with messages from both shop and platform.
+// Ticket numbers are generated server-side after the row is inserted.
+// ==================================================================
+
+model SupportTicket {
+  id            Int       @id @default(autoincrement())
+  ticketNumber  String    @unique @map("ticket_number")
+  shopId        Int       @map("shop_id")
+  createdById   Int       @map("created_by_id")
+  title         String    @db.VarChar(200)
+  category      String // "pickup" | "delivery" | "payment" | "billing" | "service" | "other"
+  status        String    @default("open") // "open" | "answered" | "closed"
+  lastMessageAt DateTime  @default(now()) @map("last_message_at")
+  closedAt      DateTime? @map("closed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  shop      Shop             @relation(fields: [shopId], references: [id])
+  createdBy User             @relation("SupportTicketCreator", fields: [createdById], references: [id])
+  messages  SupportMessage[]
+
+  @@index([shopId, status, lastMessageAt])
+  @@index([status, lastMessageAt])
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id         Int      @id @default(autoincrement())
+  ticketId   Int      @map("ticket_id")
+  senderId   Int      @map("sender_id")
+  senderType String   @map("sender_type") // "shop" | "support"
+  message    String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User           @relation("SupportMessageSender", fields: [senderId], references: [id])
+
+  @@index([ticketId, createdAt])
+  @@map("support_messages")
 }

@@ -1,6 +1,7 @@
 import {
   Archive,
   LayoutGridCircles,
+  LifeBuoy,
   Megaphone,
   ScrollText,
   ShoppingCart,
@@ -29,6 +30,7 @@ export const superAdminMenu: MenuItem[] = [
   { type: "link", label: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { type: "link", label: "Products", href: "/admin/products", icon: Archive },
   { type: "link", label: "News", href: "/admin/news", icon: Megaphone },
+  { type: "link", label: "Support", href: "/admin/support", icon: LifeBuoy },
   { type: "link", label: "Audit Log", href: "/admin/audit", icon: ScrollText },
   { type: "link", label: "Profile", href: "/admin/profile", icon: User },
 ]

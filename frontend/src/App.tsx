@@ -42,6 +42,9 @@ const SuperAdminAuditPage = lazy(
 const SuperAdminNewsPage = lazy(
   () => import("./admin/pages/super-admin/NewsPage")
 )
+const SuperAdminSupportPage = lazy(
+  () => import("./admin/pages/super-admin/SupportPage")
+)
 const SuperAdminProductsPage = lazy(
   () => import("./admin/pages/super-admin/ProductsPage")
 )
@@ -161,6 +164,7 @@ export function App() {
               />
               <Route path="audit" element={<SuperAdminAuditPage />} />
               <Route path="news" element={<SuperAdminNewsPage />} />
+              <Route path="support" element={<SuperAdminSupportPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>
           </Route>

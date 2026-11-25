@@ -48,7 +48,11 @@ export type AuditAction =
   | "category.delete"
   | "news.create"
   | "news.update"
-  | "news.delete";
+  | "news.delete"
+  | "support.create"
+  | "support.reply"
+  | "support.close"
+  | "support.status_update";
 
 export async function logAudit(params: {
   req: Request;
