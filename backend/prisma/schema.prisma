@@ -451,6 +451,7 @@ model CourierAccount {
   shopId           Int       @map("shop_id")
   slug             String    @db.VarChar(30) // steadfast | pathao | redx | carrybee
   enabled          Boolean   @default(false)
+  isSandbox        Boolean   @default(false) @map("is_sandbox")
   baseUrl          String?   @map("base_url") @db.VarChar(255)
   apiKey           String?   @map("api_key") @db.Text
   secretKey        String?   @map("secret_key") @db.Text

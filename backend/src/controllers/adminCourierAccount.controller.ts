@@ -6,9 +6,11 @@ import { testCourierConnection } from "../lib/courierTester.js";
 import { prisma } from "../lib/prisma.js";
 import { sendValidationError } from "../lib/validation.js";
 import {
-  DEFAULT_COURIER_BASE_URLS,
   COURIER_SLUGS,
+  resolveOfficialCourierBaseUrl,
+  supportsCourierSandbox,
   toggleCourierAccountSchema,
+  toggleCourierSandboxSchema,
   upsertCourierAccountSchema,
   type CourierSlug,
   type UpsertCourierAccountInput,
@@ -80,6 +82,8 @@ function toSafeCourierAccount(row: CourierAccountRow) {
     shopId: row.shopId,
     slug: row.slug,
     enabled: row.enabled,
+    isSandbox: row.isSandbox,
+    supportsSandbox: supportsCourierSandbox(row.slug as CourierSlug),
     baseUrl: row.baseUrl,
     clientId: row.clientId,
     username: row.username,
@@ -110,7 +114,8 @@ export async function ensureShopCourierAccounts(shopId: number): Promise<void> {
       shopId,
       slug,
       enabled: false,
-      baseUrl: DEFAULT_COURIER_BASE_URLS[slug],
+      isSandbox: false,
+      baseUrl: resolveOfficialCourierBaseUrl(slug, false),
       apiKey: null,
       secretKey: null,
       clientId: null,
@@ -209,12 +214,22 @@ export async function upsertCourierAccount(req: Request, res: Response) {
   const parsed = upsertCourierAccountSchema.safeParse(req.body);
   if (!parsed.success) return sendValidationError(res, parsed.error);
 
+  if (parsed.data.isSandbox === true && !supportsCourierSandbox(slugParam)) {
+    return res.status(422).json({
+      success: false,
+      message: "Validation failed",
+      errors: { isSandbox: "Sandbox mode is not available for Steadfast." },
+    });
+  }
+
   try {
     await ensureShopCourierAccounts(shopId);
     const existing = await findAccount(shopId, slugParam);
     if (!existing) return notFound(res);
 
     const input = parsed.data;
+    const nextIsSandbox = input.isSandbox ?? existing.isSandbox;
+    const environmentChanged = nextIsSandbox !== existing.isSandbox;
     const configured = isConfigured(
       slugParam,
       effectiveCredentials(input, existing),
@@ -240,17 +255,27 @@ export async function upsertCourierAccount(req: Request, res: Response) {
 
     const status = !configured
       ? "not_connected"
-      : existing.status === "connected"
-        ? "connected"
-        : "ready";
+      : environmentChanged
+        ? "ready"
+        : existing.status === "connected"
+          ? "connected"
+          : "ready";
 
     const data: Prisma.CourierAccountUncheckedUpdateInput = {
       ...encryptedSecrets,
       enabled: configured ? (input.enabled ?? existing.enabled) : false,
+      isSandbox: nextIsSandbox,
       status,
       statusMessage: null,
-      // Read-only by design: a forged client baseUrl is stripped by the schema.
-      baseUrl: DEFAULT_COURIER_BASE_URLS[slugParam],
+      // Read-only by design: derived from the official environment URL only.
+      baseUrl: resolveOfficialCourierBaseUrl(slugParam, nextIsSandbox),
+      ...(environmentChanged && {
+        balance: null,
+        checkedAt: null,
+        // Pathao's token is issued for a specific environment; RedX's token
+        // is user-supplied and must survive an environment switch.
+        ...(slugParam === "pathao" && { accessToken: null }),
+      }),
       ...(input.clientId !== undefined && { clientId: input.clientId }),
       ...(input.username !== undefined && { username: input.username }),
       ...(input.storeId !== undefined && { storeId: input.storeId }),
@@ -270,7 +295,12 @@ export async function upsertCourierAccount(req: Request, res: Response) {
       entityType: "courier_account",
       entityId: updated.id,
       targetShopId: shopId,
-      metadata: { slug: updated.slug, enabled: updated.enabled, status: updated.status },
+      metadata: {
+        slug: updated.slug,
+        enabled: updated.enabled,
+        status: updated.status,
+        isSandbox: updated.isSandbox,
+      },
     });
 
     return res.json({ success: true, data: toSafeCourierAccount(updated) });
@@ -333,6 +363,70 @@ export async function toggleCourierAccount(req: Request, res: Response) {
   }
 }
 
+/** Switches a courier between official production and sandbox endpoints. */
+export async function toggleCourierSandbox(req: Request, res: Response) {
+  const shopId = getShopIdOrForbid(req, res);
+  if (shopId === null) return;
+
+  const slugParam = typeof req.params.slug === "string" ? req.params.slug : "";
+  if (!isCourierSlug(slugParam)) return notFound(res);
+
+  const parsed = toggleCourierSandboxSchema.safeParse(req.body);
+  if (!parsed.success) return sendValidationError(res, parsed.error);
+
+  const { isSandbox } = parsed.data;
+  if (isSandbox && !supportsCourierSandbox(slugParam)) {
+    return res.status(422).json({
+      success: false,
+      message: "Validation failed",
+      errors: { isSandbox: "Sandbox mode is not available for Steadfast." },
+    });
+  }
+
+  try {
+    await ensureShopCourierAccounts(shopId);
+    const existing = await findAccount(shopId, slugParam);
+    if (!existing) return notFound(res);
+
+    if (isSandbox === existing.isSandbox) {
+      return res.json({ success: true, data: toSafeCourierAccount(existing) });
+    }
+
+    const updated = await prisma.courierAccount.update({
+      where: { id: existing.id },
+      data: {
+        isSandbox,
+        baseUrl: resolveOfficialCourierBaseUrl(slugParam, isSandbox),
+        status: hasRequiredCredentials(slugParam, existing)
+          ? "ready"
+          : "not_connected",
+        statusMessage: null,
+        balance: null,
+        checkedAt: null,
+        // Pathao tokens are environment-specific; RedX tokens are entered by
+        // the user and must be kept intact across the switch.
+        ...(slugParam === "pathao" && { accessToken: null }),
+      },
+    });
+
+    void logAudit({
+      req,
+      action: "courier.account_sandbox",
+      entityType: "courier_account",
+      entityId: updated.id,
+      targetShopId: shopId,
+      metadata: { slug: updated.slug, isSandbox: updated.isSandbox },
+    });
+
+    return res.json({ success: true, data: toSafeCourierAccount(updated) });
+  } catch (error) {
+    console.error("Error switching courier environment:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+}
+
 export async function disconnectCourierAccount(req: Request, res: Response) {
   const shopId = getShopIdOrForbid(req, res);
   if (shopId === null) return;
@@ -362,8 +456,9 @@ export async function disconnectCourierAccount(req: Request, res: Response) {
         balance: null,
         checkedAt: null,
         enabled: false,
+        isSandbox: false,
         status: "not_connected",
-        baseUrl: DEFAULT_COURIER_BASE_URLS[slugParam],
+        baseUrl: resolveOfficialCourierBaseUrl(slugParam, false),
       },
     });
 
@@ -405,12 +500,15 @@ export async function testCourierAccount(req: Request, res: Response) {
       });
     }
 
-    const result = await testCourierConnection(existing);
+    const result = await testCourierConnection({
+      ...existing,
+      isSandbox: existing.isSandbox,
+    });
     const updated = await prisma.courierAccount.update({
       where: { id: existing.id },
       data: {
-        // Heal any legacy/poisoned URL: only official defaults are stored.
-        baseUrl: DEFAULT_COURIER_BASE_URLS[slugParam],
+        // Heal any legacy/poisoned URL: only the official environment URL is stored.
+        baseUrl: resolveOfficialCourierBaseUrl(slugParam, existing.isSandbox),
         status: result.status,
         statusMessage: result.ok ? null : result.message,
         checkedAt: new Date(),

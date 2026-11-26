@@ -76,6 +76,13 @@ export function useToggleCourierAccountMutation() {
   )
 }
 
+export function useToggleCourierSandboxMutation() {
+  return useAccountCacheMutation(
+    ({ slug, isSandbox }: { slug: CourierSlug; isSandbox: boolean }) =>
+      courierApi.toggleSandbox(slug, isSandbox)
+  )
+}
+
 export function useDisconnectCourierAccountMutation() {
   return useAccountCacheMutation((slug: CourierSlug) =>
     courierApi.disconnectAccount(slug)

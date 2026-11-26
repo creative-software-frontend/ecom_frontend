@@ -20,6 +20,8 @@ export type CourierAccount = {
   shopId: number
   slug: CourierSlug
   enabled: boolean
+  isSandbox: boolean
+  supportsSandbox: boolean
   baseUrl: string | null
   clientId: string | null
   username: string | null
@@ -51,6 +53,7 @@ export type CourierTestResult = {
 
 export type UpdateCourierAccountInput = {
   enabled?: boolean
+  isSandbox?: boolean
   baseUrl?: string | null
   clientId?: string | null
   username?: string | null

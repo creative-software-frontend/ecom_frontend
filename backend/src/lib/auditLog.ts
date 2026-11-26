@@ -58,6 +58,7 @@ export type AuditAction =
   | "courier.account_update"
   | "courier.account_toggle"
   | "courier.account_disconnect"
+  | "courier.account_sandbox"
   | "courier.account_test";
 
 export async function logAudit(params: {

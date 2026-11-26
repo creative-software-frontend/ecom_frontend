@@ -1,7 +1,9 @@
 import { decryptSecret, encryptSecret } from "./crypto.js";
 import {
-  COURIER_ALLOWED_HOSTNAMES,
+  COURIER_ENVIRONMENTS,
   DEFAULT_COURIER_BASE_URLS,
+  resolveOfficialCourierBaseUrl,
+  supportsCourierSandbox,
   type CourierSlug,
 } from "../schemas/courierAccount.schema.js";
 
@@ -9,8 +11,8 @@ import {
    Live courier connection probes.
 
    Security invariants:
-   - The endpoint is ALWAYS the official default for the slug; a stored or
-     client-supplied base URL is never used as a fetch target.
+   - The endpoint is ALWAYS the official URL for the slug and environment;
+     a stored or client-supplied base URL is never used as a fetch target.
    - Decrypted secrets only ever travel in request headers/body, never in
      URLs, responses, logs, or error messages.
    - Every request has a hard 10s timeout and all upstream text is sanitised.
@@ -31,6 +33,7 @@ export type CourierTestResult = {
 /** Only the fields a probe needs; the controller row satisfies this shape. */
 export type CourierTestAccount = {
   slug: string;
+  isSandbox?: boolean;
   baseUrl?: string | null;
   apiKey?: string | null;
   secretKey?: string | null;
@@ -63,12 +66,18 @@ function isIpLiteral(hostname: string): boolean {
 }
 
 /**
- * Defense in depth: even if a default were misconfigured, refuse to probe a
- * non-HTTPS, private, loopback, credential-bearing, or unexpected host.
+ * Defense in depth: even if an official URL were misconfigured, refuse to
+ * probe a non-HTTPS, private, loopback, credential-bearing, or unexpected host.
  */
-export function assertOfficialCourierBaseUrl(slug: CourierSlug): string {
-  const configured = DEFAULT_COURIER_BASE_URLS[slug];
-  const expectedHost = COURIER_ALLOWED_HOSTNAMES[slug];
+export function assertOfficialCourierBaseUrl(
+  slug: CourierSlug,
+  isSandbox = false,
+): string {
+  if (isSandbox && !supportsCourierSandbox(slug)) {
+    throw new Error("Sandbox mode is not available for this courier.");
+  }
+
+  const configured = resolveOfficialCourierBaseUrl(slug, isSandbox);
   let parsed: URL;
   try {
     parsed = new URL(configured);
@@ -76,6 +85,8 @@ export function assertOfficialCourierBaseUrl(slug: CourierSlug): string {
     throw new Error("Courier endpoint is not configured correctly.");
   }
 
+  const hosts = COURIER_ENVIRONMENTS[slug].hosts;
+  const expectedHost = isSandbox ? hosts.sandbox : hosts.production;
   if (
     parsed.protocol !== "https:" ||
     !expectedHost ||
@@ -440,9 +451,11 @@ export async function testCourierConnection(
       return failure("Unsupported courier.");
     }
     const slug: CourierSlug = account.slug;
-    // account.baseUrl is deliberately ignored: the official default is the
-    // only possible probe target, so a poisoned stored value cannot cause SSRF.
-    const baseUrl = assertOfficialCourierBaseUrl(slug);
+    const sandbox = Boolean(account.isSandbox);
+    // account.baseUrl is deliberately ignored: only the official URL for the
+    // selected environment can be a probe target, so a poisoned stored value
+    // cannot cause SSRF.
+    const baseUrl = assertOfficialCourierBaseUrl(slug, sandbox);
 
     switch (slug) {
       case "steadfast":
@@ -459,7 +472,11 @@ export async function testCourierConnection(
     if (name === "TimeoutError" || name === "AbortError") {
       return failure("Courier API request timed out. Please try again.");
     }
-    if (error instanceof Error && error.message.includes("not configured")) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("not configured") ||
+        error.message.includes("Sandbox mode is not available"))
+    ) {
       return failure(error.message);
     }
     return failure("Could not reach the courier API. Please try again.");

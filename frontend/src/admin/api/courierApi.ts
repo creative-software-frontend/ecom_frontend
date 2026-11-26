@@ -40,6 +40,15 @@ export const courierApi = {
       { method: "PATCH", body: { enabled } }
     )
   },
+  toggleSandbox(
+    slug: CourierSlug,
+    isSandbox: boolean
+  ): Promise<CourierAccount> {
+    return apiRequest<CourierAccount>(
+      `/shop/settings/courier/accounts/${slug}/sandbox`,
+      { method: "PATCH", body: { isSandbox } }
+    )
+  },
   disconnectAccount(slug: CourierSlug): Promise<CourierAccount> {
     return apiRequest<CourierAccount>(
       `/shop/settings/courier/accounts/${slug}/credentials`,

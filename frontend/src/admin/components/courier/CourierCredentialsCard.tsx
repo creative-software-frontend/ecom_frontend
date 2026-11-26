@@ -12,6 +12,7 @@ import {
   useDisconnectCourierAccountMutation,
   useTestCourierAccountMutation,
   useToggleCourierAccountMutation,
+  useToggleCourierSandboxMutation,
   useUpdateCourierAccountMutation,
 } from "../../hooks/useCourierQuery"
 import { getErrorMessage } from "../../lib/errors"
@@ -29,7 +30,12 @@ import type {
    Secrets are write-only: the API returns only flags + masked previews.
    ================================================================ */
 
-type EditableField = Exclude<keyof UpdateCourierAccountInput, "enabled">
+// The environment is switched only through its dedicated endpoint, never via
+// the credentials form.
+type EditableField = Exclude<
+  keyof UpdateCourierAccountInput,
+  "enabled" | "isSandbox"
+>
 type FormValues = Partial<Record<EditableField, string>>
 type SecretFlagKey =
   | "hasApiKey"
@@ -239,6 +245,7 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
 
   const updateMutation = useUpdateCourierAccountMutation()
   const toggleMutation = useToggleCourierAccountMutation()
+  const sandboxToggleMutation = useToggleCourierSandboxMutation()
   const disconnectMutation = useDisconnectCourierAccountMutation()
   const testMutation = useTestCourierAccountMutation()
 
@@ -304,6 +311,27 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
     }
   }
 
+  async function handleSandboxToggle(next: boolean) {
+    setNotice(null)
+    try {
+      await sandboxToggleMutation.mutateAsync({
+        slug: account.slug,
+        isSandbox: next,
+      })
+      setNotice({
+        variant: "success",
+        message: next
+          ? "Switched to Sandbox mode. Save or test your sandbox credentials."
+          : "Switched to Production mode.",
+      })
+    } catch (error) {
+      setNotice({
+        variant: "error",
+        message: getErrorMessage(error, "Could not switch courier environment."),
+      })
+    }
+  }
+
   async function handleDisconnect() {
     setNotice(null)
     try {
@@ -359,6 +387,15 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
                     : undefined
                 }
               />
+              {account.isSandbox ? (
+                <span className="rounded bg-(--status-pending-bg) px-1.5 py-0.5 text-[10px] font-semibold text-(--status-pending-text)">
+                  Sandbox
+                </span>
+              ) : configured ? (
+                <span className="rounded bg-(--bg-surface-hover) px-1.5 py-0.5 text-[10px] font-medium text-(--text-muted)">
+                  Production
+                </span>
+              ) : null}
             </div>
             <p className="mt-0.5 truncate text-xs text-(--text-muted)">
               {account.description ?? "Courier account"}
@@ -380,6 +417,30 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
         onSubmit={handleSave}
         className="space-y-3 border-t border-(--border-light) bg-(--bg-app) p-3"
       >
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded border border-(--border-light) bg-(--bg-surface) px-3 py-2">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-(--text-primary)">
+              Sandbox / Test Mode
+            </p>
+            <p className="mt-0.5 text-xs text-(--text-muted)">
+              {account.supportsSandbox
+                ? "Uses the official sandbox endpoint for this courier."
+                : "Sandbox is not available for Steadfast."}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="text-xs text-(--text-muted)">
+              {account.isSandbox ? "On" : "Off"}
+            </span>
+            <FormToggle
+              checked={account.isSandbox}
+              disabled={!account.supportsSandbox || sandboxToggleMutation.isPending}
+              onChange={(next) => void handleSandboxToggle(next)}
+              aria-label={`Sandbox mode for ${account.slug}`}
+            />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {fields.map((field) => {
             const isSaved =
@@ -511,7 +572,11 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
             )}
             <button
               type="submit"
-              disabled={updateMutation.isPending || toggleMutation.isPending}
+              disabled={
+                updateMutation.isPending ||
+                toggleMutation.isPending ||
+                sandboxToggleMutation.isPending
+              }
               className="inline-flex h-7 items-center rounded bg-primary px-2.5 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
             >
               {updateMutation.isPending ? "Saving…" : "Save"}
