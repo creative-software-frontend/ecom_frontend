@@ -8,6 +8,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react"
+import type { PermissionCheck } from "../lib/permissions"
 
 export type MenuItem =
   // | { type: "section"; label: string }
@@ -18,6 +19,8 @@ export type MenuItem =
       badge?: string | number
       disabled?: boolean
       icon: LucideIcon
+      anyPermission?: readonly PermissionCheck[]
+      shopAdminOnly?: boolean
     }
   | {
       type: "group"
@@ -41,6 +44,7 @@ export const shopMenu: MenuItem[] = [
     href: "/shop/orders",
     badge: 0,
     icon: Package,
+    anyPermission: [["orders", "read"]],
   },
   {
     type: "link",
@@ -48,6 +52,7 @@ export const shopMenu: MenuItem[] = [
     href: "/shop/products",
     badge: 0,
     icon: Archive,
+    anyPermission: [["products", "read"]],
   },
   {
     type: "link",
@@ -55,6 +60,7 @@ export const shopMenu: MenuItem[] = [
     href: "/shop/users",
     badge: 0,
     icon: Users,
+    shopAdminOnly: true,
   },
   {
     type: "link",
@@ -69,5 +75,17 @@ export const shopMenu: MenuItem[] = [
     icon: LifeBuoy,
   },
   // { type: "section", label: "Configuration" },
-  { type: "link", label: "Settings", href: "/shop/settings", icon: Settings },
+  {
+    type: "link",
+    label: "Settings",
+    href: "/shop/settings",
+    icon: Settings,
+    anyPermission: [
+      ["settings", "read"],
+      ["coupons", "read"],
+      ["pages", "read"],
+      ["courier", "read"],
+      ["marketing", "read"],
+    ],
+  },
 ]

@@ -8,8 +8,10 @@ import type { CourierFormValues } from "../../schemas/courierSchema"
 /* Delivery zones — 3 fixed tiers, fee editable per row. */
 export function DeliveryZonesCard({
   form,
+  canUpdate = true,
 }: {
   form: UseFormReturn<CourierFormValues>
+  canUpdate?: boolean
 }) {
   const {
     register,
@@ -39,6 +41,7 @@ export function DeliveryZonesCard({
             </span>
             <FormToggle
               checked={enabled}
+              disabled={!canUpdate}
               onChange={(v) => setValue("enabled", v, { shouldDirty: true })}
               aria-label="Enable courier delivery"
             />
@@ -76,6 +79,7 @@ export function DeliveryZonesCard({
             </div>
             <FormToggle
               checked={flatFeeEnabled}
+              disabled={!canUpdate}
               onChange={(v) =>
                 setValue("flat_fee_enabled", v, { shouldDirty: true })
               }
@@ -145,6 +149,7 @@ export function DeliveryZonesCard({
                   min={0}
                   className="h-8 w-20 rounded border border-(--border-light) bg-(--bg-surface) pr-2 pl-5 text-right text-xs text-(--text-primary) tabular-nums outline-none focus:border-primary"
                   aria-invalid={Boolean(feeError)}
+                  readOnly={!canUpdate}
                   {...register(zone.feeKey, { valueAsNumber: true })}
                 />
               </div>
@@ -207,6 +212,7 @@ export function DeliveryZonesCard({
                 min={0}
                 className="h-8 w-32 rounded border border-(--border-light) bg-(--bg-surface) pr-2 pl-6 text-right text-xs text-(--text-primary) tabular-nums outline-none focus:border-primary"
                 aria-invalid={Boolean(errors.free_delivery_above)}
+                readOnly={!canUpdate}
                 {...register("free_delivery_above", { valueAsNumber: true })}
               />
             </div>

@@ -20,8 +20,13 @@ import {
   type CourierFormValues,
 } from "../../../schemas/courierSchema"
 import { getErrorMessage } from "../../../lib/errors"
+import { useAuth } from "../../../auth/AuthProvider"
+import { can } from "../../../lib/permissions"
 
 export default function CourierTab() {
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canUpdate = can(user, "courier", "update")
   const { data, isLoading, error, refetch } = useCourierQuery()
   const updateMutation = useUpdateCourierMutation()
   const accountsQuery = useCourierAccountsQuery()
@@ -49,6 +54,7 @@ export default function CourierTab() {
     accountsQuery.data?.filter((account) => account.enabled).length ?? 0
 
   async function onSubmit(values: CourierFormValues) {
+    if (!canUpdate) return
     setSaveNotice(null)
     try {
       await updateMutation.mutateAsync(values)
@@ -74,10 +80,10 @@ export default function CourierTab() {
           {enabledCount} Courier{enabledCount === 1 ? "" : "s"} Enabled
         </span>
       }
-      isDirty={isDirty}
+      isDirty={canUpdate && isDirty}
       isSaving={updateMutation.isPending}
-      onDiscard={() => data && form.reset(data)}
-      onSave={form.handleSubmit(onSubmit)}
+      onDiscard={canUpdate ? () => data && form.reset(data) : undefined}
+      onSave={canUpdate ? form.handleSubmit(onSubmit) : undefined}
       saveBarTitle="You have unsaved changes in Courier Settings"
       saveBarDescription="Changes in Dhaka zone fees and free delivery rules are pending saving."
     >
@@ -113,7 +119,7 @@ export default function CourierTab() {
       {!isLoading && !error && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-4">
-            <DeliveryZonesCard form={form} />
+            <DeliveryZonesCard form={form} canUpdate={canUpdate} />
             <CourierCredentialsCard />
           </div>
           <aside className="space-y-3">

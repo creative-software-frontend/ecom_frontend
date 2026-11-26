@@ -9,17 +9,22 @@ import {
   updatePage,
 } from "../controllers/adminPage.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { requirePermission } from "../middleware/requirePermission.js";
 
 const router = Router();
 
 router.use(requireAuth);
 
-router.get("/", listPages);
-router.get("/:id", getPageById);
-router.post("/", createPage);
-router.put("/:id", updatePage);
-router.get("/:id/revisions", listPageRevisions);
-router.post("/:id/revisions/:revisionId/restore", restorePageRevision);
-router.delete("/:id", deletePage);
+router.get("/", requirePermission("pages", "read"), listPages);
+router.get("/:id", requirePermission("pages", "read"), getPageById);
+router.post("/", requirePermission("pages", "create"), createPage);
+router.put("/:id", requirePermission("pages", "update"), updatePage);
+router.get("/:id/revisions", requirePermission("pages", "read"), listPageRevisions);
+router.post(
+  "/:id/revisions/:revisionId/restore",
+  requirePermission("pages", "update"),
+  restorePageRevision
+);
+router.delete("/:id", requirePermission("pages", "delete"), deletePage);
 
 export default router;

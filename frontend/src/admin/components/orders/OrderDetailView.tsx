@@ -52,6 +52,8 @@ import {
 } from "./DispatchCourierModal"
 import { getErrorMessage } from "../../lib/errors"
 import React from "react"
+import { useAuth } from "../../auth/AuthProvider"
+import { can, canAny } from "../../lib/permissions"
 
 type OrderDetailQueryKeys = {
   detail: (id: string) => readonly unknown[]
@@ -319,6 +321,13 @@ export function OrderDetailView({
   invalidateStats = false,
   courierDispatchEnabled = false,
 }: OrderDetailViewConfig) {
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canUpdateOrder = can(user, "orders", "update")
+  const canDispatchCourier = canAny(user, [
+    ["orders", "update"],
+    ["courier", "update"],
+  ])
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
   const navigate = useNavigate()
@@ -383,6 +392,7 @@ export function OrderDetailView({
     body: { orderStatus?: OrderStatus; paymentStatus?: PaymentStatus },
     actionKey: string
   ) {
+    if (!canUpdateOrder) return
     if (!id || mutating) return
     setPendingAction(actionKey)
     setMutationError(null)
@@ -916,22 +926,24 @@ export function OrderDetailView({
                 </div>
               ) : null}
 
-              <div className="mt-4 border-t border-(--border-light) pt-4">
-                <button
-                  type="button"
-                  onClick={openCourierDispatch}
-                  disabled={hasActiveShipment}
-                  title={
-                    hasActiveShipment
-                      ? "This order already has an active courier shipment."
-                      : undefined
-                  }
-                  className="admin-template-button admin-template-button--primary w-full disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Truck className="icon-size" aria-hidden="true" />
-                  Send to Courier
-                </button>
-              </div>
+              {canDispatchCourier ? (
+                <div className="mt-4 border-t border-(--border-light) pt-4">
+                  <button
+                    type="button"
+                    onClick={openCourierDispatch}
+                    disabled={hasActiveShipment}
+                    title={
+                      hasActiveShipment
+                        ? "This order already has an active courier shipment."
+                        : undefined
+                    }
+                    className="admin-template-button admin-template-button--primary w-full disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Truck className="icon-size" aria-hidden="true" />
+                    Send to Courier
+                  </button>
+                </div>
+              ) : null}
             </Card>
           ) : null}
 
@@ -952,6 +964,7 @@ export function OrderDetailView({
             </dl>
           </Card>
 
+          {canUpdateOrder ? (
           <Card title="Update order">
             <div className="space-y-5">
               <div>
@@ -1019,6 +1032,7 @@ export function OrderDetailView({
               </div>
             </div>
           </Card>
+          ) : null}
 
           <div className="flex items-start gap-3 rounded-md border border-(--border-light) bg-white p-4">
             <Clock3
@@ -1035,7 +1049,7 @@ export function OrderDetailView({
 
       {/* Cancel confirmation dialog */}
       <ConfirmationDialog
-        open={confirmTarget !== null}
+        open={canUpdateOrder && confirmTarget !== null}
         title={
           confirmTarget === "returned"
             ? "Mark order as returned?"
@@ -1074,7 +1088,7 @@ export function OrderDetailView({
         }
       />
 
-      {courierDispatchEnabled && dispatchOpen ? (
+      {courierDispatchEnabled && canDispatchCourier && dispatchOpen ? (
         <DispatchCourierModal
           open={dispatchOpen}
           targets={[dispatchTarget]}

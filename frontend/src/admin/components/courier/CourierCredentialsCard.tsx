@@ -15,6 +15,8 @@ import {
   useToggleCourierSandboxMutation,
   useUpdateCourierAccountMutation,
 } from "../../hooks/useCourierQuery"
+import { useAuth } from "../../auth/AuthProvider"
+import { can } from "../../lib/permissions"
 import { getErrorMessage } from "../../lib/errors"
 import { relativeTime } from "../../lib/formatTime"
 import { formatTaka } from "../../lib/orderStatus"
@@ -234,7 +236,15 @@ function hasRequiredCredentials(account: CourierAccount): boolean {
   })
 }
 
-function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
+function CourierAccountPanel({
+  account,
+  canUpdate = true,
+  canDelete = true,
+}: {
+  account: AccountWithMeta
+  canUpdate?: boolean
+  canDelete?: boolean
+}) {
   const [values, setValues] = useState<FormValues>(() => toFormValues(account))
   const [notice, setNotice] = useState<{
     variant: "success" | "error"
@@ -259,10 +269,12 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
   const configured = isConfigured(account)
   const credentialsSaved = hasRequiredCredentials(account)
   const dirty = JSON.stringify(values) !== JSON.stringify(toFormValues(account))
-  const canTest = credentialsSaved && !dirty && !testMutation.isPending
+  const canTest =
+    canUpdate && credentialsSaved && !dirty && !testMutation.isPending
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (!canUpdate) return
     setNotice(null)
 
     const payload: UpdateCourierAccountInput = {}
@@ -294,6 +306,7 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
   }
 
   async function handleToggle(next: boolean) {
+    if (!canUpdate) return
     setNotice(null)
     try {
       await toggleMutation.mutateAsync({ slug: account.slug, enabled: next })
@@ -312,6 +325,7 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
   }
 
   async function handleSandboxToggle(next: boolean) {
+    if (!canUpdate) return
     setNotice(null)
     try {
       await sandboxToggleMutation.mutateAsync({
@@ -333,6 +347,7 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
   }
 
   async function handleDisconnect() {
+    if (!canDelete) return
     setNotice(null)
     try {
       await disconnectMutation.mutateAsync(account.slug)
@@ -350,6 +365,7 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
   }
 
   async function handleTest() {
+    if (!canUpdate) return
     setNotice(null)
     try {
       const result = await testMutation.mutateAsync(account.slug)
@@ -403,13 +419,17 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2 pr-3">
-          <span className="text-xs text-(--text-muted)">Enabled</span>
-          <FormToggle
-            checked={account.enabled}
-            disabled={toggleMutation.isPending}
-            onChange={(next) => void handleToggle(next)}
-            aria-label={`Enable ${account.slug} courier`}
-          />
+          <span className="text-xs text-(--text-muted)">
+            {canUpdate ? "Enabled" : account.enabled ? "Enabled" : "Disabled"}
+          </span>
+          {canUpdate && (
+            <FormToggle
+              checked={account.enabled}
+              disabled={toggleMutation.isPending}
+              onChange={(next) => void handleToggle(next)}
+              aria-label={`Enable ${account.slug} courier`}
+            />
+          )}
         </div>
       </div>
 
@@ -432,12 +452,16 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
             <span className="text-xs text-(--text-muted)">
               {account.isSandbox ? "On" : "Off"}
             </span>
-            <FormToggle
-              checked={account.isSandbox}
-              disabled={!account.supportsSandbox || sandboxToggleMutation.isPending}
-              onChange={(next) => void handleSandboxToggle(next)}
-              aria-label={`Sandbox mode for ${account.slug}`}
-            />
+            {canUpdate && (
+              <FormToggle
+                checked={account.isSandbox}
+                disabled={
+                  !account.supportsSandbox || sandboxToggleMutation.isPending
+                }
+                onChange={(next) => void handleSandboxToggle(next)}
+                aria-label={`Sandbox mode for ${account.slug}`}
+              />
+            )}
           </div>
         </div>
 
@@ -469,7 +493,7 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
                       [field.key]: event.target.value,
                     }))
                   }
-                  readOnly={field.key === "baseUrl"}
+                  readOnly={!canUpdate || field.key === "baseUrl"}
                   placeholder={
                     isSaved
                       ? "Saved (••••) — enter new value to replace"
@@ -477,7 +501,7 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
                   }
                   autoComplete="off"
                   className={`${inputClass} ${
-                    field.key === "baseUrl"
+                    !canUpdate || field.key === "baseUrl"
                       ? "cursor-not-allowed !bg-(--bg-surface-hover) text-(--text-muted)"
                       : ""
                   }`}
@@ -539,27 +563,29 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => void handleTest()}
-              disabled={!canTest}
-              title={
-                !credentialsSaved
-                  ? "Save required credentials before testing"
-                  : dirty
-                    ? "Save changes before testing"
-                    : undefined
-              }
-              className="inline-flex h-7 items-center gap-1 rounded border border-(--border-light) bg-(--bg-surface) px-2 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
-            >
-              {testMutation.isPending ? (
-                <Loader2 className="size-3 animate-spin" />
-              ) : (
-                <Zap className="size-3" />
-              )}
-              {testMutation.isPending ? "Testing..." : "Test Connection"}
-            </button>
-            {configured && (
+            {canUpdate && (
+              <button
+                type="button"
+                onClick={() => void handleTest()}
+                disabled={!canTest}
+                title={
+                  !credentialsSaved
+                    ? "Save required credentials before testing"
+                    : dirty
+                      ? "Save changes before testing"
+                      : undefined
+                }
+                className="inline-flex h-7 items-center gap-1 rounded border border-(--border-light) bg-(--bg-surface) px-2 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+              >
+                {testMutation.isPending ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Zap className="size-3" />
+                )}
+                {testMutation.isPending ? "Testing..." : "Test Connection"}
+              </button>
+            )}
+            {canDelete && configured && (
               <button
                 type="button"
                 onClick={() => setConfirmOpen(true)}
@@ -570,37 +596,45 @@ function CourierAccountPanel({ account }: { account: AccountWithMeta }) {
                 Disconnect
               </button>
             )}
-            <button
-              type="submit"
-              disabled={
-                updateMutation.isPending ||
-                toggleMutation.isPending ||
-                sandboxToggleMutation.isPending
-              }
-              className="inline-flex h-7 items-center rounded bg-primary px-2.5 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
-            >
-              {updateMutation.isPending ? "Saving…" : "Save"}
-            </button>
+            {canUpdate && (
+              <button
+                type="submit"
+                disabled={
+                  updateMutation.isPending ||
+                  toggleMutation.isPending ||
+                  sandboxToggleMutation.isPending
+                }
+                className="inline-flex h-7 items-center rounded bg-primary px-2.5 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+              >
+                {updateMutation.isPending ? "Saving…" : "Save"}
+              </button>
+            )}
           </div>
         </div>
       </form>
 
-      <ConfirmationDialog
-        open={confirmOpen}
-        title={`Disconnect ${account.slug}?`}
-        description="This clears all saved credentials, disables the courier, and resets its configuration. You will need to enter the credentials again to reconnect."
-        variant="danger"
-        confirmLabel="Disconnect"
-        isPending={disconnectMutation.isPending}
-        onCancel={() => setConfirmOpen(false)}
-        onConfirm={() => void handleDisconnect()}
-      />
+      {canDelete && (
+        <ConfirmationDialog
+          open={confirmOpen}
+          title={`Disconnect ${account.slug}?`}
+          description="This clears all saved credentials, disables the courier, and resets its configuration. You will need to enter the credentials again to reconnect."
+          variant="danger"
+          confirmLabel="Disconnect"
+          isPending={disconnectMutation.isPending}
+          onCancel={() => setConfirmOpen(false)}
+          onConfirm={() => void handleDisconnect()}
+        />
+      )}
     </div>
   )
 }
 
 export function CourierCredentialsCard() {
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
   const { data, isLoading, isError, error, refetch } = useCourierAccountsQuery()
+  const canUpdate = can(user, "courier", "update")
+  const canDelete = can(user, "courier", "delete")
 
   return (
     <section className="rounded-md border border-(--border-light) bg-(--bg-surface)">
@@ -639,6 +673,8 @@ export function CourierCredentialsCard() {
               <CourierAccountPanel
                 key={account.slug}
                 account={{ ...account, ...meta }}
+                canUpdate={canUpdate}
+                canDelete={canDelete}
               />
             )
           })}

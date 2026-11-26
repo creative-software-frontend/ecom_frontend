@@ -1,9 +1,25 @@
 import { NavLink } from "react-router"
 import type { MenuItem } from "../menu"
 import { useSidebarStats } from "@/admin/hooks/useSidebarStats"
+import { useAuth, type AdminUser } from "../../auth/AuthProvider"
+import { can, canAny } from "../../lib/permissions"
+
+function isMenuItemVisible(item: MenuItem, user: AdminUser | null): boolean {
+  if (item.type === "group") {
+    return item.items.some((child) => isMenuItemVisible(child, user))
+  }
+  if (item.shopAdminOnly) {
+    if (!(user?.role === "shop_admin" || can(user, "*", "*"))) return false
+  }
+  if (item.anyPermission && !canAny(user, item.anyPermission)) return false
+  return true
+}
 
 export function Sidebar({ menu }: { menu: MenuItem[] }) {
   const { data: stats } = useSidebarStats()
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const visibleMenu = menu.filter((item) => isMenuItemVisible(item, user))
 
   /**
    * Resolve a badge count for a menu item. Returns the dynamic stat
@@ -41,7 +57,7 @@ export function Sidebar({ menu }: { menu: MenuItem[] }) {
   return (
     <nav className="min-h-0 flex-1 overflow-y-auto bg-(--bg-surface) px-2 py-2">
       <ul className="space-y-1">
-        {menu.map((item: MenuItem) => {
+        {visibleMenu.map((item: MenuItem) => {
           // if (item.type === "section") {
           //   return (
           //     <li key={`section-${index}`} className="px-3 pt-4 pb-2">

@@ -42,6 +42,8 @@ import {
   DispatchCourierModal,
   isDispatchableAccount,
 } from "./DispatchCourierModal"
+import { useAuth } from "../../auth/AuthProvider"
+import { can, canAny } from "../../lib/permissions"
 
 const COURIER_ABBR: Record<string, string> = {
   steadfast: "SF",
@@ -130,6 +132,14 @@ export function OrdersView({
   shopFilterOptions,
   courierDispatchEnabled = false,
 }: OrdersViewProps) {
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canCreateOrder = can(user, "orders", "create")
+  const canUpdateOrder = can(user, "orders", "update")
+  const canDispatchCourier = canAny(user, [
+    ["orders", "update"],
+    ["courier", "update"],
+  ])
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const status = (searchParams.get("status") ?? "") as OrderStatus | ""
@@ -285,6 +295,7 @@ export function OrdersView({
   }, [debouncedSearch, setSearchParams])
 
   async function handleBulkStatusUpdate() {
+    if (!canUpdateOrder) return
     if (!bulkStatus || selectedOrders.length === 0 || bulkUpdating) return
 
     setBulkNotice(null)
@@ -342,8 +353,8 @@ export function OrdersView({
   }
 
   async function handleApply() {
-    const selection = courierSelection
-    if (bulkStatus) {
+    const selection = canDispatchCourier ? courierSelection : ""
+    if (bulkStatus && canUpdateOrder) {
       await handleBulkStatusUpdate()
     }
     if (selection && selectedOrders.length > 0) {
@@ -562,12 +573,14 @@ export function OrdersView({
           >
             <Download className="icon-size" /> Export CSV
           </button>
-          <Link
-            to={createOrderPath}
-            className="admin-template-button admin-template-button--primary h-8 px-3 text-xs"
-          >
-            <Plus className="icon-size" /> Create Order
-          </Link>
+          {canCreateOrder ? (
+            <Link
+              to={createOrderPath}
+              className="admin-template-button admin-template-button--primary h-8 px-3 text-xs"
+            >
+              <Plus className="icon-size" /> Create Order
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -728,26 +741,28 @@ export function OrdersView({
           >
             <Printer className="icon-size" /> Print
           </button>
-          <label>
-            <span className="sr-only">Update selected order status</span>
-            <select
-              value={bulkStatus}
-              onChange={(event) =>
-                setBulkStatus(event.target.value as OrderStatus | "")
-              }
-              disabled={selectedOrders.length === 0 || bulkUpdating}
-              className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="">Update status</option>
-              {STATUS_TABS.filter(
-                ({ value }) => value !== "" && value !== "pending"
-              ).map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          {canUpdateOrder ? (
+            <label>
+              <span className="sr-only">Update selected order status</span>
+              <select
+                value={bulkStatus}
+                onChange={(event) =>
+                  setBulkStatus(event.target.value as OrderStatus | "")
+                }
+                disabled={selectedOrders.length === 0 || bulkUpdating}
+                className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Update status</option>
+                {STATUS_TABS.filter(
+                  ({ value }) => value !== "" && value !== "pending"
+                ).map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           <label>
             <span className="sr-only">Update selected order source</span>
             <select
@@ -768,7 +783,7 @@ export function OrdersView({
               <option>Assign employee</option>
             </select>
           </label>
-          {courierDispatchEnabled ? (
+          {courierDispatchEnabled && canDispatchCourier ? (
             <CourierAssignSelect
               value={courierSelection}
               onChange={setCourierSelection}
@@ -790,7 +805,10 @@ export function OrdersView({
             type="button"
             disabled={
               selectedOrders.length === 0 ||
-              (!bulkStatus && !courierSelection) ||
+              !(
+                (canUpdateOrder && bulkStatus) ||
+                (canDispatchCourier && courierSelection)
+              ) ||
               bulkUpdating
             }
             onClick={() => void handleApply()}
@@ -874,7 +892,7 @@ export function OrdersView({
         )}
       </div>
 
-      {courierDispatchEnabled && dispatchOpen ? (
+      {courierDispatchEnabled && canDispatchCourier && dispatchOpen ? (
         <DispatchCourierModal
           open={dispatchOpen}
           targets={selectedOrders.map((order) => ({

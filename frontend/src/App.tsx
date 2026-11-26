@@ -1,5 +1,15 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router"
 import { Suspense, lazy } from "react"
+import RequireShopPermission, {
+  ShopAccessDenied,
+} from "./admin/auth/RequireShopPermission"
+import { useAuth } from "./admin/auth/AuthProvider"
+import {
+  ANY_SETTINGS_TAB,
+  SETTINGS_TAB_ACCESS,
+  canAny,
+  type PermissionCheck,
+} from "./admin/lib/permissions"
 import HomePage from "./pages/HomePage"
 import Ultrahot from "./pages/Products/ultrahot/Ultrahot"
 import JingsengPlus from "./pages/Products/jingseng-plus/Jingseng-plus"
@@ -90,6 +100,20 @@ const CategoriesPage = lazy(
 )
 const SupportPage = lazy(() => import("./admin/pages/SupportPage"))
 const NewsPage = lazy(() => import("./admin/pages/NewsPage"))
+
+const PRODUCTS_READ: readonly PermissionCheck[] = [["products", "read"]]
+const PRODUCTS_CREATE: readonly PermissionCheck[] = [["products", "create"]]
+const PRODUCTS_UPDATE: readonly PermissionCheck[] = [["products", "update"]]
+const ORDERS_READ: readonly PermissionCheck[] = [["orders", "read"]]
+const ORDERS_CREATE: readonly PermissionCheck[] = [["orders", "create"]]
+
+function SettingsIndex() {
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const firstAllowed = SETTINGS_TAB_ACCESS.find((tab) => canAny(user, tab.checks))
+  if (!firstAllowed) return <ShopAccessDenied />
+  return <Navigate to={`/shop/settings/${firstAllowed.id}`} replace />
+}
 
 function AdminLoading() {
   return (
@@ -193,20 +217,101 @@ export function App() {
               />
               <Route
                 path="settings"
-                element={<Navigate to="store" replace />}
+                element={
+                  <RequireShopPermission anyOf={ANY_SETTINGS_TAB}>
+                    <SettingsIndex />
+                  </RequireShopPermission>
+                }
               />
-              <Route path="settings/:tab" element={<SettingsPage />} />
-              <Route path="brands" element={<BrandsPage />} />
-              <Route path="categories" element={<CategoriesPage />} />
-              <Route path="products" element={<ProductsPage />} />
-              <Route path="products/new" element={<ProductCreatePage />} />
-              <Route path="products/:id/edit" element={<ProductEditPage />} />
+              <Route
+                path="settings/:tab"
+                element={
+                  <RequireShopPermission anyOf={ANY_SETTINGS_TAB}>
+                    <SettingsPage />
+                  </RequireShopPermission>
+                }
+              />
+              <Route
+                path="brands"
+                element={
+                  <RequireShopPermission anyOf={PRODUCTS_READ}>
+                    <BrandsPage />
+                  </RequireShopPermission>
+                }
+              />
+              <Route
+                path="categories"
+                element={
+                  <RequireShopPermission anyOf={PRODUCTS_READ}>
+                    <CategoriesPage />
+                  </RequireShopPermission>
+                }
+              />
+              <Route
+                path="products"
+                element={
+                  <RequireShopPermission anyOf={PRODUCTS_READ}>
+                    <ProductsPage />
+                  </RequireShopPermission>
+                }
+              />
+              <Route
+                path="products/new"
+                element={
+                  <RequireShopPermission anyOf={PRODUCTS_CREATE}>
+                    <ProductCreatePage />
+                  </RequireShopPermission>
+                }
+              />
+              <Route
+                path="products/:id/edit"
+                element={
+                  <RequireShopPermission anyOf={PRODUCTS_UPDATE}>
+                    <ProductEditPage />
+                  </RequireShopPermission>
+                }
+              />
 
-              <Route path="orders" element={<OrdersPage />} />
-              <Route path="orders/new" element={<OrderCreatePage />} />
-              <Route path="orders/invoice" element={<InvoicePrintPage />} />
-              <Route path="orders/:id" element={<OrderDetailPage />} />
-              <Route path="users" element={<UsersPage />} />
+              <Route
+                path="orders"
+                element={
+                  <RequireShopPermission anyOf={ORDERS_READ}>
+                    <OrdersPage />
+                  </RequireShopPermission>
+                }
+              />
+              <Route
+                path="orders/new"
+                element={
+                  <RequireShopPermission anyOf={ORDERS_CREATE}>
+                    <OrderCreatePage />
+                  </RequireShopPermission>
+                }
+              />
+              <Route
+                path="orders/invoice"
+                element={
+                  <RequireShopPermission anyOf={ORDERS_READ}>
+                    <InvoicePrintPage />
+                  </RequireShopPermission>
+                }
+              />
+              <Route
+                path="orders/:id"
+                element={
+                  <RequireShopPermission anyOf={ORDERS_READ}>
+                    <OrderDetailPage />
+                  </RequireShopPermission>
+                }
+              />
+              <Route
+                path="users"
+                element={
+                  <RequireShopPermission shopAdminOnly>
+                    <UsersPage />
+                  </RequireShopPermission>
+                }
+              />
               <Route path="news" element={<NewsPage />} />
               <Route path="support" element={<SupportPage />} />
             </Route>

@@ -26,6 +26,8 @@ import {
   type StorefrontFormValues,
 } from "../../../schemas/storefrontSchema"
 import type { StorefrontSettings } from "../../../types/settings"
+import { useAuth } from "../../../auth/AuthProvider"
+import { can } from "../../../lib/permissions"
 
 /* ================================================================
    Mock data — replace with API later
@@ -92,6 +94,9 @@ function BannerThumb({ src, alt }: { src: string | null; alt: string }) {
    ================================================================ */
 
 export default function StorefrontTab() {
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canUpdate = can(user, "settings", "update")
   const {
     register,
     control,
@@ -121,6 +126,7 @@ export default function StorefrontTab() {
   }
 
   async function handleBannerUpload(files: FileList | null) {
+    if (!canUpdate) return
     const file = files?.[0]
     if (bannerInputRef.current) bannerInputRef.current.value = ""
     const targetIndex = changeTargetIndexRef.current
@@ -174,6 +180,7 @@ export default function StorefrontTab() {
     marqueeText || "Your announcement text will appear here…"
 
   async function onSubmit(data: StorefrontFormValues) {
+    if (!canUpdate) return
     // TODO: wire to API later
     console.log("Save storefront", data)
     await new Promise((r) => setTimeout(r, 400))
@@ -183,27 +190,29 @@ export default function StorefrontTab() {
   return (
     <SettingsLayout
       activeTab="storefront"
-      isDirty={isDirty}
+      isDirty={canUpdate && isDirty}
       isSaving={isSubmitting}
-      onDiscard={() => reset()}
-      onSave={handleSubmit(onSubmit)}
+      onDiscard={canUpdate ? () => reset() : undefined}
+      onSave={canUpdate ? handleSubmit(onSubmit) : undefined}
     >
       {/* ---------------- Announcement bar ---------------- */}
       <SettingsCard
         title="Announcement bar"
         description="Top notification banner displayed above the header on all storefront pages."
         badge={
-          <Controller
-            control={control}
-            name="announcement.enabled"
-            render={({ field }) => (
-              <FormToggle
-                checked={field.value}
-                onChange={field.onChange}
-                aria-label="Show announcement bar"
-              />
-            )}
-          />
+          canUpdate ? (
+            <Controller
+              control={control}
+              name="announcement.enabled"
+              render={({ field }) => (
+                <FormToggle
+                  checked={field.value}
+                  onChange={field.onChange}
+                  aria-label="Show announcement bar"
+                />
+              )}
+            />
+          ) : undefined
         }
       >
         {/* Marquee text */}
@@ -226,6 +235,7 @@ export default function StorefrontTab() {
             placeholder="Write a short announcement…"
             className="block w-full resize-y rounded-md border border-transparent bg-(--bg-app) px-3 py-2 text-sm text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
             aria-invalid={Boolean(errors.announcement?.marquee_text)}
+            readOnly={!canUpdate}
             {...register("announcement.marquee_text")}
           />
           <div className="mt-1 flex items-center justify-between text-xs text-(--text-muted)">
@@ -292,6 +302,7 @@ export default function StorefrontTab() {
               maxLength={160}
               placeholder="Shown above the checkout order form"
               className="block h-9 w-full rounded-md border border-transparent bg-(--bg-app) pr-3 pl-9 text-sm text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
+              readOnly={!canUpdate}
               {...register("announcement.order_note")}
             />
           </div>
@@ -342,16 +353,18 @@ export default function StorefrontTab() {
               return (
                 <div className="mb-3 flex flex-col gap-3 rounded-md border border-(--border-light) bg-(--bg-app) p-3 md:flex-row md:items-start">
                   {/* Single drag handle — position via CSS only */}
-                  <button
-                    type="button"
-                    ref={setActivatorNodeRef}
-                    {...attributes}
-                    {...listeners}
-                    className="cursor-grab touch-none self-start text-(--text-muted) transition-colors hover:text-(--text-primary) active:cursor-grabbing md:mt-1"
-                    aria-label={`Drag to reorder banner ${index + 1}`}
-                  >
-                    <GripVertical className="size-4" />
-                  </button>
+                  {canUpdate && (
+                    <button
+                      type="button"
+                      ref={setActivatorNodeRef}
+                      {...attributes}
+                      {...listeners}
+                      className="cursor-grab touch-none self-start text-(--text-muted) transition-colors hover:text-(--text-primary) active:cursor-grabbing md:mt-1"
+                      aria-label={`Drag to reorder banner ${index + 1}`}
+                    >
+                      <GripVertical className="size-4" />
+                    </button>
+                  )}
 
                   {/* Image */}
                   <div className="w-full md:w-32 md:shrink-0">
@@ -369,26 +382,30 @@ export default function StorefrontTab() {
                         Banner #{index + 1}
                         {bannerValue?.alt ? ` • ${bannerValue.alt}` : ""}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => remove(index)}
-                        className="shrink-0 rounded p-1 text-(--text-muted) transition-colors hover:bg-(--status-cancelled-bg) hover:text-(--status-cancelled-text)"
-                        aria-label={`Remove banner ${index + 1}`}
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
+                      {canUpdate && (
+                        <button
+                          type="button"
+                          onClick={() => remove(index)}
+                          className="shrink-0 rounded p-1 text-(--text-muted) transition-colors hover:bg-(--status-cancelled-bg) hover:text-(--status-cancelled-text)"
+                          aria-label={`Remove banner ${index + 1}`}
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      )}
                     </div>
 
                     {/* Replace this banner's image — no URL input */}
-                    <button
-                      type="button"
-                      disabled={bannerUploading}
-                      onClick={() => openBannerPicker(index)}
-                      className="inline-flex h-7 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-2.5 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
-                    >
-                      <ImagePlus className="size-3.5" />
-                      Change image
-                    </button>
+                    {canUpdate && (
+                      <button
+                        type="button"
+                        disabled={bannerUploading}
+                        onClick={() => openBannerPicker(index)}
+                        className="inline-flex h-7 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-2.5 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+                      >
+                        <ImagePlus className="size-3.5" />
+                        Change image
+                      </button>
+                    )}
 
                     {/* Link + active toggle */}
                     <div className="flex items-center gap-2">
@@ -404,6 +421,7 @@ export default function StorefrontTab() {
                             className="block h-9 w-full rounded-md border border-transparent bg-(--bg-app) pr-3 pl-9 text-sm text-(--text-primary) transition-all outline-none hover:border-(--border-hover) focus:border-primary focus:bg-(--bg-surface) focus:ring-2 focus:ring-(--primary)/20"
                             aria-invalid={Boolean(linkError)}
                             aria-label={`Banner ${index + 1} link`}
+                            readOnly={!canUpdate}
                             {...register(`banners.${index}.link`)}
                           />
                         </div>
@@ -413,17 +431,19 @@ export default function StorefrontTab() {
                         <span className="text-xs font-medium text-(--text-muted)">
                           Active
                         </span>
-                        <Controller
-                          control={control}
-                          name={`banners.${index}.active`}
-                          render={({ field: f }) => (
-                            <FormToggle
-                              checked={f.value ?? true}
-                              onChange={f.onChange}
-                              aria-label={`Banner ${index + 1} active`}
-                            />
-                          )}
-                        />
+                        {canUpdate && (
+                          <Controller
+                            control={control}
+                            name={`banners.${index}.active`}
+                            render={({ field: f }) => (
+                              <FormToggle
+                                checked={f.value ?? true}
+                                onChange={f.onChange}
+                                aria-label={`Banner ${index + 1} active`}
+                              />
+                            )}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -434,30 +454,32 @@ export default function StorefrontTab() {
         )}
 
         {/* Add banner */}
-        <button
-          type="button"
-          disabled={bannerUploading || fields.length >= 10}
-          onClick={() => openBannerPicker()}
-          className="flex w-full flex-col items-center gap-1 rounded-md border-2 border-dashed border-(--border-light) bg-(--bg-surface) px-4 py-6 text-center transition-colors hover:border-(--primary)/40 hover:bg-(--bg-surface-hover) disabled:opacity-50"
-        >
-          <span className="flex size-8 items-center justify-center rounded-full bg-(--bg-table-header) text-primary">
-            {bannerUploading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <ImagePlus className="size-4" />
-            )}
-          </span>
-          <span className="text-sm font-medium text-(--text-primary)">
-            {bannerUploading
-              ? "Uploading banner..."
-              : fields.length >= 10
-                ? "Maximum 10 banners reached"
-                : "Upload new banner"}
-          </span>
-          <span className="text-xs text-(--text-muted)">
-            PNG, JPG or WebP (max 5 MB) • Recommended 1600 × 600 px
-          </span>
-        </button>
+        {canUpdate && (
+          <button
+            type="button"
+            disabled={bannerUploading || fields.length >= 10}
+            onClick={() => openBannerPicker()}
+            className="flex w-full flex-col items-center gap-1 rounded-md border-2 border-dashed border-(--border-light) bg-(--bg-surface) px-4 py-6 text-center transition-colors hover:border-(--primary)/40 hover:bg-(--bg-surface-hover) disabled:opacity-50"
+          >
+            <span className="flex size-8 items-center justify-center rounded-full bg-(--bg-table-header) text-primary">
+              {bannerUploading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ImagePlus className="size-4" />
+              )}
+            </span>
+            <span className="text-sm font-medium text-(--text-primary)">
+              {bannerUploading
+                ? "Uploading banner..."
+                : fields.length >= 10
+                  ? "Maximum 10 banners reached"
+                  : "Upload new banner"}
+            </span>
+            <span className="text-xs text-(--text-muted)">
+              PNG, JPG or WebP (max 5 MB) • Recommended 1600 × 600 px
+            </span>
+          </button>
+        )}
         {bannerUploadError && (
           <InlineNotice
             message={bannerUploadError}
@@ -476,36 +498,43 @@ export default function StorefrontTab() {
         description="Customize primary accent colors and page surfaces across customer checkout."
       >
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="space-y-4">
-            <FormColorPicker
-              label="Primary color"
-              hint="Accent & CTAs"
-              value={brandPrimary}
-              onChange={(v) =>
-                setValue("brand_colors.primary", v, { shouldDirty: true })
-              }
-              onReset={() =>
-                setValue("brand_colors.primary", "#0D9488", {
-                  shouldDirty: true,
-                })
-              }
-              error={errors.brand_colors?.primary?.message}
-            />
-            <FormColorPicker
-              label="Background color"
-              hint="Canvas surface"
-              value={brandBackground}
-              onChange={(v) =>
-                setValue("brand_colors.background", v, { shouldDirty: true })
-              }
-              onReset={() =>
-                setValue("brand_colors.background", "#FAF8FF", {
-                  shouldDirty: true,
-                })
-              }
-              error={errors.brand_colors?.background?.message}
-            />
-          </div>
+          {canUpdate ? (
+            <div className="space-y-4">
+              <FormColorPicker
+                label="Primary color"
+                hint="Accent & CTAs"
+                value={brandPrimary}
+                onChange={(v) =>
+                  setValue("brand_colors.primary", v, { shouldDirty: true })
+                }
+                onReset={() =>
+                  setValue("brand_colors.primary", "#0D9488", {
+                    shouldDirty: true,
+                  })
+                }
+                error={errors.brand_colors?.primary?.message}
+              />
+              <FormColorPicker
+                label="Background color"
+                hint="Canvas surface"
+                value={brandBackground}
+                onChange={(v) =>
+                  setValue("brand_colors.background", v, { shouldDirty: true })
+                }
+                onReset={() =>
+                  setValue("brand_colors.background", "#FAF8FF", {
+                    shouldDirty: true,
+                  })
+                }
+                error={errors.brand_colors?.background?.message}
+              />
+            </div>
+          ) : (
+            <div className="space-y-2 text-xs text-(--text-muted)">
+              <p>Primary color: {brandPrimary}</p>
+              <p>Background color: {brandBackground}</p>
+            </div>
+          )}
 
           {/* Live preview */}
           <div>

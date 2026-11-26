@@ -32,6 +32,8 @@ import { formatTaka } from "../lib/orderStatus"
 import type { Product } from "../types/product"
 import { ConfirmationDialog } from "../components/common/ConfirmationDialog"
 import { useProductDelete } from "../hooks/useProductDelete"
+import { useAuth } from "../auth/AuthProvider"
+import { can } from "../lib/permissions"
 
 const DEFAULT_PAGE_SIZE = 20
 const stockFilters: ProductStockFilter[] = [
@@ -97,6 +99,11 @@ function downloadCatalog(products: Product[]) {
 
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canCreate = can(user, "products", "create")
+  const canUpdate = can(user, "products", "update")
+  const canDelete = can(user, "products", "delete")
   const query = searchParams.get("q") ?? ""
   const category = searchParams.get("category") ?? "all"
   const stock = getStockFilter(searchParams.get("stock"))
@@ -265,18 +272,20 @@ export default function ProductsPage() {
             </span>
             Categories
           </Link>
-          <Link
-            to="/shop/products/new"
-            className={cn(
-              buttonVariants({ variant: "default" }),
-              "h-8 gap-2 rounded-md px-3 text-xs"
-            )}
-          >
-            <span aria-hidden="true">
-              <Plus className="size-4" />
-            </span>
-            Add Product
-          </Link>
+          {canCreate ? (
+            <Link
+              to="/shop/products/new"
+              className={cn(
+                buttonVariants({ variant: "default" }),
+                "h-8 gap-2 rounded-md px-3 text-xs"
+              )}
+            >
+              <span aria-hidden="true">
+                <Plus className="size-4" />
+              </span>
+              Add Product
+            </Link>
+          ) : null}
         </div>
       </header>
 
@@ -350,6 +359,8 @@ export default function ProductsPage() {
               onPageChange={changePage}
               onPageSizeChange={changePageSize}
               onDelete={deleteState.open}
+              canUpdate={canUpdate}
+              canDelete={canDelete}
             />
             <ConfirmationDialog
               open={deleteState.target !== null}

@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { hasPermission } from "../lib/permissions.js";
 import { prisma } from "../lib/prisma.js";
 
 export async function getSidebarStats(req: Request, res: Response) {
@@ -11,10 +12,19 @@ export async function getSidebarStats(req: Request, res: Response) {
     });
   }
 
+  // Badge counts are informational: omit the ones this user cannot read
+  // rather than denying the whole stats request.
+  const canReadOrders = hasPermission(req.permissions, "orders", "read");
+  const canReadProducts = hasPermission(req.permissions, "products", "read");
+
   try {
     const [pendingOrders, totalProducts] = await Promise.all([
-      prisma.order.count({ where: { shopId, status: "pending" } }),
-      prisma.product.count({ where: { shopId, isActive: true } }),
+      canReadOrders
+        ? prisma.order.count({ where: { shopId, status: "pending" } })
+        : Promise.resolve(0),
+      canReadProducts
+        ? prisma.product.count({ where: { shopId, isActive: true } })
+        : Promise.resolve(0),
     ]);
 
     return res.json({

@@ -17,6 +17,8 @@ type ProductCatalogTableProps = {
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
   onDelete: (product: Product) => void
+  canUpdate?: boolean
+  canDelete?: boolean
 }
 
 function ProductThumbnail({ product }: { product: Product }) {
@@ -53,7 +55,54 @@ export function ProductCatalogTable({
   onPageChange,
   onPageSizeChange,
   onDelete,
+  canUpdate = true,
+  canDelete = true,
 }: ProductCatalogTableProps) {
+  const actionColumns: TableColumn<Product>[] =
+    canUpdate || canDelete
+      ? [
+          {
+            name: "ACTIONS",
+            width: "90px",
+            right: true,
+            cell: (product) => (
+              <PortalActionMenu
+                label={`Actions for ${product.name}`}
+                trigger={<MoreVertical className="size-4" />}
+                triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
+                menuClassName="w-40"
+              >
+                {(closeMenu) => (
+                  <>
+                    {canUpdate ? (
+                      <Link
+                        to={`/shop/products/${product.id}/edit`}
+                        onClick={closeMenu}
+                        className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+                      >
+                        <Pencil className="size-3.5" /> Edit Product
+                      </Link>
+                    ) : null}
+                    {canDelete ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          closeMenu()
+                          onDelete(product)
+                        }}
+                        className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
+                      >
+                        <Trash2 className="size-3.5" /> Delete
+                      </button>
+                    ) : null}
+                  </>
+                )}
+              </PortalActionMenu>
+            ),
+          },
+        ]
+      : []
+
   const productColumns: TableColumn<Product>[] = [
     {
       name: "Product Info & Slug",
@@ -155,41 +204,7 @@ export function ProductCatalogTable({
         />
       ),
     },
-    {
-      name: "ACTIONS",
-      width: "90px",
-      right: true,
-      cell: (product) => (
-        <PortalActionMenu
-          label={`Actions for ${product.name}`}
-          trigger={<MoreVertical className="size-4" />}
-          triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
-          menuClassName="w-40"
-        >
-          {(closeMenu) => (
-            <>
-              <Link
-                to={`/shop/products/${product.id}/edit`}
-                onClick={closeMenu}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
-              >
-                <Pencil className="size-3.5" /> Edit Product
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  closeMenu()
-                  onDelete(product)
-                }}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
-              >
-                <Trash2 className="size-3.5" /> Delete
-              </button>
-            </>
-          )}
-        </PortalActionMenu>
-      ),
-    },
+    ...actionColumns,
   ]
 
   return (

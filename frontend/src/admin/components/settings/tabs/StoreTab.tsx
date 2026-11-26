@@ -20,6 +20,8 @@ import {
   type StoreSettingsFormValues,
 } from "../../../schemas/storeSettingsSchema"
 import type { StoreSettings } from "../../../types/settings"
+import { useAuth } from "../../../auth/AuthProvider"
+import { can } from "../../../lib/permissions"
 
 /* ================================================================
    Mock data — replace with API data later
@@ -54,6 +56,9 @@ const mockStore: StoreSettings = {
    ================================================================ */
 
 export default function StoreTab() {
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canUpdate = can(user, "settings", "update")
   const {
     register,
     handleSubmit,
@@ -81,6 +86,7 @@ export default function StoreTab() {
     }) ?? ""
 
   async function onSubmit(data: StoreSettingsFormValues) {
+    if (!canUpdate) return
     // TODO: wire to settingsApi.updateStore(data) once backend is ready
     console.log("Save store settings", data)
     // Simulate network latency
@@ -91,10 +97,10 @@ export default function StoreTab() {
   return (
     <SettingsLayout
       activeTab="store"
-      isDirty={isDirty}
+      isDirty={canUpdate && isDirty}
       isSaving={isSubmitting}
-      onDiscard={() => reset()}
-      onSave={handleSubmit(onSubmit)}
+      onDiscard={canUpdate ? () => reset() : undefined}
+      onSave={canUpdate ? handleSubmit(onSubmit) : undefined}
     >
       {/* ---------------- General information ---------------- */}
       <SettingsCard
@@ -116,7 +122,7 @@ export default function StoreTab() {
               ? errors.logo.message
               : undefined
           }
-          disabled={isSubmitting}
+          disabled={!canUpdate || isSubmitting}
         />
 
         <FormRow>

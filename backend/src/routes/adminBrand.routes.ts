@@ -6,14 +6,15 @@ import {
   updateBrand,
 } from "../controllers/adminBrand.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { requirePermission } from "../middleware/requirePermission.js";
 
 const router = Router();
 
 router.use(requireAuth);
 
-router.get("/", listBrands);
-router.post("/", createBrand);
-router.put("/:id", updateBrand);
-router.delete("/:id", deleteBrand);
+router.get("/", requirePermission("products", "read"), listBrands);
+router.post("/", requirePermission("products", "create"), createBrand);
+router.put("/:id", requirePermission("products", "update"), updateBrand);
+router.delete("/:id", requirePermission("products", "delete"), deleteBrand);
 
 export default router;

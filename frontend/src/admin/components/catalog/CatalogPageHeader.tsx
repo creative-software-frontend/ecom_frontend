@@ -9,6 +9,7 @@ type CatalogPageHeaderProps = {
   exportDisabled?: boolean
   onAdd: () => void // ← Link বাদ, callback
   addLabel: string
+  canAdd?: boolean
 }
 
 export function CatalogPageHeader({
@@ -19,6 +20,7 @@ export function CatalogPageHeader({
   exportDisabled,
   onAdd,
   addLabel,
+  canAdd = true,
 }: CatalogPageHeaderProps) {
   return (
     <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -47,13 +49,15 @@ export function CatalogPageHeader({
         >
           <Download className="size-4" /> Export
         </button>
-        <button
-          type="button"
-          onClick={onAdd}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md bg-(--primary) px-3 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover)"
-        >
-          <Plus className="size-4" /> {addLabel}
-        </button>
+        {canAdd ? (
+          <button
+            type="button"
+            onClick={onAdd}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-(--primary) px-3 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover)"
+          >
+            <Plus className="size-4" /> {addLabel}
+          </button>
+        ) : null}
       </div>
     </header>
   )

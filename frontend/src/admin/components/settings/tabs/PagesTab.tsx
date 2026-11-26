@@ -29,6 +29,8 @@ import { pagesApi, pageQueryKeys } from "../../../api/pagesApi"
 import { formatDate, relativeTime } from "../../../lib/formatTime"
 import { pageSchema, type PageFormValues } from "../../../schemas/pageSchema"
 import type { UpdatePageInput } from "../../../types/pages"
+import { useAuth } from "../../../auth/AuthProvider"
+import { can } from "../../../lib/permissions"
 
 type Notice = { tone: "success" | "error"; message: string }
 
@@ -54,6 +56,11 @@ function countChars(html: string): number {
 
 export default function PagesTab() {
   const queryClient = useQueryClient()
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canCreate = can(user, "pages", "create")
+  const canUpdate = can(user, "pages", "update")
+  const canDelete = can(user, "pages", "delete")
   const [selectedPageId, setSelectedPageId] = useState<number | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [revisionsOpen, setRevisionsOpen] = useState(false)
@@ -181,7 +188,7 @@ export default function PagesTab() {
   }
 
   function onSubmit(data: PageFormValues) {
-    if (activePageId === null) return
+    if (!canUpdate || activePageId === null) return
     setNotice(null)
     saveMutation.mutate({
       id: activePageId,
@@ -243,10 +250,10 @@ export default function PagesTab() {
     <SettingsLayout
       activeTab="pages"
       badges={{ pages: pages.length }}
-      isDirty={isDirty}
+      isDirty={canUpdate && isDirty}
       isSaving={saveMutation.isPending}
-      onDiscard={handleDiscard}
-      onSave={handleSubmit(onSubmit)}
+      onDiscard={canUpdate ? handleDiscard : undefined}
+      onSave={canUpdate ? handleSubmit(onSubmit) : undefined}
       saveBarDescription={
         selectedPage
           ? `Changes made to "${selectedPage.title}" are applied when you save.`
@@ -296,14 +303,16 @@ export default function PagesTab() {
           titleClassName="text-sm font-semibold text-(--text-primary)"
           descriptionClassName="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-(--text-muted)"
           action={
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover)"
-            >
-              <Plus className="size-3.5" />
-              Add custom page
-            </button>
+            canCreate ? (
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover)"
+              >
+                <Plus className="size-3.5" />
+                Add custom page
+              </button>
+            ) : undefined
           }
         />
       ) : (
@@ -329,14 +338,16 @@ export default function PagesTab() {
                 </li>
               ))}
             </ul>
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
-              className="flex items-center justify-center gap-1.5 border-t border-(--border-light) px-3 py-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
-            >
-              <Plus className="size-3.5" />
-              Add custom page
-            </button>
+            {canCreate ? (
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="flex items-center justify-center gap-1.5 border-t border-(--border-light) px-3 py-3 text-sm font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+              >
+                <Plus className="size-3.5" />
+                Add custom page
+              </button>
+            ) : null}
           </aside>
 
           {/* ============ RIGHT: editor ============ */}
@@ -409,22 +420,26 @@ export default function PagesTab() {
                     >
                       <Eye className="size-3.5" /> Preview
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteOpen(true)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--status-cancelled-text) transition-colors hover:bg-(--status-cancelled-bg)"
-                    >
-                      <Trash2 className="size-3.5" /> Delete
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSubmit(onSubmit)}
-                      disabled={saveMutation.isPending}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
-                    >
-                      <Save className="size-3.5" />
-                      {saveMutation.isPending ? "Saving..." : "Save page"}
-                    </button>
+                    {canDelete ? (
+                      <button
+                        type="button"
+                        onClick={() => setDeleteOpen(true)}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-sm font-medium text-(--status-cancelled-text) transition-colors hover:bg-(--status-cancelled-bg)"
+                      >
+                        <Trash2 className="size-3.5" /> Delete
+                      </button>
+                    ) : null}
+                    {canUpdate ? (
+                      <button
+                        type="button"
+                        onClick={handleSubmit(onSubmit)}
+                        disabled={saveMutation.isPending}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-white transition-colors hover:bg-(--primary-hover) disabled:opacity-50"
+                      >
+                        <Save className="size-3.5" />
+                        {saveMutation.isPending ? "Saving..." : "Save page"}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -566,9 +581,11 @@ export default function PagesTab() {
                     Saved to this shop
                   </span>
                 </div>
-                <button type="submit" className="sr-only">
-                  Save page
-                </button>
+                {canUpdate ? (
+                  <button type="submit" className="sr-only">
+                    Save page
+                  </button>
+                ) : null}
               </form>
 
               {/* Bottom cards */}
@@ -603,13 +620,15 @@ export default function PagesTab() {
                         {formatDate(selectedPage.updatedAt)}.{" "}
                         {selectedPage.revisionCount} saved revision(s).
                       </p>
-                      <button
-                        type="button"
-                        onClick={() => setRevisionsOpen(true)}
-                        className="mt-2 text-xs font-medium text-primary hover:underline"
-                      >
-                        Restore Previous Version
-                      </button>
+                      {canUpdate ? (
+                        <button
+                          type="button"
+                          onClick={() => setRevisionsOpen(true)}
+                          className="mt-2 text-xs font-medium text-primary hover:underline"
+                        >
+                          Restore Previous Version
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -619,6 +638,7 @@ export default function PagesTab() {
         </div>
       )}
 
+      {canCreate ? (
       <CreatePageModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
@@ -630,7 +650,9 @@ export default function PagesTab() {
           })
         }}
       />
+      ) : null}
 
+      {canUpdate ? (
       <PageRevisionsModal
         open={revisionsOpen}
         pageId={activePageId}
@@ -644,6 +666,7 @@ export default function PagesTab() {
           })
         }}
       />
+      ) : null}
 
       {/* Unsafe page switch confirmation */}
       <ConfirmationDialog
@@ -666,7 +689,7 @@ export default function PagesTab() {
 
       {/* Delete confirmation */}
       <ConfirmationDialog
-        open={deleteOpen}
+        open={canDelete && deleteOpen}
         title="Delete page?"
         description={
           selectedPage ? (

@@ -23,6 +23,8 @@ import {
   type OrderSettingsFormValues,
 } from "../../../schemas/orderSettingsSchema"
 import type { OrderSettings } from "../../../types/settings"
+import { useAuth } from "../../../auth/AuthProvider"
+import { can } from "../../../lib/permissions"
 
 /* ================================================================
    Mock data — replace with API later
@@ -136,6 +138,9 @@ const ORDER_SMS_STATUS_OPTIONS: {
 
 export default function OrdersTab() {
   const navigate = useNavigate()
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canUpdate = can(user, "settings", "update")
   const [statusSmsSettings, setStatusSmsSettings] = useState<
     Record<OrderSmsStatus, { enabled: boolean; template: string }>
   >({
@@ -163,6 +168,7 @@ export default function OrdersTab() {
   const locationFieldsEnabled = watch("location_fields.enabled")
 
   async function onSubmit(data: OrderSettingsFormValues) {
+    if (!canUpdate) return
     // TODO: wire to API
     console.log("Save order settings", data)
     await new Promise((r) => setTimeout(r, 400))
@@ -172,10 +178,10 @@ export default function OrdersTab() {
   return (
     <SettingsLayout
       activeTab="orders"
-      isDirty={isDirty}
+      isDirty={canUpdate && isDirty}
       isSaving={isSubmitting}
-      onDiscard={() => reset()}
-      onSave={handleSubmit(onSubmit)}
+      onDiscard={canUpdate ? () => reset() : undefined}
+      onSave={canUpdate ? handleSubmit(onSubmit) : undefined}
     >
       {/* ---------- Row 1: Duplicate block + Location fields ---------- */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -190,6 +196,7 @@ export default function OrdersTab() {
               render={({ field }) => (
                 <FormToggle
                   checked={field.value}
+                  disabled={!canUpdate}
                   onChange={field.onChange}
                   aria-label="Enable duplicate order block"
                 />
@@ -207,6 +214,7 @@ export default function OrdersTab() {
                 trailingSlot="min"
                 hint="Default: 15m"
                 error={errors.duplicate_block?.minutes?.message}
+                disabled={!canUpdate}
                 {...register("duplicate_block.minutes", {
                   valueAsNumber: true,
                 })}
@@ -231,6 +239,7 @@ export default function OrdersTab() {
               render={({ field }) => (
                 <FormToggle
                   checked={field.value}
+                  disabled={!canUpdate}
                   onChange={field.onChange}
                   aria-label="Enable location fields"
                 />
@@ -281,6 +290,7 @@ export default function OrdersTab() {
             leadingSlot="৳"
             help="e.g. Dhanmondi, Gulshan, Mirpur, Uttara"
             error={errors.delivery_charges?.inside_dhaka?.message}
+            disabled={!canUpdate}
             {...register("delivery_charges.inside_dhaka", {
               valueAsNumber: true,
             })}
@@ -291,6 +301,7 @@ export default function OrdersTab() {
             leadingSlot="৳"
             help="Chittagong, Sylhet, Steadfast / SA Paribahan"
             error={errors.delivery_charges?.outside_dhaka?.message}
+            disabled={!canUpdate}
             {...register("delivery_charges.outside_dhaka", {
               valueAsNumber: true,
             })}
@@ -306,6 +317,7 @@ export default function OrdersTab() {
             }
             help="Orders above ৳2,000 get ৳0 shipping"
             error={errors.delivery_charges?.free_delivery_above?.message}
+            disabled={!canUpdate}
             {...register("delivery_charges.free_delivery_above", {
               valueAsNumber: true,
             })}
@@ -409,7 +421,7 @@ export default function OrdersTab() {
                           },
                         }))
                       }
-                      disabled={!setting.enabled}
+                      disabled={!canUpdate || !setting.enabled}
                       className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label={`${status.label} SMS template`}
                     >
@@ -420,6 +432,7 @@ export default function OrdersTab() {
 
                     <FormToggle
                       checked={setting.enabled}
+                      disabled={!canUpdate}
                       onChange={(enabled) =>
                         setStatusSmsSettings((current) => ({
                           ...current,

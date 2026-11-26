@@ -12,6 +12,8 @@ import {
   Loader2,
   MessageSquare,
 } from "lucide-react"
+import { useAuth } from "../../auth/AuthProvider"
+import { canReadSettingsTab } from "../../lib/permissions"
 
 /* ================================================================
    Tabs configuration
@@ -232,6 +234,9 @@ export function SettingsLayout({
   pageSubtitle?: string
 }) {
   const navigate = useNavigate()
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const visibleTabs = TABS.filter(({ id }) => canReadSettingsTab(user, id))
 
   return (
     <div className="flex flex-col gap-5 bg-(--bg-app) p-4 sm:p-6">
@@ -275,7 +280,7 @@ export function SettingsLayout({
         className="-mx-4 overflow-x-auto border-b border-(--border-light) px-4 sm:-mx-6 sm:px-6"
       >
         <div className="flex min-w-max gap-0">
-          {TABS.map(({ id, label, icon: Icon }) => {
+          {visibleTabs.map(({ id, label, icon: Icon }) => {
             const isActive = id === activeTab
             const badgeCount = badges?.[id] ?? 0
             return (

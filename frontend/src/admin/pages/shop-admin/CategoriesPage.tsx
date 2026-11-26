@@ -34,6 +34,8 @@ import type {
   CatalogStatusFilter,
 } from "../../types/catalog"
 import { CreateCategoryModal } from "@/admin/components/shop-admin/CreateCategoryModal"
+import { useAuth } from "../../auth/AuthProvider"
+import { can } from "../../lib/permissions"
 
 type Notice = { tone: "success" | "error"; message: string } | null
 
@@ -91,6 +93,11 @@ function fieldErrors(error: unknown): Record<string, string> | null {
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient()
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canCreate = can(user, "products", "create")
+  const canUpdate = can(user, "products", "update")
+  const canDelete = can(user, "products", "delete")
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search, 300)
   const [status, setStatus] = useState<CatalogStatusFilter>("all")
@@ -238,42 +245,47 @@ export default function CategoriesPage() {
       name: "",
       width: "56px",
       right: true,
-      cell: (row) => (
-        <PortalActionMenu
-          label={`Actions for ${row.name}`}
-          trigger={<MoreVertical className="size-4" />}
-          triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
-          menuClassName="w-44"
-        >
-          {(closeMenu) => (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  closeMenu()
-                  setEditError(null)
-                  setEditFieldErrors(null)
-                  setEditingCategory(row)
-                }}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
-              >
-                <Pencil className="size-3.5" /> Edit Category
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  closeMenu()
-                  setDeleteError(null)
-                  setDeletingCategory(row)
-                }}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
-              >
-                <Trash2 className="size-3.5" /> Delete
-              </button>
-            </>
-          )}
-        </PortalActionMenu>
-      ),
+      cell: (row) =>
+        !canUpdate && !canDelete ? null : (
+          <PortalActionMenu
+            label={`Actions for ${row.name}`}
+            trigger={<MoreVertical className="size-4" />}
+            triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-surface-hover) hover:text-(--text-primary)"
+            menuClassName="w-44"
+          >
+            {(closeMenu) => (
+              <>
+                {canUpdate ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeMenu()
+                      setEditError(null)
+                      setEditFieldErrors(null)
+                      setEditingCategory(row)
+                    }}
+                    className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+                  >
+                    <Pencil className="size-3.5" /> Edit Category
+                  </button>
+                ) : null}
+                {canDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeMenu()
+                      setDeleteError(null)
+                      setDeletingCategory(row)
+                    }}
+                    className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    <Trash2 className="size-3.5" /> Delete
+                  </button>
+                ) : null}
+              </>
+            )}
+          </PortalActionMenu>
+        ),
     },
   ]
 
@@ -324,6 +336,7 @@ export default function CategoriesPage() {
           setCreateOpen(true)
         }}
         addLabel="Add Category"
+        canAdd={canCreate}
       />
 
       <CatalogMetricsWrapper>

@@ -5,13 +5,20 @@ import {
   getCourierZones,
 } from "../controllers/adminCourierDispatch.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { requireAnyPermission } from "../middleware/requirePermission.js";
 
 const router = Router();
 
 router.use(requireAuth);
 
-router.get("/:slug/cities", getCourierCities);
-router.get("/:slug/zones", getCourierZones);
-router.get("/:slug/areas", getCourierAreas);
+const canViewLocations = requireAnyPermission([
+  ["orders", "update"],
+  ["courier", "read"],
+  ["courier", "update"],
+]);
+
+router.get("/:slug/cities", canViewLocations, getCourierCities);
+router.get("/:slug/zones", canViewLocations, getCourierZones);
+router.get("/:slug/areas", canViewLocations, getCourierAreas);
 
 export default router;

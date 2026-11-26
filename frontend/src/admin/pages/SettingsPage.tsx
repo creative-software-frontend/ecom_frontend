@@ -1,4 +1,4 @@
-import { Navigate, useParams } from "react-router"
+import { useParams } from "react-router"
 import type { SettingsTabId } from "../components/settings/SettingsLayout"
 import StoreTab from "../components/settings/tabs/StoreTab"
 import StorefrontTab from "../components/settings/tabs/StorefrontTab"
@@ -8,6 +8,9 @@ import MarketingTab from "../components/settings/tabs/MarketingTab"
 import PagesTab from "../components/settings/tabs/PagesTab"
 import CourierTab from "../components/settings/tabs/CourierTab"
 import SmsTab from "../components/settings/tabs/SmsTab"
+import { useAuth } from "../auth/AuthProvider"
+import { ShopAccessDenied } from "../auth/RequireShopPermission"
+import { canReadSettingsTab } from "../lib/permissions"
 
 const VALID_TABS: SettingsTabId[] = [
   "store",
@@ -26,9 +29,12 @@ function isTabId(value: string | undefined): value is SettingsTabId {
 
 export default function SettingsPage() {
   const { tab } = useParams<{ tab: string }>()
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
 
-  if (!isTabId(tab)) {
-    return <Navigate to="/shop/settings/store" replace />
+  // Render the denied panel before any tab component can fire queries.
+  if (!isTabId(tab) || !canReadSettingsTab(user, tab)) {
+    return <ShopAccessDenied />
   }
 
   // Add new tabs here as they're built
@@ -50,12 +56,7 @@ export default function SettingsPage() {
     case "sms":
       return <SmsTab />
 
-    // return (
-    //   <div className="flex items-center justify-center p-12 text-sm text-(--text-muted)">
-    //     This settings tab is coming soon.
-    //   </div>
-    // )
     default:
-      return <Navigate to="/shop/settings/store" replace />
+      return <ShopAccessDenied />
   }
 }

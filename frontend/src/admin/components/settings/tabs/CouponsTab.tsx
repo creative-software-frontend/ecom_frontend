@@ -34,6 +34,8 @@ import { LoadingState } from "../../common/LoadingState"
 import { ErrorState } from "../../common/ErrorState"
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue"
 import { adminDataTableStyles } from "../../../lib/dataTableStyles"
+import { useAuth } from "../../../auth/AuthProvider"
+import { can } from "../../../lib/permissions"
 
 const EMPTY_COUNTS: CouponCounts = {
   total: 0,
@@ -151,7 +153,13 @@ function ExpiryCell({ coupon }: { coupon: Coupon }) {
    CouponsEmptyState — shown when 0 coupons exist
    ================================================================ */
 
-function CouponsEmptyState({ onAdd }: { onAdd: () => void }) {
+function CouponsEmptyState({
+  onAdd,
+  canAdd,
+}: {
+  onAdd: () => void
+  canAdd: boolean
+}) {
   return (
     <div className="rounded-md border-2 border-dashed border-(--border-light) bg-(--bg-surface) px-6 py-12 text-center">
       <span className="mx-auto flex size-12 items-center justify-center rounded-md bg-(--bg-table-header) text-(--text-muted)">
@@ -164,14 +172,16 @@ function CouponsEmptyState({ onAdd }: { onAdd: () => void }) {
         Create promo discount codes for holidays or returning customers across
         Bangladesh.
       </p>
-      <button
-        type="button"
-        onClick={onAdd}
-        className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover)"
-      >
-        <Plus className="size-3.5" />
-        Add coupon
-      </button>
+      {canAdd ? (
+        <button
+          type="button"
+          onClick={onAdd}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-(--primary-hover)"
+        >
+          <Plus className="size-3.5" />
+          Add coupon
+        </button>
+      ) : null}
     </div>
   )
 }
@@ -182,6 +192,11 @@ function CouponsEmptyState({ onAdd }: { onAdd: () => void }) {
 
 export default function CouponsTab() {
   const queryClient = useQueryClient()
+  const { state } = useAuth()
+  const user = state.status === "authenticated" ? state.user : null
+  const canCreate = can(user, "coupons", "create")
+  const canUpdate = can(user, "coupons", "update")
+  const canDelete = can(user, "coupons", "delete")
   const [searchQuery, setSearchQuery] = useState("")
   const debouncedSearch = useDebouncedValue(searchQuery, 300)
   const [modalOpen, setModalOpen] = useState(false)
@@ -263,17 +278,19 @@ export default function CouponsTab() {
     closeMenu()
 
     if (action === "edit") {
-      openEdit(coupon)
+      if (canUpdate) openEdit(coupon)
       return
     }
 
     if (action === "delete") {
+      if (!canDelete) return
       setNotice(null)
       setDeleteNoticeDismissed(false)
       setDeletingCoupon(coupon)
       return
     }
 
+    if (!canUpdate) return
     const nextStatus: CouponEditableStatus =
       coupon.status === "active" ? "paused" : "active"
     if (coupon.status === "expired" && nextStatus === "active") return
@@ -320,60 +337,67 @@ export default function CouponsTab() {
     },
     {
       name: "Actions",
-      cell: (coupon) => (
-        <PortalActionMenu
-          label={`Actions for coupon ${coupon.code}`}
-          trigger={<MoreVertical className="size-4" />}
-          triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--text-primary)"
-          menuClassName="w-36"
-        >
-          {(closeMenu) => {
-            const isActivateExpired = coupon.status === "expired"
-            return (
-              <>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => handleMenuAction(coupon, "edit", closeMenu)}
-                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
-                >
-                  <Pencil className="size-3.5" /> Edit
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  disabled={isActivateExpired}
-                  title={
-                    isActivateExpired
-                      ? "Extend expiry date via Edit to reactivate"
-                      : undefined
-                  }
-                  onClick={() => handleMenuAction(coupon, "toggle", closeMenu)}
-                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover) disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {coupon.status === "active" ? (
-                    <>
-                      <Pause className="size-3.5" /> Pause
-                    </>
-                  ) : (
-                    <>
-                      <Play className="size-3.5" /> Activate
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => handleMenuAction(coupon, "delete", closeMenu)}
-                  className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--status-cancelled-text) transition-colors hover:bg-(--status-cancelled-bg)"
-                >
-                  <Trash2 className="size-3.5" /> Delete
-                </button>
-              </>
-            )
-          }}
-        </PortalActionMenu>
-      ),
+      cell: (coupon) =>
+        !canUpdate && !canDelete ? null : (
+          <PortalActionMenu
+            label={`Actions for coupon ${coupon.code}`}
+            trigger={<MoreVertical className="size-4" />}
+            triggerClassName="rounded p-1 text-(--text-muted) transition-colors hover:bg-(--bg-table-header) hover:text-(--text-primary)"
+            menuClassName="w-36"
+          >
+            {(closeMenu) => {
+              const isActivateExpired = coupon.status === "expired"
+              return (
+                <>
+                  {canUpdate ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => handleMenuAction(coupon, "edit", closeMenu)}
+                      className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover)"
+                    >
+                      <Pencil className="size-3.5" /> Edit
+                    </button>
+                  ) : null}
+                  {canUpdate ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      disabled={isActivateExpired}
+                      title={
+                        isActivateExpired
+                          ? "Extend expiry date via Edit to reactivate"
+                          : undefined
+                      }
+                      onClick={() => handleMenuAction(coupon, "toggle", closeMenu)}
+                      className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-(--bg-surface-hover) disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {coupon.status === "active" ? (
+                        <>
+                          <Pause className="size-3.5" /> Pause
+                        </>
+                      ) : (
+                        <>
+                          <Play className="size-3.5" /> Activate
+                        </>
+                      )}
+                    </button>
+                  ) : null}
+                  {canDelete ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => handleMenuAction(coupon, "delete", closeMenu)}
+                      className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-(--status-cancelled-text) transition-colors hover:bg-(--status-cancelled-bg)"
+                    >
+                      <Trash2 className="size-3.5" /> Delete
+                    </button>
+                  ) : null}
+                </>
+              )
+            }}
+          </PortalActionMenu>
+        ),
       width: "90px",
       right: true,
     },
@@ -452,7 +476,7 @@ export default function CouponsTab() {
           role="alert"
         />
       ) : counts.total === 0 ? (
-        <CouponsEmptyState onAdd={openCreate} />
+        <CouponsEmptyState onAdd={openCreate} canAdd={canCreate} />
       ) : (
         /* ---------- All coupons card ---------- */
         <section className="overflow-hidden rounded-md border border-(--border-light) bg-(--bg-surface)">
@@ -477,14 +501,16 @@ export default function CouponsTab() {
                   className="h-8 w-52 rounded-md border border-(--border-light) bg-(--bg-surface) pr-3 pl-8 text-xs text-(--text-primary) transition-all outline-none focus:border-primary focus:ring-2 focus:ring-(--primary)/20"
                 />
               </div>
-              <button
-                type="button"
-                onClick={openCreate}
-                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-(--primary-hover)"
-              >
-                <Plus className="size-3.5" />
-                Add coupon
-              </button>
+              {canCreate ? (
+                <button
+                  type="button"
+                  onClick={openCreate}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-(--primary-hover)"
+                >
+                  <Plus className="size-3.5" />
+                  Add coupon
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -515,6 +541,7 @@ export default function CouponsTab() {
       )}
 
       {/* Create / edit coupon modal */}
+      {canCreate || canUpdate ? (
       <CreateCouponModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -526,6 +553,7 @@ export default function CouponsTab() {
           })
         }
       />
+      ) : null}
 
       {/* Delete confirmation */}
       <ConfirmationDialog
