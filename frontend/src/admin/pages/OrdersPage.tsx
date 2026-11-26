@@ -7,6 +7,7 @@ export default function OrdersPage() {
       api={ordersApi}
       queryKeys={orderQueryKeys}
       basePath="/shop/orders"
+      courierDispatchEnabled
     />
   )
 }

@@ -8,6 +8,7 @@ export default function OrderDetailPage() {
       queryKeys={orderQueryKeys}
       basePath="/shop/orders"
       invalidateStats
+      courierDispatchEnabled
     />
   )
 }

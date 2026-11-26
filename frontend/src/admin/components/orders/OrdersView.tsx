@@ -35,6 +35,20 @@ import {
 } from "lucide-react"
 import { adminDataTableStyles } from "../../lib/dataTableStyles"
 import { InlineNotice } from "../common/InlineNotice"
+import { useCourierAccountsQuery } from "../../hooks/useCourierQuery"
+import type { CourierSlug } from "../../types/courier"
+import {
+  COURIER_LABELS,
+  DispatchCourierModal,
+  isDispatchableAccount,
+} from "./DispatchCourierModal"
+
+const COURIER_ABBR: Record<string, string> = {
+  steadfast: "SF",
+  pathao: "PA",
+  redx: "RX",
+  carrybee: "CB",
+}
 
 const PAGE_LIMIT = 10
 const STATUS_TABS: { value: "" | OrderStatus; label: string }[] = [
@@ -68,6 +82,42 @@ export type OrdersViewProps = {
   exportFileName?: string
   showShopColumn?: boolean
   shopFilterOptions?: { id: number | string; name: string }[]
+  courierDispatchEnabled?: boolean
+}
+
+/** Rendered only in the shop panel so super admin never hits /api/shop/*. */
+function CourierAssignSelect({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string
+  onChange: (value: string) => void
+  disabled: boolean
+}) {
+  const accountsQuery = useCourierAccountsQuery()
+  const accounts = (accountsQuery.data ?? []).filter(isDispatchableAccount)
+
+  return (
+    <label>
+      <span className="sr-only">Assign selected orders to courier</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        disabled={disabled || accountsQuery.isPending}
+        className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <option value="">Assign courier</option>
+        <option value="send">Send to Courier</option>
+        {accounts.map((account) => (
+          <option key={account.slug} value={account.slug}>
+            {COURIER_LABELS[account.slug]}
+            {account.isSandbox ? " (Sandbox)" : ""}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
 }
 
 export function OrdersView({
@@ -78,6 +128,7 @@ export function OrdersView({
   exportFileName = "orders.csv",
   showShopColumn = false,
   shopFilterOptions,
+  courierDispatchEnabled = false,
 }: OrdersViewProps) {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -106,6 +157,10 @@ export function OrdersView({
   const [selectedOrders, setSelectedOrders] = useState<OrderListItem[]>([])
   const [clearSelectedRows, setClearSelectedRows] = useState(false)
   const [bulkStatus, setBulkStatus] = useState<OrderStatus | "">("")
+  const [courierSelection, setCourierSelection] = useState("")
+  const [dispatchOpen, setDispatchOpen] = useState(false)
+  const [dispatchInitialSlug, setDispatchInitialSlug] =
+    useState<CourierSlug | null>(null)
   const [bulkNotice, setBulkNotice] = useState<{
     tone: "success" | "warning" | "error"
     message: string
@@ -172,6 +227,7 @@ export function OrdersView({
     setSelectedOrders([])
     setClearSelectedRows((previous) => !previous)
     setBulkNotice(null)
+    setCourierSelection("")
   }
 
   function handleStatusTab(value: "" | OrderStatus) {
@@ -284,6 +340,21 @@ export function OrdersView({
       })
     }
   }
+
+  async function handleApply() {
+    const selection = courierSelection
+    if (bulkStatus) {
+      await handleBulkStatusUpdate()
+    }
+    if (selection && selectedOrders.length > 0) {
+      setDispatchInitialSlug(
+        selection === "send" ? null : (selection as CourierSlug)
+      )
+      setDispatchOpen(true)
+    }
+    setCourierSelection("")
+  }
+
   const total = data?.total ?? 0
   const counts = data?.counts ?? {
     all: { count: 0, totalPrice: 0 },
@@ -436,12 +507,26 @@ export function OrdersView({
         center: true,
         cell: (row) => {
           const orderCfg = ORDER_STATUS_CONFIG[row.orderStatus]
+          const shipment = row.latestShipment
+          const tracking = shipment?.trackingCode ?? shipment?.consignmentId
           return (
-            <StatusBadge
-              variant={orderCfg.variant}
-              label={orderCfg.label}
-              className="text-xs!"
-            />
+            <div className="flex flex-col items-center gap-1">
+              <StatusBadge
+                variant={orderCfg.variant}
+                label={orderCfg.label}
+                className="text-xs!"
+              />
+              {shipment && tracking ? (
+                <span
+                  title={`${shipment.courierSlug} shipment`}
+                  className="inline-flex items-center gap-1 rounded bg-(--bg-table-header) px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap text-(--text-muted)"
+                >
+                  {COURIER_ABBR[shipment.courierSlug] ??
+                    shipment.courierSlug.slice(0, 2).toUpperCase()}{" "}
+                  • #{tracking}
+                </span>
+              ) : null}
+            </div>
           )
         },
       },
@@ -683,22 +768,32 @@ export function OrdersView({
               <option>Assign employee</option>
             </select>
           </label>
-          <label>
-            <span className="sr-only">Assign selected orders to courier</span>
-            <select
-              disabled
-              title="Courier assignment is not configured"
-              className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option>Assign courier</option>
-            </select>
-          </label>
+          {courierDispatchEnabled ? (
+            <CourierAssignSelect
+              value={courierSelection}
+              onChange={setCourierSelection}
+              disabled={selectedOrders.length === 0 || bulkUpdating}
+            />
+          ) : (
+            <label>
+              <span className="sr-only">Assign selected orders to courier</span>
+              <select
+                disabled
+                title="Courier assignment is available in the shop panel"
+                className="h-9 min-w-36.25 rounded-md border border-(--border-hover) bg-white px-3 text-xs text-(--text-primary) outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option>Assign courier</option>
+              </select>
+            </label>
+          )}
           <button
             type="button"
             disabled={
-              selectedOrders.length === 0 || !bulkStatus || bulkUpdating
+              selectedOrders.length === 0 ||
+              (!bulkStatus && !courierSelection) ||
+              bulkUpdating
             }
-            onClick={handleBulkStatusUpdate}
+            onClick={() => void handleApply()}
             className="admin-template-button admin-template-button--primary h-9 px-3 text-xs disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Check className="icon-size" />
@@ -778,6 +873,28 @@ export function OrdersView({
           />
         )}
       </div>
+
+      {courierDispatchEnabled && dispatchOpen ? (
+        <DispatchCourierModal
+          open={dispatchOpen}
+          targets={selectedOrders.map((order) => ({
+            id: order.id,
+            orderNumber: order.orderNumber,
+            total: order.total,
+            paymentStatus: order.paymentStatus,
+            orderStatus: order.orderStatus,
+          }))}
+          initialSlug={dispatchInitialSlug}
+          onClose={() => {
+            setDispatchOpen(false)
+            setCourierSelection("")
+          }}
+          onDispatched={async () => {
+            await queryClient.invalidateQueries({ queryKey: queryKeys.all })
+            resetSelectedOrders()
+          }}
+        />
+      ) : null}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { apiRequest } from "./client"
 import type {
   CourierAccount,
+  CourierLocationOption,
   CourierSettings,
   CourierSlug,
   CourierTestResult,
@@ -21,6 +22,36 @@ export const courierApi = {
     return apiRequest<CourierAccount[]>("/shop/settings/courier/accounts", {
       signal,
     })
+  },
+  getCities(slug: CourierSlug, signal?: AbortSignal): Promise<CourierLocationOption[]> {
+    return apiRequest<CourierLocationOption[]>(
+      `/shop/courier/locations/${slug}/cities`,
+      { signal }
+    )
+  },
+  getZones(
+    slug: CourierSlug,
+    cityId: number,
+    signal?: AbortSignal
+  ): Promise<CourierLocationOption[]> {
+    return apiRequest<CourierLocationOption[]>(
+      `/shop/courier/locations/${slug}/zones?cityId=${cityId}`,
+      { signal }
+    )
+  },
+  getAreas(
+    slug: CourierSlug,
+    params: { cityId?: number; zoneId?: number },
+    signal?: AbortSignal
+  ): Promise<CourierLocationOption[]> {
+    const query = new URLSearchParams()
+    if (params.cityId) query.set("cityId", String(params.cityId))
+    if (params.zoneId) query.set("zoneId", String(params.zoneId))
+    const suffix = query.toString()
+    return apiRequest<CourierLocationOption[]>(
+      `/shop/courier/locations/${slug}/areas${suffix ? `?${suffix}` : ""}`,
+      { signal }
+    )
   },
   updateAccount(
     slug: CourierSlug,

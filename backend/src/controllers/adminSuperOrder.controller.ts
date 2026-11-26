@@ -51,6 +51,22 @@ async function fetchOrderDetail(id: number) {
           },
         },
       },
+      shipments: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          courierSlug: true,
+          isSandbox: true,
+          consignmentId: true,
+          trackingCode: true,
+          courierStatus: true,
+          deliveryFee: true,
+          areaName: true,
+          errorMessage: true,
+          dispatchedAt: true,
+          createdAt: true,
+        },
+      },
     },
   });
 
@@ -82,6 +98,7 @@ async function fetchOrderDetail(id: number) {
     shopId: order.shopId,
     shop: order.shop,
     createdAt: order.createdAt,
+    shipments: order.shipments,
     items: order.items.map((item) => {
       let image: string | null = null;
       if (

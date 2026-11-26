@@ -154,6 +154,7 @@ model Order {
   shop            Shop        @relation(fields: [shopId], references: [id])
   createdAt       DateTime    @default(now()) @map("created_at")
   items           OrderItem[]
+  shipments       CourierShipment[]
 
   @@index([shopId, createdAt])
   @@index([assignedToId])
@@ -477,6 +478,41 @@ model CourierAccount {
   @@map("courier_accounts")
 }
 
+// ==================================================================
+// Courier shipments — one row per dispatch attempt (success or failure).
+// Raw upstream payloads are sanitized before they reach this table.
+// ==================================================================
+
+model CourierShipment {
+  id            Int       @id @default(autoincrement())
+  orderId       Int       @map("order_id")
+  shopId        Int       @map("shop_id")
+  courierSlug   String    @map("courier_slug") @db.VarChar(30)
+  isSandbox     Boolean   @default(false) @map("is_sandbox")
+  consignmentId String?   @map("consignment_id") @db.VarChar(120)
+  trackingCode  String?   @map("tracking_code") @db.VarChar(120)
+  courierStatus String?   @map("courier_status") @db.VarChar(60)
+  deliveryFee   Int?      @map("delivery_fee")
+  cityId        Int?      @map("city_id")
+  zoneId        Int?      @map("zone_id")
+  areaId        Int?      @map("area_id")
+  areaName      String?   @map("area_name") @db.VarChar(150)
+  errorMessage  String?   @map("error_message") @db.VarChar(255)
+  rawResponse   Json?     @map("raw_response")
+  dispatchedAt  DateTime? @map("dispatched_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shop  Shop  @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@index([shopId, courierSlug])
+  @@index([consignmentId])
+  @@index([trackingCode])
+  @@map("courier_shipments")
+}
+
 model Shop {
   id          Int       @id @default(autoincrement())
   name        String
@@ -504,6 +540,7 @@ model Shop {
   supportTickets  SupportTicket[]
   courierSettings CourierSettings?
   courierAccounts CourierAccount[]
+  courierShipments CourierShipment[]
 
   @@map("shops")
 }

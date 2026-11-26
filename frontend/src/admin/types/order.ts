@@ -13,6 +13,52 @@ export type OrderCounts = {
   returned: { count: number; totalPrice: number }
 }
 
+export type CourierShipmentSummary = {
+  id: number
+  courierSlug: string
+  isSandbox: boolean
+  consignmentId: string | null
+  trackingCode: string | null
+  courierStatus: string | null
+  deliveryFee: number | null
+  areaName: string | null
+  errorMessage: string | null
+  dispatchedAt: string | null
+  createdAt: string
+}
+
+export type DispatchOrderPayload = {
+  courierSlug: "steadfast" | "pathao" | "redx" | "carrybee"
+  cityId?: number
+  zoneId?: number
+  areaId?: number
+  areaName?: string
+  itemWeight?: number
+  note?: string
+  confirmFirst?: boolean
+}
+
+export type BulkDispatchPayload = {
+  orderIds: number[]
+  courierSlug: "steadfast"
+  confirmFirst?: boolean
+}
+
+export type BulkDispatchResultItem = {
+  orderId: number
+  orderNumber: string
+  ok: boolean
+  consignmentId?: string | null
+  trackingCode?: string | null
+  error?: string
+}
+
+export type BulkDispatchResponse = {
+  results: BulkDispatchResultItem[]
+  succeededCount: number
+  failedCount: number
+}
+
 export type OrderListItem = {
   id: number
   orderNumber: string
@@ -30,6 +76,7 @@ export type OrderListItem = {
   itemCount: number
   shopId: number
   shopName: string
+  latestShipment?: CourierShipmentSummary | null
 }
 
 export type OrdersListResponse = {
@@ -91,6 +138,7 @@ export type OrderDetail = {
   shopId: number
   shopName: string
   items: OrderItemDetail[]
+  shipments?: CourierShipmentSummary[]
 }
 
 export type UpdateStatusBody = {

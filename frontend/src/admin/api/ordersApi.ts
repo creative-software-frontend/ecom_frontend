@@ -6,7 +6,16 @@ import type {
   OrderDetail,
   CreateOrderPayload,
   UpdateStatusBody,
+  DispatchOrderPayload,
+  BulkDispatchPayload,
+  BulkDispatchResponse,
+  CourierShipmentSummary,
 } from "../types/order"
+
+export type DispatchOrderResponse = {
+  shipment: CourierShipmentSummary
+  order: OrderDetail | null
+}
 
 export const ordersApi = {
   create(body: CreateOrderPayload): Promise<OrderDetail> {
@@ -49,6 +58,23 @@ export const ordersApi = {
       `/shop/orders/${encodeURIComponent(String(id))}/status`,
       { method: "PATCH", body }
     )
+  },
+
+  dispatch(
+    orderId: number,
+    body: DispatchOrderPayload
+  ): Promise<DispatchOrderResponse> {
+    return apiRequest<DispatchOrderResponse>(
+      `/shop/orders/${orderId}/dispatch`,
+      { method: "POST", body }
+    )
+  },
+
+  bulkDispatch(body: BulkDispatchPayload): Promise<BulkDispatchResponse> {
+    return apiRequest<BulkDispatchResponse>("/shop/orders/bulk-dispatch", {
+      method: "POST",
+      body,
+    })
   },
 }
 

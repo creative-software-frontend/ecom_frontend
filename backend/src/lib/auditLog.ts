@@ -33,6 +33,7 @@ export type AuditAction =
   | "product.unblock"
   | "order.create"
   | "order.status_update"
+  | "order.courier_dispatch"
   | "coupon.create"
   | "coupon.update"
   | "coupon.status_update"

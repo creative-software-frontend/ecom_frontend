@@ -100,7 +100,8 @@ export function assertOfficialCourierBaseUrl(
   return configured;
 }
 
-function sanitizeMessage(
+/** Shared redaction helper so dispatch failures cannot leak upstream secrets. */
+export function sanitizeMessage(
   input: string,
   secrets: readonly string[] = [],
 ): string {

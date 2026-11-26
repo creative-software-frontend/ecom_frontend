@@ -51,6 +51,12 @@ export type CourierTestResult = {
   account: CourierAccount
 }
 
+export type CourierLocationOption = {
+  id: number
+  name: string
+  districtName?: string
+}
+
 export type UpdateCourierAccountInput = {
   enabled?: boolean
   isSandbox?: boolean

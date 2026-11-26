@@ -7,12 +7,14 @@ import DataTable, {
 } from "react-data-table-component"
 import { ApiError } from "../../api/client"
 import type {
+  CourierShipmentSummary,
   OrderDetail,
   OrderItemDetail,
   OrderStatus,
   PaymentStatus,
   UpdateStatusBody,
 } from "../../types/order"
+import type { CourierSlug } from "../../types/courier"
 import {
   ORDER_STATUS_CONFIG,
   ORDER_STATUS_ACTION_LABEL,
@@ -26,12 +28,14 @@ import {
   ArrowLeft,
   Check,
   Clock3,
+  Copy,
   MapPin,
   MessageCircle,
   Package,
   Phone,
   Printer,
   RotateCcw,
+  Truck,
   UserRound,
   XCircle,
 } from "lucide-react"
@@ -41,6 +45,11 @@ import { LoadingState } from "../common/LoadingState"
 import { NotFoundState } from "../common/NotFoundState"
 import { StatusBadge } from "../common/StatusBadge"
 import { ConfirmationDialog } from "../common/ConfirmationDialog"
+import {
+  COURIER_LABELS,
+  DispatchCourierModal,
+  type DispatchTarget,
+} from "./DispatchCourierModal"
 import { getErrorMessage } from "../../lib/errors"
 import React from "react"
 
@@ -60,6 +69,7 @@ export type OrderDetailViewConfig = {
   basePath: string
   showShopName?: boolean
   invalidateStats?: boolean
+  courierDispatchEnabled?: boolean
 }
 
 function getBackHref(locationState: unknown, basePath: string): string {
@@ -80,6 +90,22 @@ function getPaymentMethodLabel(method: string): string {
   return method
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+function getCourierLabel(slug: string): string {
+  const labels = COURIER_LABELS as Record<string, string>
+  return (
+    labels[slug] ??
+    slug
+      .replaceAll("_", " ")
+      .replace(/\b\w/g, (letter) => letter.toUpperCase())
+  )
+}
+
+function toCourierSlug(value: string | null | undefined): CourierSlug | null {
+  if (!value) return null
+  const labels = COURIER_LABELS as Record<string, string>
+  return value in labels ? (value as CourierSlug) : null
 }
 
 /* ------------------------------------------------------------------ */
@@ -291,6 +317,7 @@ export function OrderDetailView({
   basePath,
   showShopName = false,
   invalidateStats = false,
+  courierDispatchEnabled = false,
 }: OrderDetailViewConfig) {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
@@ -305,6 +332,15 @@ export function OrderDetailView({
   const [confirmTarget, setConfirmTarget] = useState<
     "cancelled" | "returned" | null
   >(null)
+  const [dispatchOpen, setDispatchOpen] = useState(false)
+  const [dispatchInitialSlug, setDispatchInitialSlug] =
+    useState<CourierSlug | null>(null)
+  const [copiedTrackingValue, setCopiedTrackingValue] = useState<string | null>(
+    null
+  )
+  const [dismissedFailureId, setDismissedFailureId] = useState<number | null>(
+    null
+  )
   const cancelTriggerRef = useRef<HTMLButtonElement>(null)
 
   const orderQuery = useQuery({
@@ -495,6 +531,59 @@ export function OrderDetailView({
   // Clean phone number for tel: / wa.me links
   const phoneDigits = order.customerPhone.replace(/[^0-9]/g, "")
   const waLink = `https://wa.me/88${phoneDigits}`
+
+  const shipments: CourierShipmentSummary[] = order.shipments ?? []
+  const latestShipment = shipments[0] ?? null
+  const trackingNumber =
+    latestShipment?.trackingCode ?? latestShipment?.consignmentId ?? null
+  const hasActiveShipment = Boolean(
+    latestShipment?.consignmentId || latestShipment?.trackingCode
+  )
+  const failureNotice =
+    latestShipment?.errorMessage && latestShipment.id !== dismissedFailureId
+      ? latestShipment
+      : null
+  const copied = trackingNumber !== null && copiedTrackingValue === trackingNumber
+  const dispatchTarget: DispatchTarget = {
+    id: order.id,
+    orderNumber: order.orderNumber,
+    total: order.total,
+    advance: order.advance,
+    paymentStatus: order.paymentStatus,
+    orderStatus: order.orderStatus,
+  }
+
+  async function handleCopyTracking() {
+    if (!trackingNumber) return
+    try {
+      await navigator.clipboard.writeText(trackingNumber)
+      setCopiedTrackingValue(trackingNumber)
+    } catch {
+      setCopiedTrackingValue(null)
+    }
+  }
+
+  function openCourierDispatch() {
+    setDispatchInitialSlug(toCourierSlug(order.courier))
+    setDispatchOpen(true)
+  }
+
+  async function handleCourierDispatched() {
+    if (!id) return
+    const invalidations = [
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.detail(id),
+        exact: true,
+      }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.lists() }),
+    ]
+    if (invalidateStats && queryKeys.stats) {
+      invalidations.push(
+        queryClient.invalidateQueries({ queryKey: queryKeys.stats() })
+      )
+    }
+    await Promise.all(invalidations)
+  }
 
   return (
     <div className="min-w-0 space-y-5 bg-(--bg-app) p-4 sm:p-6">
@@ -744,6 +833,108 @@ export function OrderDetailView({
             </dl>
           </Card>
 
+          {courierDispatchEnabled ? (
+            <Card title="Courier & tracking">
+              {latestShipment ? (
+                <dl className="divide-y divide-(--border-light)">
+                  <Row label="Courier">
+                    <span className="inline-flex flex-wrap items-center gap-1.5">
+                      {getCourierLabel(latestShipment.courierSlug)}
+                      {latestShipment.isSandbox ? (
+                        <span className="rounded bg-(--bg-table-header) px-1.5 py-0.5 text-[10px] font-semibold text-(--text-muted)">
+                          Sandbox
+                        </span>
+                      ) : null}
+                    </span>
+                  </Row>
+                  <Row label="Tracking">
+                    {trackingNumber ? (
+                      <span className="inline-flex flex-wrap items-center gap-2">
+                        <span className="font-medium tabular-nums">
+                          {trackingNumber}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => void handleCopyTracking()}
+                          className="inline-flex items-center gap-1 rounded-md border border-(--border-light) bg-white px-2 py-0.5 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
+                        >
+                          <Copy className="size-3" aria-hidden="true" />
+                          {copied ? "Copied" : "Copy"}
+                        </button>
+                      </span>
+                    ) : (
+                      <span className="text-(--text-muted)">—</span>
+                    )}
+                  </Row>
+                  <Row label="Courier status">
+                    {latestShipment.courierStatus || (
+                      <span className="text-(--text-muted)">—</span>
+                    )}
+                  </Row>
+                  <Row label="Delivery fee">
+                    {latestShipment.deliveryFee !== null ? (
+                      <span className="tabular-nums">
+                        {formatTaka(latestShipment.deliveryFee)}
+                      </span>
+                    ) : (
+                      <span className="text-(--text-muted)">—</span>
+                    )}
+                  </Row>
+                  <Row label="Area">
+                    {latestShipment.areaName || (
+                      <span className="text-(--text-muted)">—</span>
+                    )}
+                  </Row>
+                  <Row label="Dispatched">
+                    {latestShipment.dispatchedAt ? (
+                      <span className="tabular-nums">
+                        {formatOrderDate(latestShipment.dispatchedAt)}
+                      </span>
+                    ) : (
+                      <span className="text-(--text-muted)">—</span>
+                    )}
+                  </Row>
+                </dl>
+              ) : (
+                <p className="text-sm text-(--text-muted)">
+                  No courier shipment has been created for this order.
+                </p>
+              )}
+
+              {failureNotice ? (
+                <div className="mt-3">
+                  <InlineNotice
+                    variant="error"
+                    message={`Last courier attempt failed: ${failureNotice.errorMessage}`}
+                    ariaLive="polite"
+                    dismissLabel="Dismiss courier error"
+                    dismissText="✕"
+                    onDismiss={() => setDismissedFailureId(failureNotice.id)}
+                    className="flex items-start justify-between gap-3 rounded-md border border-(--border-light) bg-(--bg-app) px-3 py-2 text-xs text-(--text-primary)"
+                    dismissClassName="rounded px-1.5 py-0.5 text-(--text-muted) hover:bg-(--bg-surface-hover)"
+                  />
+                </div>
+              ) : null}
+
+              <div className="mt-4 border-t border-(--border-light) pt-4">
+                <button
+                  type="button"
+                  onClick={openCourierDispatch}
+                  disabled={hasActiveShipment}
+                  title={
+                    hasActiveShipment
+                      ? "This order already has an active courier shipment."
+                      : undefined
+                  }
+                  className="admin-template-button admin-template-button--primary w-full disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Truck className="icon-size" aria-hidden="true" />
+                  Send to Courier
+                </button>
+              </div>
+            </Card>
+          ) : null}
+
           <Card title="Order details">
             <dl className="divide-y divide-(--border-light)">
               <Row label="Source">{order.source || "—"}</Row>
@@ -882,6 +1073,16 @@ export function OrderDetailView({
           )
         }
       />
+
+      {courierDispatchEnabled && dispatchOpen ? (
+        <DispatchCourierModal
+          open={dispatchOpen}
+          targets={[dispatchTarget]}
+          initialSlug={dispatchInitialSlug}
+          onClose={() => setDispatchOpen(false)}
+          onDispatched={handleCourierDispatched}
+        />
+      ) : null}
     </div>
   )
 }

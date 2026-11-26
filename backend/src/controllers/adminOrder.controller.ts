@@ -38,7 +38,7 @@ function getShopIdOrForbid(req: Request, res: Response): number | null {
   return shopId;
 }
 
-async function fetchOrderDetail(id: number, shopId?: number) {
+export async function fetchOrderDetail(id: number, shopId?: number) {
   const order = await prisma.order.findFirst({
     where: { id, ...(shopId !== undefined ? { shopId } : {}) },
     include: {
@@ -53,6 +53,22 @@ async function fetchOrderDetail(id: number, shopId?: number) {
               images: true,
             },
           },
+        },
+      },
+      shipments: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          courierSlug: true,
+          isSandbox: true,
+          consignmentId: true,
+          trackingCode: true,
+          courierStatus: true,
+          deliveryFee: true,
+          areaName: true,
+          errorMessage: true,
+          dispatchedAt: true,
+          createdAt: true,
         },
       },
     },
@@ -88,6 +104,7 @@ async function fetchOrderDetail(id: number, shopId?: number) {
     shopId: order.shopId,
     shop: order.shop,
     createdAt: order.createdAt,
+    shipments: order.shipments,
     items: order.items.map((item) => {
       let image: string | null = null;
       if (
@@ -216,6 +233,23 @@ export async function listOrders(req: Request, res: Response) {
                 items: true,
               },
             },
+            shipments: {
+              orderBy: { createdAt: "desc" },
+              take: 1,
+              select: {
+                id: true,
+                courierSlug: true,
+                isSandbox: true,
+                consignmentId: true,
+                trackingCode: true,
+                courierStatus: true,
+                deliveryFee: true,
+                areaName: true,
+                errorMessage: true,
+                dispatchedAt: true,
+                createdAt: true,
+              },
+            },
           },
         }),
         prisma.order.count({ where }),
@@ -274,6 +308,7 @@ export async function listOrders(req: Request, res: Response) {
       shopId: o.shopId,
       createdAt: o.createdAt,
       itemCount: o._count.items,
+      latestShipment: o.shipments[0] ?? null,
     }));
     return res.status(200).json({
       success: true,

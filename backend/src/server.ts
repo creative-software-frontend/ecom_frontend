@@ -10,6 +10,7 @@ import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import adminProductRoutes from "./routes/adminProduct.routes.js";
 import adminSettingsRoutes from "./routes/adminSettings.routes.js";
 import adminOrderRoutes from "./routes/adminOrder.routes.js";
+import adminCourierLocationRoutes from "./routes/adminCourierLocation.routes.js";
 import adminCouponRoutes from "./routes/adminCoupon.routes.js";
 import adminPageRoutes from "./routes/adminPage.routes.js";
 import adminBrandRoutes from "./routes/adminBrand.routes.js";
@@ -44,6 +45,7 @@ app.use("/api/admin/super", adminSuperRoutes);
 // Shop operations — shop admin scope
 app.use("/api/shop/products", adminProductRoutes);
 app.use("/api/shop/settings", adminSettingsRoutes);
+app.use("/api/shop/courier/locations", adminCourierLocationRoutes);
 app.use("/api/shop/orders", adminOrderRoutes);
 app.use("/api/shop/coupons", adminCouponRoutes);
 app.use("/api/shop/pages", adminPageRoutes);
