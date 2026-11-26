@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router"
 import { useQuery } from "@tanstack/react-query"
-import { ChevronDown, Truck } from "lucide-react"
-import { Select as SelectPrimitive } from "@base-ui/react/select"
+import { Truck } from "lucide-react"
 import { courierApi } from "../../api/courierApi"
 import { ordersApi } from "../../api/ordersApi"
 import { useCourierAccountsQuery } from "../../hooks/useCourierQuery"
@@ -18,6 +17,7 @@ import { ConfirmationDialog } from "../common/ConfirmationDialog"
 import { DialogShell } from "../common/DialogShell"
 import { InlineNotice } from "../common/InlineNotice"
 import { LoadingState } from "../common/LoadingState"
+import { AdminSearchSelect } from "../common/AdminSearchSelect"
 
 const PENDING_CONFIRM_PROMPT =
   "অর্ডারটি এখনো Pending আছে। আপনি কি এটি Confirm করে কুরিয়ারে পাঠাতে চান?"
@@ -354,68 +354,27 @@ export function DispatchCourierModal({
                 <label htmlFor="dispatch-city" className={labelClass}>
                   City
                 </label>
-                <SelectPrimitive.Root
-                  value={cityId ? String(cityId) : null}
+                <AdminSearchSelect
+                  id="dispatch-city"
+                  value={cityId ? String(cityId) : ""}
+                  options={(citiesQuery.data ?? []).map((option) => ({
+                    value: String(option.id),
+                    label: option.name,
+                  }))}
                   onValueChange={(value) => {
-                    setCityId(
-                      value && value !== "__no_city__"
-                        ? Number(value)
-                        : undefined
-                    )
+                    setCityId(value ? Number(value) : undefined)
                     setZoneId(undefined)
                     setAreaId(undefined)
                     setAreaName("")
                   }}
-                >
-                  <SelectPrimitive.Trigger
-                    id="dispatch-city"
-                    type="button"
-                    disabled={
-                      busy ||
-                      citiesQuery.isPending ||
-                      (citiesQuery.data ?? []).length === 0
-                    }
-                    className={`${inputClass} flex cursor-pointer items-center justify-between text-left`}
-                  >
-                    <SelectPrimitive.Value
-                      placeholder="Select city"
-                      className="min-w-0 flex-1 truncate"
-                    />
-                    <ChevronDown
-                      aria-hidden="true"
-                      className="ml-2 size-3.5 shrink-0 text-(--text-muted)"
-                    />
-                  </SelectPrimitive.Trigger>
-                  <SelectPrimitive.Portal>
-                    <SelectPrimitive.Positioner
-                      align="start"
-                      alignItemWithTrigger={false}
-                      className="z-[60]"
-                    >
-                      <SelectPrimitive.Popup className="max-h-60 w-(--anchor-width) overflow-y-auto rounded-md border border-(--border-light) bg-(--bg-surface) py-1 text-(--text-primary) shadow-lg">
-                        <SelectPrimitive.List>
-                          <SelectPrimitive.Item
-                            value="__no_city__"
-                            className="px-2.5 py-2 text-xs text-(--text-muted)"
-                          >
-                            Select city
-                          </SelectPrimitive.Item>
-                          {(citiesQuery.data ?? []).map((option) => (
-                            <SelectPrimitive.Item
-                              key={option.id}
-                              value={String(option.id)}
-                              className="cursor-pointer px-2.5 py-2 text-xs outline-none data-[highlighted]:bg-(--bg-surface-hover)"
-                            >
-                              <SelectPrimitive.ItemText>
-                                {option.name}
-                              </SelectPrimitive.ItemText>
-                            </SelectPrimitive.Item>
-                          ))}
-                        </SelectPrimitive.List>
-                      </SelectPrimitive.Popup>
-                    </SelectPrimitive.Positioner>
-                  </SelectPrimitive.Portal>
-                </SelectPrimitive.Root>
+                  placeholder="Select city"
+                  searchPlaceholder="Search city"
+                  disabled={
+                    busy ||
+                    citiesQuery.isPending ||
+                    (citiesQuery.data ?? []).length === 0
+                  }
+                />
               </div>
               <div>
                 <label htmlFor="dispatch-zone" className={labelClass}>
