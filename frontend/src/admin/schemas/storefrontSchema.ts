@@ -1,8 +1,18 @@
 import { z } from "zod"
 
+const imagePathOrNull = z
+  .string()
+  .trim()
+  .refine(
+    (v) =>
+      (v.startsWith("/") && !v.startsWith("//")) || /^https?:\/\//.test(v),
+    { message: "Use a local /uploads/... path or an http(s) URL" }
+  )
+  .nullable()
+
 export const bannerSchema = z.object({
   id: z.string(),
-  image: z.string().nullable(),
+  image: imagePathOrNull,
   alt: z.string().trim().default(""),
   link: z
     .string()

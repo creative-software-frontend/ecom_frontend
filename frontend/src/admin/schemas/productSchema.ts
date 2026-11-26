@@ -31,10 +31,23 @@ export const productFormSchema = z.object({
   maxOrderQty: z.number().optional(),
   rank: z.number().optional(),
 
-  // Images
+  // Images — local /uploads paths plus legacy absolute URLs
   images: z
-    .array(z.string().url("Must be a valid URL"))
-    .min(1, "At least one image is required"),
+    .array(
+      z
+        .string()
+        .trim()
+        .min(1, "Image path is required")
+        .refine(
+          (v) =>
+            (v.startsWith("/") && !v.startsWith("//")) ||
+            v.startsWith("https://") ||
+            v.startsWith("http://"),
+          "Image must be a local path or an http(s) URL"
+        )
+    )
+    .min(1, "At least one image is required")
+    .max(10, "Maximum 10 images"),
 
   // Specifications
   specifications: z

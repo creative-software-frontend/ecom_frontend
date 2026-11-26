@@ -60,13 +60,14 @@ export type AuditAction =
   | "courier.account_toggle"
   | "courier.account_disconnect"
   | "courier.account_sandbox"
-  | "courier.account_test";
+  | "courier.account_test"
+  | "upload.image";
 
 export async function logAudit(params: {
   req: Request;
   action: AuditAction;
   entityType?: string;
-  entityId?: number;
+  entityId?: number | string;
   metadata?: Record<string, unknown>;
   targetShopId?: number | null;
   /** Explicit actor — required when req.user is not populated (e.g., login). */

@@ -19,6 +19,7 @@ import adminDashboardRoutes from "./routes/adminDashboard.routes.js";
 import adminSuperRoutes from "./routes/adminSuper.routes.js";
 import adminSidebarStatsRoutes from "./routes/adminSidebarStats.routes.js";
 import rechargeRoutes from "./routes/recharge.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
 import adminShopUserRoutes from "./routes/adminShopUser.routes.js";
 import adminNewsRoutes from "./routes/adminNews.routes.js";
 import adminSupportRoutes from "./routes/adminSupport.routes.js";
@@ -39,6 +40,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 // Auth — shared by all roles (super admin + shop users)
 app.use("/api/auth", adminAuthRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 // Platform super admin — platform scope
 app.use("/api/admin/super", adminSuperRoutes);
@@ -64,6 +66,12 @@ app.use("/api/shop/support", adminSupportRoutes);
 //     message: "Server is running successfully.",
 //   });
 // });
+
+// Local uploads — served before the SPA fallback so image URLs resolve.
+app.use(
+  "/uploads",
+  express.static(path.resolve(process.cwd(), "uploads"), { maxAge: "7d" }),
+);
 
 // ফ্রন্টএন্ডের dist ফোল্ডার স্ট্যাটিক হিসেবে সার্ভ করা
 const frontendDistPath = path.resolve(process.cwd(), "../frontend/dist");

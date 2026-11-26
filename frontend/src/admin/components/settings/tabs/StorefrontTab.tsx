@@ -1,3 +1,4 @@
+import { useRef, useState } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -5,6 +6,7 @@ import {
   Trash2,
   Link as LinkIcon,
   ImagePlus,
+  Loader2,
   Megaphone,
   AlertTriangle,
   Truck,
@@ -12,7 +14,13 @@ import {
 } from "lucide-react"
 import { SettingsLayout, SettingsCard } from "../SettingsLayout"
 import { SortableList } from "../SortableList"
+import { InlineNotice } from "../../common/InlineNotice"
 import { FormToggle, FormColorPicker, FieldError } from "../SettingsField"
+import { uploadImage } from "../../../api/uploadApi"
+import {
+  IMAGE_ACCEPT_ATTRIBUTE,
+  validateImageFile,
+} from "../../../lib/imageUpload"
 import {
   storefrontSchema,
   type StorefrontFormValues,
@@ -101,6 +109,60 @@ export default function StorefrontTab() {
     control,
     name: "banners",
   })
+
+  const bannerInputRef = useRef<HTMLInputElement>(null)
+  const changeTargetIndexRef = useRef<number | null>(null)
+  const [bannerUploading, setBannerUploading] = useState(false)
+  const [bannerUploadError, setBannerUploadError] = useState<string | null>(null)
+
+  function openBannerPicker(index?: number) {
+    changeTargetIndexRef.current = index ?? null
+    bannerInputRef.current?.click()
+  }
+
+  async function handleBannerUpload(files: FileList | null) {
+    const file = files?.[0]
+    if (bannerInputRef.current) bannerInputRef.current.value = ""
+    const targetIndex = changeTargetIndexRef.current
+    changeTargetIndexRef.current = null
+    if (!file) return
+
+    const validationMessage = validateImageFile(file)
+    if (validationMessage) {
+      setBannerUploadError(validationMessage)
+      return
+    }
+    if (targetIndex === null && fields.length >= 10) {
+      setBannerUploadError("You can add up to 10 banners.")
+      return
+    }
+
+    setBannerUploadError(null)
+    setBannerUploading(true)
+    try {
+      const result = await uploadImage(file, "banners")
+      if (targetIndex === null) {
+        append({
+          id: `b${Date.now()}`,
+          image: result.url,
+          alt: "",
+          link: "",
+          active: true,
+        })
+      } else {
+        setValue(`banners.${targetIndex}.image`, result.url, {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+      }
+    } catch (error: unknown) {
+      setBannerUploadError(
+        error instanceof Error ? error.message : "Upload failed. Please try again."
+      )
+    } finally {
+      setBannerUploading(false)
+    }
+  }
 
   const marqueeText = watch("announcement.marquee_text") ?? ""
   const orderNote = watch("announcement.order_note") ?? ""
@@ -255,6 +317,15 @@ export default function StorefrontTab() {
           </span>
         }
       >
+        <input
+          ref={bannerInputRef}
+          type="file"
+          accept={IMAGE_ACCEPT_ATTRIBUTE}
+          className="sr-only"
+          disabled={bannerUploading}
+          onChange={(event) => void handleBannerUpload(event.target.files)}
+          aria-label="Upload banner image"
+        />
         {fields.length > 0 && (
           <SortableList
             items={fields}
@@ -301,12 +372,23 @@ export default function StorefrontTab() {
                       <button
                         type="button"
                         onClick={() => remove(index)}
-                        className="shrink-0 rounded p-1 text-(--text-muted) transition-colors hover:bg-red-50 hover:text-red-600"
+                        className="shrink-0 rounded p-1 text-(--text-muted) transition-colors hover:bg-(--status-cancelled-bg) hover:text-(--status-cancelled-text)"
                         aria-label={`Remove banner ${index + 1}`}
                       >
                         <Trash2 className="size-4" />
                       </button>
                     </div>
+
+                    {/* Replace this banner's image — no URL input */}
+                    <button
+                      type="button"
+                      disabled={bannerUploading}
+                      onClick={() => openBannerPicker(index)}
+                      className="inline-flex h-7 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-2.5 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover) disabled:opacity-50"
+                    >
+                      <ImagePlus className="size-3.5" />
+                      Change image
+                    </button>
 
                     {/* Link + active toggle */}
                     <div className="flex items-center gap-2">
@@ -354,27 +436,38 @@ export default function StorefrontTab() {
         {/* Add banner */}
         <button
           type="button"
-          onClick={() =>
-            append({
-              id: `b${Date.now()}`,
-              image: null,
-              alt: "",
-              link: "",
-              active: true,
-            })
-          }
-          className="flex w-full flex-col items-center gap-1 rounded-md border-2 border-dashed border-(--border-light) bg-(--bg-surface) px-4 py-6 text-center transition-colors hover:border-(--primary)/40 hover:bg-(--bg-surface-hover)"
+          disabled={bannerUploading || fields.length >= 10}
+          onClick={() => openBannerPicker()}
+          className="flex w-full flex-col items-center gap-1 rounded-md border-2 border-dashed border-(--border-light) bg-(--bg-surface) px-4 py-6 text-center transition-colors hover:border-(--primary)/40 hover:bg-(--bg-surface-hover) disabled:opacity-50"
         >
           <span className="flex size-8 items-center justify-center rounded-full bg-(--bg-table-header) text-primary">
-            <ImagePlus className="size-4" />
+            {bannerUploading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ImagePlus className="size-4" />
+            )}
           </span>
           <span className="text-sm font-medium text-(--text-primary)">
-            Upload new banner
+            {bannerUploading
+              ? "Uploading banner..."
+              : fields.length >= 10
+                ? "Maximum 10 banners reached"
+                : "Upload new banner"}
           </span>
           <span className="text-xs text-(--text-muted)">
             PNG, JPG or WebP (max 5 MB) • Recommended 1600 × 600 px
           </span>
         </button>
+        {bannerUploadError && (
+          <InlineNotice
+            message={bannerUploadError}
+            variant="error"
+            ariaLive="assertive"
+            dismissLabel="Dismiss banner upload error"
+            onDismiss={() => setBannerUploadError(null)}
+            className="mt-3 flex items-center justify-between gap-3 rounded-md border border-(--status-cancelled-bg) bg-(--status-cancelled-bg)/50 px-3 py-2 text-xs text-(--status-cancelled-text)"
+          />
+        )}
       </SettingsCard>
 
       {/* ---------------- Brand colors ---------------- */}

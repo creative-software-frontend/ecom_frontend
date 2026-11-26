@@ -6,8 +6,6 @@ import {
   Mail,
   Link as LinkIcon,
   Music2,
-  Upload,
-  Trash2,
 } from "lucide-react"
 import {
   SiFacebook,
@@ -16,6 +14,7 @@ import {
 } from "@icons-pack/react-simple-icons"
 import { SettingsLayout, SettingsCard } from "../SettingsLayout"
 import { FormField, FormTextarea, FormRow } from "../SettingsField"
+import { ImageUploadField } from "../../common/ImageUploadField"
 import {
   storeSettingsSchema,
   type StoreSettingsFormValues,
@@ -60,6 +59,8 @@ export default function StoreTab() {
     handleSubmit,
     reset,
     control,
+    setValue,
+    watch,
     formState: { errors, isDirty, isSubmitting },
   } = useForm({
     resolver: zodResolver(storeSettingsSchema),
@@ -101,37 +102,22 @@ export default function StoreTab() {
         description="Basic details about your business displayed across the customer storefront and invoices."
       >
         {/* Logo */}
-        <div>
-          <p className="mb-1.5 text-xs font-semibold text-(--text-primary)">
-            Store logo
-          </p>
-          <div className="flex items-center gap-4">
-            <div className="flex size-20 shrink-0 items-center justify-center rounded-md border border-(--border-light) bg-(--bg-app)">
-              <span className="text-xs font-medium text-(--text-muted)">
-                Power Zenox
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-(--border-light) bg-(--bg-surface) px-3 text-xs font-medium text-(--text-primary) transition-colors hover:bg-(--bg-surface-hover)"
-              >
-                <Upload className="size-3.5" />
-                Upload new
-              </button>
-              <button
-                type="button"
-                className="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
-              >
-                <Trash2 className="size-3.5" />
-                Remove
-              </button>
-            </div>
-          </div>
-          <p className="mt-2 text-xs text-(--text-muted)">
-            PNG, JPG or WebP, square aspect ratio, maximum file size 2 MB.
-          </p>
-        </div>
+        <ImageUploadField
+          value={watch("logo")}
+          onChange={(url) =>
+            setValue("logo", url, { shouldDirty: true, shouldValidate: true })
+          }
+          folder="logos"
+          label="Store logo"
+          hint="PNG, JPG or WebP, square aspect ratio, maximum file size 5 MB."
+          aspect="square"
+          error={
+            typeof errors.logo?.message === "string"
+              ? errors.logo.message
+              : undefined
+          }
+          disabled={isSubmitting}
+        />
 
         <FormRow>
           <FormField

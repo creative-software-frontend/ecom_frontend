@@ -1,6 +1,16 @@
 import { z } from "zod"
 
 const bdPhoneRegex = /^01[3-9]\d{8}$/
+const imagePathOrEmpty = z
+  .string()
+  .trim()
+  .refine(
+    (v) =>
+      v === "" ||
+      (v.startsWith("/") && !v.startsWith("//")) ||
+      /^https?:\/\//.test(v),
+    { message: "Use a local /uploads/... path or an http(s) URL" }
+  )
 const urlOrEmpty = z
   .string()
   .trim()
@@ -16,7 +26,7 @@ export const storeSettingsSchema = z.object({
     .trim()
     .max(300, "Description must be 300 characters or less")
     .default(""),
-  logo: z.string().nullable().default(null),
+  logo: imagePathOrEmpty.nullable().default(null),
   contact: z.object({
     phone: z
       .string()

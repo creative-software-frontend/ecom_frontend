@@ -41,7 +41,7 @@ function toInitialValues(product: Product): Partial<ProductFormValues> {
     stockAlertQty: product.stockAlertQty ?? undefined,
     maxOrderQty: product.maxOrderQty ?? undefined,
     rank: product.rank ?? undefined,
-    images: product.images?.length ? product.images : [""],
+    images: product.images ?? [],
     specifications: product.specifications?.length
       ? product.specifications.map((row) => ({
           key: row.key,

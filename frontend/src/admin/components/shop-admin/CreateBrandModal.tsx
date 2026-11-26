@@ -4,7 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { DialogShell } from "../common/DialogShell"
 import { InlineNotice } from "../common/InlineNotice"
-import { Layers, ImageIcon } from "lucide-react"
+import { ImageUploadField } from "../common/ImageUploadField"
+import { Layers } from "lucide-react"
 import { FieldError, FormToggle } from "../settings/SettingsField"
 import { useEscapeKey } from "../../hooks/useEscapeKey"
 import type { BrandWriteInput } from "../../types/catalog"
@@ -93,7 +94,6 @@ export function CreateBrandModal({
     })
   }
 
-  const logoValue = watch("logoUrl")
   const isActiveValue = watch("isActive")
 
   return (
@@ -135,41 +135,25 @@ export function CreateBrandModal({
             </p>
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">
-              Logo URL{" "}
-              <span className="text-xs font-normal text-(--text-muted)">
-                (optional)
-              </span>
-            </label>
-            <div className="flex items-start gap-3">
-              <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-(--border-light) bg-(--bg-app)">
-                {logoValue ? (
-                  <img
-                    src={logoValue}
-                    alt="Logo preview"
-                    className="size-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none"
-                    }}
-                  />
-                ) : (
-                  <ImageIcon className="size-5 text-(--text-muted)" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <input
-                  type="text"
-                  placeholder="/uploads/logo.png or https://example.com/logo.png"
-                  className="h-9 w-full rounded-md border border-(--border-light) bg-(--bg-app) px-3 text-sm outline-none focus:border-(--primary)"
-                  {...register("logoUrl")}
-                />
-                {errors.logoUrl && (
-                  <FieldError>{errors.logoUrl.message}</FieldError>
-                )}
-              </div>
-            </div>
-          </div>
+          <ImageUploadField
+            value={watch("logoUrl")}
+            onChange={(url) =>
+              setValue("logoUrl", url ?? "", {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            folder="brands"
+            label="Brand Logo (optional)"
+            hint="PNG, JPG or WebP, max 5 MB. Square crop recommended."
+            aspect="square"
+            error={
+              typeof errors.logoUrl?.message === "string"
+                ? errors.logoUrl.message
+                : undefined
+            }
+            disabled={busy}
+          />
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-(--text-primary)">

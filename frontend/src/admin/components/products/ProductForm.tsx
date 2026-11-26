@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -11,6 +11,7 @@ import {
   Image as ImageIcon,
   Plus,
   X,
+  Loader2,
   CheckCircle2,
 } from "lucide-react"
 import {
@@ -26,6 +27,9 @@ import {
   FieldError,
 } from "../settings/SettingsField"
 import { RichTextToolbar } from "../settings/RichTextToolbar"
+import { InlineNotice } from "../common/InlineNotice"
+import { uploadImage } from "../../api/uploadApi"
+import { IMAGE_ACCEPT_ATTRIBUTE, validateImageFile } from "../../lib/imageUpload"
 import type { ShopOption } from "@/admin/types/superAdminProduct"
 import { ShopSelectorCard } from "../super-admin/ShopSelectorCard"
 import {
@@ -44,6 +48,8 @@ import type {
 
 type CatalogSelectOption = CatalogOption & { isLegacy: boolean }
 type CategorySelectOption = CategoryOption & { isLegacy: boolean }
+
+const MAX_PRODUCT_IMAGES = 6
 
 /**
  * Keep an existing product's text value selectable even when the matching
@@ -120,7 +126,7 @@ export function ProductForm({
       isFeatured: false,
       isFreeShipping: false,
       enableStockAlert: false,
-      images: [""],
+      images: [],
       specifications: [{ key: "", value: "" }],
       sizeOptions: [],
       colorOptions: [],
@@ -140,6 +146,9 @@ export function ProductForm({
 
   // Watch fields
   const imageValues = useWatch({ control, name: "images" }) || []
+  const imageInputRef = useRef<HTMLInputElement>(null)
+  const [imageUploading, setImageUploading] = useState(false)
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null)
   const productType = useWatch({ control, name: "productType" })
   const enableStockAlert = useWatch({ control, name: "enableStockAlert" })
   const sellingPrice = useWatch({ control, name: "sellingPrice" }) || 0
@@ -283,6 +292,51 @@ export function ProductForm({
       }
     }
     setValue("variants", generated)
+  }
+
+  async function handleImageUpload(files: FileList | null) {
+    const selected = Array.from(files ?? [])
+    if (imageInputRef.current) imageInputRef.current.value = ""
+    if (selected.length === 0) return
+
+    const remaining = MAX_PRODUCT_IMAGES - imageValues.length
+    if (remaining <= 0) {
+      setImageUploadError(`Maximum ${MAX_PRODUCT_IMAGES} images.`)
+      return
+    }
+
+    const accepted = selected.slice(0, remaining)
+    setImageUploadError(
+      selected.length > remaining
+        ? `Only ${remaining} more image${remaining === 1 ? "" : "s"} can be added.`
+        : null
+    )
+    setImageUploading(true)
+    const uploaded: string[] = []
+
+    for (const file of accepted) {
+      const validationMessage = validateImageFile(file)
+      if (validationMessage) {
+        setImageUploadError(validationMessage)
+        continue
+      }
+      try {
+        const result = await uploadImage(file, "products")
+        uploaded.push(result.url)
+      } catch (error: unknown) {
+        setImageUploadError(
+          error instanceof Error ? error.message : "Upload failed. Please try again."
+        )
+      }
+    }
+
+    if (uploaded.length > 0) {
+      setValue("images", [...imageValues, ...uploaded], {
+        shouldDirty: true,
+        shouldValidate: true,
+      })
+    }
+    setImageUploading(false)
   }
 
   // Guard: super admin variant cannot submit without a shop selected.
@@ -817,59 +871,92 @@ export function ProductForm({
               )}
             </SettingsCard>
 
-            {/* Product Images (URL based) */}
+            {/* Product Images — local uploads only */}
             <SettingsCard
               title="Product Images"
-              description={`${imageValues.length} / 6 uploaded`}
+              description={`${imageValues.length} / ${MAX_PRODUCT_IMAGES} uploaded`}
             >
-              <div className="space-y-3">
-                {imageValues.map((_, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Controller
-                      control={control}
-                      name={`images.${index}`}
-                      render={({ field }) => (
-                        <input
-                          {...field}
-                          type="text"
-                          placeholder="https://example.com/image.jpg"
-                          className="h-9 flex-1 rounded-md border border-(--border-light) px-3 text-xs outline-none focus:border-(--primary)"
-                        />
-                      )}
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setValue(
-                          "images",
-                          imageValues.filter(
-                            (_, imageIndex) => imageIndex !== index
-                          ),
-                          { shouldDirty: true, shouldValidate: true }
-                        )
-                      }
-                      className="rounded p-2 text-red-500 hover:bg-red-50"
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept={IMAGE_ACCEPT_ATTRIBUTE}
+                multiple
+                className="sr-only"
+                disabled={imageUploading || imageValues.length >= MAX_PRODUCT_IMAGES}
+                onChange={(event) => void handleImageUpload(event.target.files)}
+                aria-label="Upload product images"
+              />
+              {imageValues.length > 0 && (
+                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                  {imageValues.map((url, index) => (
+                    <div
+                      key={`${url}-${index}`}
+                      className="relative aspect-square overflow-hidden rounded-md border border-(--border-light) bg-(--bg-app)"
                     >
-                      <X className="size-4" />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setValue("images", [...imageValues, ""], {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
-                  }
-                  className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-(--border-light) transition-colors hover:border-(--primary) hover:bg-(--bg-app)"
-                >
+                      <img
+                        src={url}
+                        alt={`Product image ${index + 1}`}
+                        className="size-full object-cover"
+                      />
+                      {index === 0 && (
+                        <span className="absolute top-1 left-1 rounded bg-(--primary) px-1.5 py-0.5 text-[9px] font-semibold text-white">
+                          Primary
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        aria-label={`Remove product image ${index + 1}`}
+                        onClick={() =>
+                          setValue(
+                            "images",
+                            imageValues.filter((_, imageIndex) => imageIndex !== index),
+                            { shouldDirty: true, shouldValidate: true }
+                          )
+                        }
+                        className="absolute top-1 right-1 rounded bg-(--bg-surface) p-1 text-(--text-primary) transition-colors hover:text-(--status-cancelled-text)"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button
+                type="button"
+                disabled={imageUploading || imageValues.length >= MAX_PRODUCT_IMAGES}
+                onClick={() => imageInputRef.current?.click()}
+                className="mt-3 flex h-24 w-full flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-(--border-light) transition-colors hover:border-(--primary) hover:bg-(--bg-app) disabled:opacity-50"
+              >
+                {imageUploading ? (
+                  <Loader2 className="size-5 animate-spin text-(--text-muted)" />
+                ) : (
                   <ImageIcon className="size-5 text-(--text-muted)" />
-                  <span className="text-xs text-(--text-muted)">
-                    Click to add image URL
-                  </span>
-                </button>
-              </div>
+                )}
+                <span className="text-xs text-(--text-muted)">
+                  {imageUploading
+                    ? "Uploading..."
+                    : imageValues.length >= MAX_PRODUCT_IMAGES
+                      ? `Maximum ${MAX_PRODUCT_IMAGES} images reached`
+                      : "Click to upload images (max 6)"}
+                </span>
+              </button>
+              {errors.images && (
+                <FieldError>
+                  {typeof errors.images.message === "string"
+                    ? errors.images.message
+                    : "Add at least one product image."}
+                </FieldError>
+              )}
+              {imageUploadError && (
+                <InlineNotice
+                  message={imageUploadError}
+                  variant="error"
+                  ariaLive="assertive"
+                  dismissLabel="Dismiss image upload error"
+                  onDismiss={() => setImageUploadError(null)}
+                  className="mt-3 flex items-center justify-between gap-3 rounded-md border border-(--status-cancelled-bg) bg-(--status-cancelled-bg)/50 px-3 py-2 text-xs text-(--status-cancelled-text)"
+                />
+              )}
             </SettingsCard>
 
             {/* Specifications */}
